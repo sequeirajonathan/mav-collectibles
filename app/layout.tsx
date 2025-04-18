@@ -25,24 +25,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-black text-white font-sans flex flex-col`}
       >
-          <QueryProvider>
-            <AppProvider>
-              <Navbar />
-              <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-                {children}
-              </main>
-              <Footer />
-              <ScrollToTop />
-            </AppProvider>
-          </QueryProvider>
+        {/* Make sure any providers here are compatible with SSR */}
+        <QueryProvider>
+          <AppProvider>
+            <Navbar />
+            <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <ScrollToTop />
+          </AppProvider>
+        </QueryProvider>
       </body>
     </html>
   );
