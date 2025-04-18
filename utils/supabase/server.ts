@@ -1,12 +1,26 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+// Debug log to check environment variables
+console.log('ENV CHECK:', {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'defined' : 'undefined',
+  key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'defined' : 'undefined'
+})
+
 export async function createClient() {
   const cookieStore = await cookies()
   
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase environment variables')
+    throw new Error('Missing Supabase environment variables')
+  }
+  
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
