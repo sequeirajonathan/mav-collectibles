@@ -198,7 +198,7 @@ export default function Home() {
           ))}
         </div>
       </div>
-      7845
+      
       {/* Featured Products or other sections */}
       <ProductList />
     </div>

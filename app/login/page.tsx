@@ -1,63 +1,24 @@
 "use client";
 
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-
-// Define an error type
-interface AuthError {
-  message: string;
-}
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { signIn, signInWithGoogle, signInWithFacebook } = useAuth();
-  const router = useRouter();
 
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     
-    try {
-      const { error } = await signIn(email, password);
-      if (error) throw error;
-      router.push('/');
-    } catch (error: unknown) {
-      const authError = error as AuthError;
-      setError(authError.message || 'Failed to sign in');
-    } finally {
-      setLoading(false);
-    }
+    // Add your login logic here
+    setLoading(false);
   };
-
-  const handleGoogleLogin = async () => {
-    setError(null);
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) throw error;
-    } catch (error: unknown) {
-      const authError = error as AuthError;
-      setError(authError.message || 'Failed to sign in with Google');
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    setError(null);
-    try {
-      const { error } = await signInWithFacebook();
-      if (error) throw error;
-    } catch (error: unknown) {
-      const authError = error as AuthError;
-      setError(authError.message || 'Failed to sign in with Facebook');
-    }
-  };
-
+  
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg">
       <div className="flex justify-center mb-6">
@@ -130,13 +91,13 @@ export default function Login() {
         
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button
-            onClick={handleGoogleLogin}
+            onClick={() => {}}
             className="w-full flex justify-center py-2 px-4 border border-[#E6B325]/30 rounded-md shadow-sm bg-black text-sm font-medium text-[#E6B325] hover:bg-gray-900 transition-colors"
           >
             Google
           </button>
           <button
-            onClick={handleFacebookLogin}
+            onClick={() => {}}
             className="w-full flex justify-center py-2 px-4 border border-[#E6B325]/30 rounded-md shadow-sm bg-black text-sm font-medium text-[#E6B325] hover:bg-gray-900 transition-colors"
           >
             Facebook
@@ -154,4 +115,4 @@ export default function Login() {
       </div>
     </div>
   );
-} 
+}

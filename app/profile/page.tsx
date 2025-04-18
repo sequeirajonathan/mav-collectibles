@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
 
 export default function Profile() {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   
@@ -21,10 +17,6 @@ export default function Profile() {
 
   if (isLoading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    return null;
   }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -42,13 +34,13 @@ export default function Profile() {
         <h2 className="text-xl font-semibold mb-4">Account Information</h2>
         <div className="mb-4">
           <p className="text-gray-600">Email</p>
-          <p className="font-medium">{user.email}</p>
+          <p className="font-medium">test@test.com</p>
         </div>
         
         <div className="mb-4">
           <p className="text-gray-600">Account Type</p>
           <p className="font-medium capitalize">
-            {user.app_metadata?.provider || 'Email'}
+            Email
           </p>
         </div>
         
@@ -78,7 +70,7 @@ export default function Profile() {
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Account Actions</h2>
         <button
-          onClick={() => signOut().then(() => router.push('/'))}
+          onClick={() => {}}
           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           Sign Out

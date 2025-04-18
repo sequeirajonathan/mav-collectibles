@@ -4,7 +4,6 @@ import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AppProvider } from "@/contexts/AppContext";
-import { AuthProvider } from '@/contexts/AuthContext';
 import "./globals.css";
 import "./videojs-theme.css";
 import ScrollToTop from '@/components/ui/ScrollToTop';
@@ -34,7 +33,6 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-black text-white font-sans flex flex-col`}
       >
-        <AuthProvider>
           <QueryProvider>
             <AppProvider>
               <Navbar />
@@ -45,7 +43,6 @@ export default function RootLayout({
               <ScrollToTop />
             </AppProvider>
           </QueryProvider>
-        </AuthProvider>
       </body>
     </html>
   );
