@@ -1,103 +1,206 @@
+"use client"; // Add this since we're using client-side features
+
+import React from "react";
 import Image from "next/image";
+import Link from "next/link";
+import FeaturedEvents from "@/components/ui/FeaturedEvents";
+import AnnouncementCarousel from "@/components/ui/AnnouncementCarousel";
+import YouTubeSection from "@/components/ui/YouTubeSection";
+import ProductList from "@/components/ui/ProductList";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // Sample featured events data
+  const featuredEvents = [
+    {
+      title:
+        "SCARLET & VIOLET - PALDEAN FATES - Release Day - January 26, 2024",
+      date: "January 26, 2024",
+      description:
+        "The spotlight glistens on Shiny Pokémon making their fated return to the Pokémon TCG! Shiny Pikachu blazes the path forward as Tinkaton, Ceruledge, Dondozo, and more than 100 other Shiny Pokémon follow. Meanwhile, Great Tusk and Iron Treads appear as Ancient and Future Pokémon ex, and Charizard, Forretress, and Espathra show off their own unique skills as Shiny Tera Pokémon ex. Shed some light and discover sparkling wonders in the Scarlet & Violet—Paldean Fates expansion!",
+      imageSrc: "/paldean_fatesevent.png",
+      imageAlt: "Scarlet & Violet - Paldean Fates featuring Shiny Pikachu",
+      bulletPoints: [
+        "More than 240 cards",
+        "More than 100 Shiny Pokémon",
+        "Brand-new Pokémon ex",
+        "A handful of full-art Supporter cards",
+        "6 hyper rare cards",
+      ],
+      link: "/products/pokemon/paldean-fates",
+    },
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  //Sample announcements data
+  const announcements = [
+    {
+      id: "1",
+      title: "New Pokémon TCG Releases",
+      description:
+        "Check out the latest Paldean Fates expansion, now available in store and online!",
+      buttonText: "Shop Now",
+      buttonLink: "/products/pokemon/paldean-fates",
+      bgColor: "bg-gradient-to-r from-blue-900 to-purple-900",
+    },
+    {
+      id: "2",
+      title: "Weekly Tournament - Friday Nights",
+      description:
+        "Join us every Friday at 6PM for our weekly Pokémon TCG tournament. All skill levels welcome!",
+      buttonText: "Learn More",
+      buttonLink: "/events/tournaments",
+      bgColor: "bg-gradient-to-r from-gray-900 to-gray-800",
+    },
+    {
+      id: "3",
+      title: "Free Shipping on Orders Over $50",
+      description:
+        "For a limited time, get free shipping on all orders over $50. No coupon needed!",
+      buttonText: "Start Shopping",
+      buttonLink: "/products",
+      bgColor: "bg-gradient-to-r from-[#B38A00]/20 to-[#E6B325]/20",
+    },
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center space-y-12">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-4 text-brand-gold">
+          Welcome to MAV Collectibles
+        </h1>
+        <p className="text-xl">
+          Your premier destination for trading card games
+        </p>
+      </div>
+      {/* Announcement Carousel */}
+      <div className="w-full max-w-6xl">
+        <AnnouncementCarousel announcements={announcements} />
+      </div>
+      {/* YouTube Videos Section */}
+      <YouTubeSection />
+      {/* Featured Events Section */}
+      <FeaturedEvents events={featuredEvents} />
+      {/* First row of card games */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+        {[
+          {
+            title: "Pokemon",
+            href: "/products/pokemon",
+            image: "/pokemon-logo.png",
+          },
+          {
+            title: "Yu-Gi-Oh TCG",
+            href: "/products/yugioh",
+            image: "/yugioh-logo.png",
+          },
+          {
+            title: "DBZ Super TCG",
+            href: "/products/dragonball",
+            image: "/dragonball.png",
+            width: 220,
+          },
+        ].map((item) => (
+          <div key={item.href} className="flex flex-col items-center group">
+            <h2 className="text-2xl font-bold uppercase mb-1 group-hover:text-brand-gold transition-colors">
+              {item.title}
+            </h2>
+            <Link
+              href={item.href}
+              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-4 transition-colors"
+            >
+              VIEW ALL
+            </Link>
+            <div className="bg-gray-900 rounded-lg p-4 w-full aspect-square flex items-center justify-center border border-transparent group-hover:border-brand-blue/30 transition-all shadow-lg hover:shadow-brand-blue/10">
+              <Image
+                src={item.image}
+                alt={item.title}
+                width={item.width || 280}
+                height={140}
+                className="object-contain transition-transform group-hover:scale-105"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Second row of card games */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+        {[
+          {
+            title: "Digimon",
+            href: "/products/digimon",
+            image: "/digimon_card_game_logo.png",
+          },
+          {
+            title: "One Piece",
+            href: "/products/onepiece",
+            image: "/one-piece-card-game.jpg",
+            width: 220,
+          },
+          {
+            title: "MetaZoo",
+            href: "/products/metazoo",
+            image: "/Metazoo-logo.png",
+            width: 220,
+          },
+        ].map((item) => (
+          <div key={item.href} className="flex flex-col items-center group">
+            <h2 className="text-2xl font-bold uppercase mb-1 group-hover:text-brand-gold transition-colors">
+              {item.title}
+            </h2>
+            <Link
+              href={item.href}
+              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-4 transition-colors"
+            >
+              VIEW ALL
+            </Link>
+            <div className="bg-gray-900 rounded-lg p-4 w-full aspect-square flex items-center justify-center border border-transparent group-hover:border-brand-blue/30 transition-all shadow-lg hover:shadow-brand-blue/10">
+              <Image
+                src={item.image}
+                alt={item.title}
+                width={item.width || 280}
+                height={140}
+                className="object-contain transition-transform group-hover:scale-105"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-8 text-center">
+        <h2 className="text-3xl font-bold mb-4 text-brand-gold">
+          Why Choose MAV Collectibles?
+        </h2>
+        <div className="flex flex-col md:flex-row gap-6 justify-center mt-4">
+          {[
+            {
+              title: "Quality Selection",
+              description:
+                "We carefully curate our inventory to offer only the best cards.",
+            },
+            {
+              title: "Expert Knowledge",
+              description:
+                "Our team is passionate about trading cards and ready to help.",
+            },
+            {
+              title: "Community Focus",
+              description:
+                "We're more than a store - we're a hub for collectors and players.",
+            },
+          ].map((feature, index) => (
+            <div
+              key={index}
+              className="flex-1 max-w-md p-6 bg-gray-900 rounded-lg border border-brand-blue/10 hover:border-brand-blue/30 transition-colors shadow-lg"
+            >
+              <h3 className="text-xl font-semibold mb-2 text-brand-blue-light">
+                {feature.title}
+              </h3>
+              <p>{feature.description}</p>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      7845
+      {/* Featured Products or other sections */}
+      <ProductList />
     </div>
   );
 }

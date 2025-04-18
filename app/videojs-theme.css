@@ -1,0 +1,41 @@
+/* Custom Video.js theme to match MAV Collectibles aesthetic */
+.video-js.vjs-theme-mav {
+  --vjs-theme-color: #E6B325;
+  --vjs-theme-bg: rgba(0, 0, 0, 0.8);
+}
+
+.video-js.vjs-theme-mav .vjs-big-play-button {
+  background-color: var(--vjs-theme-bg);
+  border: 2px solid var(--vjs-theme-color);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  font-size: 40px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.video-js.vjs-theme-mav:hover .vjs-big-play-button,
+.video-js.vjs-theme-mav .vjs-big-play-button:focus {
+  background-color: rgba(230, 179, 37, 0.2);
+}
+
+.video-js.vjs-theme-mav .vjs-control-bar {
+  background-color: var(--vjs-theme-bg);
+}
+
+.video-js.vjs-theme-mav .vjs-play-control,
+.video-js.vjs-theme-mav .vjs-volume-panel,
+.video-js.vjs-theme-mav .vjs-fullscreen-control {
+  color: var(--vjs-theme-color);
+}
+
+.video-js.vjs-theme-mav .vjs-progress-control .vjs-play-progress {
+  background-color: var(--vjs-theme-color);
+}
+
+.video-js.vjs-theme-mav .vjs-progress-control .vjs-load-progress {
+  background: rgba(230, 179, 37, 0.3);
+} 
