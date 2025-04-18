@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+
+// Define an error type
+interface AuthError {
+  message: string;
+}
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -14,9 +18,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const { signUp, signInWithGoogle, signInWithFacebook } = useAuth();
-  const router = useRouter();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
@@ -29,12 +32,13 @@ export default function Signup() {
     setLoading(true);
     
     try {
-      const { error, data } = await signUp(email, password);
+      const { error } = await signUp(email, password);
       if (error) throw error;
       
       setMessage('Check your email for the confirmation link');
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign up');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      setError(authError.message || 'Failed to sign up');
     } finally {
       setLoading(false);
     }
@@ -45,8 +49,9 @@ export default function Signup() {
     try {
       const { error } = await signInWithGoogle();
       if (error) throw error;
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign up with Google');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      setError(authError.message || 'Failed to sign up with Google');
     }
   };
 
@@ -55,8 +60,9 @@ export default function Signup() {
     try {
       const { error } = await signInWithFacebook();
       if (error) throw error;
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign up with Facebook');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      setError(authError.message || 'Failed to sign up with Facebook');
     }
   };
 

@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import VideoJS from './VideoJS';
 import '@/app/videojs-theme.css';
+import videojs from 'video.js';
+
+// Define the VideoJsPlayer type
+type VideoJsPlayer = ReturnType<typeof videojs>;
 
 // Replace with your actual YouTube video ID
 // You can get the video ID from the YouTube URL: https://www.youtube.com/watch?v=VIDEO_ID_HERE
@@ -11,7 +15,9 @@ const featuredVideo = {
 };
 
 export default function YouTubeSection() {
-  const [player, setPlayer] = useState<any>(null);
+  // Use an underscore prefix to indicate intentionally unused variable
+  // Or just use setState directly without the state variable
+  const [, setPlayer] = useState<VideoJsPlayer | null>(null);
 
   const videoJsOptions = {
     autoplay: true,
@@ -32,7 +38,7 @@ export default function YouTubeSection() {
     }
   };
 
-  const handlePlayerReady = (player: any) => {
+  const handlePlayerReady = (player: VideoJsPlayer) => {
     setPlayer(player);
   };
 

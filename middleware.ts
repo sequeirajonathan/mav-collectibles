@@ -23,11 +23,22 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Fix: Use request.cookies directly instead of cookieStore
+  const authCookie = request.cookies.get('auth-token');
+  
+  // Your middleware logic here
+  // For example, redirecting unauthenticated users
+  if (!authCookie && request.nextUrl.pathname.startsWith('/profile')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   return res;
 }
 
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/profile/:path*',
+    '/cart/:path*',
   ],
 }; 

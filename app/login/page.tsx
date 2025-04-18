@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Define an error type
+interface AuthError {
+  message: string;
+}
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +19,7 @@ export default function Login() {
   const { signIn, signInWithGoogle, signInWithFacebook } = useAuth();
   const router = useRouter();
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -23,8 +28,9 @@ export default function Login() {
       const { error } = await signIn(email, password);
       if (error) throw error;
       router.push('/');
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      setError(authError.message || 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -35,8 +41,9 @@ export default function Login() {
     try {
       const { error } = await signInWithGoogle();
       if (error) throw error;
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in with Google');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      setError(authError.message || 'Failed to sign in with Google');
     }
   };
 
@@ -45,8 +52,9 @@ export default function Login() {
     try {
       const { error } = await signInWithFacebook();
       if (error) throw error;
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in with Facebook');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      setError(authError.message || 'Failed to sign in with Facebook');
     }
   };
 
@@ -138,7 +146,7 @@ export default function Login() {
       
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-400">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className="font-medium text-[#E6B325] hover:text-[#FFD966] transition-colors">
             Sign up
           </Link>

@@ -5,14 +5,23 @@ import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import 'videojs-youtube';
 
+// Fix the Player type
+type VideoJsPlayer = ReturnType<typeof videojs>;
+
+// Define a SourceObject type since videojs.Tech.SourceObject is not available
+interface SourceObject {
+  src: string;
+  type: string;
+}
+
 interface VideoJSProps {
-  options: any;
-  onReady?: (player: any) => void;
+  options: Record<string, unknown>;
+  onReady?: (player: VideoJsPlayer) => void;
 }
 
 export const VideoJS: React.FC<VideoJSProps> = ({ options, onReady }) => {
   const videoRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<VideoJsPlayer | null>(null);
 
   useEffect(() => {
     // Make sure Video.js player is only initialized once
@@ -27,15 +36,16 @@ export const VideoJS: React.FC<VideoJSProps> = ({ options, onReady }) => {
       // Initialize player
       const player = playerRef.current = videojs(videoElement, options, () => {
         console.log('Player is ready');
-        onReady && onReady(player);
+        if (onReady) onReady(player);
       });
     } else {
       // Update player options if they change
       const player = playerRef.current;
-      player.autoplay(options.autoplay);
+      player.autoplay(options.autoplay as boolean);
       
       if (options.sources) {
-        player.src(options.sources);
+        // Fix the type casting here
+        player.src(options.sources as SourceObject[]);
       }
     }
   }, [options, videoRef, onReady]);
