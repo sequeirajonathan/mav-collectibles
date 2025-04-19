@@ -1,8 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { config } from '@/lib/config';
 
 // Define types
 export interface FeatureFlag {
@@ -91,7 +90,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsLoading(true);
         
         // Fetch feature flags
-        const flagsResponse = await fetch(`${API_URL}/feature-flags`);
+        const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
         if (!flagsResponse.ok) throw new Error(`HTTP error! Status: ${flagsResponse.status}`);
         const flagsData = await flagsResponse.json();
         console.log('Feature flags response:', flagsData);
@@ -103,7 +102,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setFeatureFlags(prev => ({ ...prev, ...flags }));
         
         // Fetch alert banner
-        const alertResponse = await fetch(`${API_URL}/alert-banner`);
+        const alertResponse = await fetch(`${config.baseUrl}/api/alert-banner`);
         if (alertResponse.ok) {
           const alertData = await alertResponse.json();
           if (alertData && alertData.enabled) {
@@ -112,7 +111,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         
         // Fetch featured events
-        const eventsResponse = await fetch(`${API_URL}/featured-events`);
+        const eventsResponse = await fetch(`${config.baseUrl}/api/featured-events`);
         if (eventsResponse.ok) {
           const eventsData = await eventsResponse.json();
           setFeaturedEvents(eventsData.filter((event: FeaturedEvent) => event.enabled)
@@ -120,7 +119,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         
         // Fetch YouTube settings
-        const youtubeResponse = await fetch(`${API_URL}/youtube-settings`);
+        const youtubeResponse = await fetch(`${config.baseUrl}/api/youtube-settings`);
         if (youtubeResponse.ok) {
           const youtubeData = await youtubeResponse.json();
           if (youtubeData) {
@@ -141,13 +140,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateFeatureFlag = async (name: string, enabled: boolean) => {
     try {
       // Find the flag ID by name
-      const flagsResponse = await fetch(`${API_URL}/feature-flags`);
+      const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
       if (!flagsResponse.ok) throw new Error(`HTTP error! Status: ${flagsResponse.status}`);
       const flagsData = await flagsResponse.json();
       const flag = flagsData.find((f: FeatureFlag) => f.name === name);
       
       if (flag) {
-        const updateResponse = await fetch(`${API_URL}/feature-flags/${flag.id}`, {
+        const updateResponse = await fetch(`${config.baseUrl}/api/feature-flags/${flag.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -167,7 +166,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateAlertBanner = async (data: Partial<AlertBanner>) => {
     try {
       if (alertBanner) {
-        const response = await fetch(`${API_URL}/alert-banner/${alertBanner.id}`, {
+        const response = await fetch(`${config.baseUrl}/api/alert-banner/${alertBanner.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -179,7 +178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const responseData = await response.json();
         setAlertBanner(responseData);
       } else {
-        const response = await fetch(`${API_URL}/alert-banner`, {
+        const response = await fetch(`${config.baseUrl}/api/alert-banner`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -199,7 +198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Update featured event
   const updateFeaturedEvent = async (id: string, data: Partial<FeaturedEvent>) => {
     try {
-      const response = await fetch(`${API_URL}/featured-events/${id}`, {
+      const response = await fetch(`${config.baseUrl}/api/featured-events/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +219,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Add featured event
   const addFeaturedEvent = async (data: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const response = await fetch(`${API_URL}/featured-events`, {
+      const response = await fetch(`${config.baseUrl}/api/featured-events`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +238,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Remove featured event
   const removeFeaturedEvent = async (id: string) => {
     try {
-      const response = await fetch(`${API_URL}/featured-events/${id}`, {
+      const response = await fetch(`${config.baseUrl}/api/featured-events/${id}`, {
         method: 'DELETE',
       });
       
@@ -259,7 +258,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateYoutubeSettings = async (settings: Partial<YouTubeSettings>) => {
     try {
       const updatedSettings = { ...youtubeSettings, ...settings };
-      const response = await fetch(`${API_URL}/youtube-settings/1`, {
+      const response = await fetch(`${config.baseUrl}/api/youtube-settings/1`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
