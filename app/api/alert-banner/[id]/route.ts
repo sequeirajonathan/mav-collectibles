@@ -1,19 +1,25 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { alertBannerSchema } from '@/lib/validations/feature-flags';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
 
-const prisma = new PrismaClient();
+const alertBannerPatchSchema = z.object({
+  message: z.string().optional(),
+  code: z.string().optional(),
+  backgroundColor: z.string().optional(),
+  textColor: z.string().optional(),
+  enabled: z.boolean().optional(),
+});
 
 // GET a specific alert banner
-export async function GET(request: Request) {
-  // Extract the ID from the URL instead of using params directly
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const id = pathParts[pathParts.length - 1];
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   
   try {
     const alertBanner = await prisma.alertBanner.findUnique({
-      where: { id },
+      where: { id }
     });
     
     if (!alertBanner) {
@@ -25,7 +31,7 @@ export async function GET(request: Request) {
     
     return NextResponse.json(alertBanner);
   } catch (error: unknown) {
-    console.error('Error fetching alert banner:', error);
+    console.error('GET error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch alert banner' },
       { status: 500 }
@@ -34,31 +40,24 @@ export async function GET(request: Request) {
 }
 
 // PATCH to update an alert banner
-export async function PATCH(request: Request) {
-  // Extract the ID from the URL instead of using params directly
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const id = pathParts[pathParts.length - 1];
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   
   try {
     const body = await request.json();
-    const validationResult = alertBannerSchema.safeParse(body);
+    const validatedData = alertBannerPatchSchema.parse(body);
     
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { error: 'Invalid alert banner data', details: validationResult.error.format() },
-        { status: 400 }
-      );
-    }
-    
-    const alertBanner = await prisma.alertBanner.update({
+    const updated = await prisma.alertBanner.update({
       where: { id },
-      data: validationResult.data
+      data: validatedData,
     });
     
-    return NextResponse.json(alertBanner);
+    return NextResponse.json(updated);
   } catch (error: unknown) {
-    console.error('Error updating alert banner:', error);
+    console.error('PATCH error:', error);
     return NextResponse.json(
       { error: 'Failed to update alert banner' },
       { status: 500 }
@@ -67,20 +66,20 @@ export async function PATCH(request: Request) {
 }
 
 // DELETE an alert banner
-export async function DELETE(request: Request) {
-  // Extract the ID from the URL instead of using params directly
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const id = pathParts[pathParts.length - 1];
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   
   try {
     await prisma.alertBanner.delete({
-      where: { id },
+      where: { id }
     });
     
-    return NextResponse.json({ success: true });
+    return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {
-    console.error('Error deleting alert banner:', error);
+    console.error('DELETE error:', error);
     return NextResponse.json(
       { error: 'Failed to delete alert banner' },
       { status: 500 }

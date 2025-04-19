@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from '@/lib/axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
@@ -91,30 +90,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         setIsLoading(true);
         
-        // Use absolute URLs
-        const flagsResponse = await axios.get(`${API_URL}/feature-flags`);
-        console.log('Feature flags response:', flagsResponse);
+        // Fetch feature flags
+        const flagsResponse = await fetch(`${API_URL}/feature-flags`);
+        if (!flagsResponse.ok) throw new Error(`HTTP error! Status: ${flagsResponse.status}`);
+        const flagsData = await flagsResponse.json();
+        console.log('Feature flags response:', flagsData);
         
         const flags: Record<string, boolean> = {};
-        flagsResponse.data.forEach((flag: FeatureFlag) => {
+        flagsData.forEach((flag: FeatureFlag) => {
           flags[flag.name] = flag.enabled;
         });
         setFeatureFlags(prev => ({ ...prev, ...flags }));
         
-        // Update other API calls similarly
-        const alertResponse = await axios.get(`${API_URL}/alert-banner`);
-        if (alertResponse.data && alertResponse.data.enabled) {
-          setAlertBanner(alertResponse.data);
+        // Fetch alert banner
+        const alertResponse = await fetch(`${API_URL}/alert-banner`);
+        if (alertResponse.ok) {
+          const alertData = await alertResponse.json();
+          if (alertData && alertData.enabled) {
+            setAlertBanner(alertData);
+          }
         }
         
-        const eventsResponse = await axios.get(`${API_URL}/featured-events`);
-        setFeaturedEvents(eventsResponse.data.filter((event: FeaturedEvent) => event.enabled)
-          .sort((a: FeaturedEvent, b: FeaturedEvent) => a.order - b.order));
+        // Fetch featured events
+        const eventsResponse = await fetch(`${API_URL}/featured-events`);
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          setFeaturedEvents(eventsData.filter((event: FeaturedEvent) => event.enabled)
+            .sort((a: FeaturedEvent, b: FeaturedEvent) => a.order - b.order));
+        }
         
-        // Add YouTube settings API call
-        const youtubeResponse = await axios.get(`${API_URL}/youtube-settings`);
-        if (youtubeResponse.data) {
-          setYoutubeSettings(youtubeResponse.data);
+        // Fetch YouTube settings
+        const youtubeResponse = await fetch(`${API_URL}/youtube-settings`);
+        if (youtubeResponse.ok) {
+          const youtubeData = await youtubeResponse.json();
+          if (youtubeData) {
+            setYoutubeSettings(youtubeData);
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -130,11 +141,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateFeatureFlag = async (name: string, enabled: boolean) => {
     try {
       // Find the flag ID by name
-      const flagsResponse = await axios.get(`${API_URL}/feature-flags`);
-      const flag = flagsResponse.data.find((f: FeatureFlag) => f.name === name);
+      const flagsResponse = await fetch(`${API_URL}/feature-flags`);
+      if (!flagsResponse.ok) throw new Error(`HTTP error! Status: ${flagsResponse.status}`);
+      const flagsData = await flagsResponse.json();
+      const flag = flagsData.find((f: FeatureFlag) => f.name === name);
       
       if (flag) {
-        await axios.patch(`${API_URL}/feature-flags/${flag.id}`, { enabled });
+        const updateResponse = await fetch(`${API_URL}/feature-flags/${flag.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ enabled }),
+        });
+        
+        if (!updateResponse.ok) throw new Error(`HTTP error! Status: ${updateResponse.status}`);
         setFeatureFlags(prev => ({ ...prev, [name]: enabled }));
       }
     } catch (error) {
@@ -146,11 +167,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateAlertBanner = async (data: Partial<AlertBanner>) => {
     try {
       if (alertBanner) {
-        const response = await axios.patch(`${API_URL}/alert-banner/${alertBanner.id}`, data);
-        setAlertBanner(response.data);
+        const response = await fetch(`${API_URL}/alert-banner/${alertBanner.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const responseData = await response.json();
+        setAlertBanner(responseData);
       } else {
-        const response = await axios.post(`${API_URL}/alert-banner`, data);
-        setAlertBanner(response.data);
+        const response = await fetch(`${API_URL}/alert-banner`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const responseData = await response.json();
+        setAlertBanner(responseData);
       }
     } catch (error) {
       console.error('Error updating alert banner:', error);
@@ -160,9 +199,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Update featured event
   const updateFeaturedEvent = async (id: string, data: Partial<FeaturedEvent>) => {
     try {
-      const response = await axios.patch(`${API_URL}/featured-events/${id}`, data);
+      const response = await fetch(`${API_URL}/featured-events/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const responseData = await response.json();
       setFeaturedEvents(prev => 
-        prev.map(event => event.id === id ? response.data : event)
+        prev.map(event => event.id === id ? responseData : event)
       );
     } catch (error) {
       console.error('Error updating featured event:', error);
@@ -172,8 +220,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Add featured event
   const addFeaturedEvent = async (data: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const response = await axios.post(`${API_URL}/featured-events`, data);
-      setFeaturedEvents(prev => [...prev, response.data]);
+      const response = await fetch(`${API_URL}/featured-events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const responseData = await response.json();
+      setFeaturedEvents(prev => [...prev, responseData]);
     } catch (error) {
       console.error('Error adding featured event:', error);
     }
@@ -182,7 +239,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Remove featured event
   const removeFeaturedEvent = async (id: string) => {
     try {
-      await axios.delete(`${API_URL}/featured-events/${id}`);
+      const response = await fetch(`${API_URL}/featured-events/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       setFeaturedEvents(prev => prev.filter(event => event.id !== id));
     } catch (error) {
       console.error('Error removing featured event:', error);
@@ -198,9 +259,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateYoutubeSettings = async (settings: Partial<YouTubeSettings>) => {
     try {
       const updatedSettings = { ...youtubeSettings, ...settings };
-      const response = await axios.put(`${API_URL}/youtube-settings/1`, updatedSettings);
-      setYoutubeSettings(response.data);
-      return response.data;
+      const response = await fetch(`${API_URL}/youtube-settings/1`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedSettings),
+      });
+      
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const responseData = await response.json();
+      setYoutubeSettings(responseData);
+      return responseData;
     } catch (error) {
       console.error('Error updating YouTube settings:', error);
       throw error;
@@ -237,11 +307,3 @@ export const useAppContext = () => {
   }
   return context;
 };
-
-export const YouTubeSettingsProvider = ({ children }) => {
-  // YouTube settings logic only
-};
-
-export const FeatureFlagsProvider = ({ children }) => {
-  // Feature flags logic only
-}; 

@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchProducts, fetchProductById, fetchProductsByCategory, Product } from '@/services/api';
-import axiosClient from '@/lib/axios';
 
 // Hook for fetching all products
 export const useProducts = () => {
@@ -33,8 +32,21 @@ export const useAddProduct = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (newProduct: Omit<Product, 'id'>) => 
-      axiosClient.post('/products', newProduct),
+    mutationFn: async (newProduct: Omit<Product, 'id'>) => {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       // Invalidate and refetch products list
       queryClient.invalidateQueries({ queryKey: ['products'] });

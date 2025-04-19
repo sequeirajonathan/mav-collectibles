@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import axios from 'axios';
 import Toggle from '@/components/ui/Toggle';
 import { toast } from 'sonner';
 import Spinner from '@/components/ui/Spinner';
@@ -25,9 +24,20 @@ export default function FeatureFlagToggle({
   const handleToggle = async (newState: boolean) => {
     setIsLoading(true);
     try {
-      await axios.patch(`/api/feature-flags/${id}`, {
-        enabled: newState,
+      const response = await fetch(`/api/feature-flags/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          value: newState,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
       setEnabled(newState);
       if (onToggle) onToggle(newState);
       toast.success(`${name} is now ${newState ? 'enabled' : 'disabled'}`);

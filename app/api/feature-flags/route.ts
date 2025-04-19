@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server';
-import supabase from '@/lib/supabase';
-import { featureFlagSchema } from '@/lib/validations/feature-flags';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+
+const featureFlagSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  enabled: z.boolean().default(false),
+});
 
 // GET all feature flags
 export async function GET() {
   try {
-    const { data, error } = await supabase.from('feature_flags').select('*');
-    
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json(
-        { error: error.message || 'Failed to fetch feature flags' },
-        { status: 500 }
-      );
-    }
-    
-    return NextResponse.json(data);
-  } catch (error: unknown) {
+    const featureFlags = await prisma.featureFlag.findMany();
+    return NextResponse.json(featureFlags);
+  } catch (error) {
     console.error('Error fetching feature flags:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch feature flags' },
@@ -31,15 +28,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = featureFlagSchema.parse(body);
     
-    const { data, error } = await supabase
-      .from('feature_flags')
-      .insert(validatedData)
-      .select()
-      .single();
+    const newFeatureFlag = await prisma.featureFlag.create({
+      data: validatedData,
+    });
     
-    if (error) throw error;
-    
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(newFeatureFlag, { status: 201 });
   } catch (error) {
     console.error('Error creating feature flag:', error);
     return NextResponse.json(

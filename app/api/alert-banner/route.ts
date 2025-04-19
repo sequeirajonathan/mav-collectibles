@@ -1,42 +1,47 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { alertBannerSchema } from '@/lib/validations/feature-flags';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
 
-const prisma = new PrismaClient();
+const alertBannerSchema = z.object({
+  message: z.string(),
+  code: z.string().optional(),
+  backgroundColor: z.string().default('#E6B325'),
+  textColor: z.string().default('#000000'),
+  enabled: z.boolean().default(true),
+});
 
 export async function GET() {
   try {
+    // Get the first alert banner (assuming there's only one active at a time)
     const alertBanner = await prisma.alertBanner.findFirst({
-      where: { enabled: true }
+      where: { enabled: true },
     });
+    
     return NextResponse.json(alertBanner);
   } catch (error) {
     console.error('Error fetching alert banner:', error);
-    return NextResponse.json({ error: 'Failed to fetch alert banner' }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to fetch alert banner' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const validatedData = alertBannerSchema.parse(body);
     
-    // Validate the request body
-    const validationResult = alertBannerSchema.safeParse(body);
-    
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', issues: validationResult.error.issues },
-        { status: 400 }
-      );
-    }
-    
-    const alertBanner = await prisma.alertBanner.create({
-      data: validationResult.data
+    const newAlertBanner = await prisma.alertBanner.create({
+      data: validatedData,
     });
     
-    return NextResponse.json(alertBanner);
+    return NextResponse.json(newAlertBanner, { status: 201 });
   } catch (error) {
     console.error('Error creating alert banner:', error);
-    return NextResponse.json({ error: 'Failed to create alert banner' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to create alert banner' },
+      { status: 500 }
+    );
   }
 } 

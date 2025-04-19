@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 
 type FeatureFlag = {
   id: string;
@@ -16,12 +15,16 @@ export function useFeatureFlag(flagName: string) {
   useEffect(() => {
     const fetchFeatureFlag = async () => {
       try {
-        const response = await axios.get<FeatureFlag[]>('/api/feature-flags');
-        const flags = response.data;
+        const response = await fetch('/api/feature-flags');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const flags: FeatureFlag[] = await response.json();
         const flag = flags.find((f) => f.name === flagName);
         setEnabled(flag?.enabled || false);
-      } catch {
-        setError('Failed to fetch feature flag');
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch feature flag';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -33,10 +36,23 @@ export function useFeatureFlag(flagName: string) {
   const toggleFlag = async (flagId: string, isEnabled: boolean): Promise<void> => {
     setIsLoading(true);
     try {
-      await axios.patch(`/api/feature-flags/${flagId}`, { enabled: isEnabled });
+      const response = await fetch(`/api/feature-flags/${flagId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enabled: isEnabled }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
       setEnabled(isEnabled);
-    } catch (error) {
-      console.error('Error toggling feature flag:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error toggling feature flag';
+      console.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
