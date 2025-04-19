@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import Toggle from '@/components/ui/Toggle';
 import { toast } from 'sonner';
+import Spinner from '@/components/ui/Spinner';
 
 interface FeatureFlagToggleProps {
   id: string;
@@ -46,11 +47,11 @@ export default function FeatureFlagToggle({
         <h3 className="text-lg font-medium text-white">{name}</h3>
         {description && <p className="text-sm text-gray-400">{description}</p>}
       </div>
-      <Toggle 
+      {isLoading ? <Spinner /> : <Toggle 
         enabled={enabled} 
         onChange={handleToggle}
         size="lg"
-      />
+      />}
     </div>
   );
 } 

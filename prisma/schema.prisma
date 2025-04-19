@@ -26,6 +26,8 @@ model CardProduct {
   tcgplayerId    Int?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@map("card_products")
 }
 
 // Feature Flag Management
@@ -36,6 +38,8 @@ model FeatureFlag {
   enabled     Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@map("feature_flags")
 }
 
 // Content Management
@@ -48,6 +52,8 @@ model AlertBanner {
   enabled         Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  @@map("alert_banners")
 }
 
 model FeaturedEvent {
@@ -63,6 +69,8 @@ model FeaturedEvent {
   order        Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+
+  @@map("featured_events")
 }
 
 model YouTubeSettings {
@@ -74,4 +82,6 @@ model YouTubeSettings {
   playlistId  String   @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("youtube_settings")
 }

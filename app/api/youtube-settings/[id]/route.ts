@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params?.id;
+    const id = params.id;
     
     const settings = await prisma.youTubeSettings.findUnique({
       where: { id },
@@ -26,7 +26,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params?.id;
+    const id = params.id;
     const body = await request.json();
     
     const updatedSettings = await prisma.youTubeSettings.update({
