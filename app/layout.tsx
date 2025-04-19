@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
+import AlertBanner from "@/components/ui/AlertBanner";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AppProvider } from "@/contexts/AppContext";
 import "./globals.css";
 import "./videojs-theme.css";
 import ScrollToTop from '@/components/ui/ScrollToTop';
+import { Toaster } from 'react-hot-toast';
+import { Suspense } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,12 +39,16 @@ export default function RootLayout({
         {/* Make sure any providers here are compatible with SSR */}
         <QueryProvider>
           <AppProvider>
+            <AlertBanner />
             <Navbar />
             <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-              {children}
+              <Suspense fallback={<div>Loading...</div>}>
+                {children}
+              </Suspense>
             </main>
             <Footer />
             <ScrollToTop />
+            <Toaster position="top-right" />
           </AppProvider>
         </QueryProvider>
       </body>

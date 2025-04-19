@@ -57,7 +57,90 @@ async function main() {
     ]
   });
 
-  console.log('✅ Seed complete');
+  // Create default feature flags
+  await prisma.featureFlag.upsert({
+    where: { name: 'showAlertBanner' },
+    update: {},
+    create: {
+      name: 'showAlertBanner',
+      description: 'Controls visibility of the alert banner at the top of the site',
+      enabled: true,
+    },
+  });
+
+  await prisma.featureFlag.upsert({
+    where: { name: 'showFeaturedEvents' },
+    update: {},
+    create: {
+      name: 'showFeaturedEvents',
+      description: 'Controls visibility of featured events on the homepage',
+      enabled: true,
+    },
+  });
+
+  // Create default alert banner
+  await prisma.alertBanner.upsert({
+    where: { id: '1' },
+    update: {},
+    create: {
+      id: '1',
+      message: 'Free shipping on orders $50 and up',
+      code: 'FREESHIP50',
+      backgroundColor: '#E6B325',
+      textColor: '#000000',
+      enabled: true,
+    },
+  });
+
+  // Create a sample featured event
+  await prisma.featuredEvent.upsert({
+    where: { id: '1' },
+    update: {},
+    create: {
+      id: '1',
+      title: 'Pokémon TCG Championship',
+      date: 'December 15, 2023',
+      description: 'Join us for our monthly Pokémon Trading Card Game championship! Great prizes for top players.',
+      imageSrc: '/images/pokemon-event.jpg',
+      imageAlt: 'Pokémon Trading Card Game Championship',
+      bulletPoints: [
+        'Date: December 15, 2023',
+        'Time: 1:00 PM - 6:00 PM',
+        'Entry Fee: $10',
+        'Prizes: Booster packs and exclusive promos',
+      ],
+      link: '/events/pokemon-championship',
+      enabled: true,
+      order: 0,
+    },
+  });
+
+  // Add this to your existing seed script
+  await prisma.youTubeSettings.upsert({
+    where: { id: '1' },
+    update: {},
+    create: {
+      id: '1',
+      videoId: 'V8D_ELNVRko',
+      title: 'Featured Video',
+      autoplay: true,
+      muted: true,
+      playlistId: '',
+    },
+  });
+
+  // Add this to your feature flags in the seed file
+  await prisma.featureFlag.upsert({
+    where: { name: 'showYouTubeVideo' },
+    update: {},
+    create: {
+      name: 'showYouTubeVideo',
+      description: 'Controls visibility of the YouTube video on the homepage',
+      enabled: true,
+    },
+  });
+
+  console.log('Database has been seeded.');
 }
 
 main()

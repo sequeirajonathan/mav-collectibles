@@ -67,6 +67,7 @@ const Navbar = () => {
                 { href: "/products/yugioh", label: "Yu-Gi-Oh!" },
                 { href: "/products/onepiece", label: "One Piece" },
                 { href: "/products/dragonball", label: "Dragon Ball" },
+                { href: "/admin", label: "Admin" },
               ].map((item) => (
                 <motion.div
                   key={item.href}
@@ -148,6 +149,7 @@ const Navbar = () => {
                   { href: "/products/yugioh", label: "Yu-Gi-Oh!" },
                   { href: "/products/onepiece", label: "One Piece" },
                   { href: "/products/dragonball", label: "Dragon Ball" },
+                  { href: "/admin", label: "Admin" },
                 ].map((item) => (
                   <motion.div key={item.href} variants={mobileItemVariants}>
                     <Link

@@ -1,53 +1,22 @@
 "use client";
 
-import { useState } from 'react';
-import VideoJS from './VideoJS';
-import '@/app/videojs-theme.css';
-import videojs from 'video.js';
-
-// Define the VideoJsPlayer type
-type VideoJsPlayer = ReturnType<typeof videojs>;
-
-// Replace with your actual YouTube video ID
-// You can get the video ID from the YouTube URL: https://www.youtube.com/watch?v=VIDEO_ID_HERE
-const featuredVideo = {
-  id: 'V8D_ELNVRko', // Your video ID
-};
+import { useAppContext } from '@/contexts/AppContext';
+import YouTubePlayer from './YouTubePlayer';
 
 export default function YouTubeSection() {
-  // Use an underscore prefix to indicate intentionally unused variable
-  // Or just use setState directly without the state variable
-  const [, setPlayer] = useState<VideoJsPlayer | null>(null);
-
-  const videoJsOptions = {
-    autoplay: true,
-    muted: true,
-    controls: true,
-    responsive: true,
-    fluid: true,
-    fill: true,
-    techOrder: ['youtube'],
-    sources: [{
-      type: 'video/youtube',
-      src: `https://www.youtube.com/watch?v=${featuredVideo.id}`
-    }],
-    youtube: {
-      ytControls: 0,
-      enablePrivacyEnhancedMode: true,
-      rel: 0
-    }
-  };
-
-  const handlePlayerReady = (player: VideoJsPlayer) => {
-    setPlayer(player);
-  };
-
+  const { featureFlags } = useAppContext();
+  
+  console.log("Feature flag for YouTube:", featureFlags.showYouTubeVideo);
+  
+  if (!featureFlags.showYouTubeVideo) {
+    console.log("YouTube section hidden due to feature flag");
+    return null;
+  }
+  
   return (
-    <section className="py-8 bg-black w-full">
-      {/* Full-width video player with no margins */}
-      <div className="w-full" style={{ maxWidth: '100%', height: 'auto', aspectRatio: '16/9' }}>
-        <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
-      </div>
+    <section className="w-full max-w-6xl mx-auto my-8">
+      <h2 className="text-2xl font-bold mb-4 text-brand-gold">Featured Video</h2>
+      <YouTubePlayer useContextSettings={true} />
     </section>
   );
 } 

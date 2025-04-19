@@ -27,3 +27,51 @@ model CardProduct {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
+
+// Feature Flag Management
+model FeatureFlag {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  enabled     Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Content Management
+model AlertBanner {
+  id              String    @id @default(uuid())
+  message         String
+  code            String?
+  backgroundColor String    @default("#E6B325")
+  textColor       String    @default("#000000")
+  enabled         Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model FeaturedEvent {
+  id           String    @id @default(uuid())
+  title        String
+  date         String
+  description  String
+  imageSrc     String
+  imageAlt     String
+  bulletPoints String[]
+  link         String?
+  enabled      Boolean   @default(true)
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model YouTubeSettings {
+  id          String   @id @default("1")
+  videoId     String
+  title       String
+  autoplay    Boolean  @default(true)
+  muted       Boolean  @default(true)
+  playlistId  String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

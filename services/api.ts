@@ -17,6 +17,13 @@ export interface Category {
   slug: string;
 }
 
+export interface FeatureFlag {
+  id: string;
+  name: string;
+  description: string;
+  value: boolean;
+}
+
 // API functions
 export const fetchProducts = async (): Promise<Product[]> => {
   const response = await axiosClient.get('/products');
@@ -35,6 +42,11 @@ export const fetchProductsByCategory = async (category: string): Promise<Product
 
 export const fetchCategories = async (): Promise<Category[]> => {
   const response = await axiosClient.get('/categories');
+  return response.data;
+};
+
+export const fetchFeatureFlags = async (): Promise<FeatureFlag[]> => {
+  const response = await axiosClient.get('/FeatureFlag');
   return response.data;
 };
 

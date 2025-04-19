@@ -1,24 +1,29 @@
-import React from 'react';
-import FeaturedEvent, { FeaturedEventProps } from './FeaturedEvent';
+"use client";
 
-interface FeaturedEventsProps {
-  events: FeaturedEventProps[];
-  title?: string;
-}
+import { useAppContext } from '@/contexts/AppContext';
+import FeaturedEvent from './FeaturedEvent';
 
-const FeaturedEvents: React.FC<FeaturedEventsProps> = ({ 
-  events,
-  title = "Latest Events & Releases" 
-}) => {
+const FeaturedEvents = () => {
+  const { featureFlags, featuredEvents, isLoading } = useAppContext();
+  
+  // Check if the showFeaturedEvents feature flag is enabled
+  const showFeaturedEvents = featureFlags['showFeaturedEvents'];
+  
+  if (isLoading) {
+    return <div className="animate-pulse h-40 bg-gray-800 rounded-md"></div>;
+  }
+  
+  if (!showFeaturedEvents || featuredEvents.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="w-full max-w-6xl mx-auto py-4 md:py-8 px-4 md:px-0">
-      <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">{title}</h2>
-      <div className="space-y-6 md:space-y-8">
-        {events.map((event, index) => (
-          <FeaturedEvent key={index} {...event} />
-        ))}
-      </div>
-    </section>
+    <div className="space-y-8 my-8">
+      <h2 className="text-3xl font-bold text-brand-gold">Featured Events</h2>
+      {featuredEvents.map((event) => (
+        <FeaturedEvent key={event.id} {...event} />
+      ))}
+    </div>
   );
 };
 

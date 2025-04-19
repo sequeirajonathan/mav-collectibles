@@ -9,28 +9,7 @@ import YouTubeSection from "@/components/ui/YouTubeSection";
 import ProductList from "@/components/ui/ProductList";
 
 export default function Home() {
-  // Sample featured events data
-  const featuredEvents = [
-    {
-      title:
-        "SCARLET & VIOLET - PALDEAN FATES - Release Day - January 26, 2024",
-      date: "January 26, 2024",
-      description:
-        "The spotlight glistens on Shiny Pokémon making their fated return to the Pokémon TCG! Shiny Pikachu blazes the path forward as Tinkaton, Ceruledge, Dondozo, and more than 100 other Shiny Pokémon follow. Meanwhile, Great Tusk and Iron Treads appear as Ancient and Future Pokémon ex, and Charizard, Forretress, and Espathra show off their own unique skills as Shiny Tera Pokémon ex. Shed some light and discover sparkling wonders in the Scarlet & Violet—Paldean Fates expansion!",
-      imageSrc: "/paldean_fatesevent.png",
-      imageAlt: "Scarlet & Violet - Paldean Fates featuring Shiny Pikachu",
-      bulletPoints: [
-        "More than 240 cards",
-        "More than 100 Shiny Pokémon",
-        "Brand-new Pokémon ex",
-        "A handful of full-art Supporter cards",
-        "6 hyper rare cards",
-      ],
-      link: "/products/pokemon/paldean-fates",
-    },
-  ];
-
-  //Sample announcements data
+  // Sample announcements data
   const announcements = [
     {
       id: "1",
@@ -77,8 +56,8 @@ export default function Home() {
       </div>
       {/* YouTube Videos Section */}
       <YouTubeSection />
-      {/* Featured Events Section */}
-      <FeaturedEvents events={featuredEvents} />
+      {/* Featured Events Section - Now controlled by feature flags */}
+      <FeaturedEvents />
       {/* First row of card games */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
         {[
