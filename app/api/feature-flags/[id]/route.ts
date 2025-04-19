@@ -11,9 +11,9 @@ const featureFlagPatchSchema = z.object({
 // GET handler
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const id = (await params).id;
+  const id = params.id;
 
   try {
     const featureFlag = await prisma.featureFlag.findUnique({ where: { id } });
@@ -32,9 +32,9 @@ export async function GET(
 // PATCH handler
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const id = (await params).id;
+  const id = params.id;
 
   try {
     const body = await request.json();
@@ -55,9 +55,9 @@ export async function PATCH(
 // DELETE handler
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const id = (await params).id;
+  const id = params.id;
 
   try {
     await prisma.featureFlag.delete({ where: { id } });
