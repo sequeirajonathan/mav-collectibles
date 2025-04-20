@@ -14,6 +14,8 @@ import Image from 'next/image';
 import { toast } from "react-hot-toast";
 import { Checkbox } from '@/components/ui/checkbox';
 import debounce from 'lodash/debounce';
+import VideoSettingsTab from '@/components/admin/VideoSettingsTab';
+import '@/styles/admin.css';
 
 // Define the props type for YouTubePreview
 interface YouTubePreviewProps {
@@ -236,13 +238,16 @@ export default function AdminDashboard() {
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6 text-brand-gold">Admin Dashboard</h1>
       
-      <Tabs defaultValue="feature-flags">
-        <TabsList className="mb-6">
-          <TabsTrigger value="feature-flags">Feature Flags</TabsTrigger>
-          <TabsTrigger value="alert-banner">Alert Banner</TabsTrigger>
-          <TabsTrigger value="featured-events">Featured Events</TabsTrigger>
-          <TabsTrigger value="youtube-video">YouTube Video</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="feature-flags" className="w-full">
+        <div className="overflow-x-auto pb-2">
+          <TabsList className="mb-6 inline-flex min-w-full">
+            <TabsTrigger value="feature-flags">Feature Flags</TabsTrigger>
+            <TabsTrigger value="alert-banner">Alert Banner</TabsTrigger>
+            <TabsTrigger value="featured-events">Featured Events</TabsTrigger>
+            <TabsTrigger value="youtube-video">YouTube Video</TabsTrigger>
+            <TabsTrigger value="direct-streaming">Direct Streaming</TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="feature-flags">
           <Card>
@@ -272,6 +277,18 @@ export default function AdminDashboard() {
                   id="showFeaturedEvents"
                   checked={featureFlags.showFeaturedEvents}
                   onCheckedChange={(checked) => updateFeatureFlag('showFeaturedEvents', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showVideoPlayer" className="text-lg">Video Player</Label>
+                  <p className="text-sm text-gray-400">Show the direct streaming video player on the homepage</p>
+                </div>
+                <Switch
+                  id="showVideoPlayer"
+                  checked={featureFlags.showVideoPlayer}
+                  onCheckedChange={(checked) => updateFeatureFlag('showVideoPlayer', checked)}
                 />
               </div>
             </CardContent>
@@ -309,7 +326,7 @@ export default function AdminDashboard() {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="backgroundColor">Background Color</Label>
                   <div className="flex items-center space-x-2">
@@ -333,7 +350,7 @@ export default function AdminDashboard() {
                       variant="outline" 
                       size="sm"
                       onClick={() => setAlertBannerState(prev => ({ ...prev, backgroundColor: '#E6B325' }))}
-                      className="text-xs"
+                      className="text-xs hidden sm:inline-flex"
                     >
                       Reset
                     </Button>
@@ -366,7 +383,7 @@ export default function AdminDashboard() {
                       variant="outline" 
                       size="sm"
                       onClick={() => setAlertBannerState(prev => ({ ...prev, textColor: '#000000' }))}
-                      className="text-xs"
+                      className="text-xs hidden sm:inline-flex"
                     >
                       Reset
                     </Button>
@@ -770,6 +787,10 @@ export default function AdminDashboard() {
               </Button>
             </CardFooter>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="direct-streaming">
+          <VideoSettingsTab />
         </TabsContent>
       </Tabs>
     </div>

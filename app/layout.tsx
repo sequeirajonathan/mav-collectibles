@@ -10,6 +10,7 @@ import "./videojs-theme.css";
 import ScrollToTop from '@/components/ui/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
+import '@/styles/video-player.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

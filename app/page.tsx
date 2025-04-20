@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import FeaturedEvents from "@/components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@/components/ui/AnnouncementCarousel";
-import YouTubeSection from "@/components/ui/YouTubeSection";
+import VideoSection from '@/components/ui/VideoSection';
 import ProductList from "@/components/ui/ProductList";
 
 export default function Home() {
@@ -54,8 +54,8 @@ export default function Home() {
       <div className="w-full max-w-6xl">
         <AnnouncementCarousel announcements={announcements} />
       </div>
-      {/* YouTube Videos Section */}
-      <YouTubeSection />
+      {/* Video Section - will show either live stream or YouTube video */}
+      <VideoSection />
       {/* Featured Events Section - Now controlled by feature flags */}
       <FeaturedEvents />
       {/* First row of card games */}

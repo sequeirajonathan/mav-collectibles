@@ -50,25 +50,39 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
-  const Comp = asChild ? Slot : "button"
-
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, 
+  VariantProps<typeof buttonVariants> {
+  isLoading?: boolean;
+  asChild?: boolean;
 }
 
-export { Button, buttonVariants }
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, isLoading, asChild = false, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    
+    return (
+      <Comp
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          isLoading && "opacity-50 cursor-not-allowed"
+        )}
+        ref={ref}
+        disabled={isLoading || props.disabled}
+        {...props}
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
+            <span>Saving...</span>
+          </div>
+        ) : (
+          children
+        )}
+      </Comp>
+    );
+  }
+);
+
+Button.displayName = "Button";
+
+export { buttonVariants }

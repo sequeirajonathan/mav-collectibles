@@ -85,3 +85,16 @@ model YouTubeSettings {
 
   @@map("youtube_settings")
 }
+
+model VideoSettings {
+  id        Int      @id @default(1)
+  src       String
+  type      String   @default("application/x-mpegURL")
+  isLive    Boolean  @default(false)
+  poster    String   @default("")
+  title     String   @default("Live Stream")
+  autoplay  Boolean  @default(true)
+  muted     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

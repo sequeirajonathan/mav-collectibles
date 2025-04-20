@@ -54,4 +54,27 @@ export async function PATCH(
   }
 }
 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const data = await request.json();
+    
+    const updatedSettings = await prisma.youTubeSettings.update({
+      where: { id },
+      data
+    });
+    
+    return NextResponse.json(updatedSettings);
+  } catch (error) {
+    console.error('Error updating YouTube settings:', error);
+    return NextResponse.json(
+      { error: 'Failed to update YouTube settings' },
+      { status: 500 }
+    );
+  }
+}
+
 // No DELETE handler for YouTube settings as it's a singleton resource 

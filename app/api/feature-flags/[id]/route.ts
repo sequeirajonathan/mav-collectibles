@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
-
-const featureFlagPatchSchema = z.object({
-  enabled: z.boolean(),
-});
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
 
   try {
     const featureFlag = await prisma.featureFlag.findUnique({
@@ -33,28 +28,32 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-
+  
   try {
-    const body = await request.json();
-    const validatedData = featureFlagPatchSchema.parse(body);
-
-    const updated = await prisma.featureFlag.update({
-      where: { id },
-      data: validatedData,
+    const { enabled } = await request.json();
+    
+    console.log(`Updating feature flag ${id} to ${enabled}`);
+    
+    const updatedFlag = await prisma.featureFlag.update({
+      where: { id: String(id) },
+      data: { enabled }
     });
-
-    return NextResponse.json(updated);
+    
+    return NextResponse.json(updatedFlag);
   } catch (error) {
-    console.error('PATCH error:', error);
-    return NextResponse.json({ error: 'Failed to update feature flag' }, { status: 500 });
+    console.error('Error updating feature flag:', error);
+    return NextResponse.json(
+      { error: 'Failed to update feature flag' },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
 
   try {
     await prisma.featureFlag.delete({
@@ -65,4 +64,4 @@ export async function DELETE(
     console.error('DELETE error:', error);
     return NextResponse.json({ error: 'Failed to delete feature flag' }, { status: 500 });
   }
-}
+} 

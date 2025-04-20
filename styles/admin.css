@@ -1,0 +1,36 @@
+/* Add this file to your styles directory */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(230, 179, 37, 0.3); /* Brand gold with opacity */
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 179, 37, 0.5); /* Brand gold with opacity */
+}
+
+/* Ensure tabs don't wrap on small screens */
+@media (max-width: 768px) {
+  .admin-tabs-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .admin-tabs-list {
+    display: inline-flex;
+    min-width: max-content;
+  }
+} 

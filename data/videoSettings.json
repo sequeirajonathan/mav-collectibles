@@ -1,0 +1,10 @@
+{
+  "src": "https://m.twitch.tv/jynxzi",
+  "type": "application/x-mpegURL",
+  "isLive": false,
+  "poster": "",
+  "title": "Live Stream",
+  "autoplay": true,
+  "muted": true,
+  "twitchChannel": "jynxzi"
+}

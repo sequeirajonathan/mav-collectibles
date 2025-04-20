@@ -1,84 +1,140 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 
-interface YouTubePlayerProps {
-  videoId?: string;
-  playlistId?: string;
+interface YouTubeSettings {
+  videoId: string;
+  title?: string;
   autoplay?: boolean;
   muted?: boolean;
-  title?: string;
+  playlistId?: string;
+  isLiveStream?: boolean;
+  liveStreamId?: string;
+  showLiveIndicator?: boolean;
+}
+
+interface YouTubePlayerProps {
+  settings?: YouTubeSettings;
   useContextSettings?: boolean;
 }
 
 export default function YouTubePlayer({ 
-  videoId, 
-  playlistId, 
-  autoplay,
-  muted,
-  title,
+  settings: propSettings,
   useContextSettings = false
 }: YouTubePlayerProps) {
-  const [isClient, setIsClient] = useState(false);
-  const { youtubeSettings, featureFlags } = useAppContext();
-
-  // If useContextSettings is true, use settings from context
-  const settings = useContextSettings ? youtubeSettings : {
-    videoId: videoId || '',
-    title: title || '',
-    autoplay: autoplay || false,
-    muted: muted || false,
-    playlistId: playlistId || ''
-  };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { youtubeSettings: contextSettings } = useAppContext();
+  const settings = useContextSettings ? contextSettings : propSettings;
+  
+  const safeSettings = useMemo(() => settings || {
+    videoId: '',
+    autoplay: false,
+    muted: true,
+    isLiveStream: false,
+    liveStreamId: '',
+    playlistId: ''
+  }, [settings]);
   
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Don't render if feature flag is off and using context settings
-  if (useContextSettings && !featureFlags.showYouTubeVideo) {
-    return null;
-  }
-
-  // Build the YouTube embed URL with parameters to control behavior
-  const embedUrl = `https://www.youtube.com/embed/${settings.videoId}?rel=0&modestbranding=1&color=white&controls=1${
-    settings.autoplay === true ? '&autoplay=1' : ''
-  }${
-    settings.autoplay === true || settings.muted === true ? '&mute=1' : ''
-  }${
-    settings.playlistId ? `&list=${settings.playlistId}` : ''
-  }&enablejsapi=0&origin=${isClient ? encodeURIComponent(window.location.origin) : ''}`;
-
-  if (!isClient) {
+    if (typeof window === 'undefined' || !containerRef.current) return;
+    
+    let isMounted = true;
+    
+    try {
+      // Create a unique ID for the iframe
+      const iframeId = `youtube-player-${Math.random().toString(36).substring(2, 9)}`;
+      
+      // Clear any existing content
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+      
+      // Determine what to play
+      let src = '';
+      if (safeSettings.isLiveStream && safeSettings.liveStreamId) {
+        // Use live stream ID if available and live stream mode is on
+        src = `https://www.youtube.com/embed/${safeSettings.liveStreamId}?autoplay=${safeSettings.autoplay ? 1 : 0}&mute=${safeSettings.muted ? 1 : 0}`;
+      } else if (safeSettings.playlistId) {
+        // Use playlist if available
+        src = `https://www.youtube.com/embed/videoseries?list=${safeSettings.playlistId}&autoplay=${safeSettings.autoplay ? 1 : 0}&mute=${safeSettings.muted ? 1 : 0}`;
+      } else if (safeSettings.videoId) {
+        // Use regular video ID
+        src = `https://www.youtube.com/embed/${safeSettings.videoId}?autoplay=${safeSettings.autoplay ? 1 : 0}&mute=${safeSettings.muted ? 1 : 0}`;
+      } else {
+        throw new Error('No video ID or playlist ID provided');
+      }
+      
+      // Create the iframe
+      const iframe = document.createElement('iframe');
+      iframe.id = iframeId;
+      iframe.width = '100%';
+      iframe.height = '100%';
+      iframe.src = src;
+      iframe.frameBorder = '0';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      
+      // Add loading and error handlers
+      iframe.onload = () => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      };
+      
+      iframe.onerror = () => {
+        if (isMounted) {
+          setError('Failed to load YouTube video');
+          setIsLoading(false);
+        }
+      };
+      
+      // Add the iframe to the container
+      if (containerRef.current) {
+        containerRef.current.appendChild(iframe);
+      }
+      
+      // Set a timeout in case the onload event doesn't fire
+      const timeout = setTimeout(() => {
+        if (isMounted && isLoading) {
+          setIsLoading(false);
+        }
+      }, 5000);
+      
+      return () => {
+        isMounted = false;
+        clearTimeout(timeout);
+      };
+    } catch (err) {
+      console.error('Error setting up YouTube player:', err);
+      if (isMounted) {
+        setError(err instanceof Error ? err.message : 'Error setting up YouTube player');
+        setIsLoading(false);
+      }
+    }
+  }, [safeSettings, isLoading]);
+  
+  if (error) {
     return (
-      <div className="aspect-video w-full bg-black/50 flex items-center justify-center">
-        <span className="text-[#E6B325]">Loading video player...</span>
+      <div className="relative w-full overflow-hidden rounded-lg border-2 border-red-500 shadow-lg aspect-video bg-gray-900 flex items-center justify-center text-white">
+        {error}
       </div>
     );
   }
-
+  
   return (
-    <div className="relative w-full overflow-hidden rounded-lg border-2 border-[#E6B325]/30 shadow-lg">
-      <div className="aspect-video">
-        <iframe
-          src={embedUrl}
-          title={settings.title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="absolute top-0 left-0 w-full h-full"
-        ></iframe>
-      </div>
-      {settings.title && (
-        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-3">
-          <h3 className="text-white font-medium truncate">{settings.title}</h3>
+    <div className="relative w-full overflow-hidden rounded-lg border-2 border-[#E6B325]/30 shadow-lg aspect-video">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-t-brand-gold border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-brand-gold">Loading YouTube video...</p>
+          </div>
         </div>
       )}
-      {settings.autoplay && !settings.muted && (
-        <div className="absolute top-0 right-0 bg-black/70 p-2 text-xs text-white">
-          <p>Note: Browsers require videos to be muted when autoplay is enabled</p>
-        </div>
-      )}
+      <div ref={containerRef} className="w-full h-full" />
     </div>
   );
 } 

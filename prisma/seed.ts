@@ -140,6 +140,17 @@ async function main() {
     },
   });
 
+  // Add this to your feature flags in the seed file
+  await prisma.featureFlag.upsert({
+    where: { name: 'showVideoPlayer' },
+    update: {},
+    create: {
+      name: 'showVideoPlayer',
+      description: 'Controls visibility of the direct streaming video player on the homepage',
+      enabled: false,
+    },
+  });
+
   console.log('Database has been seeded.');
 }
 
