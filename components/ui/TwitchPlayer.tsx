@@ -6,17 +6,22 @@ import { useEffect, useRef, useState } from 'react';
 declare global {
   interface Window {
     Twitch?: {
-      Player: new (
-        elementId: string | HTMLElement,
-        options: {
-          channel: string;
-          width: string | number;
-          height: string | number;
-          autoplay?: boolean;
-          muted?: boolean;
-        }
-      ) => {
-        destroy: () => void;
+      Player: {
+        new (
+          elementId: string | HTMLElement,
+          options: {
+            channel: string;
+            width: string | number;
+            height: string | number;
+            autoplay?: boolean;
+            muted?: boolean;
+          }
+        ): {
+          destroy: () => void;
+          addEventListener: (event: string, callback: () => void) => void;
+        };
+        READY: string;
+        ERROR: string;
       };
     };
   }
@@ -36,7 +41,7 @@ export default function TwitchPlayer({
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [playerReady, setPlayerReady] = useState(false);
+  const [, setPlayerReady] = useState(false);
 
   useEffect(() => {
     // Safety check for browser environment

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import '@videojs/http-streaming';
@@ -28,13 +28,11 @@ export default function VideoPlayer({
   useContextSettings = false
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<ReturnType<typeof videojs> | null>(null);
   const { videoSettings, featureFlags } = useAppContext();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Use context settings if specified
-  const settings = useContextSettings ? videoSettings : {
+  
+  // Use useMemo for settings
+  const settings = useMemo(() => useContextSettings ? videoSettings : {
     src: src || '',
     type: type || 'application/x-mpegURL',
     isLive: isLive || false,
@@ -42,7 +40,7 @@ export default function VideoPlayer({
     title: title || '',
     autoplay: autoplay || false,
     muted: muted || false
-  };
+  }, [useContextSettings, videoSettings, src, type, isLive, poster, title, autoplay, muted]);
 
   useEffect(() => {
     if (!videoRef.current) return;

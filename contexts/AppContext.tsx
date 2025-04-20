@@ -63,11 +63,19 @@ interface VideoSettings {
   twitchChannel?: string;
 }
 
+interface LastUpdated {
+  featureFlags?: string;
+  alertBanner?: string;
+  featuredEvents?: string;
+  youtubeSettings?: string;
+  videoSettings?: string;
+}
+
 interface AppContextType {
   featureFlags: FeatureFlags;
   alertBanner: AlertBanner | null;
   featuredEvents: FeaturedEvent[];
-  updateFeatureFlag: (name: string, enabled: boolean) => Promise<void>;
+  updateFeatureFlag: (name: string, enabled: boolean) => Promise<boolean>;
   updateAlertBanner: (data: Partial<AlertBanner>) => Promise<void>;
   updateFeaturedEvent: (id: string, data: Partial<FeaturedEvent>) => Promise<void>;
   addFeaturedEvent: (data: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
@@ -80,6 +88,7 @@ interface AppContextType {
   videoSettings: VideoSettings;
   updateVideoSettings: (settings: Partial<VideoSettings>) => Promise<void>;
   refreshData: () => Promise<void>;
+  lastUpdated: LastUpdated;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -114,12 +123,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     autoplay: true,
     muted: true
   });
+  const [lastUpdated, setLastUpdated] = useState<LastUpdated>({});
 
   // Load data on initial render
   const fetchData = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      
       // Fetch feature flags
       const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
       if (flagsResponse.ok) {
@@ -139,6 +148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           
           setFeatureFlags(flags);
+          setLastUpdated(prev => ({ ...prev, featureFlags: new Date().toISOString() }));
         }
       }
       
@@ -148,6 +158,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const bannerData = await bannerResponse.json();
         if (bannerData) {
           setAlertBanner(bannerData);
+          setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
         }
       }
       
@@ -157,6 +168,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const eventsData = await eventsResponse.json();
         if (eventsData && Array.isArray(eventsData)) {
           setFeaturedEvents(eventsData);
+          setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
         }
       }
       
@@ -166,6 +178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const youtubeData = await youtubeResponse.json();
         if (youtubeData) {
           setYoutubeSettings(youtubeData);
+          setLastUpdated(prev => ({ ...prev, youtubeSettings: new Date().toISOString() }));
         }
       }
       
@@ -175,6 +188,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const videoData = await videoResponse.json();
         if (videoData) {
           setVideoSettings(videoData);
+          setLastUpdated(prev => ({ ...prev, videoSettings: new Date().toISOString() }));
         }
       }
     } catch (error) {
@@ -190,7 +204,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Update feature flag
-  const updateFeatureFlag = async (name: string, enabled: boolean) => {
+  const updateFeatureFlag = async (name: string, enabled: boolean): Promise<boolean> => {
     try {
       console.log(`Updating feature flag: ${name} to ${enabled}`);
       
@@ -230,6 +244,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         
         return true;
       }
+      return false;
     } catch (error) {
       console.error('Error updating feature flag:', error);
       return false;
@@ -251,6 +266,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const responseData = await response.json();
         setAlertBanner(responseData);
+        setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
       } else {
         const response = await fetch(`${config.baseUrl}/api/alert-banner`, {
           method: 'POST',
@@ -263,6 +279,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const responseData = await response.json();
         setAlertBanner(responseData);
+        setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
       }
     } catch (error) {
       console.error('Error updating alert banner:', error);
@@ -285,6 +302,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setFeaturedEvents(prev => 
         prev.map(event => event.id === id ? responseData : event)
       );
+      setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
     } catch (error) {
       console.error('Error updating featured event:', error);
     }
@@ -304,6 +322,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const responseData = await response.json();
       setFeaturedEvents(prev => [...prev, responseData]);
+      setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
     } catch (error) {
       console.error('Error adding featured event:', error);
     }
@@ -318,6 +337,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       setFeaturedEvents(prev => prev.filter(event => event.id !== id));
+      setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
     } catch (error) {
       console.error('Error removing featured event:', error);
     }
@@ -343,6 +363,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const responseData = await response.json();
       setYoutubeSettings(responseData);
+      setLastUpdated(prev => ({ ...prev, youtubeSettings: new Date().toISOString() }));
       return responseData;
     } catch (error) {
       console.error('Error updating YouTube settings:', error);
@@ -365,6 +386,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const responseData = await response.json();
       setVideoSettings(responseData);
+      setLastUpdated(prev => ({ ...prev, videoSettings: new Date().toISOString() }));
       return responseData;
     } catch (error) {
       console.error('Error updating video settings:', error);
@@ -390,6 +412,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateYoutubeSettings,
         videoSettings,
         updateVideoSettings,
+        lastUpdated,
         refreshData: fetchData
       }}
     >

@@ -1,7 +1,7 @@
 "use client";
 
+import { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
-import { useState, useEffect } from 'react';
 
 export default function FeatureFlagDebug() {
   const { featureFlags, updateFeatureFlag } = useAppContext();
@@ -17,8 +17,12 @@ export default function FeatureFlagDebug() {
     const currentValue = featureFlags[name as keyof typeof featureFlags];
     addLog(`Attempting to toggle ${name} from ${currentValue} to ${!currentValue}`);
     
-    const result = await updateFeatureFlag(name, !currentValue);
-    addLog(`Toggle result: ${result ? 'Success' : 'Failed'}`);
+    try {
+      await updateFeatureFlag(name, !currentValue);
+      addLog(`Toggle result: Success`);
+    } catch (error) {
+      addLog(`Toggle result: Failed - ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
   
   if (process.env.NODE_ENV !== 'development') {
