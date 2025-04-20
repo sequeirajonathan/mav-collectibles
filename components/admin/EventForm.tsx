@@ -69,7 +69,7 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
       const filePath = `events/${fileName}`;
       
       // Upload to Supabase - skip bucket check since we created it manually
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('images')
         .upload(filePath, file, {
           contentType: file.type,
