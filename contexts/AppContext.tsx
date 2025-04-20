@@ -71,6 +71,17 @@ interface LastUpdated {
   videoSettings?: string;
 }
 
+interface AdminVideoSettings {
+  src: string;
+  type: string;
+  isLive: boolean;
+  poster: string;
+  title: string;
+  autoplay: boolean;
+  muted: boolean;
+  twitchChannel?: string;
+}
+
 interface AppContextType {
   featureFlags: FeatureFlags;
   alertBanner: AlertBanner | null;
@@ -86,7 +97,7 @@ interface AppContextType {
   youtubeSettings: YouTubeSettings;
   updateYoutubeSettings: (settings: Partial<YouTubeSettings>) => Promise<void>;
   videoSettings: VideoSettings;
-  updateVideoSettings: (settings: Partial<VideoSettings>) => Promise<void>;
+  updateVideoSettings: (settings: AdminVideoSettings) => Promise<void>;
   refreshData: () => Promise<void>;
   lastUpdated: LastUpdated;
 }
@@ -372,7 +383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Update video settings
-  const updateVideoSettings = async (settings: Partial<VideoSettings>) => {
+  const updateVideoSettings = async (settings: AdminVideoSettings) => {
     try {
       const updatedSettings = { ...videoSettings, ...settings };
       const response = await fetch(`${config.baseUrl}/api/video-settings/1`, {
