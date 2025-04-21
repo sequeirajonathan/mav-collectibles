@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { X, Move } from 'lucide-react';
 
+// Define a type for feature flags
+type FeatureFlagKey = string;
+type FeatureFlagValue = boolean;
+type FeatureFlagsRecord = Record<FeatureFlagKey, FeatureFlagValue>;
+
 export default function FeatureFlagDebug() {
-  const { featureFlags, toggleFeatureFlag } = useAppContext();
+  const { featureFlags } = useAppContext();
   const [logs, setLogs] = useState<string[]>([]);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -16,6 +21,36 @@ export default function FeatureFlagDebug() {
   // Only show in development or if explicitly enabled
   const showDebug = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_SHOW_DEBUG === 'true';
   
+  // Add a log entry
+  const addLog = useCallback((message: string) => {
+    setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  }, []);
+
+  // Define drag handlers with useCallback to avoid dependency issues
+  const handleDragMove = useCallback((e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      });
+    }
+  }, [isDragging, dragOffset]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (debugRef.current) {
+      const rect = debugRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+      setIsDragging(true);
+    }
+  }, []);
+
   // Add event listeners for dragging
   useEffect(() => {
     if (isDragging) {
@@ -30,42 +65,35 @@ export default function FeatureFlagDebug() {
       window.removeEventListener('mousemove', handleDragMove);
       window.removeEventListener('mouseup', handleDragEnd);
     };
-  }, [isDragging]);
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
-  // Add a log entry
-  const addLog = (message: string) => {
-    setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
-  };
-
-  const handleDragStart = (e: React.MouseEvent) => {
-    if (debugRef.current) {
-      const rect = debugRef.current.getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-      setIsDragging(true);
-    }
-  };
-
-  const handleDragMove = (e: MouseEvent) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
-  };
-
-  // Handle feature flag toggle
+  // Handle feature flag toggle - use direct API call instead of context
   const handleToggle = async (key: string) => {
-    const newValue = !featureFlags[key];
-    addLog(`Toggling ${key} to ${newValue ? 'ON' : 'OFF'}`);
-    await toggleFeatureFlag(key, newValue);
+    try {
+      // Safely cast featureFlags to a Record type using double casting
+      const flags = featureFlags as unknown as FeatureFlagsRecord;
+      const newValue = !flags[key];
+      addLog(`Toggling ${key} to ${newValue ? 'ON' : 'OFF'}`);
+      
+      // Make direct API call to toggle feature flag
+      const response = await fetch(`/api/feature-flags/${key}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enabled: newValue }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to toggle feature flag: ${response.statusText}`);
+      }
+      
+      // Force a page refresh to apply the changes
+      window.location.reload();
+    } catch (error) {
+      console.error('Error toggling feature flag:', error);
+      addLog(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   // Return null after all hooks have been called
@@ -98,7 +126,7 @@ export default function FeatureFlagDebug() {
       <h4 className="font-bold mb-2 mt-4 pl-5">Feature Flag Debug</h4>
       
       <div className="space-y-2 mb-4">
-        {Object.entries(featureFlags).map(([key, value]) => (
+        {Object.entries(featureFlags as unknown as FeatureFlagsRecord).map(([key, value]) => (
           <div key={key} className="flex items-center justify-between">
             <span>{key}: {value ? 'ON' : 'OFF'}</span>
             <button 
