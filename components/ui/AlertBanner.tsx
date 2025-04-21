@@ -1,47 +1,47 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
-import { motion, AnimatePresence } from 'framer-motion';
 
-const AlertBanner = () => {
-  const { 
-    featureFlags, 
-    alertBanner, 
-    dismissAlertBanner, 
-    alertBannerDismissed 
-  } = useAppContext();
+export default function AlertBanner() {
+  const { alertBanner } = useAppContext();
+  const [isVisible, setIsVisible] = useState(true);
   
-  // Check if the showAlertBanner feature flag is enabled
-  const showAlertBanner = featureFlags['showAlertBanner'];
+  // Reset visibility when banner content changes
+  useEffect(() => {
+    if (alertBanner) {
+      setIsVisible(true);
+    }
+  }, [alertBanner]);
   
-  if (!showAlertBanner || !alertBanner || alertBannerDismissed) {
+  if (!alertBanner || !isVisible) {
     return null;
   }
-
+  
   return (
-    <AnimatePresence>
-      <motion.div 
-        initial={{ height: 0, opacity: 0 }}
-        animate={{ height: 'auto', opacity: 1 }}
-        exit={{ height: 0, opacity: 0 }}
-        style={{ 
-          backgroundColor: alertBanner.backgroundColor, 
-          color: alertBanner.textColor 
-        }}
-        className="relative text-center py-2 px-4 font-medium"
-      >
-        {alertBanner.message} {alertBanner.code && <span className="font-bold">Use code: {alertBanner.code}</span>}
+    <div 
+      className="w-full left-0 right-0 z-50" 
+      style={{ 
+        backgroundColor: alertBanner.backgroundColor || '#E6B325',
+        color: alertBanner.textColor || '#000000',
+      }}
+    >
+      <div className="relative flex items-center justify-center px-4 py-2 text-center">
+        <p className="text-sm font-medium pr-6 sm:pr-0">
+          {alertBanner.message}
+          {alertBanner.code && (
+            <span className="ml-2 font-bold">{alertBanner.code}</span>
+          )}
+        </p>
         <button 
-          onClick={dismissAlertBanner}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-black/10"
-          aria-label="Dismiss alert"
+          onClick={() => setIsVisible(false)}
+          className="absolute right-4 p-1 rounded-full hover:bg-black/10 transition-colors hidden sm:block"
+          aria-label="Close"
         >
           <X size={16} />
         </button>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </div>
   );
-};
-
-export default AlertBanner; 
+} 

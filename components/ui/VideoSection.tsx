@@ -70,12 +70,15 @@ export default function VideoSection() {
   };
 
   return (
-    <div className="w-full mb-12 relative">
+    <div className="w-full mb-12 relative overflow-x-hidden">
       {/* Banner - always shown when no video is available */}
       {showBanner && (
-        <div className="relative" style={{ paddingBottom: "42.85%" }}>
+        <div className="relative" style={{ 
+          paddingBottom: "42.85%", // Original aspect ratio
+          maxHeight: "calc(100vh - 200px)" // Prevent it from being too tall on mobile
+        }}>
           <motion.div 
-            className="absolute left-[-20%] right-[-20%] top-0 bottom-0 z-20"
+            className="absolute inset-0 sm:left-[-5%] sm:right-[-5%] md:left-[-10%] md:right-[-10%] lg:left-[-20%] lg:right-[-20%] top-0 bottom-0 z-20"
             initial={{ opacity: 1 }}
             animate={{ opacity: 1, scale: 1 }}
           >
@@ -94,7 +97,7 @@ export default function VideoSection() {
                 fill
                 className="object-cover object-center"
                 priority
-                sizes="140vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 110vw, (max-width: 1024px) 120vw, 140vw"
                 style={{ objectPosition: '50% 30%' }}
                 unoptimized
               />
