@@ -1,22 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MAV Collectables
+
+A Next.js e-commerce application for trading card games like Pokémon, Yu-Gi-Oh!, Dragon Ball, and more.
+
+## Project Structure
+
+```
+mav-collectables/
+├── app/                    # Next.js App Router
+│   ├── (auth)/             # Authentication routes grouped
+│   │   ├── login/          # Login page
+│   │   ├── signup/         # Signup page
+│   │   └── [...]/          # Other auth routes
+│   ├── (shop)/             # Shop-related pages grouped
+│   │   ├── cart/           # Shopping cart
+│   │   ├── products/       # Products pages
+│   │   └── [...]/          # Other shop routes
+│   ├── admin/              # Admin dashboard and features
+│   ├── api/                # API routes
+│   │   ├── alerts/         # Alert API endpoints
+│   │   ├── auth/           # Auth API endpoints
+│   │   ├── feature-flags/  # Feature flags endpoints
+│   │   ├── products/       # Products API endpoints
+│   │   └── [...]/          # Other API routes
+│   └── [...]/              # Other page routes
+├── components/             # React components
+│   ├── cards/              # Card-specific components
+│   ├── forms/              # Form-related components
+│   ├── layout/             # Layout components
+│   │   ├── footer/         # Footer components
+│   │   ├── header/         # Header components
+│   │   └── [...]/          # Other layout components
+│   ├── media/              # Media-related components
+│   │   ├── carousel/       # Carousel components
+│   │   ├── video/          # Video player components
+│   │   └── [...]/          # Other media components
+│   ├── product/            # Product-related components
+│   ├── ui/                 # UI components (buttons, inputs, etc.)
+│   └── [...]/              # Other component categories
+├── config/                 # Application configuration
+├── context/                # React Context providers
+├── hooks/                  # Custom React hooks
+├── lib/                    # Library code and utilities
+│   ├── api/                # API client functions
+│   ├── db/                 # Database utilities
+│   ├── validations/        # Validation schemas
+│   └── [...]/              # Other utilities
+├── prisma/                 # Prisma ORM configuration
+├── public/                 # Static files
+│   ├── images/             # Image assets
+│   ├── fonts/              # Font files
+│   └── [...]/              # Other public assets
+├── styles/                 # CSS and styling files
+└── types/                  # TypeScript type definitions
+```
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables: Copy `.env.example` to `.env.local`
+4. Run the development server: `npm run dev`
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Trading card inventory management
+- User authentication
+- Shopping cart
+- Admin dashboard
+- Feature flags for controlled feature rollout
+- Video content integration
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
