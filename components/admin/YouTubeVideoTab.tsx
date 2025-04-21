@@ -5,7 +5,6 @@ import { useAppContext } from "@/contexts/AppContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-hot-toast";
@@ -43,7 +42,6 @@ export default function YouTubeVideoTab() {
   const {
     featureFlags,
     youtubeSettings,
-    updateFeatureFlag,
     updateYoutubeSettings,
   } = useAppContext();
 
@@ -68,43 +66,24 @@ export default function YouTubeVideoTab() {
     <Card>
       <CardHeader>
         <CardTitle>YouTube Video Settings</CardTitle>
-        <CardDescription>Configure the featured YouTube video on your site</CardDescription>
+        <CardDescription>
+          Configure the featured YouTube video on your site.
+          {!featureFlags.showYouTubeVideo && (
+            <span className="text-amber-500 block mt-1">
+              Note: Enable the &quot;YouTube Video&quot; feature flag to display this video.
+            </span>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="showYouTubeVideo" className="text-lg">Show YouTube Video</Label>
-            <p className="text-sm text-gray-400">Display the featured YouTube video on the homepage</p>
-          </div>
-          <Switch
-            id="showYouTubeVideo"
-            checked={featureFlags.showYouTubeVideo}
-            onCheckedChange={(checked) => updateFeatureFlag('showYouTubeVideo', checked)}
-          />
-        </div>
-        
         <div>
           <Label htmlFor="videoId">YouTube Video ID</Label>
-          <div className="flex gap-2">
-            <Input
-              id="videoId"
-              value={localYoutubeSettings.videoId}
-              onChange={(e) => setLocalYoutubeSettings({...localYoutubeSettings, videoId: e.target.value})}
-              placeholder="e.g. V8D_ELNVRko"
-              className="flex-1"
-            />
-            <Button 
-              variant="outline"
-              onClick={() => {
-                window.open(`https://www.youtube.com/watch?v=${localYoutubeSettings.videoId}`, '_blank');
-              }}
-            >
-              Preview
-            </Button>
-          </div>
-          <p className="text-xs text-gray-400 mt-1">
-            The ID is the part after &quot;v=&quot; in a YouTube URL
-          </p>
+          <Input
+            id="videoId"
+            value={localYoutubeSettings.videoId}
+            onChange={(e) => setLocalYoutubeSettings({...localYoutubeSettings, videoId: e.target.value})}
+            placeholder="e.g. dQw4w9WgXcQ"
+          />
         </div>
         
         <div>

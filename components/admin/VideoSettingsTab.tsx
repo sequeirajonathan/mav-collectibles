@@ -11,11 +11,10 @@ import { toast } from "react-hot-toast";
 import { AdminVideoSettings, VideoSettings } from "@/types/admin";
 
 export default function VideoSettingsTab() {
-  const { videoSettings, updateVideoSettings } = useAppContext();
+  const { videoSettings, updateVideoSettings, featureFlags } = useAppContext();
   
   const [settings, setSettings] = useState<AdminVideoSettings>({
     url: '',
-    enabled: false,
     autoplay: false
   });
   
@@ -23,7 +22,6 @@ export default function VideoSettingsTab() {
     if (videoSettings) {
       setSettings({
         url: videoSettings.src || '',
-        enabled: videoSettings.isLive || false,
         autoplay: videoSettings.autoplay || false
       });
     }
@@ -54,7 +52,14 @@ export default function VideoSettingsTab() {
     <Card>
       <CardHeader>
         <CardTitle>Direct Streaming Settings</CardTitle>
-        <CardDescription>Configure your direct streaming video player</CardDescription>
+        <CardDescription>
+          Configure your direct streaming video player. 
+          {!featureFlags.showDirectStreaming && (
+            <span className="text-amber-500 block mt-1">
+              Note: Enable the &quot;Direct Streaming&quot; feature flag to display this video.
+            </span>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
@@ -63,20 +68,11 @@ export default function VideoSettingsTab() {
             id="streamUrl"
             value={settings.url}
             onChange={(e) => handleChange('url', e.target.value)}
-            placeholder="https://example.com/stream"
+            placeholder="https://example.com/stream/index.m3u8 or https://twitch.tv/channel"
           />
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="enabled" className="text-lg">Enable Streaming</Label>
-            <p className="text-sm text-gray-400">Show the video player when available</p>
-          </div>
-          <Switch
-            id="enabled"
-            checked={settings.enabled}
-            onCheckedChange={(checked) => handleChange('enabled', checked)}
-          />
+          <p className="text-xs text-gray-400 mt-1">
+            Enter a valid HLS stream URL (usually ending with .m3u8) or a Twitch channel URL
+          </p>
         </div>
         
         <div className="flex items-center justify-between">

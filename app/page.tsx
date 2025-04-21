@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import FeaturedEvents from "@/components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@/components/ui/AnnouncementCarousel";
-import VideoSection from '@/components/ui/VideoSection';
+import VideoSection from "@/components/ui/VideoSection";
 import ProductList from "@/components/ui/ProductList";
 
 export default function Home() {
@@ -42,22 +42,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-12">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4 text-brand-gold">
-          Welcome to MAV Collectibles
-        </h1>
-        <p className="text-xl">
-          Your premier destination for trading card games
-        </p>
-      </div>
+      {/* Video Section - moved above the announcement carousel */}
+      <VideoSection />
+
       {/* Announcement Carousel */}
       <div className="w-full max-w-6xl">
         <AnnouncementCarousel announcements={announcements} />
       </div>
-      {/* Video Section - will show either live stream or YouTube video */}
-      <VideoSection />
-      {/* Featured Events Section - Now controlled by feature flags */}
+
+      {/* Featured Events Section */}
       <FeaturedEvents />
+
       {/* First row of card games */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
         {[
@@ -177,7 +172,7 @@ export default function Home() {
           ))}
         </div>
       </div>
-      
+
       {/* Featured Products or other sections */}
       <ProductList />
     </div>

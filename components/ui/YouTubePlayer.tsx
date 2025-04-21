@@ -1,140 +1,160 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 
-interface YouTubeSettings {
-  videoId: string;
+interface YouTubePlayerProps {
+  videoId?: string;
   title?: string;
   autoplay?: boolean;
   muted?: boolean;
   playlistId?: string;
   isLiveStream?: boolean;
   liveStreamId?: string;
-  showLiveIndicator?: boolean;
-}
-
-interface YouTubePlayerProps {
-  settings?: YouTubeSettings;
   useContextSettings?: boolean;
+  onError?: () => void;
 }
 
-export default function YouTubePlayer({ 
-  settings: propSettings,
-  useContextSettings = false
+export default function YouTubePlayer({
+  videoId,
+  title,
+  autoplay = true,
+  muted = true,
+  playlistId,
+  isLiveStream = false,
+  liveStreamId,
+  useContextSettings = false,
+  onError
 }: YouTubePlayerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { youtubeSettings } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { youtubeSettings: contextSettings } = useAppContext();
-  const settings = useContextSettings ? contextSettings : propSettings;
-  
-  const safeSettings = useMemo(() => settings || {
-    videoId: '',
-    autoplay: false,
-    muted: true,
-    isLiveStream: false,
-    liveStreamId: '',
-    playlistId: ''
-  }, [settings]);
-  
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Use settings from context if requested
+  const settings = useContextSettings && youtubeSettings ? {
+    videoId: youtubeSettings.videoId || '',
+    title: youtubeSettings.title || '',
+    autoplay: youtubeSettings.autoplay ?? true,
+    muted: youtubeSettings.muted ?? true,
+    playlistId: youtubeSettings.playlistId || '',
+    isLiveStream: youtubeSettings.isLiveStream || false,
+    liveStreamId: youtubeSettings.liveStreamId || ''
+  } : {
+    videoId: videoId || '',
+    title: title || '',
+    autoplay,
+    muted,
+    playlistId: playlistId || '',
+    isLiveStream,
+    liveStreamId: liveStreamId || ''
+  };
+
+  // Determine the correct video ID to use
+  const effectiveVideoId = settings.isLiveStream && settings.liveStreamId 
+    ? settings.liveStreamId 
+    : settings.videoId;
+
+  // Handle YouTube URL formats
   useEffect(() => {
-    if (typeof window === 'undefined' || !containerRef.current) return;
-    
-    let isMounted = true;
-    
-    try {
-      // Create a unique ID for the iframe
-      const iframeId = `youtube-player-${Math.random().toString(36).substring(2, 9)}`;
-      
-      // Clear any existing content
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-      
-      // Determine what to play
-      let src = '';
-      if (safeSettings.isLiveStream && safeSettings.liveStreamId) {
-        // Use live stream ID if available and live stream mode is on
-        src = `https://www.youtube.com/embed/${safeSettings.liveStreamId}?autoplay=${safeSettings.autoplay ? 1 : 0}&mute=${safeSettings.muted ? 1 : 0}`;
-      } else if (safeSettings.playlistId) {
-        // Use playlist if available
-        src = `https://www.youtube.com/embed/videoseries?list=${safeSettings.playlistId}&autoplay=${safeSettings.autoplay ? 1 : 0}&mute=${safeSettings.muted ? 1 : 0}`;
-      } else if (safeSettings.videoId) {
-        // Use regular video ID
-        src = `https://www.youtube.com/embed/${safeSettings.videoId}?autoplay=${safeSettings.autoplay ? 1 : 0}&mute=${safeSettings.muted ? 1 : 0}`;
-      } else {
-        throw new Error('No video ID or playlist ID provided');
-      }
-      
-      // Create the iframe
-      const iframe = document.createElement('iframe');
-      iframe.id = iframeId;
-      iframe.width = '100%';
-      iframe.height = '100%';
-      iframe.src = src;
-      iframe.frameBorder = '0';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      iframe.allowFullscreen = true;
-      
-      // Add loading and error handlers
-      iframe.onload = () => {
-        if (isMounted) {
-          setIsLoading(false);
+    // If the videoId looks like a full YouTube URL, extract the ID
+    if (effectiveVideoId && (
+      effectiveVideoId.includes('youtube.com') || 
+      effectiveVideoId.includes('youtu.be')
+    )) {
+      try {
+        let extractedId = '';
+        
+        if (effectiveVideoId.includes('youtube.com/watch?v=')) {
+          // Regular YouTube video URL
+          const url = new URL(effectiveVideoId);
+          extractedId = url.searchParams.get('v') || '';
+        } else if (effectiveVideoId.includes('youtu.be/')) {
+          // Shortened YouTube URL
+          const parts = effectiveVideoId.split('youtu.be/');
+          extractedId = parts[1]?.split('?')[0] || '';
+        } else if (effectiveVideoId.includes('youtube.com/live/')) {
+          // YouTube live URL format
+          const parts = effectiveVideoId.split('youtube.com/live/');
+          extractedId = parts[1]?.split('?')[0] || '';
         }
-      };
-      
-      iframe.onerror = () => {
-        if (isMounted) {
-          setError('Failed to load YouTube video');
-          setIsLoading(false);
+        
+        if (extractedId && iframeRef.current) {
+          // Update the iframe src with the extracted ID
+          const autoplayParam = settings.autoplay ? '&autoplay=1' : '';
+          const mutedParam = settings.muted ? '&mute=1' : '';
+          const playlistParam = settings.playlistId ? `&list=${settings.playlistId}` : '';
+          
+          iframeRef.current.src = `https://www.youtube.com/embed/${extractedId}?rel=0&modestbranding=1&color=white&controls=1${autoplayParam}${mutedParam}${playlistParam}`;
         }
-      };
-      
-      // Add the iframe to the container
-      if (containerRef.current) {
-        containerRef.current.appendChild(iframe);
-      }
-      
-      // Set a timeout in case the onload event doesn't fire
-      const timeout = setTimeout(() => {
-        if (isMounted && isLoading) {
-          setIsLoading(false);
-        }
-      }, 5000);
-      
-      return () => {
-        isMounted = false;
-        clearTimeout(timeout);
-      };
-    } catch (err) {
-      console.error('Error setting up YouTube player:', err);
-      if (isMounted) {
-        setError(err instanceof Error ? err.message : 'Error setting up YouTube player');
-        setIsLoading(false);
+      } catch (e) {
+        console.error('Error parsing YouTube URL:', e);
+        setError('Invalid YouTube URL');
+        if (onError) onError();
       }
     }
-  }, [safeSettings, isLoading]);
-  
-  if (error) {
+  }, [effectiveVideoId, settings.autoplay, settings.muted, settings.playlistId, onError]);
+
+  // Handle loading state
+  useEffect(() => {
+    const handleLoad = () => {
+      setIsLoading(false);
+    };
+
+    const handleError = () => {
+      setIsLoading(false);
+      setError('Failed to load YouTube video');
+      if (onError) onError();
+    };
+
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener('load', handleLoad);
+      iframe.addEventListener('error', handleError);
+      
+      return () => {
+        iframe.removeEventListener('load', handleLoad);
+        iframe.removeEventListener('error', handleError);
+      };
+    }
+  }, [onError]);
+
+  if (!effectiveVideoId) {
     return (
-      <div className="relative w-full overflow-hidden rounded-lg border-2 border-red-500 shadow-lg aspect-video bg-gray-900 flex items-center justify-center text-white">
-        {error}
+      <div className="w-full h-full flex items-center justify-center bg-black text-white">
+        <p>No video ID provided</p>
       </div>
     );
   }
+
+  // Build the YouTube embed URL
+  const autoplayParam = settings.autoplay ? '&autoplay=1' : '';
+  const mutedParam = settings.muted ? '&mute=1' : '';
+  const playlistParam = settings.playlistId ? `&list=${settings.playlistId}` : '';
   
   return (
-    <div className="relative w-full overflow-hidden rounded-lg border-2 border-[#E6B325]/30 shadow-lg aspect-video">
+    <div className="relative w-full h-full">
+      <iframe
+        ref={iframeRef}
+        src={`https://www.youtube.com/embed/${effectiveVideoId}?rel=0&modestbranding=1&color=white&controls=1${autoplayParam}${mutedParam}${playlistParam}`}
+        title={settings.title || 'YouTube Video'}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="w-full h-full"
+      />
+      
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-t-brand-gold border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-brand-gold">Loading YouTube video...</p>
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
         </div>
       )}
-      <div ref={containerRef} className="w-full h-full" />
+      
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 p-4 text-center">
+          <p className="text-red-400 mb-2">⚠️ {error}</p>
+          <p className="text-white/70 text-sm">Please check your YouTube video settings.</p>
+        </div>
+      )}
     </div>
   );
 } 

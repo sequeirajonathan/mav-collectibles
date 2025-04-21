@@ -39,6 +39,7 @@ interface FeatureFlags {
   showFeaturedEvents: boolean;
   showYouTubeVideo: boolean;
   showVideoPlayer: boolean;
+  showDirectStreaming: boolean;
 }
 
 interface YouTubeSettings {
@@ -110,6 +111,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showFeaturedEvents: true,
     showYouTubeVideo: true,
     showVideoPlayer: true,
+    showDirectStreaming: false,
   });
   const [alertBanner, setAlertBanner] = useState<AlertBanner | null>(null);
   const [featuredEvents, setFeaturedEvents] = useState<FeaturedEvent[]>([]);
@@ -149,7 +151,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             showAlertBanner: false,
             showFeaturedEvents: false,
             showYouTubeVideo: false,
-            showVideoPlayer: false
+            showVideoPlayer: false,
+            showDirectStreaming: false
           };
           
           flagsData.forEach((flag: FeatureFlag) => {

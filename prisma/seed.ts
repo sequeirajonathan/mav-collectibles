@@ -151,6 +151,33 @@ async function main() {
     },
   });
 
+  // Add this to your feature flags in the seed file
+  await prisma.featureFlag.upsert({
+    where: { name: 'showDirectStreaming' },
+    update: {},
+    create: {
+      name: 'showDirectStreaming',
+      description: 'Controls visibility of direct streaming video on the homepage',
+      enabled: false,
+    },
+  });
+
+  // Add a default video settings with a more reliable test stream
+  await prisma.videoSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      src: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", // Akamai test stream
+      type: "application/x-mpegURL",
+      isLive: true,
+      poster: "",
+      title: "Test Stream",
+      autoplay: true,
+      muted: true
+    }
+  });
+
   console.log('Database has been seeded.');
 }
 
