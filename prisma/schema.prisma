@@ -99,13 +99,21 @@ model VideoSettings {
   updatedAt DateTime @updatedAt
 }
 
-// User Authentication
-model User {
+enum UserRole {
+  CUSTOMER
+  STAFF
+  MANAGER
+  ADMIN
+  OWNER
+}
+
+model UserProfile {
   id            String    @id @default(uuid())
   email         String    @unique
   password      String?   // For users who sign up with email/password
+  role          UserRole  @default(CUSTOMER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  @@map("users")
+  @@map("user_profiles")
 }
