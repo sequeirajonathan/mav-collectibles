@@ -3,22 +3,88 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSupabase } from '@/contexts/SupabaseContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { supabase } = useSupabase();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo') || '/dashboard';
 
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     
-    // Add your login logic here
-    setLoading(false);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Successful login - the middleware will handle the redirect
+      router.push(redirectTo);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
-  
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign in with Google';
+      setError(errorMessage);
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign in with Facebook';
+      setError(errorMessage);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg">
       <div className="flex justify-center mb-6">
@@ -27,7 +93,7 @@ export default function Login() {
           alt="MAV Collectibles Logo" 
           width={200} 
           height={80} 
-          className="h-auto"
+          className="w-auto h-auto"
         />
       </div>
       
@@ -91,13 +157,15 @@ export default function Login() {
         
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button
-            onClick={() => {}}
+            onClick={handleGoogleLogin}
+            disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-[#E6B325]/30 rounded-md shadow-sm bg-black text-sm font-medium text-[#E6B325] hover:bg-gray-900 transition-colors"
           >
             Google
           </button>
           <button
-            onClick={() => {}}
+            onClick={handleFacebookLogin}
+            disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-[#E6B325]/30 rounded-md shadow-sm bg-black text-sm font-medium text-[#E6B325] hover:bg-gray-900 transition-colors"
           >
             Facebook

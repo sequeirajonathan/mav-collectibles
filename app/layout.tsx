@@ -11,6 +11,7 @@ import ScrollToTop from '@/components/ui/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
 import '@/styles/video-player.css';
+import { SupabaseProvider } from '@/contexts/SupabaseContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,21 +38,22 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-black text-white font-sans flex flex-col`}
       >
-        {/* Make sure any providers here are compatible with SSR */}
-        <QueryProvider>
-          <AppProvider>
-            <AlertBanner />
-            <Navbar />
-            <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-              <Suspense fallback={<div>Loading...</div>}>
-                {children}
-              </Suspense>
-            </main>
-            <Footer />
-            <ScrollToTop />
-            <Toaster position="top-right" />
-          </AppProvider>
-        </QueryProvider>
+        <SupabaseProvider>
+          <QueryProvider>
+            <AppProvider>
+              <AlertBanner />
+              <Navbar />
+              <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+                <Suspense fallback={<div>Loading...</div>}>
+                  {children}
+                </Suspense>
+              </main>
+              <Footer />
+              <ScrollToTop />
+              <Toaster position="top-right" />
+            </AppProvider>
+          </QueryProvider>
+        </SupabaseProvider>
       </body>
     </html>
   );

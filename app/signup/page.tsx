@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSupabase } from '@/contexts/SupabaseContext';
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const { supabase } = useSupabase();
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,8 +25,81 @@ export default function Signup() {
     }
 
     setLoading(true);
-    // Add your signup logic here
-    setLoading(false);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        if (data.user.identities && data.user.identities.length === 0) {
+          setError('This email is already registered');
+        } else {
+          setMessage('Check your email for the confirmation link');
+          // Optionally redirect after a delay
+          // setTimeout(() => router.push('/login'), 5000);
+        }
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setError(null);
+    setMessage(null);
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign up with Google';
+      setError(errorMessage);
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookSignup = async () => {
+    setError(null);
+    setMessage(null);
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign up with Facebook';
+      setError(errorMessage);
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,7 +110,7 @@ export default function Signup() {
           alt="MAV Collectibles Logo"
           width={200}
           height={80}
-          className="h-auto"
+          className="w-auto h-auto"
         />
       </div>
 
@@ -132,13 +207,15 @@ export default function Signup() {
 
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button
-            onClick={() => {}}
+            onClick={handleGoogleSignup}
+            disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-[#E6B325]/30 rounded-md shadow-sm bg-black text-sm font-medium text-[#E6B325] hover:bg-gray-900 transition-colors"
           >
             Google
           </button>
           <button
-            onClick={() => {}}
+            onClick={handleFacebookSignup}
+            disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-[#E6B325]/30 rounded-md shadow-sm bg-black text-sm font-medium text-[#E6B325] hover:bg-gray-900 transition-colors"
           >
             Facebook

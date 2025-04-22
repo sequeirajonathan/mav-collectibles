@@ -11,14 +11,11 @@ const featureFlagSchema = z.object({
 // GET all feature flags
 export async function GET() {
   try {
-    const featureFlags = await prisma.featureFlag.findMany();
-    return NextResponse.json(featureFlags);
+    const flags = await prisma.featureFlag.findMany();
+    return NextResponse.json(flags);
   } catch (error) {
     console.error('Error fetching feature flags:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to fetch feature flags' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch feature flags' }, { status: 500 });
   }
 }
 

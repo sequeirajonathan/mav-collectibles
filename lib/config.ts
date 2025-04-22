@@ -16,5 +16,5 @@ const getBaseUrl = () => {
 };
 
 export const config = {
-  baseUrl: getBaseUrl(),
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || '',
 }; 

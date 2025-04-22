@@ -98,3 +98,14 @@ model VideoSettings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// User Authentication
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String?   // For users who sign up with email/password
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}

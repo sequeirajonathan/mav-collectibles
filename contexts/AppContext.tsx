@@ -105,6 +105,13 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// At the top of your file, add mock data
+const MOCK_FLAGS = [
+  { id: '1', name: 'showAlertBanner', enabled: true },
+  { id: '2', name: 'showFeaturedEvents', enabled: true },
+  // Add other flags...
+];
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [featureFlags, setFeatureFlags] = useState<FeatureFlags>({
     showAlertBanner: true,
@@ -142,71 +149,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Fetch feature flags
-      const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
-      if (flagsResponse.ok) {
-        const flagsData = await flagsResponse.json();
-        if (flagsData && Array.isArray(flagsData)) {
-          const flags: FeatureFlags = {
-            showAlertBanner: false,
-            showFeaturedEvents: false,
-            showYouTubeVideo: false,
-            showVideoPlayer: false,
-            showDirectStreaming: false
-          };
-          
-          flagsData.forEach((flag: FeatureFlag) => {
-            if (flag.name in flags) {
-              flags[flag.name as keyof FeatureFlags] = flag.enabled;
-            }
-          });
-          
-          setFeatureFlags(flags);
-          setLastUpdated(prev => ({ ...prev, featureFlags: new Date().toISOString() }));
-        }
-      }
+      // Use mock data instead of API calls
+      const flags: FeatureFlags = {
+        showAlertBanner: true,
+        showFeaturedEvents: true,
+        showYouTubeVideo: true,
+        showVideoPlayer: true,
+        showDirectStreaming: false
+      };
+      setFeatureFlags(flags);
       
-      // Fetch alert banner
-      const bannerResponse = await fetch(`${config.baseUrl}/api/alert-banner`);
-      if (bannerResponse.ok) {
-        const bannerData = await bannerResponse.json();
-        if (bannerData) {
-          setAlertBanner(bannerData);
-          setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
-        }
-      }
-      
-      // Fetch featured events
-      const eventsResponse = await fetch(`${config.baseUrl}/api/featured-events`);
-      if (eventsResponse.ok) {
-        const eventsData = await eventsResponse.json();
-        if (eventsData && Array.isArray(eventsData)) {
-          setFeaturedEvents(eventsData);
-          setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
-        }
-      }
-      
-      // Fetch YouTube settings
-      const youtubeResponse = await fetch(`${config.baseUrl}/api/youtube-settings/1`);
-      if (youtubeResponse.ok) {
-        const youtubeData = await youtubeResponse.json();
-        if (youtubeData) {
-          setYoutubeSettings(youtubeData);
-          setLastUpdated(prev => ({ ...prev, youtubeSettings: new Date().toISOString() }));
-        }
-      }
-      
-      // Fetch video settings
-      const videoResponse = await fetch(`${config.baseUrl}/api/video-settings/1`);
-      if (videoResponse.ok) {
-        const videoData = await videoResponse.json();
-        if (videoData) {
-          setVideoSettings(videoData);
-          setLastUpdated(prev => ({ ...prev, videoSettings: new Date().toISOString() }));
-        }
-      }
+      // Set other mock data as needed
+      // ...
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error in fetchData:', error);
     } finally {
       setIsLoading(false);
     }
@@ -223,7 +179,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.log(`Updating feature flag: ${name} to ${enabled}`);
       
       // Find the flag ID first
-      const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
+      const flagsResponse = await fetch('/api/feature-flags');
       if (flagsResponse.ok) {
         const flagsData = await flagsResponse.json();
         const flag = flagsData.find((f: FeatureFlag) => f.name === name);
@@ -235,7 +191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         
         // Now update the flag with the correct ID
-        const response = await fetch(`${config.baseUrl}/api/feature-flags/${flag.id}`, {
+        const response = await fetch(`/api/feature-flags/${flag.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -269,7 +225,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateAlertBanner = async (data: Partial<AlertBanner>) => {
     try {
       if (alertBanner) {
-        const response = await fetch(`${config.baseUrl}/api/alert-banner/${alertBanner.id}`, {
+        const response = await fetch(`/api/alert-banner/${alertBanner.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -282,7 +238,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAlertBanner(responseData);
         setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
       } else {
-        const response = await fetch(`${config.baseUrl}/api/alert-banner`, {
+        const response = await fetch('/api/alert-banner', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -303,7 +259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Update featured event
   const updateFeaturedEvent = async (id: string, data: Partial<FeaturedEvent>) => {
     try {
-      const response = await fetch(`${config.baseUrl}/api/featured-events/${id}`, {
+      const response = await fetch(`/api/featured-events/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -325,7 +281,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Add featured event
   const addFeaturedEvent = async (data: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const response = await fetch(`${config.baseUrl}/api/featured-events`, {
+      const response = await fetch('/api/featured-events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -345,7 +301,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Remove featured event
   const removeFeaturedEvent = async (id: string) => {
     try {
-      const response = await fetch(`${config.baseUrl}/api/featured-events/${id}`, {
+      const response = await fetch(`/api/featured-events/${id}`, {
         method: 'DELETE',
       });
       
@@ -366,7 +322,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateYoutubeSettings = async (settings: Partial<YouTubeSettings>) => {
     try {
       const updatedSettings = { ...youtubeSettings, ...settings };
-      const response = await fetch(`${config.baseUrl}/api/youtube-settings/1`, {
+      const response = await fetch('/api/youtube-settings/1', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -389,7 +345,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateVideoSettings = async (settings: AdminVideoSettings) => {
     try {
       const updatedSettings = { ...videoSettings, ...settings };
-      const response = await fetch(`${config.baseUrl}/api/video-settings/1`, {
+      const response = await fetch('/api/video-settings/1', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
