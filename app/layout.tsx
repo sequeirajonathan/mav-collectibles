@@ -12,6 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
 import '@/styles/video-player.css';
 import { SupabaseProvider } from '@/contexts/SupabaseContext';
+import CookieConsent from '@/components/ui/CookieConsent';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
               <Footer />
               <ScrollToTop />
               <Toaster position="top-right" />
+              <CookieConsent />
             </AppProvider>
           </QueryProvider>
         </SupabaseProvider>
