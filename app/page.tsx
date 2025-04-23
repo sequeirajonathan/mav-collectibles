@@ -7,6 +7,7 @@ import FeaturedEvents from "@/components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@/components/ui/AnnouncementCarousel";
 import VideoSection from "@/components/ui/VideoSection";
 import ProductList from "@/components/ui/ProductList";
+import { motion } from "framer-motion";
 
 export default function Home() {
   // Sample announcements data
@@ -40,6 +41,60 @@ export default function Home() {
     },
   ];
 
+  const cardGames = [
+    {
+      title: "Pokemon",
+      href: "/products/pokemon",
+      image: "/pokemon-logo.png",
+      width: 220,
+    },
+    {
+      title: "Yu-Gi-Oh TCG",
+      href: "/products/yugioh",
+      image: "/yugioh-logo.png",
+      width: 220,
+    },
+    {
+      title: "DBZ Super TCG",
+      href: "/products/dragonball",
+      image: "/dragonball.png",
+      width: 180,
+    },
+    {
+      title: "Digimon",
+      href: "/products/digimon",
+      image: "/digimon_card_game_logo.png",
+      width: 220,
+    },
+    {
+      title: "One Piece",
+      href: "/products/onepiece",
+      image: "/one-piece-card-game.jpg",
+      width: 180,
+    },
+    {
+      title: "MetaZoo",
+      href: "/products/metazoo",
+      image: "/Metazoo-logo.png",
+      width: 180,
+    },
+  ];
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center space-y-8 pt-2">
       {/* Video Section - moved above the announcement carousel */}
@@ -53,96 +108,79 @@ export default function Home() {
       {/* Featured Events Section */}
       <FeaturedEvents />
 
-      {/* First row of card games */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
-        {[
-          {
-            title: "Pokemon",
-            href: "/products/pokemon",
-            image: "/pokemon-logo.png",
-          },
-          {
-            title: "Yu-Gi-Oh TCG",
-            href: "/products/yugioh",
-            image: "/yugioh-logo.png",
-          },
-          {
-            title: "DBZ Super TCG",
-            href: "/products/dragonball",
-            image: "/dragonball.png",
-            width: 220,
-          },
-        ].map((item) => (
-          <div key={item.href} className="flex flex-col items-center group">
-            <h2 className="text-2xl font-bold uppercase mb-1 group-hover:text-brand-gold transition-colors">
-              {item.title}
-            </h2>
-            <Link
-              href={item.href}
-              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-2 transition-colors"
+      {/* Card Games Grid */}
+      <div className="w-full max-w-6xl">
+        <motion.h2 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold text-center mb-8 text-brand-gold"
+        >
+          Trading Card Games
+        </motion.h2>
+        
+        <motion.div 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6"
+        >
+          {cardGames.map((game) => (
+            <motion.div
+              key={game.href}
+              variants={item}
+              className="group relative"
             >
-              VIEW ALL
-            </Link>
-            <div className="bg-gray-900 rounded-lg p-4 w-full aspect-square flex items-center justify-center border border-transparent group-hover:border-brand-blue/30 transition-all shadow-lg hover:shadow-brand-blue/10">
-              <Image
-                src={item.image}
-                alt={item.title}
-                width={item.width || 280}
-                height={140}
-                className="object-contain transition-transform group-hover:scale-105"
-              />
-            </div>
-          </div>
-        ))}
+              <Link href={game.href} className="block">
+                <div className="relative overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
+                  {/* Card Content */}
+                  <div className="p-4 flex flex-col items-center space-y-2">
+                    {/* Image */}
+                    <div className="relative w-full aspect-[3/2] flex items-center justify-center">
+                      <Image
+                        src={game.image}
+                        alt={game.title}
+                        width={game.width}
+                        height={game.width * 0.5}
+                        className="object-contain transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                    
+                    {/* Title & View All */}
+                    <div className="text-center mt-2">
+                      <h3 className="text-lg md:text-xl font-bold group-hover:text-brand-gold transition-colors">
+                        {game.title}
+                      </h3>
+                      <span className="text-xs md:text-sm text-brand-blue group-hover:text-brand-blue-light transition-colors">
+                        VIEW ALL
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Hover Effect Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
-      {/* Second row of card games */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
-        {[
-          {
-            title: "Digimon",
-            href: "/products/digimon",
-            image: "/digimon_card_game_logo.png",
-          },
-          {
-            title: "One Piece",
-            href: "/products/onepiece",
-            image: "/one-piece-card-game.jpg",
-            width: 220,
-          },
-          {
-            title: "MetaZoo",
-            href: "/products/metazoo",
-            image: "/Metazoo-logo.png",
-            width: 220,
-          },
-        ].map((item) => (
-          <div key={item.href} className="flex flex-col items-center group">
-            <h2 className="text-2xl font-bold uppercase mb-1 group-hover:text-brand-gold transition-colors">
-              {item.title}
-            </h2>
-            <Link
-              href={item.href}
-              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-2 transition-colors"
-            >
-              VIEW ALL
-            </Link>
-            <div className="bg-gray-900 rounded-lg p-4 w-full aspect-square flex items-center justify-center border border-transparent group-hover:border-brand-blue/30 transition-all shadow-lg hover:shadow-brand-blue/10">
-              <Image
-                src={item.image}
-                alt={item.title}
-                width={item.width || 280}
-                height={140}
-                className="object-contain transition-transform group-hover:scale-105"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 text-center">
-        <h2 className="text-3xl font-bold mb-4 text-brand-gold">
+
+      {/* Why Choose Section */}
+      <div className="mt-4 text-center w-full max-w-6xl">
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-3xl font-bold mb-4 text-brand-gold"
+        >
           Why Choose MAV Collectibles?
-        </h2>
-        <div className="flex flex-col md:flex-row gap-4 justify-center mt-2">
+        </motion.h2>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2"
+        >
           {[
             {
               title: "Quality Selection",
@@ -160,20 +198,24 @@ export default function Home() {
                 "We're more than a store - we're a hub for collectors and players.",
             },
           ].map((feature, index) => (
-            <div
+            <motion.div
               key={index}
-              className="flex-1 max-w-md p-4 bg-gray-900 rounded-lg border border-brand-blue/10 hover:border-brand-blue/30 transition-colors shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800/50 hover:border-brand-blue/30 transition-all duration-300 hover:bg-gray-900/80"
             >
               <h3 className="text-xl font-semibold mb-2 text-brand-blue-light">
                 {feature.title}
               </h3>
-              <p>{feature.description}</p>
-            </div>
+              <p className="text-gray-300">{feature.description}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
 
-      {/* Featured Products or other sections */}
+      {/* Featured Products */}
       <ProductList />
     </div>
   );
