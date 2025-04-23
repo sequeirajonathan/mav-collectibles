@@ -5,7 +5,7 @@ import Footer from "@/components/ui/Footer";
 import AlertBanner from "@/components/ui/AlertBanner";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AppProvider } from "@/contexts/AppContext";
-import "./globals.css";
+import "@/styles/globals.css";
 import "./videojs-theme.css";
 import ScrollToTop from '@/components/ui/ScrollToTop';
 import { Toaster } from 'react-hot-toast';

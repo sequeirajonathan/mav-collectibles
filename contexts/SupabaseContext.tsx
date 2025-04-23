@@ -120,8 +120,9 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const pathname = window.location.pathname;
     const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup');
+    const isProtectedRoute = pathname.startsWith('/admin') || pathname.startsWith('/dashboard');
     
-    if (!user && !loading && !isAuthPage) {
+    if (!user && !loading && !isAuthPage && isProtectedRoute) {
       router.push('/login');
     }
   }, [user, loading, router]);

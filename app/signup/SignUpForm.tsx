@@ -111,7 +111,7 @@ export default function SignUpForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:ring-[#E6B325] focus:border-[#E6B325] text-white"
+            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:border-[#E6B325] focus:ring-0 text-white autofill:bg-gray-900 [-webkit-autofill:focus]:bg-gray-900 [-webkit-autofill:hover]:bg-gray-900 [-webkit-autofill:active]:bg-gray-900 [-webkit-autofill]:bg-gray-900 [-webkit-autofill]:text-white [-webkit-autofill]:shadow-[0_0_0_30px_rgb(17,24,39)_inset]"
           />
         </div>
 
@@ -125,7 +125,7 @@ export default function SignUpForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:ring-[#E6B325] focus:border-[#E6B325] text-white"
+            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:border-[#E6B325] focus:ring-0 text-white autofill:bg-gray-900 [-webkit-autofill:focus]:bg-gray-900 [-webkit-autofill:hover]:bg-gray-900 [-webkit-autofill:active]:bg-gray-900 [-webkit-autofill]:bg-gray-900 [-webkit-autofill]:text-white [-webkit-autofill]:shadow-[0_0_0_30px_rgb(17,24,39)_inset]"
           />
         </div>
 
@@ -139,7 +139,7 @@ export default function SignUpForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:ring-[#E6B325] focus:border-[#E6B325] text-white"
+            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:border-[#E6B325] focus:ring-0 text-white autofill:bg-gray-900 [-webkit-autofill:focus]:bg-gray-900 [-webkit-autofill:hover]:bg-gray-900 [-webkit-autofill:active]:bg-gray-900 [-webkit-autofill]:bg-gray-900 [-webkit-autofill]:text-white [-webkit-autofill]:shadow-[0_0_0_30px_rgb(17,24,39)_inset]"
           />
         </div>
 
