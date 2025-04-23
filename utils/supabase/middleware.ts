@@ -57,6 +57,35 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getSession()
+  try {
+    await supabase.auth.getSession()
+  } catch (error) {
+    // If there's an error getting the session (like invalid refresh token),
+    // clear the session and redirect to login
+    if (error instanceof Error && 'code' in error && error.code === 'refresh_token_not_found') {
+      // Clear any existing auth cookies
+      supabaseResponse.cookies.set({
+        name: 'sb-access-token',
+        value: '',
+        path: '/',
+        maxAge: 0,
+      })
+      supabaseResponse.cookies.set({
+        name: 'sb-refresh-token',
+        value: '',
+        path: '/',
+        maxAge: 0,
+      })
+      
+      // Redirect to login if not already on a public route
+      if (!isPublicRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        url.searchParams.set('redirectTo', request.nextUrl.pathname)
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+  
   return supabaseResponse
 }

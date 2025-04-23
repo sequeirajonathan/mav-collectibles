@@ -3,15 +3,46 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingCart, Menu, X, User } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSupabase } from "@/contexts/SupabaseContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user, userProfile, signOut } = useSupabase();
+
+  // Debug logs for role checking
+  console.log('Current user:', user?.email);
+  console.log('User profile in Navbar:', userProfile);
+  console.log('User role:', userProfile?.role);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    if (isProfileOpen) setIsProfileOpen(false);
   };
+
+  const toggleProfile = () => {
+    setIsProfileOpen(!isProfileOpen);
+    if (isMenuOpen) setIsMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  // More explicit role check
+  const hasAdminAccess = userProfile?.role && ['STAFF', 'MANAGER', 'ADMIN', 'OWNER'].includes(userProfile.role);
+  console.log('Has admin access:', hasAdminAccess);
+
+  const navigationItems = [
+    { href: "/products", label: "All Cards" },
+    { href: "/products/pokemon", label: "Pokémon" },
+    { href: "/products/yugioh", label: "Yu-Gi-Oh!" },
+    { href: "/products/onepiece", label: "One Piece" },
+    { href: "/products/dragonball", label: "Dragon Ball" },
+    ...(hasAdminAccess ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
 
   const mobileMenuVariants = {
     hidden: { opacity: 0, height: 0 },
@@ -61,14 +92,7 @@ const Navbar = () => {
 
             {/* Desktop Navigation - only hover animations */}
             <div className="hidden md:flex items-center space-x-4">
-              {[
-                { href: "/products", label: "All Cards" },
-                { href: "/products/pokemon", label: "Pokémon" },
-                { href: "/products/yugioh", label: "Yu-Gi-Oh!" },
-                { href: "/products/onepiece", label: "One Piece" },
-                { href: "/products/dragonball", label: "Dragon Ball" },
-                { href: "/admin", label: "Admin" },
-              ].map((item) => (
+              {navigationItems.map((item) => (
                 <motion.div
                   key={item.href}
                   initial={{ y: 0 }}
@@ -95,7 +119,7 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Search, Cart, and Menu - no animation */}
+            {/* Search, Profile, Cart, and Menu - no animation */}
             <div className="flex items-center space-x-4">
               <button
                 className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
@@ -104,12 +128,62 @@ const Navbar = () => {
                 <Search size={20} />
               </button>
 
-              <Link
-                href="/login"
-                className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
-              >
-                <User size={20} />
-              </Link>
+              {/* Profile Menu */}
+              <div className="relative">
+                <button
+                  onClick={toggleProfile}
+                  className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
+                  aria-label="Profile"
+                >
+                  <User size={20} />
+                </button>
+
+                {/* Profile Dropdown */}
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1"
+                    >
+                      {user ? (
+                        <>
+                          <Link
+                            href="/dashboard"
+                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                            onClick={() => setIsProfileOpen(false)}
+                          >
+                            Dashboard
+                          </Link>
+                          <Link
+                            href="/profile"
+                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                            onClick={() => setIsProfileOpen(false)}
+                          >
+                            Profile Settings
+                          </Link>
+                          <button
+                            onClick={handleSignOut}
+                            className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 flex items-center"
+                          >
+                            <LogOut size={16} className="mr-2" />
+                            Sign Out
+                          </button>
+                        </>
+                      ) : (
+                        <Link
+                          href="/login"
+                          className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Sign In
+                        </Link>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <Link
                 href="/cart"
@@ -143,14 +217,7 @@ const Navbar = () => {
               exit="exit"
             >
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black border-t border-[#E6B325]/10">
-                {[
-                  { href: "/products", label: "All Cards" },
-                  { href: "/products/pokemon", label: "Pokémon" },
-                  { href: "/products/yugioh", label: "Yu-Gi-Oh!" },
-                  { href: "/products/onepiece", label: "One Piece" },
-                  { href: "/products/dragonball", label: "Dragon Ball" },
-                  { href: "/admin", label: "Admin" },
-                ].map((item) => (
+                {navigationItems.map((item) => (
                   <motion.div key={item.href} variants={mobileItemVariants}>
                     <Link
                       href={item.href}

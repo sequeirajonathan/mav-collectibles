@@ -1,80 +1,97 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { useSupabase } from "@/contexts/SupabaseContext";
+import { motion } from "framer-motion";
 
-export default function Profile() {
-  const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  
+export default function ProfilePage() {
+  const { user, userProfile } = useSupabase();
+  const [displayName, setDisplayName] = useState("");
+
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    if (userProfile) {
+      setDisplayName(userProfile.username || "");
+    }
+  }, [userProfile]);
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Update user profile in your database
-    // This is just a placeholder - implement your actual update logic
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Handle profile update logic here
   };
 
-  return (
-    <div className="max-w-4xl mx-auto mt-10 p-6">
-      <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
-      
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Account Information</h2>
-        <div className="mb-4">
-          <p className="text-gray-600">Email</p>
-          <p className="font-medium">test@test.com</p>
-        </div>
-        
-        <div className="mb-4">
-          <p className="text-gray-600">Account Type</p>
-          <p className="font-medium capitalize">
-            Email
-          </p>
-        </div>
-        
-        <form onSubmit={handleUpdateProfile} className="mt-6">
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Display Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E6B325] focus:border-[#E6B325]"
-            />
-          </div>
-          
-          <button
-            type="submit"
-            className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E6B325]"
-          >
-            Save Changes
-          </button>
-        </form>
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black text-[#E6B325] flex items-center justify-center">
+        <p className="text-lg">Please sign in to view your profile.</p>
       </div>
-      
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Account Actions</h2>
-        <button
-          onClick={() => {}}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          Sign Out
-        </button>
+          <h1 className="text-4xl font-bold text-[#E6B325] mb-8">Your Profile</h1>
+
+          <div className="bg-zinc-900 rounded-lg shadow-xl p-6 border border-[#E6B325]/30">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email Field */}
+              <div>
+                <label className="block text-sm font-medium text-[#E6B325] mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={user.email || ""}
+                  disabled
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] disabled:opacity-50"
+                />
+              </div>
+
+              {/* Account Type Field */}
+              <div>
+                <label className="block text-sm font-medium text-[#E6B325] mb-2">
+                  Account Type
+                </label>
+                <input
+                  type="text"
+                  value={userProfile?.role || "USER"}
+                  disabled
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] disabled:opacity-50"
+                />
+              </div>
+
+              {/* Display Name Field */}
+              <div>
+                <label htmlFor="displayName" className="block text-sm font-medium text-[#E6B325] mb-2">
+                  Display Name
+                </label>
+                <input
+                  id="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:ring-2 focus:ring-[#E6B325] focus:border-transparent transition-all"
+                  placeholder="Enter your display name"
+                />
+              </div>
+
+              {/* Save Button */}
+              <div>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-6 py-2 bg-[#E6B325] text-black font-semibold rounded-md hover:bg-[#FFD966] transition-colors duration-200 flex items-center justify-center"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

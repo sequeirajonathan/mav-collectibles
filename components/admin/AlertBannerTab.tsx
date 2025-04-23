@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+import { AlertTriangle } from "lucide-react";
 
 export default function AlertBannerTab() {
-  const { alertBanner, updateAlertBanner } = useAppContext();
+  const { alertBanner, updateAlertBanner, featureFlags } = useAppContext();
   
   const [alertBannerState, setAlertBannerState] = useState({
     message: '',
@@ -79,84 +80,101 @@ export default function AlertBannerTab() {
         <CardTitle>Alert Banner</CardTitle>
         <CardDescription>Configure the alert banner that appears at the top of your site</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="message">Message</Label>
-          <Input
-            id="message"
-            name="message"
-            value={alertBannerState.message}
-            onChange={handleAlertBannerChange}
-            placeholder="Enter alert message"
-          />
-          {alertBannerErrors.message && (
-            <p className="text-red-500 text-xs mt-1">{alertBannerErrors.message}</p>
-          )}
-        </div>
+      <CardContent>
+        {!featureFlags.showAlertBanner && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-3">
+            <AlertTriangle className="text-yellow-500" />
+            <p className="text-sm text-yellow-500">
+              Alert Banner is currently disabled. Enable it in the Feature Flags tab to display the banner.
+            </p>
+          </div>
+        )}
         
-        <div>
-          <Label htmlFor="code">Code (Optional)</Label>
-          <Input
-            id="code"
-            name="code"
-            value={alertBannerState.code}
-            onChange={handleAlertBannerChange}
-            placeholder="Enter code or identifier"
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4 opacity-100 transition-opacity duration-200" 
+             style={{ opacity: featureFlags.showAlertBanner ? 1 : 0.5 }}>
           <div>
-            <Label htmlFor="backgroundColor">Background Color</Label>
-            <div className="flex gap-2">
-              <Input
-                id="backgroundColor"
-                name="backgroundColor"
-                value={alertBannerState.backgroundColor}
-                onChange={handleAlertBannerChange}
-                placeholder="#E6B325"
-              />
-              <div 
-                className="w-10 h-10 rounded border"
-                style={{ backgroundColor: alertBannerState.backgroundColor }}
-              />
-            </div>
-            {alertBannerErrors.backgroundColor && (
-              <p className="text-red-500 text-xs mt-1">{alertBannerErrors.backgroundColor}</p>
+            <Label htmlFor="message">Message</Label>
+            <Input
+              id="message"
+              name="message"
+              value={alertBannerState.message}
+              onChange={handleAlertBannerChange}
+              placeholder="Enter alert message"
+              disabled={!featureFlags.showAlertBanner}
+            />
+            {alertBannerErrors.message && (
+              <p className="text-red-500 text-xs mt-1">{alertBannerErrors.message}</p>
             )}
           </div>
           
           <div>
-            <Label htmlFor="textColor">Text Color</Label>
-            <div className="flex gap-2">
-              <Input
-                id="textColor"
-                name="textColor"
-                value={alertBannerState.textColor}
-                onChange={handleAlertBannerChange}
-                placeholder="#000000"
-              />
-              <div 
-                className="w-10 h-10 rounded border"
-                style={{ backgroundColor: alertBannerState.textColor }}
-              />
-            </div>
-            {alertBannerErrors.textColor && (
-              <p className="text-red-500 text-xs mt-1">{alertBannerErrors.textColor}</p>
-            )}
+            <Label htmlFor="code">Code (Optional)</Label>
+            <Input
+              id="code"
+              name="code"
+              value={alertBannerState.code}
+              onChange={handleAlertBannerChange}
+              placeholder="Enter code or identifier"
+              disabled={!featureFlags.showAlertBanner}
+            />
           </div>
-        </div>
-        
-        <div className="mt-4 p-4 rounded" style={{ 
-          backgroundColor: alertBannerState.backgroundColor,
-          color: alertBannerState.textColor
-        }}>
-          <p className="font-medium">Preview: {alertBannerState.message || "Your alert message will appear here"}</p>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="backgroundColor">Background Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="backgroundColor"
+                  name="backgroundColor"
+                  value={alertBannerState.backgroundColor}
+                  onChange={handleAlertBannerChange}
+                  placeholder="#E6B325"
+                  disabled={!featureFlags.showAlertBanner}
+                />
+                <div 
+                  className="w-10 h-10 rounded border"
+                  style={{ backgroundColor: alertBannerState.backgroundColor }}
+                />
+              </div>
+              {alertBannerErrors.backgroundColor && (
+                <p className="text-red-500 text-xs mt-1">{alertBannerErrors.backgroundColor}</p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="textColor">Text Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="textColor"
+                  name="textColor"
+                  value={alertBannerState.textColor}
+                  onChange={handleAlertBannerChange}
+                  placeholder="#000000"
+                  disabled={!featureFlags.showAlertBanner}
+                />
+                <div 
+                  className="w-10 h-10 rounded border"
+                  style={{ backgroundColor: alertBannerState.textColor }}
+                />
+              </div>
+              {alertBannerErrors.textColor && (
+                <p className="text-red-500 text-xs mt-1">{alertBannerErrors.textColor}</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-4 p-4 rounded" style={{ 
+            backgroundColor: alertBannerState.backgroundColor,
+            color: alertBannerState.textColor
+          }}>
+            <p className="font-medium">Preview: {alertBannerState.message || "Your alert message will appear here"}</p>
+          </div>
         </div>
       </CardContent>
       <CardFooter>
         <Button 
           onClick={saveAlertBanner}
+          disabled={!featureFlags.showAlertBanner}
           className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black bg-[#E6B325] text-[#000000] shadow-md hover:bg-[#FFD966] border border-[#B38A00] focus-visible:ring-[#E6B325]/50 font-extrabold tracking-wide uppercase h-10 px-5 py-2.5"
         >
           Save Changes

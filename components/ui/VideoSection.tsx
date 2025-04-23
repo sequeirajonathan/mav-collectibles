@@ -70,15 +70,15 @@ export default function VideoSection() {
   };
 
   return (
-    <div className="w-full mb-12 relative overflow-x-hidden">
+    <div className="w-full mb-8 relative overflow-x-hidden">
       {/* Banner - always shown when no video is available */}
       {showBanner && (
         <div className="relative" style={{ 
-          paddingBottom: "42.85%", // Original aspect ratio
-          maxHeight: "calc(100vh - 200px)" // Prevent it from being too tall on mobile
+          paddingBottom: "28%", // More compact aspect ratio
+          maxHeight: "400px" // Fixed maximum height
         }}>
           <motion.div 
-            className="absolute inset-0 sm:left-[-5%] sm:right-[-5%] md:left-[-10%] md:right-[-10%] lg:left-[-20%] lg:right-[-20%] top-0 bottom-0 z-20"
+            className="absolute inset-0 sm:left-[-5%] sm:right-[-5%] md:left-[-10%] md:right-[-10%] lg:left-[-15%] lg:right-[-15%] top-0 bottom-0 z-20"
             initial={{ opacity: 1 }}
             animate={{ opacity: 1, scale: 1 }}
           >
@@ -86,7 +86,7 @@ export default function VideoSection() {
               {/* Cinematic vignette overlay */}
               <div className="absolute inset-0 z-5 pointer-events-none" 
                 style={{
-                  background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%)',
+                  background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)',
                   mixBlendMode: 'multiply'
                 }}
               />
@@ -97,36 +97,36 @@ export default function VideoSection() {
                 fill
                 className="object-cover object-center"
                 priority
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 110vw, (max-width: 1024px) 120vw, 140vw"
-                style={{ objectPosition: '50% 30%' }}
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 110vw, (max-width: 1024px) 120vw, 130vw"
+                style={{ objectPosition: '50% 25%' }} // Adjusted to show more of the top portion
                 unoptimized
               />
               
-              {/* Dramatic lighting gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+              {/* Dramatic lighting gradient - reduced opacity */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
               
               {/* Cinematic lens flare effect */}
-              <div className="absolute top-[20%] right-[30%] w-[150px] h-[150px] rounded-full opacity-20 blur-xl"
+              <div className="absolute top-[20%] right-[30%] w-[100px] h-[100px] rounded-full opacity-15 blur-lg"
                 style={{
                   background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
                   animation: 'pulse 3s infinite alternate'
                 }}
               />
               
-              {/* Pokemon-style MAV Collectibles overlay */}
+              {/* Pokemon-style MAV Collectibles overlay - adjusted size */}
               <motion.div 
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 text-center w-full"
                 initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]" 
+                <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]" 
                     style={{ 
                       fontFamily: "'Press Start 2P', system-ui", 
                       textShadow: "2px 2px 0 #3B4CCA, -2px -2px 0 #3B4CCA, 2px -2px 0 #3B4CCA, -2px 2px 0 #3B4CCA, 0 0 15px rgba(255,203,5,0.7)"
                     }}>
                   MAV Collectibles
                 </h1>
-                <p className="mt-2 text-lg text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                <p className="mt-1 text-base text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                   Your Premier TCG Destination
                 </p>
               </motion.div>

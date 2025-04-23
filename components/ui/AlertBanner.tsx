@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 
 export default function AlertBanner() {
-  const { alertBanner } = useAppContext();
+  const { alertBanner, featureFlags } = useAppContext();
   const [isVisible, setIsVisible] = useState(true);
   
   // Reset visibility when banner content changes
@@ -15,7 +15,8 @@ export default function AlertBanner() {
     }
   }, [alertBanner]);
   
-  if (!alertBanner || !isVisible) {
+  // Don't render if feature flag is off or banner doesn't exist or is hidden
+  if (!featureFlags.showAlertBanner || !alertBanner || !isVisible) {
     return null;
   }
   

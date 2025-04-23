@@ -7,16 +7,42 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 export default function FeatureFlagsTab() {
   const { featureFlags, updateFeatureFlag } = useAppContext();
   const [localFlags, setLocalFlags] = useState({ ...featureFlags });
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   // Update local state when context changes
   useEffect(() => {
     setLocalFlags({ ...featureFlags });
   }, [featureFlags]);
+
+  // Function to seed feature flags
+  const seedFeatureFlags = async () => {
+    setIsSeeding(true);
+    try {
+      const response = await fetch('/api/feature-flags/seed', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to seed feature flags');
+      }
+      
+      await response.json(); // Just check that we can parse the response
+      toast.success('Feature flags initialized successfully');
+      // Refresh the page to get the new flags
+      window.location.reload();
+    } catch (error) {
+      console.error('Error seeding feature flags:', error);
+      toast.error('Failed to initialize feature flags');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   // Handle local flag changes
   const handleFlagChange = (flagName: string, checked: boolean) => {
@@ -45,7 +71,13 @@ export default function FeatureFlagsTab() {
       
       // Update all changed flags
       for (const [key, value] of changedFlags) {
-        await updateFeatureFlag(key, value);
+        const success = await updateFeatureFlag(key, value);
+        if (!success) {
+          // If update fails, it might be because flags aren't seeded
+          toast.error('Feature flags not found. Initializing...');
+          await seedFeatureFlags();
+          return;
+        }
       }
       
       toast.success("Feature flags updated successfully");
@@ -64,6 +96,26 @@ export default function FeatureFlagsTab() {
         <CardDescription>Enable or disable features on your site</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Show seeding button if needed */}
+        {Object.keys(featureFlags).length === 0 && (
+          <div className="flex justify-center mb-4">
+            <Button
+              onClick={seedFeatureFlags}
+              disabled={isSeeding}
+              className="bg-[#E6B325] text-black hover:bg-[#FFD966]"
+            >
+              {isSeeding ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Initializing...
+                </>
+              ) : (
+                'Initialize Feature Flags'
+              )}
+            </Button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="showAlertBanner" className="text-lg">Alert Banner</Label>

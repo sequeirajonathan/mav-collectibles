@@ -41,7 +41,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-12">
+    <div className="flex flex-col items-center justify-center space-y-8 pt-2">
       {/* Video Section - moved above the announcement carousel */}
       <VideoSection />
 
@@ -54,7 +54,7 @@ export default function Home() {
       <FeaturedEvents />
 
       {/* First row of card games */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
         {[
           {
             title: "Pokemon",
@@ -79,7 +79,7 @@ export default function Home() {
             </h2>
             <Link
               href={item.href}
-              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-4 transition-colors"
+              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-2 transition-colors"
             >
               VIEW ALL
             </Link>
@@ -96,7 +96,7 @@ export default function Home() {
         ))}
       </div>
       {/* Second row of card games */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
         {[
           {
             title: "Digimon",
@@ -122,7 +122,7 @@ export default function Home() {
             </h2>
             <Link
               href={item.href}
-              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-4 transition-colors"
+              className="text-brand-blue hover:text-brand-blue-light text-sm font-medium mb-2 transition-colors"
             >
               VIEW ALL
             </Link>
@@ -138,11 +138,11 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="mt-8 text-center">
+      <div className="mt-4 text-center">
         <h2 className="text-3xl font-bold mb-4 text-brand-gold">
           Why Choose MAV Collectibles?
         </h2>
-        <div className="flex flex-col md:flex-row gap-6 justify-center mt-4">
+        <div className="flex flex-col md:flex-row gap-4 justify-center mt-2">
           {[
             {
               title: "Quality Selection",
@@ -162,7 +162,7 @@ export default function Home() {
           ].map((feature, index) => (
             <div
               key={index}
-              className="flex-1 max-w-md p-6 bg-gray-900 rounded-lg border border-brand-blue/10 hover:border-brand-blue/30 transition-colors shadow-lg"
+              className="flex-1 max-w-md p-4 bg-gray-900 rounded-lg border border-brand-blue/10 hover:border-brand-blue/30 transition-colors shadow-lg"
             >
               <h3 className="text-xl font-semibold mb-2 text-brand-blue-light">
                 {feature.title}
