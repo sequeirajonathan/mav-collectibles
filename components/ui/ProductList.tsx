@@ -57,30 +57,30 @@ export default function ProductList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchProducts = async () => {
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setProducts(MOCK_PRODUCTS);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading products:', err);
+      setError('Failed to load products. Please try again later.');
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
-    const fetchProducts = async () => {
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        if (mounted) {
-          setProducts(MOCK_PRODUCTS);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (mounted) {
-          console.error('Error loading products:', err);
-          setError('Failed to load products. Please try again later.');
-          setLoading(false);
-        }
+    const loadProducts = async () => {
+      if (mounted) {
+        await fetchProducts();
       }
     };
 
-    fetchProducts();
+    loadProducts();
 
-    // Cleanup function to prevent memory leaks and state updates on unmounted component
     return () => {
       mounted = false;
     };
@@ -119,7 +119,6 @@ export default function ProductList() {
             onClick={() => {
               setError(null);
               setLoading(true);
-              // Retry loading products
               fetchProducts();
             }}
             className="mt-4 px-4 py-2 bg-[#E6B325] text-black rounded-lg hover:bg-[#FFD966] transition-colors"
