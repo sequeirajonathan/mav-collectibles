@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
     url.pathname.startsWith('/login') || 
     url.pathname.startsWith('/signup') ||
     url.pathname.startsWith('/auth') ||
+    url.pathname.startsWith('/products') ||
     url.pathname === '/';
   
   // If it's an API route, just return the response with CORS headers

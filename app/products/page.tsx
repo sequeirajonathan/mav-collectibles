@@ -1,0 +1,138 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+}
+
+const MOCK_PRODUCTS: Product[] = [
+  {
+    id: '1',
+    name: 'Charizard Holo Card',
+    price: 299.99,
+    image: '/prismatic.jpg',
+    category: 'pokemon'
+  },
+  {
+    id: '2',
+    name: 'Blue-Eyes White Dragon',
+    price: 149.99,
+    image: '/prismatic.jpg',
+    category: 'yugioh'
+  },
+  {
+    id: '3',
+    name: 'Goku Ultra Instinct',
+    price: 89.99,
+    image: '/prismatic.jpg',
+    category: 'dragonball'
+  },
+  {
+    id: '4',
+    name: 'Luffy Gear 5',
+    price: 129.99,
+    image: '/prismatic.jpg',
+    category: 'onepiece'
+  },
+];
+
+const IMAGE_CONFIG = {
+  width: 160,
+  height: 120,
+  quality: 75,
+} as const;
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading products
+    const timer = setTimeout(() => {
+      setProducts(MOCK_PRODUCTS);
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <div className="h-8 w-48 bg-gray-800 rounded mx-auto mb-4" />
+          <div className="h-4 w-64 bg-gray-800 rounded mx-auto" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-[60vh] px-4 py-12">
+      <div className="max-w-7xl mx-auto">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl sm:text-4xl font-bold text-[#E6B325] mb-8 text-center"
+        >
+          All Trading Card Games
+        </motion.h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map(product => (
+            <Link 
+              href={`/products/${product.category}/${product.id}`} 
+              key={product.id}
+              className="group relative block max-w-[240px] mx-auto w-full"
+            >
+              <div className="relative overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 
+                            transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
+                <div className="relative aspect-[4/3] w-full overflow-hidden flex items-center justify-center bg-black/20">
+                  <div className="absolute inset-0 bg-gray-900/20 z-10" />
+                  <div className="relative w-full h-full flex items-center justify-center transform transition-transform duration-500 group-hover:scale-105">
+                    <Image 
+                      src={product.image} 
+                      alt={product.name}
+                      width={IMAGE_CONFIG.width}
+                      height={IMAGE_CONFIG.height}
+                      className="object-contain max-h-full max-w-full w-auto h-auto p-2"
+                      quality={IMAGE_CONFIG.quality}
+                    />
+                  </div>
+                </div>
+                
+                <div className="p-3 relative z-10">
+                  <div className="flex flex-col space-y-1">
+                    <h3 className="text-sm font-medium text-white/90 group-hover:text-white truncate transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-[#E6B325] font-semibold tracking-wide text-sm">
+                      ${product.price.toFixed(2)}
+                    </p>
+                  </div>
+                  
+                  <div className="mt-2 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                    <span className="text-xs text-[#E6B325]/80 hover:text-[#E6B325] inline-flex items-center">
+                      View Details
+                      <svg className="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+} 
