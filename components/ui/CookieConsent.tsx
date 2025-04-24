@@ -32,7 +32,7 @@ export default function CookieConsent() {
           <div className="flex-1 text-sm text-gray-300">
             <p>
               We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 
-              By clicking "Accept All", you consent to our use of cookies. Read our{' '}
+              By clicking &ldquo;Accept All&rdquo;, you consent to our use of cookies. Read our{' '}
               <a href="/privacy-policy" className="text-[#E6B325] hover:text-[#FFD966] underline">
                 Privacy Policy
               </a>{' '}
