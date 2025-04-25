@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
@@ -11,11 +11,35 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, userProfile, signOut } = useSupabase();
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
 
   // Debug logs for role checking
   console.log('Current user:', user?.email);
   console.log('User profile in Navbar:', userProfile);
   console.log('User role:', userProfile?.role);
+
+  // Handle click outside for profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileDropdownRef.current &&
+        profileButtonRef.current &&
+        !profileDropdownRef.current.contains(event.target as Node) &&
+        !profileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    if (isProfileOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileOpen]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -28,6 +52,7 @@ const Navbar = () => {
   };
 
   const handleSignOut = async () => {
+    setIsProfileOpen(false); // Close dropdown before signing out
     await signOut();
   };
 
@@ -131,9 +156,15 @@ const Navbar = () => {
               {/* Profile Menu */}
               <div className="relative">
                 <button
+                  ref={profileButtonRef}
                   onClick={toggleProfile}
-                  className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
+                  className={`p-2 rounded-full transition-colors ${
+                    isProfileOpen 
+                      ? 'bg-[#E6B325]/10 text-[#E6B325]' 
+                      : 'text-white hover:bg-brand-blue/20 hover:text-[#E6B325]'
+                  }`}
                   aria-label="Profile"
+                  aria-expanded={isProfileOpen}
                 >
                   <User size={20} />
                 </button>
@@ -142,30 +173,37 @@ const Navbar = () => {
                 <AnimatePresence>
                   {isProfileOpen && (
                     <motion.div
+                      ref={profileDropdownRef}
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1"
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 backdrop-blur-sm"
                     >
                       {user ? (
                         <>
+                          <div className="px-4 py-2 border-b border-[#E6B325]/10">
+                            <p className="text-sm font-medium text-[#E6B325] truncate">
+                              {user.email}
+                            </p>
+                          </div>
                           <Link
                             href="/dashboard"
-                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
                             onClick={() => setIsProfileOpen(false)}
                           >
                             Dashboard
                           </Link>
                           <Link
                             href="/profile"
-                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
                             onClick={() => setIsProfileOpen(false)}
                           >
                             Profile Settings
                           </Link>
                           <button
                             onClick={handleSignOut}
-                            className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 flex items-center"
+                            className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors flex items-center"
                           >
                             <LogOut size={16} className="mr-2" />
                             Sign Out
@@ -174,7 +212,7 @@ const Navbar = () => {
                       ) : (
                         <Link
                           href="/login"
-                          className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                          className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
                           onClick={() => setIsProfileOpen(false)}
                         >
                           Sign In
