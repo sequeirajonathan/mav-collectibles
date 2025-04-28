@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@contexts/AppContext';
 import YouTubePlayer from './YouTubePlayer';
 import VideoPlayer from './VideoPlayer';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VideoSection() {
   const { youtubeSettings, videoSettings, getFeatureFlag } = useAppContext();
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Check feature flags
   const isVideoSectionEnabled = getFeatureFlag('showVideoPlayer');
@@ -56,8 +58,57 @@ export default function VideoSection() {
     if (!hasVideo) {
       setVideoReady(false);
       setShowVideo(false);
+      setVideoLoaded(false);
+      setVideoPlaying(false);
     }
   }, [hasVideo]);
+
+  // Pre-load the video as soon as component mounts
+  useEffect(() => {
+    // Create a new Image to preload the video poster if needed
+    const img = new Image();
+    img.src = '/banner-poster.jpg'; // Optional: add a poster image if you have one
+  }, []);
+
+  // Handle video load events
+  const handleVideoLoad = () => {
+    setVideoLoaded(true);
+    
+    // Small delay to ensure smooth transition after load
+    setTimeout(() => {
+      setVideoPlaying(true);
+    }, 100);
+  };
+
+  // Handle video playing events
+  const handleVideoPlaying = () => {
+    setVideoPlaying(true);
+  };
+
+  // Preload video if possible
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    
+    if (videoElement) {
+      // Listen for various events that indicate the video is ready
+      videoElement.addEventListener('loadeddata', handleVideoLoad);
+      videoElement.addEventListener('canplay', handleVideoLoad);
+      videoElement.addEventListener('playing', handleVideoPlaying);
+      
+      // If the video is already loaded in the DOM
+      if (videoElement.readyState >= 3) {
+        handleVideoLoad();
+      }
+    }
+    
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener('loadeddata', handleVideoLoad);
+        videoElement.removeEventListener('canplay', handleVideoLoad);
+        videoElement.removeEventListener('playing', handleVideoPlaying);
+      }
+    };
+  }, []);
 
   // Always show the banner if there's no video or if video isn't ready yet
   const showBanner = !hasVideo || !videoReady || !showVideo;
@@ -70,7 +121,7 @@ export default function VideoSection() {
   };
 
   return (
-    <div className="w-full mb-8 relative overflow-x-hidden">
+    <div className="w-full mb-8 relative overflow-x-hidden bg-black">
       {/* Banner - always shown when no video is available */}
       {showBanner && (
         <div className="relative" style={{ 
@@ -82,7 +133,22 @@ export default function VideoSection() {
             initial={{ opacity: 1 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="w-full h-full relative overflow-hidden rounded-md">
+            <div className="w-full h-full relative overflow-hidden rounded-md bg-black">
+              {/* Placeholder pulse animation while video loads */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black"
+                initial={{ opacity: 1 }}
+                animate={{ 
+                  opacity: videoLoaded ? 0 : [0.7, 0.9, 0.7],
+                  x: videoLoaded ? 0 : ["-100%", "100%", "-100%"]
+                }}
+                transition={{ 
+                  duration: 3, 
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              />
+              
               {/* Cinematic vignette overlay */}
               <div className="absolute inset-0 z-5 pointer-events-none" 
                 style={{
@@ -91,16 +157,34 @@ export default function VideoSection() {
                 }}
               />
               
-              <Image 
-                src="/banner.gif" 
-                alt="MAV Collectibles" 
-                fill
-                className="object-cover object-center"
-                priority
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 110vw, (max-width: 1024px) 120vw, 130vw"
-                style={{ objectPosition: '50% 25%' }} // Adjusted to show more of the top portion
-                unoptimized
-              />
+              <AnimatePresence>
+                <motion.div 
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: videoPlaying ? 1 : 0,
+                    scale: videoPlaying ? 1 : 1.02 
+                  }}
+                  transition={{ 
+                    opacity: { duration: 1.2, ease: "easeOut" },
+                    scale: { duration: 1.5, ease: "easeOut" }
+                  }}
+                >
+                  <video 
+                    ref={videoRef}
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline
+                    preload="auto"
+                    className="absolute w-full h-full object-cover object-center"
+                    style={{ objectPosition: '50% 25%' }}
+                  >
+                    <source src="/banner_1.webm" type="video/webm" />
+                    <source src="/banner_2_5.mp4" type="video/mp4" />
+                  </video>
+                </motion.div>
+              </AnimatePresence>
               
               {/* Dramatic lighting gradient - reduced opacity */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
@@ -116,8 +200,19 @@ export default function VideoSection() {
               {/* Pokemon-style MAV Collectibles overlay - adjusted size */}
               <motion.div 
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 text-center w-full"
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0.9, y: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  scale: videoPlaying ? 1 : [0.98, 1.02, 0.98]
+                }}
+                transition={{
+                  scale: {
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }
+                }}
               >
                 <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]" 
                     style={{ 
