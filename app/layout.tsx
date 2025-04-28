@@ -13,6 +13,7 @@ import { Suspense } from 'react';
 import '@styles/video-player.css';
 import { SupabaseProvider } from '@contexts/SupabaseContext';
 import CookieConsent from '@components/ui/CookieConsent';
+import { fetchAlertBanner } from '@services/alertBannerService';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,18 +30,32 @@ export const metadata: Metadata = {
   description: "Your local source for Pokémon, Yu-Gi-Oh!, Dragon Ball, One Piece and more trading cards",
 };
 
-export default function RootLayout({
+// Preload alert banner data
+async function preloadAlertBanner() {
+  try {
+    const alertBanner = await fetchAlertBanner();
+    return alertBanner;
+  } catch {
+    // Silently fail and return null - we'll fetch on the client side
+    return null;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Preload the alert banner data
+  const alertBannerData = await preloadAlertBanner();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-black text-white font-sans flex flex-col`}
       >
         <SupabaseProvider>
-          <QueryProvider>
+          <QueryProvider initialAlertBanner={alertBannerData}>
             <AppProvider>
               <AlertBanner />
               <Navbar />

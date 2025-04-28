@@ -62,14 +62,10 @@ export default function VideoSection() {
 
   const handleVideoLoad = () => {
     setVideoLoaded(true);
-    setTimeout(() => {
-      setVideoPlaying(true);
-    }, 100);
+    setTimeout(() => setVideoPlaying(true), 100);
   };
 
-  const handleVideoPlaying = () => {
-    setVideoPlaying(true);
-  };
+  const handleVideoPlaying = () => setVideoPlaying(true);
 
   const handleVideoError = (e: Event) => {
     console.error("Video error:", e);
@@ -122,38 +118,50 @@ export default function VideoSection() {
 
   return (
     <div className="w-full mb-8 relative overflow-x-hidden bg-black">
-      {showBanner && (
-        <div className="relative" style={{ paddingBottom: "28%", maxHeight: "400px" }}>
+      <div className="relative w-full" style={{ aspectRatio: "16/9", maxHeight: "400px" }}>
+        {showBanner && (
           <motion.div
             className="absolute inset-0 sm:left-[-5%] sm:right-[-5%] md:left-[-10%] md:right-[-10%] lg:left-[-15%] lg:right-[-15%] top-0 bottom-0 z-20"
             initial={{ opacity: 1 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="w-full h-full relative overflow-hidden rounded-md bg-black" style={videoError ? backgroundStyle : undefined}>
-              <motion.div 
+            <div
+              className="w-full h-full relative overflow-hidden rounded-md bg-black"
+              style={videoError ? backgroundStyle : undefined}
+            >
+              {/* Pulse Background Animation */}
+              <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black"
                 initial={{ opacity: 1 }}
-                animate={{ 
+                animate={{
                   opacity: videoLoaded ? 0 : [0.7, 0.9, 0.7],
                   x: videoLoaded ? 0 : ["-100%", "100%", "-100%"]
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />
 
-              <div className="absolute inset-0 z-5 pointer-events-none" 
+              {/* Radial Shadow Overlay */}
+              <div className="absolute inset-0 z-5 pointer-events-none"
                 style={{
                   background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)',
                   mixBlendMode: 'multiply'
                 }}
               />
 
+              {/* Video */}
               {!videoError && (
                 <AnimatePresence>
                   <motion.div
                     className="absolute inset-0"
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: videoPlaying ? 1 : 0, scale: videoPlaying ? 1 : 1.02 }}
-                    transition={{ opacity: { duration: 1.2, ease: "easeOut" }, scale: { duration: 1.5, ease: "easeOut" } }}
+                    animate={{
+                      opacity: videoPlaying ? 1 : 0,
+                      scale: videoPlaying ? 1 : 1.02
+                    }}
+                    transition={{
+                      opacity: { duration: 1.2, ease: "easeOut" },
+                      scale: { duration: 1.5, ease: "easeOut" }
+                    }}
                   >
                     <video
                       ref={videoRef}
@@ -174,8 +182,10 @@ export default function VideoSection() {
                 </AnimatePresence>
               )}
 
+              {/* Lighting Effects */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 
+              {/* Lens Flare */}
               <div className="absolute top-[20%] right-[30%] w-[100px] h-[100px] rounded-full opacity-15 blur-lg"
                 style={{
                   background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
@@ -183,14 +193,21 @@ export default function VideoSection() {
                 }}
               />
 
+              {/* Centered Titles */}
               <motion.div
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 text-center w-full"
                 initial={{ opacity: 0.9, y: 0 }}
-                animate={{ opacity: 1, y: 0, scale: videoPlaying ? 1 : [0.98, 1.02, 0.98] }}
-                transition={{ scale: { duration: 3, repeat: Infinity, ease: "easeInOut" } }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: videoPlaying ? 1 : [0.98, 1.02, 0.98]
+                }}
+                transition={{
+                  scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                }}
               >
                 <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]"
-                  style={{ fontFamily: "'Press Start 2P', system-ui", textShadow: "2px 2px 0 #3B4CCA, -2px -2px 0 #3B4CCA, 2px -2px 0 #3B4CCA, -2px 2px 0 #3B4CCA, 0 0 15px rgba(255,203,5,0.7)" }}>
+                  style={{ fontFamily: "'Press Start 2P', system-ui", textShadow: "2px 2px 0 #3B4CCA" }}>
                   MAV Collectibles
                 </h1>
                 <p className="mt-1 text-base text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
@@ -199,16 +216,21 @@ export default function VideoSection() {
               </motion.div>
             </div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </div>
 
+      {/* Secondary Video container (if needed) */}
       {hasVideo && showVideo && !showBanner && (
         <div className="max-w-6xl mx-auto">
           <motion.div
             className="w-full relative rounded-lg border border-[#E6B325]/20 shadow-lg overflow-hidden"
             style={{ aspectRatio: "16/9" }}
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1, transition: { type: "spring", duration: 1, bounce: 0.3, delay: 0.2 } }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              transition: { type: "spring", duration: 1, bounce: 0.3, delay: 0.2 }
+            }}
           >
             <div className="absolute inset-0">
               {videoType === 'youtube' && <YouTubePlayer useContextSettings={true} onError={handlePlayerError} />}

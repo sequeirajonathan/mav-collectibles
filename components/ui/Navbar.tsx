@@ -91,8 +91,8 @@ const Navbar = () => {
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-black shadow-md">
-      <nav className="sticky top-0 z-50 w-full bg-black">
+    <div className="bg-black shadow-md">
+      <nav className="w-full bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-auto py-2 md:py-3">
             {/* Logo and brand - no animation */}
