@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, memo } from "react";
-import { useAppContext } from "@/contexts/AppContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useAppContext } from "@contexts/AppContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
+import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Checkbox } from "@components/ui/checkbox";
 import { toast } from "react-hot-toast";
 
 // Define the props type for YouTubePreview
@@ -40,10 +40,12 @@ YouTubePreview.displayName = 'YouTubePreview';
 
 export default function YouTubeVideoTab() {
   const {
-    featureFlags,
+    getFeatureFlag,
     youtubeSettings,
     updateYoutubeSettings,
   } = useAppContext();
+
+  const showYouTubeVideo = getFeatureFlag('showYouTubeVideo');
 
   const [localYoutubeSettings, setLocalYoutubeSettings] = useState({
     videoId: '',
@@ -68,7 +70,7 @@ export default function YouTubeVideoTab() {
         <CardTitle>YouTube Video Settings</CardTitle>
         <CardDescription>
           Configure the featured YouTube video on your site.
-          {!featureFlags.showYouTubeVideo && (
+          {!showYouTubeVideo && (
             <span className="text-amber-500 block mt-1">
               Note: Enable the &quot;YouTube Video&quot; feature flag to display this video.
             </span>

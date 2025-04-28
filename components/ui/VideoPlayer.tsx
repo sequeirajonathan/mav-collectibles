@@ -5,7 +5,7 @@ import videojs from 'video.js';
 import type Player from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';
 import '@videojs/http-streaming';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppContext } from '@contexts/AppContext';
 
 interface VideoPlayerProps {
   src?: string;

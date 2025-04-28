@@ -1,54 +1,50 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAppContext } from "@/contexts/AppContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
+import { useAppContext } from "@contexts/AppContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
+import { Label } from "@components/ui/label";
+import { Switch } from "@components/ui/switch";
+import { Button } from "@components/ui/button";
 import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import { useSeedFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
+
+type LocalFlags = Record<string, boolean>;
 
 export default function FeatureFlagsTab() {
-  const { featureFlags, updateFeatureFlag } = useAppContext();
-  const [localFlags, setLocalFlags] = useState({ ...featureFlags });
+  const { featureFlags } = useAppContext();
+  const [localFlags, setLocalFlags] = useState<LocalFlags>({});
   const [hasChanges, setHasChanges] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
 
-  // Update local state when context changes
+  const { mutate: triggerSeed, isPending: isSeeding } = useSeedFeatureFlags();
+  const { mutateAsync: triggerUpdateFlag } = useUpdateFeatureFlag();
+
   useEffect(() => {
-    setLocalFlags({ ...featureFlags });
+    if (featureFlags) {
+      const flagsObject: LocalFlags = featureFlags.reduce((acc, flag) => {
+        acc[flag.name] = flag.enabled;
+        return acc;
+      }, {} as LocalFlags);
+      setLocalFlags(flagsObject);
+    }
   }, [featureFlags]);
 
-  // Function to seed feature flags
-  const seedFeatureFlags = async () => {
-    setIsSeeding(true);
-    try {
-      const response = await fetch('/api/feature-flags/seed', {
-        method: 'POST',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to seed feature flags');
-      }
-      
-      await response.json(); // Just check that we can parse the response
-      toast.success('Feature flags initialized successfully');
-      // Refresh the page to get the new flags
-      window.location.reload();
-    } catch (error) {
-      console.error('Error seeding feature flags:', error);
-      toast.error('Failed to initialize feature flags');
-    } finally {
-      setIsSeeding(false);
-    }
+  const handleSeedFeatureFlags = async () => {
+    triggerSeed(undefined, {
+      onSuccess: () => {
+        toast.success('Feature flags initialized successfully');
+        window.location.reload();
+      },
+      onError: () => {
+        toast.error('Failed to initialize feature flags');
+      },
+    });
   };
 
-  // Handle local flag changes
   const handleFlagChange = (flagName: string, checked: boolean) => {
-    // Handle mutual exclusivity locally
     const updatedFlags = { ...localFlags, [flagName]: checked };
-    
+
     if (checked) {
       if (flagName === "showYouTubeVideo" && localFlags.showDirectStreaming) {
         updatedFlags.showDirectStreaming = false;
@@ -56,38 +52,43 @@ export default function FeatureFlagsTab() {
         updatedFlags.showYouTubeVideo = false;
       }
     }
-    
+
     setLocalFlags(updatedFlags);
     setHasChanges(true);
   };
 
-  // Save all changes at once
   const saveChanges = async () => {
-    try {
-      // Find which flags have changed
-      const changedFlags = Object.entries(localFlags).filter(
-        ([key, value]) => featureFlags[key as keyof typeof featureFlags] !== value
-      );
-      
-      // Update all changed flags
-      for (const [key, value] of changedFlags) {
-        const success = await updateFeatureFlag(key, value);
-        if (!success) {
-          // If update fails, it might be because flags aren't seeded
-          toast.error('Feature flags not found. Initializing...');
-          await seedFeatureFlags();
+    if (!featureFlags) return;
+
+    const changedFlags = Object.entries(localFlags).filter(([key, value]) => {
+      const original = featureFlags.find(flag => flag.name === key);
+      return original && original.enabled !== value;
+    });
+
+    for (const [name, enabled] of changedFlags) {
+      const flag = featureFlags.find(f => f.name === name);
+      if (flag) {
+        try {
+          await triggerUpdateFlag({ id: flag.id, enabled });
+        } catch {
+          toast.error('Feature flag update failed. Trying to reinitialize...');
+          await handleSeedFeatureFlags();
           return;
         }
       }
-      
-      toast.success("Feature flags updated successfully");
-      setHasChanges(false);
-    } catch {
-      toast.error("Failed to update feature flags");
-      // Reset to original values on error
-      setLocalFlags({ ...featureFlags });
     }
+
+    toast.success("Feature flags updated successfully");
+    setHasChanges(false);
   };
+
+  if (!featureFlags) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin w-6 h-6" />
+      </div>
+    );
+  }
 
   return (
     <Card>
@@ -95,12 +96,13 @@ export default function FeatureFlagsTab() {
         <CardTitle>Feature Flags</CardTitle>
         <CardDescription>Enable or disable features on your site</CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-4">
-        {/* Show seeding button if needed */}
-        {Object.keys(featureFlags).length === 0 && (
+
+        {featureFlags.length === 0 && (
           <div className="flex justify-center mb-4">
             <Button
-              onClick={seedFeatureFlags}
+              onClick={handleSeedFeatureFlags}
               disabled={isSeeding}
               className="bg-[#E6B325] text-black hover:bg-[#FFD966]"
             >
@@ -116,6 +118,7 @@ export default function FeatureFlagsTab() {
           </div>
         )}
 
+        {/* ---- Basic Flags Section ---- */}
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="showAlertBanner" className="text-lg">Alert Banner</Label>
@@ -127,7 +130,7 @@ export default function FeatureFlagsTab() {
             onCheckedChange={(checked) => handleFlagChange("showAlertBanner", checked)}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="showFeaturedEvents" className="text-lg">Featured Events</Label>
@@ -139,11 +142,12 @@ export default function FeatureFlagsTab() {
             onCheckedChange={(checked) => handleFlagChange("showFeaturedEvents", checked)}
           />
         </div>
-        
+
+        {/* ---- Divider + Video Settings ---- */}
         <div className="border-t border-gray-700 my-4 pt-4">
           <h3 className="text-lg font-medium mb-2">Video Settings</h3>
           <p className="text-sm text-gray-400 mb-4">Configure video display options</p>
-          
+
           <div className="flex items-center justify-between mb-3">
             <div>
               <Label htmlFor="showVideoPlayer" className="text-base">Video Section</Label>
@@ -155,11 +159,11 @@ export default function FeatureFlagsTab() {
               onCheckedChange={(checked) => handleFlagChange("showVideoPlayer", checked)}
             />
           </div>
-          
+
           <div className="pl-4 border-l-2 border-gray-700 mt-4 mb-2">
             <h4 className="text-base font-medium mb-2">Video Sources</h4>
             <p className="text-sm text-gray-400 mb-3">Choose which video source to display (only one can be active)</p>
-            
+
             <div className="flex items-center justify-between mb-3">
               <div>
                 <Label htmlFor="showYouTubeVideo" className="text-base">YouTube Video</Label>
@@ -172,7 +176,7 @@ export default function FeatureFlagsTab() {
                 disabled={!localFlags.showVideoPlayer}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="showDirectStreaming" className="text-base">Direct Streaming</Label>
@@ -188,14 +192,20 @@ export default function FeatureFlagsTab() {
           </div>
         </div>
       </CardContent>
-      
+
       {hasChanges && (
         <CardFooter>
           <div className="flex justify-between w-full">
             <Button 
               variant="outline" 
               onClick={() => {
-                setLocalFlags({ ...featureFlags });
+                if (featureFlags) {
+                  const flagsObject: LocalFlags = featureFlags.reduce((acc, flag) => {
+                    acc[flag.name] = flag.enabled;
+                    return acc;
+                  }, {} as LocalFlags);
+                  setLocalFlags(flagsObject);
+                }
                 setHasChanges(false);
               }}
             >
@@ -203,7 +213,7 @@ export default function FeatureFlagsTab() {
             </Button>
             <Button 
               onClick={saveChanges}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black bg-[#E6B325] text-[#000000] shadow-md hover:bg-[#FFD966] border border-[#B38A00] focus-visible:ring-[#E6B325]/50 font-extrabold tracking-wide uppercase h-10 px-5 py-2.5"
+              className="inline-flex items-center justify-center gap-2 bg-[#E6B325] text-black hover:bg-[#FFD966] border border-[#B38A00]"
             >
               Save Changes
             </Button>
@@ -212,4 +222,4 @@ export default function FeatureFlagsTab() {
       )}
     </Card>
   );
-} 
+}

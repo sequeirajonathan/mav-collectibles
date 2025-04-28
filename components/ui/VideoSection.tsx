@@ -1,22 +1,22 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppContext } from '@contexts/AppContext';
 import YouTubePlayer from './YouTubePlayer';
 import VideoPlayer from './VideoPlayer';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 export default function VideoSection() {
-  const { youtubeSettings, videoSettings, featureFlags } = useAppContext();
+  const { youtubeSettings, videoSettings, getFeatureFlag } = useAppContext();
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoError, setVideoError] = useState(false);
 
   // Check feature flags
-  const isVideoSectionEnabled = featureFlags?.showVideoPlayer === true;
-  const isYouTubeEnabled = featureFlags?.showYouTubeVideo === true;
-  const isDirectStreamingEnabled = featureFlags?.showDirectStreaming === true;
+  const isVideoSectionEnabled = getFeatureFlag('showVideoPlayer');
+  const isYouTubeEnabled = getFeatureFlag('showYouTubeVideo');
+  const isDirectStreamingEnabled = getFeatureFlag('showDirectStreaming');
   
   // Determine which video type to show (if any)
   const hasYouTubeVideo = isVideoSectionEnabled && isYouTubeEnabled && youtubeSettings && (

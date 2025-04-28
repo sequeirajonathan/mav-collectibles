@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAppContext } from "@/contexts/AppContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useAppContext } from "@contexts/AppContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
+import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
 import { toast } from "react-hot-toast";
 import { AlertTriangle } from "lucide-react";
 
 export default function AlertBannerTab() {
-  const { alertBanner, updateAlertBanner, featureFlags } = useAppContext();
+  const { alertBanner, updateAlertBanner, getFeatureFlag } = useAppContext();
+  const showAlertBanner = getFeatureFlag('showAlertBanner');
   
   const [alertBannerState, setAlertBannerState] = useState({
     message: '',
@@ -81,7 +82,7 @@ export default function AlertBannerTab() {
         <CardDescription>Configure the alert banner that appears at the top of your site</CardDescription>
       </CardHeader>
       <CardContent>
-        {!featureFlags.showAlertBanner && (
+        {!showAlertBanner && (
           <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-3">
             <AlertTriangle className="text-yellow-500" />
             <p className="text-sm text-yellow-500">
@@ -91,7 +92,7 @@ export default function AlertBannerTab() {
         )}
         
         <div className="space-y-4 opacity-100 transition-opacity duration-200" 
-             style={{ opacity: featureFlags.showAlertBanner ? 1 : 0.5 }}>
+             style={{ opacity: showAlertBanner ? 1 : 0.5 }}>
           <div>
             <Label htmlFor="message">Message</Label>
             <Input
@@ -100,7 +101,7 @@ export default function AlertBannerTab() {
               value={alertBannerState.message}
               onChange={handleAlertBannerChange}
               placeholder="Enter alert message"
-              disabled={!featureFlags.showAlertBanner}
+              disabled={!showAlertBanner}
             />
             {alertBannerErrors.message && (
               <p className="text-red-500 text-xs mt-1">{alertBannerErrors.message}</p>
@@ -115,7 +116,7 @@ export default function AlertBannerTab() {
               value={alertBannerState.code}
               onChange={handleAlertBannerChange}
               placeholder="Enter code or identifier"
-              disabled={!featureFlags.showAlertBanner}
+              disabled={!showAlertBanner}
             />
           </div>
           
@@ -129,7 +130,7 @@ export default function AlertBannerTab() {
                   value={alertBannerState.backgroundColor}
                   onChange={handleAlertBannerChange}
                   placeholder="#E6B325"
-                  disabled={!featureFlags.showAlertBanner}
+                  disabled={!showAlertBanner}
                 />
                 <div 
                   className="w-10 h-10 rounded border"
@@ -150,7 +151,7 @@ export default function AlertBannerTab() {
                   value={alertBannerState.textColor}
                   onChange={handleAlertBannerChange}
                   placeholder="#000000"
-                  disabled={!featureFlags.showAlertBanner}
+                  disabled={!showAlertBanner}
                 />
                 <div 
                   className="w-10 h-10 rounded border"
@@ -174,7 +175,7 @@ export default function AlertBannerTab() {
       <CardFooter>
         <Button 
           onClick={saveAlertBanner}
-          disabled={!featureFlags.showAlertBanner}
+          disabled={!showAlertBanner}
           className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black bg-[#E6B325] text-[#000000] shadow-md hover:bg-[#FFD966] border border-[#B38A00] focus-visible:ring-[#E6B325]/50 font-extrabold tracking-wide uppercase h-10 px-5 py-2.5"
         >
           Save Changes

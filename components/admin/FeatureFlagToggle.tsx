@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useAppContext } from "@/contexts/AppContext";
+import { Switch } from "@components/ui/switch";
+import { Label } from "@components/ui/label";
+import { useAppContext } from "@contexts/AppContext";
 import { toast } from "react-hot-toast";
 
 interface FeatureFlagToggleProps {
@@ -23,8 +23,11 @@ export default function FeatureFlagToggle({
   
   // Initialize local state from context
   useEffect(() => {
-    if (name in featureFlags) {
-      setLocalChecked(featureFlags[name as keyof typeof featureFlags]);
+    if (featureFlags) {
+      const flag = featureFlags.find(f => f.name === name);
+      if (flag) {
+        setLocalChecked(flag.enabled);
+      }
     }
   }, [featureFlags, name]);
   

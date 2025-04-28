@@ -3,10 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import FeaturedEvents from "@/components/ui/FeaturedEvents";
-import AnnouncementCarousel from "@/components/ui/AnnouncementCarousel";
-import VideoSection from "@/components/ui/VideoSection";
-import ProductList from "@/components/ui/ProductList";
+import FeaturedEvents from "@components/ui/FeaturedEvents";
+import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
+import VideoSection from "@components/ui/VideoSection";
+import ProductList from "@components/ui/ProductList";
 import { motion } from "framer-motion";
 
 export default function Home() {

@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { useAppContext } from "@/contexts/AppContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
+import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Switch } from "@components/ui/switch";
+import { useAppContext } from "@contexts/AppContext";
 import { toast } from "react-hot-toast";
-import { AdminVideoSettings, VideoSettings } from "@/types/admin";
+import { AdminVideoSettings, VideoSettings } from "interfaces/admin";
 
 export default function VideoSettingsTab() {
-  const { videoSettings, updateVideoSettings, featureFlags } = useAppContext();
+  const { videoSettings, updateVideoSettings, getFeatureFlag } = useAppContext();
+  const showDirectStreaming = getFeatureFlag('showDirectStreaming');
   
   const [settings, setSettings] = useState<AdminVideoSettings>({
     url: '',
@@ -54,7 +55,7 @@ export default function VideoSettingsTab() {
         <CardTitle>Direct Streaming Settings</CardTitle>
         <CardDescription>
           Configure your direct streaming video player. 
-          {!featureFlags.showDirectStreaming && (
+          {!showDirectStreaming && (
             <span className="text-amber-500 block mt-1">
               Note: Enable the &quot;Direct Streaming&quot; feature flag to display this video.
             </span>

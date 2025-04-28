@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Navbar from "@/components/ui/Navbar";
-import Footer from "@/components/ui/Footer";
-import AlertBanner from "@/components/ui/AlertBanner";
-import { QueryProvider } from "@/providers/QueryProvider";
-import { AppProvider } from "@/contexts/AppContext";
-import "@/styles/globals.css";
+import Navbar from "@components/ui/Navbar";
+import Footer from "@components/ui/Footer";
+import AlertBanner from "@components/ui/AlertBanner";
+import { QueryProvider } from "@providers/QueryProvider";
+import { AppProvider } from "@contexts/AppContext";
+import "@styles/globals.css";
 import "./videojs-theme.css";
-import ScrollToTop from '@/components/ui/ScrollToTop';
+import ScrollToTop from '@components/ui/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
-import '@/styles/video-player.css';
-import { SupabaseProvider } from '@/contexts/SupabaseContext';
-import CookieConsent from '@/components/ui/CookieConsent';
+import '@styles/video-player.css';
+import { SupabaseProvider } from '@contexts/SupabaseContext';
+import CookieConsent from '@components/ui/CookieConsent';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

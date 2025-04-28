@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@contexts/SupabaseContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,11 +13,6 @@ const Navbar = () => {
   const { user, userProfile, signOut } = useSupabase();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Debug logs for role checking
-  console.log('Current user:', user?.email);
-  console.log('User profile in Navbar:', userProfile);
-  console.log('User role:', userProfile?.role);
 
   // Handle click outside for profile dropdown
   useEffect(() => {
@@ -58,7 +53,6 @@ const Navbar = () => {
 
   // More explicit role check
   const hasAdminAccess = userProfile?.role && ['STAFF', 'MANAGER', 'ADMIN', 'OWNER'].includes(userProfile.role);
-  console.log('Has admin access:', hasAdminAccess);
 
   const navigationItems = [
     { href: "/products", label: "All Cards" },

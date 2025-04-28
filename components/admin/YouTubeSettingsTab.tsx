@@ -1,27 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { useAppContext } from "@/contexts/AppContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
+import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input";
+import { Switch } from "@components/ui/switch";
+import { Button } from "@components/ui/button";
+import { useAppContext } from "@contexts/AppContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { toast } from "react-hot-toast";
 
 export default function YouTubeSettingsTab() {
   const { youtubeSettings, updateYoutubeSettings, refreshData } = useAppContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [settings, setSettings] = useState({
-    videoId: youtubeSettings.videoId || "",
-    title: youtubeSettings.title || "",
-    autoplay: youtubeSettings.autoplay || false,
-    muted: youtubeSettings.muted || false,
-    playlistId: youtubeSettings.playlistId || "",
-    isLiveStream: youtubeSettings.isLiveStream || false,
-    liveStreamId: youtubeSettings.liveStreamId || "",
-    showLiveIndicator: youtubeSettings.showLiveIndicator || true,
+    videoId: youtubeSettings?.videoId || "",
+    title: youtubeSettings?.title || "",
+    autoplay: youtubeSettings?.autoplay || false,
+    muted: youtubeSettings?.muted || false,
+    playlistId: youtubeSettings?.playlistId || "",
+    isLiveStream: youtubeSettings?.isLiveStream || false,
+    liveStreamId: youtubeSettings?.liveStreamId || "",
+    showLiveIndicator: youtubeSettings?.showLiveIndicator || true,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,490 +1,150 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { config } from '@/lib/config';
-import { toast } from 'react-hot-toast';
+import React, { createContext, useContext, useState } from "react";
+import { useFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
+import { useAlertBanner, useUpdateAlertBanner } from "@hooks/useAlertBanner";
+import { useFeaturedEvents } from "@hooks/useFeaturedEvents";
+import { useYoutubeSettings, useUpdateYoutubeSettings } from "@hooks/useYoutubeSettings";
+import { useVideoSettings, useUpdateVideoSettings } from "@hooks/useVideoSettings";
+import { useCreateFeaturedEvent, useUpdateFeaturedEvent, useDeleteFeaturedEvent } from "@hooks/useFeaturedEvents";
 
-// Define types
-export interface FeatureFlag {
-  id: string;
-  name: string;
-  description?: string;
-  enabled: boolean;
-}
-
-export interface AlertBanner {
-  id: string;
-  message: string;
-  code?: string;
-  backgroundColor: string;
-  textColor: string;
-  enabled: boolean;
-}
-
-export interface FeaturedEvent {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  imageSrc: string;
-  imageAlt: string;
-  bulletPoints: string[];
-  link?: string;
-  enabled: boolean;
-  order: number;
-}
-
-interface FeatureFlags {
-  showAlertBanner: boolean;
-  showFeaturedEvents: boolean;
-  showYouTubeVideo: boolean;
-  showVideoPlayer: boolean;
-  showDirectStreaming: boolean;
-}
-
-interface YouTubeSettings {
-  videoId: string;
-  title: string;
-  autoplay: boolean;
-  muted: boolean;
-  playlistId: string;
-  isLiveStream: boolean;
-  liveStreamId: string;
-  showLiveIndicator: boolean;
-}
-
-interface VideoSettings {
-  src: string;
-  type: string;
-  isLive: boolean;
-  poster: string;
-  title: string;
-  autoplay: boolean;
-  muted: boolean;
-  twitchChannel?: string;
-}
-
-interface LastUpdated {
-  featureFlags?: string;
-  alertBanner?: string;
-  featuredEvents?: string;
-  youtubeSettings?: string;
-  videoSettings?: string;
-}
-
-interface AdminVideoSettings {
-  src: string;
-  type: string;
-  isLive: boolean;
-  poster: string;
-  title: string;
-  autoplay: boolean;
-  muted: boolean;
-  twitchChannel?: string;
-}
+import {
+  FeatureFlag,
+  VideoSettings,
+  YouTubeSettings,
+  FeaturedEvent,
+  AlertBanner,
+} from "@interfaces";
 
 interface AppContextType {
-  featureFlags: FeatureFlags;
-  alertBanner: AlertBanner | null;
-  featuredEvents: FeaturedEvent[];
-  updateFeatureFlag: (name: string, enabled: boolean) => Promise<boolean>;
-  updateAlertBanner: (data: Partial<AlertBanner>) => Promise<void>;
-  updateFeaturedEvent: (id: string, data: Partial<FeaturedEvent>) => Promise<void>;
-  addFeaturedEvent: (data: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  removeFeaturedEvent: (id: string) => Promise<void>;
+  featureFlags: FeatureFlag[] | undefined;
+  alertBanner: AlertBanner | null | undefined;
+  featuredEvents: FeaturedEvent[] | undefined;
   dismissAlertBanner: () => void;
-  alertBannerDismissed: boolean;
+  youtubeSettings: YouTubeSettings | undefined;
+  videoSettings: VideoSettings | undefined;
   isLoading: boolean;
-  youtubeSettings: YouTubeSettings;
-  updateYoutubeSettings: (settings: Partial<YouTubeSettings>) => Promise<void>;
-  videoSettings: VideoSettings;
-  updateVideoSettings: (settings: AdminVideoSettings) => Promise<void>;
   refreshData: () => Promise<void>;
-  lastUpdated: LastUpdated;
+  updateAlertBanner: (data: Partial<AlertBanner>) => Promise<void>;
+  getFeatureFlag: (name: string) => boolean;
+  addFeaturedEvent: (event: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateFeaturedEvent: (id: string, event: Partial<FeaturedEvent>) => Promise<void>;
+  removeFeaturedEvent: (id: string) => Promise<void>;
+  updateFeatureFlag: (name: string, enabled: boolean) => Promise<void>;
+  lastUpdated: {
+    youtubeSettings?: Date;
+    videoSettings?: Date;
+  };
+  updateVideoSettings: (settings: Partial<VideoSettings>) => Promise<void>;
+  updateYoutubeSettings: (settings: Partial<YouTubeSettings>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [featureFlags, setFeatureFlags] = useState<FeatureFlags>({
-    showAlertBanner: true,
-    showFeaturedEvents: true,
-    showYouTubeVideo: true,
-    showVideoPlayer: true,
-    showDirectStreaming: false,
-  });
-  const [alertBanner, setAlertBanner] = useState<AlertBanner | null>(null);
-  const [featuredEvents, setFeaturedEvents] = useState<FeaturedEvent[]>([]);
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { data: featureFlags, isLoading: featureFlagsLoading, refetch: refetchFeatureFlags } =
+    useFeatureFlags();
+  const { data: alertBanner, isLoading: alertBannerLoading, refetch: refetchAlertBanner } = useAlertBanner();
+  const { mutateAsync: updateAlertBannerMutation } = useUpdateAlertBanner();
+  const { data: featuredEvents, isLoading: featuredEventsLoading, refetch: refetchFeaturedEvents } =
+    useFeaturedEvents();
+  const { mutateAsync: createFeaturedEvent } = useCreateFeaturedEvent();
+  const { mutateAsync: updateFeaturedEventMutation } = useUpdateFeaturedEvent();
+  const { mutateAsync: deleteFeaturedEvent } = useDeleteFeaturedEvent();
+  const { data: youtubeSettings, isLoading: youtubeSettingsLoading, refetch: refetchYoutubeSettings } =
+    useYoutubeSettings();
+  const { mutateAsync: updateYoutubeSettingsMutation } = useUpdateYoutubeSettings();
+  const { data: videoSettings, isLoading: videoSettingsLoading, refetch: refetchVideoSettings } =
+    useVideoSettings();
+  const { mutateAsync: updateFeatureFlagMutation } = useUpdateFeatureFlag();
+  const { mutateAsync: updateVideoSettingsMutation } = useUpdateVideoSettings();
+
   const [alertBannerDismissed, setAlertBannerDismissed] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [youtubeSettings, setYoutubeSettings] = useState<YouTubeSettings>({
-    videoId: 'V8D_ELNVRko',
-    title: 'Featured Video',
-    autoplay: true,
-    muted: true,
-    playlistId: '',
-    isLiveStream: false,
-    liveStreamId: '',
-    showLiveIndicator: false
-  });
-  const [videoSettings, setVideoSettings] = useState<VideoSettings>({
-    src: '',
-    type: 'application/x-mpegURL',
-    isLive: false,
-    poster: '',
-    title: 'Live Stream',
-    autoplay: true,
-    muted: true
-  });
-  const [lastUpdated, setLastUpdated] = useState<LastUpdated>({});
+  const [lastUpdated, setLastUpdated] = useState<AppContextType['lastUpdated']>({});
 
-  // Load data on initial render
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch feature flags
-      try {
-        const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
-        
-        // Check if response is OK and is JSON
-        if (flagsResponse.ok) {
-          const contentType = flagsResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const flagsData = await flagsResponse.json();
-            if (flagsData && Array.isArray(flagsData)) {
-              const flags: FeatureFlags = {
-                showAlertBanner: false,
-                showFeaturedEvents: false,
-                showYouTubeVideo: false,
-                showVideoPlayer: false,
-                showDirectStreaming: false
-              };
-              
-              flagsData.forEach((flag: FeatureFlag) => {
-                if (flag.name in flags) {
-                  flags[flag.name as keyof FeatureFlags] = flag.enabled;
-                }
-              });
-              
-              setFeatureFlags(flags);
-              setLastUpdated(prev => ({ ...prev, featureFlags: new Date().toISOString() }));
-            }
-          } else {
-            console.error('Feature flags endpoint did not return JSON');
-          }
-        } else {
-          console.error(`Feature flags request failed with status: ${flagsResponse.status}`);
-        }
-      } catch (error) {
-        console.error('Error fetching feature flags:', error);
-      }
-      
-      // Fetch alert banner with similar error handling
-      try {
-        const bannerResponse = await fetch(`${config.baseUrl}/api/alert-banner`);
-        if (bannerResponse.ok) {
-          const contentType = bannerResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const bannerData = await bannerResponse.json();
-            if (bannerData) {
-              setAlertBanner(bannerData);
-              setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
-            }
-          } else {
-            console.error('Alert banner endpoint did not return JSON');
-          }
-        } else {
-          console.error(`Alert banner request failed with status: ${bannerResponse.status}`);
-        }
-      } catch (error) {
-        console.error('Error fetching alert banner:', error);
-      }
-      
-      // Fetch featured events with similar error handling
-      try {
-        const eventsResponse = await fetch(`${config.baseUrl}/api/featured-events`);
-        if (eventsResponse.ok) {
-          const contentType = eventsResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const eventsData = await eventsResponse.json();
-            if (eventsData && Array.isArray(eventsData)) {
-              setFeaturedEvents(eventsData);
-              setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
-            }
-          } else {
-            console.error('Featured events endpoint did not return JSON');
-          }
-        } else {
-          console.error(`Featured events request failed with status: ${eventsResponse.status}`);
-        }
-      } catch (error) {
-        console.error('Error fetching featured events:', error);
-      }
-      
-      // Fetch YouTube settings with similar error handling
-      try {
-        const youtubeResponse = await fetch(`${config.baseUrl}/api/youtube-settings/1`);
-        if (youtubeResponse.ok) {
-          const contentType = youtubeResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const youtubeData = await youtubeResponse.json();
-            if (youtubeData) {
-              setYoutubeSettings(youtubeData);
-              setLastUpdated(prev => ({ ...prev, youtubeSettings: new Date().toISOString() }));
-            }
-          } else {
-            console.error('YouTube settings endpoint did not return JSON');
-          }
-        } else {
-          console.error(`YouTube settings request failed with status: ${youtubeResponse.status}`);
-        }
-      } catch (error) {
-        console.error('Error fetching YouTube settings:', error);
-      }
-      
-      // Fetch video settings with similar error handling
-      try {
-        const videoResponse = await fetch(`${config.baseUrl}/api/video-settings/1`);
-        if (videoResponse.ok) {
-          const contentType = videoResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const videoData = await videoResponse.json();
-            if (videoData) {
-              setVideoSettings(videoData);
-              setLastUpdated(prev => ({ ...prev, videoSettings: new Date().toISOString() }));
-            }
-          } else {
-            console.error('Video settings endpoint did not return JSON');
-          }
-        } else {
-          console.error(`Video settings request failed with status: ${videoResponse.status}`);
-        }
-      } catch (error) {
-        console.error('Error fetching video settings:', error);
-      }
-    } catch (error) {
-      console.error('Error in fetchData:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Initial data fetch
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  // Update feature flag
-  const updateFeatureFlag = async (name: string, enabled: boolean): Promise<boolean> => {
-    try {
-      console.log(`Updating feature flag: ${name} to ${enabled}`);
-      
-      // Find the flag ID first
-      const flagsResponse = await fetch(`${config.baseUrl}/api/feature-flags`);
-      if (flagsResponse.ok) {
-        const flagsData = await flagsResponse.json();
-        const flag = flagsData.find((f: FeatureFlag) => f.name === name);
-        
-        if (!flag) {
-          console.error(`Feature flag ${name} not found`);
-          toast.error(`Feature flag ${name} not found. Please run the database seeder.`);
-          return false;
-        }
-        
-        // Now update the flag with the correct ID
-        const response = await fetch(`${config.baseUrl}/api/feature-flags/${flag.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ enabled }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        // Update local state immediately for better UX
-        setFeatureFlags(prev => ({
-          ...prev,
-          [name]: enabled
-        }));
-        
-        // Refresh data to ensure we have the latest state
-        await fetchData();
-        
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error updating feature flag:', error);
-      return false;
-    }
-  };
-
-  // Update alert banner
-  const updateAlertBanner = async (data: Partial<AlertBanner>) => {
-    try {
-      if (alertBanner) {
-        const response = await fetch(`${config.baseUrl}/api/alert-banner/${alertBanner.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-        
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const responseData = await response.json();
-        setAlertBanner(responseData);
-        setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
-      } else {
-        const response = await fetch(`${config.baseUrl}/api/alert-banner`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-        
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const responseData = await response.json();
-        setAlertBanner(responseData);
-        setLastUpdated(prev => ({ ...prev, alertBanner: new Date().toISOString() }));
-      }
-    } catch (error) {
-      console.error('Error updating alert banner:', error);
-    }
-  };
-
-  // Update featured event
-  const updateFeaturedEvent = async (id: string, data: Partial<FeaturedEvent>) => {
-    try {
-      const response = await fetch(`${config.baseUrl}/api/featured-events/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const responseData = await response.json();
-      setFeaturedEvents(prev => 
-        prev.map(event => event.id === id ? responseData : event)
-      );
-      setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
-    } catch (error) {
-      console.error('Error updating featured event:', error);
-    }
-  };
-
-  // Add featured event
-  const addFeaturedEvent = async (data: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
-    try {
-      const response = await fetch(`${config.baseUrl}/api/featured-events`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const responseData = await response.json();
-      setFeaturedEvents(prev => [...prev, responseData]);
-      setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
-    } catch (error) {
-      console.error('Error adding featured event:', error);
-    }
-  };
-
-  // Remove featured event
-  const removeFeaturedEvent = async (id: string) => {
-    try {
-      const response = await fetch(`${config.baseUrl}/api/featured-events/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      setFeaturedEvents(prev => prev.filter(event => event.id !== id));
-      setLastUpdated(prev => ({ ...prev, featuredEvents: new Date().toISOString() }));
-    } catch (error) {
-      console.error('Error removing featured event:', error);
-    }
-  };
-
-  // Dismiss alert banner (client-side only)
   const dismissAlertBanner = () => {
     setAlertBannerDismissed(true);
   };
 
-  // Update YouTube settings
-  const updateYoutubeSettings = async (settings: Partial<YouTubeSettings>) => {
-    try {
-      const updatedSettings = { ...youtubeSettings, ...settings };
-      const response = await fetch(`${config.baseUrl}/api/youtube-settings/1`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedSettings),
-      });
-      
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const responseData = await response.json();
-      setYoutubeSettings(responseData);
-      setLastUpdated(prev => ({ ...prev, youtubeSettings: new Date().toISOString() }));
-      return responseData;
-    } catch (error) {
-      console.error('Error updating YouTube settings:', error);
-      throw error;
+  const refreshData = async () => {
+    await Promise.all([
+      refetchFeatureFlags(),
+      refetchAlertBanner(),
+      refetchFeaturedEvents(),
+      refetchYoutubeSettings(),
+      refetchVideoSettings()
+    ]);
+    setLastUpdated({
+      youtubeSettings: new Date(),
+      videoSettings: new Date()
+    });
+  };
+
+  const isLoading =
+    featureFlagsLoading ||
+    alertBannerLoading ||
+    featuredEventsLoading ||
+    youtubeSettingsLoading ||
+    videoSettingsLoading;
+
+  const updateAlertBanner = async (data: Partial<AlertBanner>) => {
+    if (!alertBanner?.id) return;
+    await updateAlertBannerMutation({ id: alertBanner.id, data });
+  };
+
+  const getFeatureFlag = (name: string) => {
+    return featureFlags?.find(flag => flag.name === name)?.enabled ?? false;
+  };
+
+  const addFeaturedEvent = async (event: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
+    await createFeaturedEvent(event);
+  };
+
+  const updateFeaturedEvent = async (id: string, event: Partial<FeaturedEvent>) => {
+    await updateFeaturedEventMutation({ id, data: event });
+  };
+
+  const removeFeaturedEvent = async (id: string) => {
+    await deleteFeaturedEvent(id);
+  };
+
+  const updateFeatureFlag = async (name: string, enabled: boolean) => {
+    const flag = featureFlags?.find(f => f.name === name);
+    if (flag) {
+      await updateFeatureFlagMutation({ id: flag.id, enabled });
     }
   };
 
-  // Update video settings
-  const updateVideoSettings = async (settings: AdminVideoSettings) => {
-    try {
-      const updatedSettings = { ...videoSettings, ...settings };
-      const response = await fetch(`${config.baseUrl}/api/video-settings/1`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedSettings),
-      });
-      
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const responseData = await response.json();
-      setVideoSettings(responseData);
-      setLastUpdated(prev => ({ ...prev, videoSettings: new Date().toISOString() }));
-      return responseData;
-    } catch (error) {
-      console.error('Error updating video settings:', error);
-      throw error;
-    }
+  const updateVideoSettings = async (settings: Partial<VideoSettings>) => {
+    await updateVideoSettingsMutation(settings);
+  };
+
+  const updateYoutubeSettings = async (settings: Partial<YouTubeSettings>) => {
+    await updateYoutubeSettingsMutation(settings);
   };
 
   return (
     <AppContext.Provider
       value={{
         featureFlags,
-        alertBanner,
+        alertBanner: alertBannerDismissed ? null : alertBanner,
         featuredEvents,
-        updateFeatureFlag,
-        updateAlertBanner,
-        updateFeaturedEvent,
-        addFeaturedEvent,
-        removeFeaturedEvent,
         dismissAlertBanner,
-        alertBannerDismissed,
-        isLoading,
         youtubeSettings,
-        updateYoutubeSettings,
         videoSettings,
-        updateVideoSettings,
+        isLoading,
+        refreshData,
+        updateAlertBanner,
+        getFeatureFlag,
+        addFeaturedEvent,
+        updateFeaturedEvent,
+        removeFeaturedEvent,
+        updateFeatureFlag,
         lastUpdated,
-        refreshData: fetchData
+        updateVideoSettings,
+        updateYoutubeSettings,
       }}
     >
       {children}
@@ -495,7 +155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
 };

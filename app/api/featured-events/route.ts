@@ -1,18 +1,8 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@lib/prisma';
 import { z } from 'zod';
-
-const featuredEventSchema = z.object({
-  title: z.string(),
-  date: z.string(),
-  description: z.string(),
-  imageSrc: z.string(),
-  imageAlt: z.string(),
-  bulletPoints: z.array(z.string()),
-  link: z.string().optional(),
-  enabled: z.boolean().default(true),
-  order: z.number().default(0),
-});
+import { createFeaturedEvent } from "@services/featuredEventService";
+import { createFeaturedEventSchema } from "@validations/featured-events";
 
 export async function GET() {
   try {
@@ -33,17 +23,24 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validatedData = featuredEventSchema.parse(body);
     
-    const newFeaturedEvent = await prisma.featuredEvent.create({
-      data: validatedData,
-    });
+    // Validate the request body
+    const validatedData = createFeaturedEventSchema.parse(body);
     
-    return NextResponse.json(newFeaturedEvent, { status: 201 });
+    const event = await createFeaturedEvent(validatedData);
+    
+    return NextResponse.json(event);
   } catch (error) {
-    console.error('Error creating featured event:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error("Error creating featured event:", error);
     return NextResponse.json(
-      { error: 'Failed to create featured event' },
+      { error: "Failed to create featured event" },
       { status: 500 }
     );
   }

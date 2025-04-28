@@ -1,17 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
-// Define a type for our product
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchProductsByCategory } from '@services/squareService';
+import { useSquareProducts } from '@hooks/useSquareProducts';
 
 // Add image dimensions configuration
 const IMAGE_CONFIG = {
@@ -20,73 +14,25 @@ const IMAGE_CONFIG = {
   quality: 75,
 } as const;
 
-// Mock products data moved outside component to prevent recreation on each render
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: '1',
-    name: 'Charizard Holo Card',
-    price: 299.99,
-    image: '/prismatic.jpg',
-    category: 'pokemon'
-  },
-  {
-    id: '2',
-    name: 'Blue-Eyes White Dragon',
-    price: 149.99,
-    image: '/prismatic.jpg',
-    category: 'yugioh'
-  },
-  {
-    id: '3',
-    name: 'Goku Ultra Instinct',
-    price: 89.99,
-    image: '/prismatic.jpg',
-    category: 'dragonball'
-  },
-  {
-    id: '4',
-    name: 'Luffy Gear 5',
-    price: 129.99,
-    image: '/prismatic.jpg',
-    category: 'onepiece'
-  },
-];
-
 export default function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const featuredCategoryToShow = 'pokemon'; // Default featured category to show
 
-  const fetchProducts = async () => {
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setProducts(MOCK_PRODUCTS);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error loading products:', err);
-      setError('Failed to load products. Please try again later.');
-      setLoading(false);
-    }
-  };
+  // Use React Query to fetch products
+  const { data: products, isLoading, error } = useSquareProducts(featuredCategoryToShow);
 
+  // Prefetch other categories when component mounts
   useEffect(() => {
-    let mounted = true;
-
-    const loadProducts = async () => {
-      if (mounted) {
-        await fetchProducts();
-      }
-    };
-
-    loadProducts();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  if (loading) {
+    // Prefetch other categories in the background
+    ['yugioh', 'dragonball', 'onepiece'].forEach(category => {
+      queryClient.prefetchQuery({
+        queryKey: ['products', category],
+        queryFn: () => fetchProductsByCategory(category)
+      });
+    });
+  }, [queryClient]);
+  
+  if (isLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-[#E6B325] to-[#FFD966]">
@@ -107,20 +53,16 @@ export default function ProductList() {
     );
   }
 
-  if (error) {
+  if (error || !products) {
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-[#E6B325] to-[#FFD966]">
           Featured Products
         </h2>
         <div className="mt-8 text-center">
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500">{error ? 'Failed to load products. Please try again later.' : 'No products found'}</p>
           <button 
-            onClick={() => {
-              setError(null);
-              setLoading(true);
-              fetchProducts();
-            }}
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['products', featuredCategoryToShow] })}
             className="mt-4 px-4 py-2 bg-[#E6B325] text-black rounded-lg hover:bg-[#FFD966] transition-colors"
           >
             Retry
@@ -137,8 +79,8 @@ export default function ProductList() {
       </h2>
       
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        {products.map(product => (
-          <Link href={`/products/${product.category}/${product.id}`} key={product.id}
+        {products.slice(0, 8).map(product => (
+          <Link href={`/products/${featuredCategoryToShow}/${product.id}`} key={product.id}
                 className="group relative block max-w-[240px] mx-auto w-full">
             <div className="relative overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 
                           transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
@@ -146,13 +88,13 @@ export default function ProductList() {
                 <div className="absolute inset-0 bg-gray-900/20 z-10" />
                 <div className="relative w-full h-full flex items-center justify-center transform transition-transform duration-500 group-hover:scale-105">
                   <Image 
-                    src={product.image} 
+                    src={product.imageUrls?.[0] || '/prismatic.jpg'} 
                     alt={product.name}
                     width={IMAGE_CONFIG.width}
                     height={IMAGE_CONFIG.height}
                     className="object-contain max-h-full max-w-full w-auto h-auto p-2"
                     quality={IMAGE_CONFIG.quality}
-                    priority={product.id === '1'}
+                    priority={products.indexOf(product) < 4}
                     sizes="(max-width: 640px) 160px, (max-width: 1024px) 160px, 160px"
                   />
                 </div>

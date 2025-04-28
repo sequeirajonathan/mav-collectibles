@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@lib/supabase/client'
 
 export default function SignUpForm() {
   const [email, setEmail] = useState('')

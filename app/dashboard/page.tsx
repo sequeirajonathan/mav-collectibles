@@ -1,6 +1,6 @@
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@lib/prisma'
 import DashboardClient from './DashboardClient'
 
 export default async function DashboardPage() {

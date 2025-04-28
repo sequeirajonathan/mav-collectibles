@@ -1,8 +1,8 @@
 "use client";
 
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppContext } from '@contexts/AppContext';
 import { toast } from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
+import { Button } from '@components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 

@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { FeaturedEvent } from "@/contexts/AppContext";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { FeaturedEvent } from "@interfaces";
+import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input";
+import { Textarea } from "@components/ui/textarea";
+import { Button } from "@components/ui/button";
 import { Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 
 interface EventFormProps {
@@ -40,6 +40,14 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
       ...prev,
       bulletPoints: prev.bulletPoints?.filter((_, i) => i !== index) || []
     }));
+  };
+  
+  const handleEditBulletPoint = (index: number, value: string) => {
+    setFormData(prev => {
+      const newBulletPoints = [...(prev.bulletPoints || [])];
+      newBulletPoints[index] = value;
+      return { ...prev, bulletPoints: newBulletPoints };
+    });
   };
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,11 +200,7 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
             <div key={index} className="flex items-center space-x-2">
               <Input
                 value={point}
-                onChange={(e) => {
-                  const newBulletPoints = [...(formData.bulletPoints || [])];
-                  newBulletPoints[index] = e.target.value;
-                  handleChange("bulletPoints", newBulletPoints);
-                }}
+                onChange={(e) => handleEditBulletPoint(index, e.target.value)}
               />
               <Button
                 variant="destructive"

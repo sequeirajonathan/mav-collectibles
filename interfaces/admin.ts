@@ -12,4 +12,4 @@ export interface VideoSettings {
 export interface AdminVideoSettings {
   url: string;
   autoplay: boolean;
-} 
+}

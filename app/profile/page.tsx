@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@contexts/SupabaseContext";
 import { motion } from "framer-motion";
 
 export default function ProfilePage() {

@@ -1,6 +1,5 @@
-import DebugInfo from '@/components/admin/DebugInfo';
-import AdminSettingsUpdater from '@/components/admin/AdminSettingsUpdater';
-import FeatureFlagDebug from '@/components/admin/FeatureFlagDebug';
+import DebugInfo from '@components/admin/DebugInfo';
+import AdminSettingsUpdater from '@components/admin/AdminSettingsUpdater';
 
 export default function AdminLayout({
   children,
@@ -12,7 +11,6 @@ export default function AdminLayout({
       {children}
       <DebugInfo />
       <AdminSettingsUpdater />
-      <FeatureFlagDebug />
     </>
   );
 } 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAppContext, type FeaturedEvent } from "@/contexts/AppContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useAppContext } from "@contexts/AppContext";
+import { type FeaturedEvent } from "@interfaces";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
+import { Button } from "@components/ui/button";
 import EventForm from "./EventForm";
 import Image from "next/image";
 import { Edit, Trash2 } from "lucide-react";
@@ -89,7 +90,7 @@ export default function FeaturedEventsTab() {
       
       <h3 className="text-xl font-bold mb-4">Existing Featured Events</h3>
       
-      {featuredEvents.length === 0 ? (
+      {!featuredEvents || featuredEvents.length === 0 ? (
         <p className="text-gray-400">No featured events yet. Add one above!</p>
       ) : (
         featuredEvents.map((event) => (

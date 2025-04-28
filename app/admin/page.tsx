@@ -1,12 +1,12 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FeatureFlagsTab from "@/components/admin/FeatureFlagsTab";
-import AlertBannerTab from "@/components/admin/AlertBannerTab";
-import FeaturedEventsTab from "@/components/admin/FeaturedEventsTab";
-import YouTubeVideoTab from "@/components/admin/YouTubeVideoTab";
-import VideoSettingsTab from "@/components/admin/VideoSettingsTab";
-import "@/styles/admin.css";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
+import FeatureFlagsTab from "@components/admin/FeatureFlagsTab";
+import AlertBannerTab from "@components/admin/AlertBannerTab";
+import FeaturedEventsTab from "@components/admin/FeaturedEventsTab";
+import YouTubeVideoTab from "@components/admin/YouTubeVideoTab";
+import VideoSettingsTab from "@components/admin/VideoSettingsTab";
+import "@styles/admin.css";
 
 export default function AdminDashboard() {
   return (

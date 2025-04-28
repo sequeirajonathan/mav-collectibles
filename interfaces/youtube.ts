@@ -1,4 +1,4 @@
-declare interface YouTubeSettings {
+export interface YouTubeSettings {
   videoId: string;
   title: string;
   autoplay: boolean;

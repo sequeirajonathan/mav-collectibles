@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSupabase } from '@/contexts/SupabaseContext';
+import { useSupabase } from '@contexts/SupabaseContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
