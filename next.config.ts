@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       "items-images-production.s3.us-west-2.amazonaws.com",
       "square-catalog-sandbox.s3.amazonaws.com",
       "square-catalog-production.s3.amazonaws.com",
+      "ubkfii3geuyo44gn.public.blob.vercel-storage.com",
     ],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

@@ -6,6 +6,12 @@ import YouTubePlayer from './YouTubePlayer';
 import VideoPlayer from './VideoPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const VIDEO_CDN = {
+  fallbackImage: "https://ubkfii3geuyo44gn.public.blob.vercel-storage.com/banner-fallback-da01abj14MnxqTeGQHExu1vyzYU8dt.jpg",
+  webm: "https://ubkfii3geuyo44gn.public.blob.vercel-storage.com/banner_1-VWhXWdrcAt4XrnuciQmV6nXgjO1mSb.webm",
+  mp4: "https://ubkfii3geuyo44gn.public.blob.vercel-storage.com/banner_2_5-QCGuDaJzZ6ezLznNqGr6umGNPDgx2p.mp4"
+};
+
 export default function VideoSection() {
   const { youtubeSettings, videoSettings, getFeatureFlag } = useAppContext();
   const [videoReady, setVideoReady] = useState(false);
@@ -51,7 +57,7 @@ export default function VideoSection() {
 
   useEffect(() => {
     const img = new Image();
-    img.src = '/banner-fallback.jpg'; // Correct poster
+    img.src = VIDEO_CDN.fallbackImage;
   }, []);
 
   const handleVideoLoad = () => {
@@ -74,31 +80,30 @@ export default function VideoSection() {
 
   useEffect(() => {
     const videoElement = videoRef.current;
+    if (!videoElement) return;
 
-    if (videoElement) {
-      videoElement.addEventListener('loadeddata', handleVideoLoad);
-      videoElement.addEventListener('canplay', handleVideoLoad);
-      videoElement.addEventListener('playing', handleVideoPlaying);
-      videoElement.addEventListener('error', handleVideoError);
+    videoElement.addEventListener('loadeddata', handleVideoLoad);
+    videoElement.addEventListener('canplay', handleVideoLoad);
+    videoElement.addEventListener('playing', handleVideoPlaying);
+    videoElement.addEventListener('error', handleVideoError);
 
-      if (videoElement.readyState >= 3) {
-        handleVideoLoad();
-      }
-
-      const timeout = setTimeout(() => {
-        if (!videoLoaded) {
-          handleVideoError(new Event('timeout'));
-        }
-      }, 5000); // safer longer timeout
-
-      return () => {
-        clearTimeout(timeout);
-        videoElement.removeEventListener('loadeddata', handleVideoLoad);
-        videoElement.removeEventListener('canplay', handleVideoLoad);
-        videoElement.removeEventListener('playing', handleVideoPlaying);
-        videoElement.removeEventListener('error', handleVideoError);
-      };
+    if (videoElement.readyState >= 3) {
+      handleVideoLoad();
     }
+
+    const timeout = setTimeout(() => {
+      if (!videoLoaded) {
+        handleVideoError(new Event('timeout'));
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeout);
+      videoElement.removeEventListener('loadeddata', handleVideoLoad);
+      videoElement.removeEventListener('canplay', handleVideoLoad);
+      videoElement.removeEventListener('playing', handleVideoPlaying);
+      videoElement.removeEventListener('error', handleVideoError);
+    };
   }, [videoLoaded]);
 
   const showBanner = !hasVideo || !videoReady || !showVideo;
@@ -109,7 +114,7 @@ export default function VideoSection() {
   };
 
   const backgroundStyle = {
-    backgroundImage: 'url("/banner-fallback.jpg")',
+    backgroundImage: `url("${VIDEO_CDN.fallbackImage}")`,
     backgroundSize: 'cover',
     backgroundPosition: 'center 25%',
     backgroundColor: '#000'
@@ -160,10 +165,10 @@ export default function VideoSection() {
                       className="absolute w-full h-full object-cover object-center"
                       style={{ objectPosition: '50% 25%' }}
                       onError={(e) => handleVideoError(e.nativeEvent)}
-                      poster="/banner-fallback.jpg"
+                      poster={VIDEO_CDN.fallbackImage}
                     >
-                      <source src="/banner_1.webm" type="video/webm" />
-                      <source src="/banner_fallback.mp4" type="video/mp4" />
+                      <source src={VIDEO_CDN.webm} type="video/webm" />
+                      <source src={VIDEO_CDN.mp4} type="video/mp4" />
                     </video>
                   </motion.div>
                 </AnimatePresence>
