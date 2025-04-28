@@ -85,6 +85,14 @@ export default function VideoSection() {
     setVideoPlaying(true);
   };
 
+  // Handle video error
+  const handleVideoError = (e: Event) => {
+    console.error("Video error:", e);
+    setVideoError(true);
+    setVideoLoaded(false);
+    setVideoPlaying(false);
+  };
+
   // Preload video if possible
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -94,30 +102,48 @@ export default function VideoSection() {
       videoElement.addEventListener('loadeddata', handleVideoLoad);
       videoElement.addEventListener('canplay', handleVideoLoad);
       videoElement.addEventListener('playing', handleVideoPlaying);
+      videoElement.addEventListener('error', handleVideoError);
       
       // If the video is already loaded in the DOM
       if (videoElement.readyState >= 3) {
         handleVideoLoad();
       }
+      
+      // Force a timeout for video loading - if not loaded after 3 seconds, show error
+      const timeout = setTimeout(() => {
+        if (!videoLoaded) {
+          handleVideoError(new Event('timeout'));
+        }
+      }, 3000);
+      
+      return () => {
+        clearTimeout(timeout);
+        if (videoElement) {
+          videoElement.removeEventListener('loadeddata', handleVideoLoad);
+          videoElement.removeEventListener('canplay', handleVideoLoad);
+          videoElement.removeEventListener('playing', handleVideoPlaying);
+          videoElement.removeEventListener('error', handleVideoError);
+        }
+      };
     }
-    
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener('loadeddata', handleVideoLoad);
-        videoElement.removeEventListener('canplay', handleVideoLoad);
-        videoElement.removeEventListener('playing', handleVideoPlaying);
-      }
-    };
-  }, []);
+  }, [videoLoaded]);
 
   // Always show the banner if there's no video or if video isn't ready yet
   const showBanner = !hasVideo || !videoReady || !showVideo;
 
   // Add a handler for video errors
-  const handleVideoError = () => {
+  const handlePlayerError = () => {
     setVideoError(true); // Set the error state to true
     // Show the banner again when video fails
     setShowVideo(false);
+  };
+  
+  // Static background to ensure content is visible even if video fails
+  const backgroundStyle = {
+    backgroundImage: 'url("/banner-fallback.jpg")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center 25%',
+    backgroundColor: '#000'
   };
 
   return (
@@ -133,7 +159,7 @@ export default function VideoSection() {
             initial={{ opacity: 1 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="w-full h-full relative overflow-hidden rounded-md bg-black">
+            <div className="w-full h-full relative overflow-hidden rounded-md bg-black" style={videoError ? backgroundStyle : undefined}>
               {/* Placeholder pulse animation while video loads */}
               <motion.div 
                 className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black"
@@ -157,34 +183,39 @@ export default function VideoSection() {
                 }}
               />
               
-              <AnimatePresence>
-                <motion.div 
-                  className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ 
-                    opacity: videoPlaying ? 1 : 0,
-                    scale: videoPlaying ? 1 : 1.02 
-                  }}
-                  transition={{ 
-                    opacity: { duration: 1.2, ease: "easeOut" },
-                    scale: { duration: 1.5, ease: "easeOut" }
-                  }}
-                >
-                  <video 
-                    ref={videoRef}
-                    autoPlay 
-                    muted 
-                    loop 
-                    playsInline
-                    preload="auto"
-                    className="absolute w-full h-full object-cover object-center"
-                    style={{ objectPosition: '50% 25%' }}
+              {!videoError && (
+                <AnimatePresence>
+                  <motion.div 
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: videoPlaying ? 1 : 0,
+                      scale: videoPlaying ? 1 : 1.02 
+                    }}
+                    transition={{ 
+                      opacity: { duration: 1.2, ease: "easeOut" },
+                      scale: { duration: 1.5, ease: "easeOut" }
+                    }}
                   >
-                    <source src="/banner_1.webm" type="video/webm" />
-                    <source src="/banner_2_5.mp4" type="video/mp4" />
-                  </video>
-                </motion.div>
-              </AnimatePresence>
+                    <video 
+                      ref={videoRef}
+                      autoPlay 
+                      muted 
+                      loop 
+                      playsInline
+                      preload="auto"
+                      className="absolute w-full h-full object-cover object-center"
+                      style={{ objectPosition: '50% 25%' }}
+                      onError={(e) => handleVideoError(e.nativeEvent)}
+                      poster="/banner-fallback.jpg"
+                    >
+                      <source src="/banner_1.webm" type="video/webm" />
+                      <source src="/banner_2_5.mp4" type="video/mp4" />
+                      <source src="/banner-fallback.mp4" type="video/mp4" />
+                    </video>
+                  </motion.div>
+                </AnimatePresence>
+              )}
               
               {/* Dramatic lighting gradient - reduced opacity */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
@@ -252,8 +283,8 @@ export default function VideoSection() {
           >
             {/* Render the appropriate video player based on type */}
             <div className="absolute inset-0">
-              {videoType === 'youtube' && <YouTubePlayer useContextSettings={true} onError={handleVideoError} />}
-              {videoType === 'direct' && <VideoPlayer useContextSettings={true} onError={handleVideoError} />}
+              {videoType === 'youtube' && <YouTubePlayer useContextSettings={true} onError={handlePlayerError} />}
+              {videoType === 'direct' && <VideoPlayer useContextSettings={true} onError={handlePlayerError} />}
             </div>
           </motion.div>
         </div>
