@@ -46,8 +46,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { data: featureFlags, isLoading: featureFlagsLoading, refetch: refetchFeatureFlags } =
     useFeatureFlags();
-  const { data: alertBanner, isLoading: alertBannerLoading, refetch: refetchAlertBanner } = useAlertBanner();
-  const { mutateAsync: updateAlertBannerMutation } = useUpdateAlertBanner();
+  const { alertBanner, loading: alertBannerLoading, refresh: refetchAlertBanner } = useAlertBanner();
+  const updateAlertBannerMutation = useUpdateAlertBanner();
   const { data: featuredEvents, isLoading: featuredEventsLoading, refetch: refetchFeaturedEvents } =
     useFeaturedEvents();
   const { mutateAsync: createFeaturedEvent } = useCreateFeaturedEvent();
@@ -91,7 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateAlertBanner = async (data: Partial<AlertBanner>) => {
     if (!alertBanner?.id) return;
-    await updateAlertBannerMutation({ id: alertBanner.id, data });
+    await updateAlertBannerMutation(alertBanner.id, data);
   };
 
   const getFeatureFlag = (name: string) => {

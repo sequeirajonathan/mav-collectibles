@@ -1,14 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
+import { alertBannerSchema } from '@validations/alert-banner';
 import { z } from 'zod';
-
-const alertBannerSchema = z.object({
-  message: z.string(),
-  code: z.string().optional(),
-  backgroundColor: z.string().default('#E6B325'),
-  textColor: z.string().default('#000000'),
-  enabled: z.boolean().default(true),
-});
 
 export async function GET() {
   try {
@@ -39,6 +32,12 @@ export async function POST(request: Request) {
     return NextResponse.json(newAlertBanner, { status: 201 });
   } catch (error) {
     console.error('Error creating alert banner:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to create alert banner' },
       { status: 500 }

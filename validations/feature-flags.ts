@@ -1,15 +1,17 @@
 import { z } from 'zod';
-import { idSchema, dateSchema, booleanSchema, nonEmptyStringSchema } from "./base";
+import { idSchema, dateSchema, nonEmptyStringSchema } from "./base";
 
 // Feature Flag validation schema
 export const featureFlagSchema = z.object({
   id: idSchema,
-  name: nonEmptyStringSchema,
+  name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  enabled: booleanSchema,
+  enabled: z.boolean().default(false),
   createdAt: dateSchema,
   updatedAt: dateSchema,
 });
+
+export type FeatureFlag = z.infer<typeof featureFlagSchema>;
 
 export const createFeatureFlagSchema = featureFlagSchema.omit({
   id: true,

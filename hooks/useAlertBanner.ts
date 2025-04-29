@@ -1,73 +1,79 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { AlertBanner } from '@validations/alert-banner';
+import { alertBannerSchema } from '@validations/alert-banner';
 import { fetchAlertBanner, updateAlertBanner, createAlertBanner } from '@services/alertBannerService';
-import { AlertBanner } from '@interfaces';
 
 export function useAlertBanner() {
-  return useQuery<AlertBanner | null>({
-    queryKey: ['alertBanner'],
-    queryFn: fetchAlertBanner,
-    // Keep data fresh for 24 hours unless explicitly invalidated
-    staleTime: 1000 * 60 * 60 * 24,
-    // Cache the data for 24 hours
-    gcTime: 1000 * 60 * 60 * 24,
-    // Don't refetch on window focus since alert banner changes are rare
-    refetchOnWindowFocus: false,
-    // Don't refetch on mount since we have SSR data
-    refetchOnMount: false,
-    initialData: null,
-  });
+  const [alertBanner, setAlertBanner] = useState<AlertBanner | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    loadAlertBanner();
+  }, []);
+
+  const loadAlertBanner = async () => {
+    try {
+      setLoading(true);
+      const banner = await fetchAlertBanner();
+      setAlertBanner(banner);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to load alert banner'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateBanner = async (id: string, data: Partial<AlertBanner>) => {
+    try {
+      setLoading(true);
+      const validatedData = alertBannerSchema.partial().parse(data);
+      const updatedBanner = await updateAlertBanner(id, validatedData);
+      setAlertBanner(updatedBanner);
+      return updatedBanner;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update alert banner');
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createBanner = async (data: AlertBanner) => {
+    try {
+      setLoading(true);
+      const validatedData = alertBannerSchema.parse(data);
+      const newBanner = await createAlertBanner(validatedData);
+      setAlertBanner(newBanner);
+      return newBanner;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create alert banner');
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    alertBanner,
+    loading,
+    error,
+    updateBanner,
+    createBanner,
+    refresh: loadAlertBanner,
+  };
 }
 
+// Separate hook for updating alert banner
 export function useUpdateAlertBanner() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<AlertBanner> }) => updateAlertBanner(id, data),
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['alertBanner'] });
-      const previousBanner = queryClient.getQueryData(['alertBanner']);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(['alertBanner'], (old: AlertBanner | null) => {
-        if (!old) return null;
-        return { ...old, ...newData.data };
-      });
-
-      return { previousBanner };
-    },
-    onError: (err, newData, context) => {
-      if (context?.previousBanner) {
-        queryClient.setQueryData(['alertBanner'], context.previousBanner);
-      }
-    },
-    onSettled: () => {
-      // Always refetch after error or success to ensure data is in sync
-      queryClient.invalidateQueries({ queryKey: ['alertBanner'] });
-    },
-  });
+  const { updateBanner } = useAlertBanner();
+  return updateBanner;
 }
 
+// Separate hook for creating alert banner
 export function useCreateAlertBanner() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: Partial<AlertBanner>) => createAlertBanner(data),
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['alertBanner'] });
-      const previousBanner = queryClient.getQueryData(['alertBanner']);
-      
-      // Optimistically update to the new value
-      queryClient.setQueryData(['alertBanner'], newData as AlertBanner);
-      
-      return { previousBanner };
-    },
-    onError: (err, newData, context) => {
-      if (context?.previousBanner) {
-        queryClient.setQueryData(['alertBanner'], context.previousBanner);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['alertBanner'] });
-    },
-  });
+  const { createBanner } = useAlertBanner();
+  return createBanner;
 }

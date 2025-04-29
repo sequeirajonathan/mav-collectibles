@@ -12,6 +12,10 @@ export interface SquareItem {
       };
     }>;
     imageIds?: string[];
+    categories?: Array<{
+      id: string;
+      ordinal?: number;
+    }>;
   };
 }
 

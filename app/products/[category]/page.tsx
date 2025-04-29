@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { ProductCard } from '@components/ui/ProductCard';
-import { Filter, SlidersHorizontal, ArrowDownWideNarrow } from 'lucide-react';
-import { useSquareProducts } from '@hooks/useSquareProducts';
-import { useParams } from 'next/navigation';
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { ProductCard } from "@components/ui/ProductCard";
+import { ProductFilters } from "@components/ui/ProductFilters";
+import { NoProducts } from "@components/ui/NoProducts";
+import { useProductsByCategory } from "@hooks/useSquareProduct";
 
 const IMAGE_CONFIG = {
   width: 280,
@@ -13,134 +14,85 @@ const IMAGE_CONFIG = {
   quality: 90,
 } as const;
 
-const categoryTitles: Record<string, string> = {
-  pokemon: "Pokémon Trading Card Game",
-  yugioh: "Yu-Gi-Oh! Trading Card Game",
-  onepiece: "One Piece Card Game",
-  dragonball: "Dragon Ball Super Card Game",
-  digimon: "Digimon Card Game",
-  metazoo: "MetaZoo Trading Card Game",
-};
+export default function CategoryPage() {
+  const params = useParams<{ category: string }>();
+  const { data: products = [], isLoading } = useProductsByCategory(
+    params.category
+  );
+  const [sortBy, setSortBy] = useState("best_selling");
+  const [filterBy, setFilterBy] = useState("all");
 
-const categoryImages: Record<string, string> = {
-  pokemon: "/pokemon-logo.png",
-  yugioh: "/yugioh-logo.png",
-  onepiece: "/one-piece-card-game.jpg",
-  dragonball: "/dragonball.png",
-  digimon: "/digimon_card_game_logo.png",
-  metazoo: "/Metazoo-logo.png",
-};
-
-export default function ProductCategoryPage() {
-  const params = useParams();
-  const category = params.category as string;
-  const { data: products = [], isLoading, isError } = useSquareProducts(category);
-
-  const categoryTitle = categoryTitles[category] || "Trading Card Game";
-  const categoryImage = categoryImages[category];
+  // Filter and sort products
+  const filteredProducts = products
+    .filter((product) => {
+      if (filterBy === "all") return true;
+      return product.status === filterBy;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price_asc":
+          return a.price - b.price;
+        case "price_desc":
+          return b.price - a.price;
+        case "name_asc":
+          return a.name.localeCompare(b.name);
+        case "name_desc":
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
 
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center text-center text-red-500">
-        Failed to load products.
+        <div className="animate-pulse text-center">
+          <div className="h-8 w-48 bg-gray-800 rounded mx-auto mb-4" />
+          <div className="h-4 w-64 bg-gray-800 rounded mx-auto" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[60vh] px-4 py-12 max-w-[1400px] mx-auto">
-      <div className="text-center mb-12">
-        {categoryImage && (
-          <div className="mb-8 flex justify-center">
-            <Image
-              src={categoryImage}
-              alt={categoryTitle}
-              width={240}
-              height={120}
-              className="object-contain"
+    <div className="min-h-[60vh] px-4 py-12">
+      <div className="max-w-7xl mx-auto">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl sm:text-4xl font-bold text-[#E6B325] mb-12 text-center"
+        >
+          {params.category.charAt(0).toUpperCase() + params.category.slice(1)}{" "}
+          Trading Cards
+        </motion.h1>
+
+        {filteredProducts.length > 0 ? (
+          <>
+            <ProductFilters
+              sortBy={sortBy}
+              filterBy={filterBy}
+              onSortChange={setSortBy}
+              onFilterChange={setFilterBy}
             />
-          </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    image: product.imageUrls?.[0] || "",
+                    stockQuantity: 0, // TODO: Get from Square API
+                  }}
+                  imageConfig={IMAGE_CONFIG}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <NoProducts />
         )}
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#E6B325] mb-4">
-          {categoryTitle}
-        </h1>
-        <p className="text-gray-300 max-w-2xl mx-auto">
-          Browse our selection of {categoryTitle.toLowerCase()} products.
-          We offer competitive prices and authentic products.
-        </p>
       </div>
-
-      {products.length > 0 && (
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-300">{products.length} products</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-3 py-2 rounded-md bg-gray-800 text-gray-300 hover:bg-gray-700">
-              <Filter size={16} />
-              <span>Filter</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 rounded-md bg-gray-800 text-gray-300 hover:bg-gray-700">
-              <ArrowDownWideNarrow size={16} />
-              <span>Sort</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
-          {products.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.imageUrls?.[0] || '',
-                category: product.category,
-                description: product.description,
-                status: product.status,
-                stockQuantity: 0, // TODO: Get from Square API
-              }}
-              imageConfig={IMAGE_CONFIG}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center bg-gray-900 rounded-lg p-10">
-          <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-800 mb-4">
-            <SlidersHorizontal size={24} className="text-[#E6B325]" />
-          </div>
-          <h2 className="text-xl font-semibold text-white mb-3">No Products Found</h2>
-          <p className="text-gray-300 mb-8 max-w-md mx-auto">
-            Sorry, there are no products available in this collection at the moment.
-            Please check back later or browse other categories.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/products"
-              className="px-6 py-3 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-lg font-medium transition-colors"
-            >
-              View All Products
-            </Link>
-            <Link
-              href="/"
-              className="px-6 py-3 border border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325]/10 rounded-lg font-medium transition-colors"
-            >
-              Return Home
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

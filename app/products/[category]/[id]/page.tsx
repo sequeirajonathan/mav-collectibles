@@ -17,7 +17,7 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
   const resolvedParams = use(params);
   const [quantity, setQuantity] = useState(1);
   
-  const { data: product, isLoading, isError } = useSquareProduct(resolvedParams.id);
+  const { data: product, isLoading, isError } = useSquareProduct(resolvedParams.id, resolvedParams.category);
 
   if (isLoading) {
     return (

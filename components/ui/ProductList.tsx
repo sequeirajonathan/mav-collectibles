@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useQueryClient } from '@tanstack/react-query';
 import { fetchProductsByCategory } from '@services/squareService';
-import { useSquareProducts } from '@hooks/useSquareProducts';
+import { useProductsByCategory } from '@hooks/useSquareProduct';
 
 // Add image dimensions configuration
 const IMAGE_CONFIG = {
@@ -19,7 +19,7 @@ export default function ProductList() {
   const featuredCategoryToShow = 'pokemon'; // Default featured category to show
 
   // Use React Query to fetch products
-  const { data: products, isLoading, error } = useSquareProducts(featuredCategoryToShow);
+  const { data: products, isLoading, error } = useProductsByCategory(featuredCategoryToShow);
 
   // Prefetch other categories when component mounts
   useEffect(() => {

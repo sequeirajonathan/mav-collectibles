@@ -1,9 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
-import { capitalizeFirstLetter } from "@utils";
 
-// Define a response type that can include debug info
 interface ProductsResponse {
   products: SquareProduct[];
   debug?: {
@@ -16,134 +14,102 @@ interface ProductsResponse {
   error?: string;
 }
 
+// Helper to map images
+function buildImageMap(relatedObjects?: unknown[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  relatedObjects?.forEach(obj => {
+    const imageObj = obj as { type: string; id: string; imageData?: { url?: string } };
+    if (imageObj.type === 'IMAGE' && imageObj.id && imageObj.imageData?.url) {
+      map[imageObj.id] = imageObj.imageData.url;
+    }
+  });
+  return map;
+}
+
+// Helper to map items to products
+function mapItemsToProducts(items: SquareItem[], imageMap: Record<string, string>): SquareProduct[] {
+  return items.map((item) => {
+    const itemData = item.itemData ?? {};
+    const mainVariation = itemData.variations?.[0]?.itemVariationData ?? {};
+    const imageUrls = itemData.imageIds?.map(id => imageMap[id]).filter(Boolean) || [];
+
+    return {
+      id: item.id ?? "",
+      name: itemData.name ?? "Unnamed Product",
+      description: itemData.description ?? "",
+      price: Number(mainVariation.priceMoney?.amount ?? 0n) / 100,
+      status: "AVAILABLE" as const,
+      imageIds: itemData.imageIds ?? [],
+      imageUrls,
+      category: itemData.categories?.[0]?.id ?? "",
+      variations: (itemData.variations ?? []).map(variation => ({
+        id: variation.id ?? "",
+        name: variation.itemVariationData?.name ?? "",
+        price: Number(variation.itemVariationData?.priceMoney?.amount ?? 0n) / 100,
+        sku: variation.itemVariationData?.sku,
+      })),
+    };
+  });
+}
+
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const category = searchParams.get('category');
+  const searchType = searchParams.get('searchType') || 'text';
+
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const searchType = searchParams.get('searchType') || 'text';
+    const squareClient = createSquareClient();
 
-    if (!category) {
-      return NextResponse.json(
-        { error: "Category is required" },
-        { status: 400 }
-      );
+    let query: { prefixQuery?: { attributeName: string; attributePrefix: string }; 
+                exactQuery?: { attributeName: string; attributeValue: string };
+                textQuery?: { keywords: string[] } } | null = null;
+    if (category) {
+      // Configure search query if category exists
+      switch (searchType) {
+        case 'prefix':
+          query = { prefixQuery: { attributeName: "name", attributePrefix: category } };
+          break;
+        case 'exact':
+          query = { exactQuery: { attributeName: "name", attributeValue: category } };
+          break;
+        default:
+          query = { textQuery: { keywords: [category] } };
+      }
     }
 
-    try {
-      const squareClient = createSquareClient();
-      
-      // Format the category name with proper capitalization
-      const formattedCategory = capitalizeFirstLetter(category);
-      
-      // Configure search query based on search type
-      let query;
-      if (searchType === 'prefix') {
-        // Use prefix search on name attribute
-        query = {
-          prefixQuery: {
-            attributeName: "name",
-            attributePrefix: formattedCategory,
-          }
-        };
-      } else if (searchType === 'exact') {
-        // Use exact search on name attribute
-        query = {
-          exactQuery: {
-            attributeName: "name",
-            attributeValue: formattedCategory,
-          }
-        };
-      } else {
-        // Default: Use text search (keywords)
-        query = {
-          textQuery: {
-            keywords: [formattedCategory]
-          }
-        };
-      }
+    const response = await squareClient.catalog.search({
+      objectTypes: ["ITEM"],
+      ...(query ? { query } : {}),
+      includeRelatedObjects: true,
+      limit: 50,
+    });
 
-      // Execute search with constructed query
-      const response = await squareClient.catalog.search({
-        objectTypes: ["ITEM"],
-        query,
-        limit: 50,
-        includeRelatedObjects: true,
-      });
-
-      if (!response.objects || response.objects.length === 0) {
-        return NextResponse.json({ products: [] });
-      }
-
-      // Filter for items only
-      const items = response.objects.filter(obj => obj.type === 'ITEM');
-      
-      // Extract image data from related objects
-      const imageMap: Record<string, string> = {};
-      if (response.relatedObjects) {
-        response.relatedObjects.forEach(obj => {
-          if (obj.type === 'IMAGE' && obj.id && obj.imageData?.url) {
-            imageMap[obj.id] = obj.imageData.url;
-          }
-        });
-      }
-
-      const products = (items as SquareItem[]).map((item) => {
-        const itemData = item.itemData ?? {};
-        const mainVariation = itemData.variations?.[0]?.itemVariationData ?? {};
-        
-        // Map image IDs to URLs
-        const imageUrls = itemData.imageIds?.map(id => imageMap[id]).filter(Boolean) || [];
-
-        return {
-          id: item.id ?? "",
-          name: itemData.name ?? "Unnamed Product",
-          description: itemData.description ?? "",
-          price: Number(mainVariation.priceMoney?.amount ?? 0n) / 100,
-          status: "AVAILABLE" as const,
-          imageIds: itemData.imageIds ?? [],
-          imageUrls,
-          category: formattedCategory,
-          variations: (itemData.variations ?? []).map((variation) => ({
-            id: variation.id ?? "",
-            name: variation.itemVariationData?.name ?? "",
-            price: Number(variation.itemVariationData?.priceMoney?.amount ?? 0n) / 100,
-            sku: variation.itemVariationData?.sku,
-          })),
-        };
-      });
-
-      // Optionally include debug info in response
-      const responseData: ProductsResponse = { products };
-
-      return NextResponse.json(responseData);
-    } catch (squareError) {
-      console.error("Square API error:", squareError);
-      
-      // Return empty array to trigger client-side fallback
-      const responseData: ProductsResponse = { 
-        products: [],
-        error: "Using fallback data due to Square API error" 
-      };
-      return NextResponse.json(responseData);
+    const objects = response.objects ?? [];
+    if (objects.length === 0) {
+      return NextResponse.json({ products: [] });
     }
+
+    const items = objects.filter(obj => obj.type === 'ITEM') as SquareItem[];
+    const imageMap = buildImageMap(response.relatedObjects);
+
+    const products = mapItemsToProducts(items, imageMap);
+
+    return NextResponse.json({ products });
   } catch (error) {
-    console.error("Error in products API route:", error);
+    console.error("Error fetching products:", error);
+
     const responseData: ProductsResponse = {
       products: [],
-      error: "Failed to fetch products",
-    };
-    
-    if (error instanceof Error) {
-      responseData.debug = {
-        searchType: 'error',
-        formattedCategory: '',
+      error: error instanceof Error ? error.message : "Failed to fetch products",
+      debug: error instanceof Error ? {
+        searchType,
+        formattedCategory: category ?? '',
         totalObjectsFound: 0,
         totalItemsFound: 0,
         hasRelatedObjects: false,
-      };
-      responseData.error = error.message;
-    }
-    
+      } : undefined,
+    };
+
     return NextResponse.json(responseData, { status: 500 });
   }
 }

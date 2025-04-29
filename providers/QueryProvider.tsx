@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { usePrefetchProducts } from '@hooks/useSquareProducts';
+import { usePrefetchProducts } from '@hooks/useSquareProduct';
 import { AlertBanner } from '@interfaces';
 import queryClient from '@lib/queryClient';
 
