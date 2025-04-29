@@ -2,19 +2,20 @@ import { NextResponse } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
     const client = createSquareClient();
     const { id } = params;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+    }
 
     // Fetch the specific item and its related objects (like images)
     const response = await client.catalog.object.get({
       objectId: id,
       includeRelatedObjects: true,
-  });
+    });
 
     if (!response.object || response.object.type !== 'ITEM') {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
