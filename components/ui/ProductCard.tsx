@@ -1,97 +1,112 @@
 "use client";
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star, ShoppingCart } from 'lucide-react';
-import { SquareProduct } from '@interfaces';
+import { ShoppingCart } from 'lucide-react';
 
-interface ProductCardProps {
-  product: SquareProduct;
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  description: string;
+  status: 'in_stock' | 'sale' | 'sold_out' | 'AVAILABLE' | 'UNAVAILABLE';
+  salePrice?: number;
+  stockQuantity: number;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  const imageUrl = product.imageUrls && product.imageUrls.length > 0 
-    ? product.imageUrls[0] 
-    : '';
+interface ProductCardProps {
+  product: Product;
+  imageConfig: {
+    width: number;
+    height: number;
+    quality: number;
+  };
+}
 
+export function ProductCard({ product, imageConfig }: ProductCardProps) {
   return (
-    <motion.div 
-      className="flex flex-col h-full"
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="group relative block max-w-[280px] mx-auto w-full"
     >
-      <div className="relative w-full pt-[100%] overflow-hidden rounded-lg bg-gray-900">
-        {/* Image */}
-        <div 
-          className="absolute inset-0 transition-transform duration-300 ease-in-out transform"
-          style={{ transform: isHovered ? 'scale(1.05)' : 'scale(1)' }}
-        >
-          {imageUrl && (
-            <Image 
-              src={imageUrl} 
-              alt={product.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover"
-            />
-          )}
+      {product.status === 'sale' && (
+        <div className="absolute -top-5 -left-2 z-10 bg-[#E6B325] text-black px-3 py-1 rounded-md text-sm font-bold shadow-lg">
+          SALE
         </div>
-        
-        {/* Status badge */}
-        {product.status === 'AVAILABLE' && (
-          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md">
-            In Stock
+      )}
+      <Link 
+        href={`/products/${product.category}/${product.id}`}
+        className="block h-full"
+      >
+        <div className="relative flex flex-col h-full overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 
+                      transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
+          <div className="relative aspect-square w-full overflow-hidden">
+            {product.status === 'sold_out' && (
+              <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">SOLD OUT</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gray-900/20 z-10" />
+            <div className="relative w-full h-full flex items-center justify-center transform transition-transform duration-500 group-hover:scale-105">
+              <Image 
+                src={product.image} 
+                alt={product.name}
+                width={imageConfig.width}
+                height={imageConfig.height}
+                className="object-contain max-h-full max-w-full w-auto h-auto p-4"
+                quality={imageConfig.quality}
+              />
+            </div>
+            
+            {product.status !== 'sold_out' && (
+              <motion.div 
+                className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                initial={false}
+              >
+                <span className="text-white font-semibold text-lg">View Details</span>
+              </motion.div>
+            )}
           </div>
-        )}
-        
-        {/* Quick view button */}
-        <div 
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
-            isHovered ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <Link 
-            href={`/products/${product.id}`}
-            className="bg-[#E6B325] hover:bg-[#FFD966] text-black font-semibold px-4 py-2 rounded-md transition-colors"
-          >
-            Quick View
-          </Link>
+          
+          <div className="flex flex-col flex-grow p-4 pt-6">
+            <h3 className="text-sm font-medium text-white/90 group-hover:text-white mb-2 line-clamp-2 min-h-[2.5rem]">
+              {product.name}
+            </h3>
+            <p className="text-sm text-gray-400 mb-3 line-clamp-2 flex-grow">
+              {product.description}
+            </p>
+            <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-800/50">
+              <div className="flex items-center gap-2">
+                {product.salePrice ? (
+                  <>
+                    <span className="text-[#E6B325] font-semibold">${product.salePrice.toFixed(2)}</span>
+                    <span className="text-gray-500 line-through text-sm">${product.price.toFixed(2)}</span>
+                  </>
+                ) : (
+                  <span className="text-[#E6B325] font-semibold">${product.price.toFixed(2)}</span>
+                )}
+              </div>
+              {product.status !== 'sold_out' && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Add to cart logic here
+                  }}
+                  className="p-2 rounded-lg bg-[#E6B325]/10 text-[#E6B325] hover:bg-[#E6B325]/20 transition-colors"
+                  aria-label="Quick add to cart"
+                >
+                  <ShoppingCart size={18} />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-      
-      {/* Product info */}
-      <div className="mt-4 flex flex-col flex-grow">
-        <h3 className="text-white font-semibold text-lg line-clamp-2 mb-1">
-          {product.name}
-        </h3>
-        
-        {/* Rating stars - static for now */}
-        <div className="flex items-center mb-2">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={14} className="text-[#E6B325] fill-[#E6B325]" />
-          ))}
-        </div>
-        
-        {/* Price */}
-        <div className="text-[#E6B325] font-bold text-lg mb-3">
-          ${product.price.toFixed(2)}
-        </div>
-        
-        {/* Add to cart button */}
-        <button 
-          className="mt-auto flex items-center justify-center gap-2 bg-[#E6B325] hover:bg-[#FFD966] text-black font-semibold py-2 px-4 rounded-md transition-colors w-full"
-        >
-          <ShoppingCart size={18} />
-          Add to Cart
-        </button>
-      </div>
+      </Link>
     </motion.div>
   );
 } 

@@ -32,6 +32,7 @@ export interface SquareProduct {
   status: "AVAILABLE" | "UNAVAILABLE";
   imageIds: string[];
   imageUrls?: string[];
+  category: string;
   variations: {
     id: string;
     name: string;

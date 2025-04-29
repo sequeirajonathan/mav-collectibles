@@ -2,10 +2,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import ProductCard from '@components/ui/ProductCard';
+import { ProductCard } from '@components/ui/ProductCard';
 import { Filter, SlidersHorizontal, ArrowDownWideNarrow } from 'lucide-react';
 import { useSquareProducts } from '@hooks/useSquareProducts';
 import { useParams } from 'next/navigation';
+
+const IMAGE_CONFIG = {
+  width: 280,
+  height: 280,
+  quality: 90,
+} as const;
 
 const categoryTitles: Record<string, string> = {
   pokemon: "Pokémon Trading Card Game",
@@ -93,10 +99,20 @@ export default function ProductCategoryPage() {
       {products.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
           {products.map((product) => (
-            <ProductCard key={product.id} product={{
-              ...product,
-              status: product.status === "UNAVAILABLE" ? "UNAVAILABLE" : "AVAILABLE",
-            }} />
+            <ProductCard 
+              key={product.id} 
+              product={{
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.imageUrls?.[0] || '',
+                category: product.category,
+                description: product.description,
+                status: product.status,
+                stockQuantity: 0, // TODO: Get from Square API
+              }}
+              imageConfig={IMAGE_CONFIG}
+            />
           ))}
         </div>
       ) : (

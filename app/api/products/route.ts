@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
+import { capitalizeFirstLetter } from "@utils";
 
 // Define a response type that can include debug info
 interface ProductsResponse {
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
       const squareClient = createSquareClient();
       
       // Format the category name with proper capitalization
-      const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+      const formattedCategory = capitalizeFirstLetter(category);
       
       // Configure search query based on search type
       let query;
@@ -115,6 +116,7 @@ export async function GET(request: Request) {
           status: "AVAILABLE" as const,
           imageIds: itemData.imageIds ?? [],
           imageUrls,
+          category: formattedCategory,
           variations: (itemData.variations ?? []).map((variation) => ({
             id: variation.id ?? "",
             name: variation.itemVariationData?.name ?? "",
@@ -126,6 +128,7 @@ export async function GET(request: Request) {
 
       // Optionally include debug info in response
       const responseData: ProductsResponse = { products };
+      
       if (debug) {
         responseData.debug = {
           searchType,
