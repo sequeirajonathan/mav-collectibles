@@ -1,14 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
 
-export async function GET(request: Request) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const client = createSquareClient();
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
     }
 
     // Fetch the specific item and its related objects (like images)
@@ -17,8 +23,8 @@ export async function GET(request: Request) {
       includeRelatedObjects: true,
     });
 
-    if (!response.object || response.object.type !== 'ITEM') {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    if (!response.object || response.object.type !== "ITEM") {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     const item = response.object as SquareItem;
@@ -29,17 +35,19 @@ export async function GET(request: Request) {
     const imageMap: Record<string, string> = {};
     if (response.relatedObjects) {
       response.relatedObjects.forEach((obj) => {
-        if (obj.type === 'IMAGE' && obj.id && obj.imageData?.url) {
+        if (obj.type === "IMAGE" && obj.id && obj.imageData?.url) {
           imageMap[obj.id] = obj.imageData.url;
         }
       });
     }
 
     // Map image IDs to URLs
-    const imageUrls = itemData.imageIds?.map(id => imageMap[id]).filter(Boolean) || [];
+    const imageUrls =
+      itemData.imageIds?.map((id) => imageMap[id]).filter(Boolean) || [];
 
     // Use the category from the search params or default to uncategorized
-    const category = new URL(request.url).searchParams.get('category') || 'uncategorized';
+    const category =
+      new URL(request.url).searchParams.get("category") || "uncategorized";
 
     const product: SquareProduct = {
       id: item.id ?? "",
@@ -53,7 +61,8 @@ export async function GET(request: Request) {
       variations: (itemData.variations ?? []).map((variation) => ({
         id: variation.id ?? "",
         name: variation.itemVariationData?.name ?? "",
-        price: Number(variation.itemVariationData?.priceMoney?.amount ?? 0n) / 100,
+        price:
+          Number(variation.itemVariationData?.priceMoney?.amount ?? 0n) / 100,
         sku: variation.itemVariationData?.sku,
       })),
     };
@@ -66,4 +75,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

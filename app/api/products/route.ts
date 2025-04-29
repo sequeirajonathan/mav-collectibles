@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
 import { capitalizeFirstLetter } from "@utils";
@@ -16,12 +16,11 @@ interface ProductsResponse {
   error?: string;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const searchType = searchParams.get('searchType') || 'text'; // Default to text search
-    const debug = searchParams.get('debug') === 'true';
+    const searchType = searchParams.get('searchType') || 'text';
 
     if (!category) {
       return NextResponse.json(
@@ -63,10 +62,6 @@ export async function GET(request: Request) {
         };
       }
 
-      if (debug) {
-        console.log(`Search query: ${JSON.stringify(query)}`);
-      }
-
       // Execute search with constructed query
       const response = await squareClient.catalog.search({
         objectTypes: ["ITEM"],
@@ -74,11 +69,6 @@ export async function GET(request: Request) {
         limit: 50,
         includeRelatedObjects: true,
       });
-
-      if (debug) {
-        console.log(`Response related objects: ${response.relatedObjects?.length || 0}`);
-        console.log(`Response objects: ${response.objects?.length || 0}`);
-      }
 
       if (!response.objects || response.objects.length === 0) {
         return NextResponse.json({ products: [] });
@@ -95,10 +85,6 @@ export async function GET(request: Request) {
             imageMap[obj.id] = obj.imageData.url;
           }
         });
-      }
-
-      if (debug) {
-        console.log(`Found ${Object.keys(imageMap).length} related images`);
       }
 
       const products = (items as SquareItem[]).map((item) => {
@@ -128,16 +114,6 @@ export async function GET(request: Request) {
 
       // Optionally include debug info in response
       const responseData: ProductsResponse = { products };
-      
-      if (debug) {
-        responseData.debug = {
-          searchType,
-          formattedCategory,
-          totalObjectsFound: response.objects.length,
-          totalItemsFound: items.length,
-          hasRelatedObjects: !!response.relatedObjects?.length,
-        };
-      }
 
       return NextResponse.json(responseData);
     } catch (squareError) {
