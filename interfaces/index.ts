@@ -5,3 +5,4 @@ export * from './supabase';
 export * from './userProfile';
 export * from './square';
 export * from './product';
+export * from './categories';

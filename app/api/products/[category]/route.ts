@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
+import { getCategoryByRoute } from '@utils';
 
 interface ProductsResponse {
   products: SquareProduct[];
@@ -24,16 +25,22 @@ export async function GET(
 
   const squareClient = createSquareClient();
 
+  // Get the Square category name from our route mapping
+  const categoryInfo = getCategoryByRoute(category);
+  if (!categoryInfo) {
+    return NextResponse.json({ products: [] });
+  }
+
   let query;
   switch (searchType) {
     case 'prefix':
-      query = { prefixQuery: { attributeName: "name", attributePrefix: category } };
+      query = { prefixQuery: { attributeName: "name", attributePrefix: categoryInfo.squareCategory } };
       break;
     case 'exact':
-      query = { exactQuery: { attributeName: "name", attributeValue: category } };
+      query = { exactQuery: { attributeName: "name", attributeValue: categoryInfo.squareCategory } };
       break;
     default:
-      query = { textQuery: { keywords: [category] } };
+      query = { textQuery: { keywords: [categoryInfo.squareCategory] } };
   }
 
   try {
@@ -69,7 +76,7 @@ export async function GET(
         status: "AVAILABLE",
         imageIds: itemData.imageIds ?? [],
         imageUrls: (itemData.imageIds ?? []).map(id => imageMap[id]).filter(Boolean),
-        category,
+        category: categoryInfo.displayName,
         variations: (itemData.variations ?? []).map(variation => ({
           id: variation.id ?? "",
           name: variation.itemVariationData?.name ?? "",
@@ -88,7 +95,7 @@ export async function GET(
       error: error instanceof Error ? error.message : "Unknown error",
       debug: {
         searchType,
-        formattedCategory: category,
+        formattedCategory: categoryInfo.squareCategory,
         totalObjectsFound: 0,
         totalItemsFound: 0,
         hasRelatedObjects: false,

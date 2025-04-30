@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaInstagram, FaFacebook, FaYoutube, FaTwitter, FaTiktok } from 'react-icons/fa';
 import { useSupabase } from "@contexts/SupabaseContext";
+import { CATEGORY_GROUPS } from '@const/categories';
 
 const Footer = () => {
   const { userProfile } = useSupabase();
@@ -81,31 +82,23 @@ const Footer = () => {
           </div>
 
           {/* Categories */}
-          <div className="col-span-1">
-            <h3 className="text-[#E6B325] font-semibold text-lg mb-4">Shop</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/products/pokemon" className="text-gray-400 hover:text-[#E6B325] transition-colors">
-                  Pokémon
-                </Link>
-              </li>
-              <li>
-                <Link href="/products/yugioh" className="text-gray-400 hover:text-[#E6B325] transition-colors">
-                  Yu-Gi-Oh!
-                </Link>
-              </li>
-              <li>
-                <Link href="/products/onepiece" className="text-gray-400 hover:text-[#E6B325] transition-colors">
-                  One Piece
-                </Link>
-              </li>
-              <li>
-                <Link href="/products/dragonball" className="text-gray-400 hover:text-[#E6B325] transition-colors">
-                  Dragon Ball
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {CATEGORY_GROUPS.map((group) => (
+            <div key={group.name} className="col-span-1">
+              <h3 className="text-[#E6B325] font-semibold text-lg mb-4">{group.name}</h3>
+              <ul className="space-y-2">
+                {group.categories.map((category) => (
+                  <li key={category.routeName}>
+                    <Link 
+                      href={`/products/${category.routeName}`}
+                      className="text-gray-400 hover:text-[#E6B325] transition-colors"
+                    >
+                      {category.displayName}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
           {/* Quick Links */}
           <div className="col-span-1">

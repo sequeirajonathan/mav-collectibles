@@ -30,6 +30,8 @@
       "@types/*": ["types/*"],
       "@utils/*": ["utils/*"],
       "@utils": ["utils/index.ts"],
+      "@const/*": ["const/*"],
+      "@const": ["const/index.ts"],
       "@public/*": ["public/*"]
     }
   },
