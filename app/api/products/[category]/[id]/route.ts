@@ -19,18 +19,11 @@ function convertBigIntToNumber(obj: unknown): JsonValue {
   return null;
 }
 
-type RouteContext = {
-  params: {
-    category: string;
-    id: string;
-  };
-};
-
 export async function GET(
   request: NextRequest,
-  { params }: RouteContext
+  context: { params: Promise<{ category: string; id: string }> }
 ) {
-  const { id } = params; // ✅ No need to await
+  const { id } = await context.params;
 
   try {
     const squareClient = createSquareClient();
@@ -45,7 +38,6 @@ export async function GET(
 
     const item = response.object as SquareItem;
 
-    // Build image map
     const imageMap: Record<string, string> = {};
     response.relatedObjects?.forEach(obj => {
       if (obj.type === 'IMAGE' && obj.id && obj.imageData?.url) {

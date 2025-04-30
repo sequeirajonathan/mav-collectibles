@@ -8,11 +8,55 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSupabase } from "@contexts/SupabaseContext";
 import { useCart } from '@contexts/CartContext';
 
+const CartIcon = () => {
+  const { totalItems } = useCart();
+  const [isAnimating, setIsAnimating] = useState(false);
+  const prevItemsRef = useRef(totalItems);
+
+  useEffect(() => {
+    if (totalItems > prevItemsRef.current) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 500);
+      return () => clearTimeout(timer);
+    }
+    prevItemsRef.current = totalItems;
+  }, [totalItems]);
+
+  return (
+    <Link
+      href="/cart"
+      className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] relative transition-colors"
+    >
+      <motion.div
+        animate={isAnimating ? {
+          scale: [1, 1.2, 1],
+          rotate: [0, -15, 15, -15, 0],
+        } : {}}
+        transition={{ duration: 0.5 }}
+      >
+        <ShoppingCart size={20} />
+      </motion.div>
+      <AnimatePresence mode="popLayout">
+        {totalItems > 0 && (
+          <motion.span
+            key="cart-count"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-black bg-[#E6B325] rounded-full"
+          >
+            {totalItems}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </Link>
+  );
+};
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, userProfile, signOut } = useSupabase();
-  const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -49,11 +93,10 @@ const Navbar = () => {
   };
 
   const handleSignOut = async () => {
-    setIsProfileOpen(false); // Close dropdown before signing out
+    setIsProfileOpen(false);
     await signOut();
   };
 
-  // More explicit role check
   const hasAdminAccess = userProfile?.role && ['STAFF', 'MANAGER', 'ADMIN', 'OWNER'].includes(userProfile.role);
 
   const navigationItems = [
@@ -97,7 +140,7 @@ const Navbar = () => {
       <nav className="w-full bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-auto py-2 md:py-3">
-            {/* Logo and brand - no animation */}
+            {/* Logo and brand */}
             <div className="flex-shrink-0 flex items-center justify-center">
               <Link href="/" className="flex items-center">
                 <Image
@@ -111,7 +154,7 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Desktop Navigation - only hover animations */}
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
               {navigationItems.map((item) => (
                 <motion.div
@@ -140,7 +183,7 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Search, Profile, Cart, and Menu - no animation */}
+            {/* Search, Profile, Cart, and Menu */}
             <div className="flex items-center space-x-4">
               <button
                 className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
@@ -219,17 +262,7 @@ const Navbar = () => {
                 </AnimatePresence>
               </div>
 
-              <Link
-                href="/cart"
-                className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] relative transition-colors"
-              >
-                <ShoppingCart size={20} />
-                {totalItems > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-black bg-[#E6B325] rounded-full">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
+              <CartIcon />
 
               <button
                 className="md:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
@@ -242,7 +275,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile menu with AnimatePresence for exit animations */}
+        {/* Mobile menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -273,4 +306,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar; 

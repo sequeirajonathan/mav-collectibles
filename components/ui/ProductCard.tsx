@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
+import { useCart } from '@contexts/CartContext';
+import toast from 'react-hot-toast';
 
 interface Product {
   id: string;
@@ -19,14 +21,40 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  imageConfig: {
-    width: number;
-    height: number;
-    quality: number;
-  };
+  aspectRatio?: number;
+  sizes?: string;
 }
 
-export function ProductCard({ product, imageConfig }: ProductCardProps) {
+export function ProductCard({ 
+  product, 
+  aspectRatio = 1, // Default to square
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+}: ProductCardProps) {
+  const { addItem } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      const itemToAdd = {
+        id: product.id,
+        name: product.name,
+        price: product.salePrice || product.price,
+        imageUrl: product.image,
+      };
+      
+      addItem(itemToAdd);
+      
+      toast.success(`${product.name} added to cart!`, {
+        position: 'top-right',
+        duration: 2000,
+      });
+    } catch {
+      toast.error('Failed to add item to cart');
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -45,35 +73,38 @@ export function ProductCard({ product, imageConfig }: ProductCardProps) {
       >
         <div className="relative flex flex-col h-full overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 
                       transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
-          <div className="relative aspect-square w-full overflow-hidden">
-            {product.status === 'sold_out' && (
-              <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">SOLD OUT</span>
-              </div>
-            )}
+          
+          {product.status === 'sold_out' && (
+            <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">SOLD OUT</span>
+            </div>
+          )}
+          
+          <div className="relative w-full" style={{ paddingTop: `${100 / aspectRatio}%` }}>
             <div className="absolute inset-0 bg-gray-900/20 z-10" />
-            <div className="relative w-full h-full flex items-center justify-center transform transition-transform duration-500 group-hover:scale-105">
+            <div className="absolute inset-0 flex items-center justify-center transform transition-transform duration-500 group-hover:scale-105">
               <Image 
                 src={product.image} 
                 alt={product.name}
-                width={imageConfig.width}
-                height={imageConfig.height}
-                className="object-contain max-h-full max-w-full w-auto h-auto p-4"
-                quality={imageConfig.quality}
+                fill
+                className="object-contain p-4"
+                sizes={sizes}
+                quality={75}
+                priority={false}
               />
             </div>
-            
-            {product.status !== 'sold_out' && (
-              <motion.div 
-                className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                initial={false}
-              >
-                <span className="text-white font-semibold text-lg">View Details</span>
-              </motion.div>
-            )}
           </div>
+            
+          {product.status !== 'sold_out' && (
+            <motion.div 
+              className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              initial={false}
+            >
+              <span className="text-white font-semibold text-lg">View Details</span>
+            </motion.div>
+          )}
           
-          <div className="flex flex-col flex-grow p-4 pt-6">
+          <div className="p-4">
             <h3 className="text-sm font-medium text-white/90 group-hover:text-white mb-2 line-clamp-2 min-h-[2.5rem]">
               {product.name}
             </h3>
@@ -93,10 +124,8 @@ export function ProductCard({ product, imageConfig }: ProductCardProps) {
               </div>
               {product.status !== 'sold_out' && (
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // Add to cart logic here
-                  }}
+                  type="button"
+                  onClick={handleAddToCart}
                   className="p-2 rounded-lg bg-[#E6B325]/10 text-[#E6B325] hover:bg-[#E6B325]/20 transition-colors"
                   aria-label="Quick add to cart"
                 >

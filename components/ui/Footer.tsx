@@ -17,13 +17,16 @@ const Footer = () => {
           {/* About Section */}
           <div className="col-span-1">
             <Link href="/" className="block mb-4">
-              <Image
-                src="/mav_collectibles.png"
-                alt="MAV Collectibles Logo"
-                width={120}
-                height={48}
-                className="h-auto"
-              />
+              <div className="relative w-[200px] h-[80px]">
+                <Image
+                  src="/mav_collectibles.png"
+                  alt="MAV Collectibles Logo"
+                  fill
+                  sizes="(max-width: 768px) 200px, 200px"
+                  className="object-contain"
+                  loading="lazy"
+                />
+              </div>
             </Link>
             <p className="text-sm text-gray-400 mb-4">
               Your premier destination for trading card games including Pokémon, Yu-Gi-Oh!, Dragon Ball, One Piece and more.

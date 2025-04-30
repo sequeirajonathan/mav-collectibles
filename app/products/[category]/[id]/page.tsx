@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ChevronLeft } from 'lucide-react';
 import { useSquareProduct } from '@hooks/useSquareProduct';
+import { useCart } from '@contexts/CartContext';
 
 const IMAGE_CONFIG = {
   width: 500,
@@ -16,8 +17,32 @@ const IMAGE_CONFIG = {
 export default function ProductPage({ params }: { params: Promise<{ category: string; id: string }> }) {
   const resolvedParams = use(params);
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart();
   
   const { data: product, isLoading, isError } = useSquareProduct(resolvedParams.id, resolvedParams.category);
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!product) {
+      return;
+    }
+    
+    try {
+      const mainVariation = product.variations[0];
+      const price = mainVariation?.price || product.price;
+      
+      addItem({
+        id: product.id,
+        name: product.name,
+        price,
+        imageUrl: product.imageUrls?.[0],
+      });
+    } catch {
+      // Silent error - animation in navbar will indicate success
+    }
+  };
 
   if (isLoading) {
     return (
@@ -64,7 +89,6 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Image Container */}
           <div className="relative">
-            {/* Product Image */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -126,6 +150,8 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
                   </div>
                 </div>
                 <button
+                  type="button"
+                  onClick={handleAddToCart}
                   className="flex-1 bg-[#E6B325] hover:bg-[#FFD966] text-black font-semibold py-2 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <ShoppingCart className="w-5 h-5" />

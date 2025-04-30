@@ -14,6 +14,7 @@ import '@styles/video-player.css';
 import { SupabaseProvider } from '@contexts/SupabaseContext';
 import CookieConsent from '@components/ui/CookieConsent';
 import { fetchAlertBanner } from '@services/alertBannerService';
+import { CartProvider } from '@contexts/CartContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,17 +58,19 @@ export default async function RootLayout({
         <SupabaseProvider>
           <QueryProvider initialAlertBanner={alertBannerData}>
             <AppProvider>
-              <AlertBanner />
-              <Navbar />
-              <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-                <Suspense fallback={<div>Loading...</div>}>
-                  {children}
-                </Suspense>
-              </main>
-              <Footer />
-              <ScrollToTop />
-              <Toaster position="top-right" />
-              <CookieConsent />
+              <CartProvider>
+                <AlertBanner />
+                <Navbar />
+                <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+                  <Suspense fallback={<div>Loading...</div>}>
+                    {children}
+                  </Suspense>
+                </main>
+                <Footer />
+                <ScrollToTop />
+                <Toaster position="top-right" />
+                <CookieConsent />
+              </CartProvider>
             </AppProvider>
           </QueryProvider>
         </SupabaseProvider>

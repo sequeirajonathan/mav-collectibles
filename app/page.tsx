@@ -6,7 +6,7 @@ import Link from "next/link";
 import FeaturedEvents from "@components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
 import VideoSection from "@components/ui/VideoSection";
-import ProductList from "@components/ui/ProductList";
+import { ProductList } from "@components/ui/ProductList";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -46,37 +46,37 @@ export default function Home() {
       title: "Pokemon",
       href: "/products/pokemon",
       image: "/pokemon-logo.png",
-      width: 220,
+      aspectRatio: 2.5,
     },
     {
       title: "Yu-Gi-Oh TCG",
       href: "/products/yugioh",
       image: "/yugioh-logo.png",
-      width: 220,
+      aspectRatio: 2.5,
     },
     {
       title: "DBZ Super TCG",
       href: "/products/dragonball",
       image: "/dragonball.png",
-      width: 180,
+      aspectRatio: 2,
     },
     {
       title: "Digimon",
       href: "/products/digimon",
       image: "/digimon_card_game_logo.png",
-      width: 220,
+      aspectRatio: 2.5,
     },
     {
       title: "One Piece",
       href: "/products/onepiece",
       image: "/one-piece-card-game.jpg",
-      width: 180,
+      aspectRatio: 2,
     },
     {
       title: "MetaZoo",
       href: "/products/metazoo",
       image: "/Metazoo-logo.png",
-      width: 180,
+      aspectRatio: 2,
     },
   ];
 
@@ -134,14 +134,14 @@ export default function Home() {
                 <div className="relative overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
                   {/* Card Content */}
                   <div className="p-4 flex flex-col items-center space-y-2">
-                    {/* Image */}
-                    <div className="relative w-full aspect-[3/2] flex items-center justify-center">
+                    {/* Image Container */}
+                    <div className="relative w-full" style={{ aspectRatio: game.aspectRatio }}>
                       <Image
                         src={game.image}
                         alt={game.title}
-                        width={game.width}
-                        height={game.width * 0.5}
+                        fill
                         className="object-contain transition-transform duration-300 group-hover:scale-110"
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     </div>
                     
