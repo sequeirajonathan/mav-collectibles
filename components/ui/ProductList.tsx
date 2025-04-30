@@ -1,8 +1,7 @@
 "use client";
 
-import { Product } from '@/types/product';
+import { Product } from '@interfaces';
 import { ProductCard } from './ProductCard';
-
 // Add image dimensions configuration
 const IMAGE_CONFIG = {
   width: 160,    // Significantly reduced width
@@ -13,13 +12,11 @@ const IMAGE_CONFIG = {
 interface ProductListProps {
   products: Product[];
   title?: string;
-  aspectRatio?: number;
 }
 
 export function ProductList({ 
   products, 
-  title,
-  aspectRatio = 4/3 // Default to 4:3 for trading cards
+  title
 }: ProductListProps) {
   if (!products?.length) {
     return (
@@ -39,7 +36,7 @@ export function ProductList({
           <ProductCard 
             key={product.id} 
             product={product}
-            aspectRatio={aspectRatio}
+            imageConfig={IMAGE_CONFIG}
           />
         ))}
       </div>

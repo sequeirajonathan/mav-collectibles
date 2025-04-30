@@ -81,7 +81,7 @@ export default function CategoryPage() {
                   key={product.id}
                   product={{
                     ...product,
-                    image: product.imageUrls?.[0] || "",
+                    image: product.imageUrls?.[0] || '/images/placeholder.png',
                     stockQuantity: 0, // TODO: Get from Square API
                   }}
                   imageConfig={IMAGE_CONFIG}

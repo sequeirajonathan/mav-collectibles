@@ -216,7 +216,7 @@ export default function Home() {
       </div>
 
       {/* Featured Products */}
-      <ProductList />
+      <ProductList products={[]} />
     </div>
   );
 }

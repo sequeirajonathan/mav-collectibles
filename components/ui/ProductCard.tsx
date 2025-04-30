@@ -21,14 +21,18 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  aspectRatio?: number;
   sizes?: string;
+  imageConfig?: {
+    width: number;
+    height: number;
+    quality: number;
+  };
 }
 
 export function ProductCard({ 
   product, 
-  aspectRatio = 1, // Default to square
-  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw",
+  imageConfig
 }: ProductCardProps) {
   const { addItem } = useCart();
 
@@ -80,17 +84,20 @@ export function ProductCard({
             </div>
           )}
           
-          <div className="relative w-full" style={{ paddingTop: `${100 / aspectRatio}%` }}>
-            <div className="absolute inset-0 bg-gray-900/20 z-10" />
-            <div className="absolute inset-0 flex items-center justify-center transform transition-transform duration-500 group-hover:scale-105">
-              <Image 
-                src={product.image} 
+          <div className="relative aspect-square overflow-hidden rounded-lg">
+            <div className={`relative ${imageConfig ? 'w-full h-full' : 'absolute inset-0'}`}>
+              <Image
+                src={product.image || '/images/placeholder.png'}
                 alt={product.name}
-                fill
-                className="object-contain p-4"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
                 sizes={sizes}
-                quality={75}
-                priority={false}
+                {...(imageConfig ? {
+                  width: imageConfig.width,
+                  height: imageConfig.height,
+                  quality: imageConfig.quality
+                } : {
+                  fill: true
+                })}
               />
             </div>
           </div>
