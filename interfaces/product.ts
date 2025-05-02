@@ -4,6 +4,8 @@ export interface Product {
   description: string;
   price: number;
   status: "AVAILABLE" | "UNAVAILABLE";
+  availability?: "IN_STOCK" | "SOLD_OUT";
+  stockQuantity?: number;
   image: string;
   imageIds: string[];
   imageUrls?: string[];
@@ -13,5 +15,4 @@ export interface Product {
     name: string;
     price: number;
   }[];
-  stockQuantity: number;
 }

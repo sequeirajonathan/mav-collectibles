@@ -99,18 +99,17 @@ export function ProductCard({
                   fill: true
                 })}
               />
+              {product.status !== 'sold_out' && (
+                <motion.div 
+                  className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  initial={false}
+                >
+                  <span className="text-white font-semibold text-lg">View Details</span>
+                </motion.div>
+              )}
             </div>
           </div>
             
-          {product.status !== 'sold_out' && (
-            <motion.div 
-              className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              initial={false}
-            >
-              <span className="text-white font-semibold text-lg">View Details</span>
-            </motion.div>
-          )}
-          
           <div className="p-4">
             <h3 className="text-sm font-medium text-white/90 group-hover:text-white mb-2 line-clamp-2 min-h-[2.5rem]">
               {product.name}

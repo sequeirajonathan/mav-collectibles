@@ -1,21 +1,24 @@
 export interface SquareItem {
   id: string;
   itemData?: {
-    name?: string;
-    description?: string;
+    name?: string | null;
+    description?: string | null;
     variations?: Array<{
-      id: string;
+      id?: string;
       itemVariationData?: {
-        name?: string;
-        priceMoney?: { amount: bigint };
-        sku?: string;
+        name?: string | null;
+        priceMoney?: { amount?: bigint | null };
+        sku?: string | null;
+        stockable?: boolean | null;
+        sellable?: boolean | null;
       };
-    }>;
-    imageIds?: string[];
+    }> | null;
+    imageIds?: string[] | null;
     categories?: Array<{
-      id: string;
-      ordinal?: number;
-    }>;
+      id?: string;
+      ordinal?: bigint | null;
+    }> | null;
+    ecom_available?: boolean;
   };
 }
 
@@ -37,11 +40,15 @@ export interface SquareProduct {
   imageIds: string[];
   imageUrls?: string[];
   category: string;
+  categoryType: string;
+  stockQuantity: number;
   variations: {
     id: string;
     name: string;
     price: number;
-    sku?: string;
+    sku?: string | null;
+    stockable: boolean;
+    sellable: boolean;
   }[];
 }
   

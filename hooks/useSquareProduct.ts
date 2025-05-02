@@ -1,38 +1,55 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchProductById, fetchAllProducts, fetchProductsByCategory, prefetchFeaturedProducts } from '@services/squareService';
-import { SquareProduct } from '@interfaces';
-import { useEffect } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchProductById,
+  fetchAllProducts,
+  fetchProductsByCategory,
+  prefetchFeaturedProducts,
+  fetchInventoryCounts,
+} from "@services/squareService";
+
+import { SquareProduct } from "@interfaces";
+import { useEffect } from "react";
+import { STALE_TIME } from "@const";
 
 export function useSquareProduct(productId: string, category: string) {
   return useQuery<SquareProduct | null>({
-    queryKey: ['product', category, productId],
+    queryKey: ["product", category, productId],
     queryFn: () => fetchProductById(productId, category),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME,
     enabled: !!productId && !!category,
   });
 }
 
-export function useAllProducts() {
+export function useAllProducts(filter?: string) {
   return useQuery<SquareProduct[]>({
-    queryKey: ['products', 'all'],
-    queryFn: fetchAllProducts,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    queryKey: ["products", "all", filter],
+    queryFn: () => fetchAllProducts(filter),
+    staleTime: STALE_TIME,
   });
 }
 
 export function useProductsByCategory(category: string) {
   return useQuery<SquareProduct[]>({
-    queryKey: ['products', category],
+    queryKey: ["products", category],
     queryFn: () => fetchProductsByCategory(category),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME,
     enabled: !!category,
   });
 }
 
 export function usePrefetchProducts() {
   const queryClient = useQueryClient();
-  
+
   useEffect(() => {
     prefetchFeaturedProducts(queryClient);
   }, [queryClient]);
-} 
+}
+
+export function useInventoryCounts(variationIds: string[]) {
+  return useQuery({
+    queryKey: ["inventory", variationIds],
+    queryFn: () => fetchInventoryCounts(variationIds),
+    enabled: variationIds.length > 0,
+    staleTime: STALE_TIME,
+  });
+}

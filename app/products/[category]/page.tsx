@@ -7,6 +7,7 @@ import { ProductCard } from "@components/ui/ProductCard";
 import { ProductFilters } from "@components/ui/ProductFilters";
 import { NoProducts } from "@components/ui/NoProducts";
 import { useProductsByCategory } from "@hooks/useSquareProduct";
+import { CATEGORY_GROUPS } from "@const/categories";
 
 const IMAGE_CONFIG = {
   width: 280,
@@ -16,15 +17,19 @@ const IMAGE_CONFIG = {
 
 export default function CategoryPage() {
   const params = useParams<{ category: string }>();
-  const { data: products = [], isLoading } = useProductsByCategory(
-    params.category
-  );
+  const categoryRoute = params.category;
+
+  const { data: products = [], isLoading } = useProductsByCategory(categoryRoute);
   const [sortBy, setSortBy] = useState("best_selling");
   const [filterBy, setFilterBy] = useState("all");
 
-  // Filter and sort products
+  const groupName =
+    CATEGORY_GROUPS.find(group =>
+      group.categories.some(c => c.routeName === categoryRoute)
+    )?.name ?? categoryRoute.charAt(0).toUpperCase() + categoryRoute.slice(1);
+
   const filteredProducts = products
-    .filter((product) => {
+    .filter(product => {
       if (filterBy === "all") return true;
       return product.status === filterBy;
     })
@@ -62,8 +67,7 @@ export default function CategoryPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl sm:text-4xl font-bold text-[#E6B325] mb-12 text-center"
         >
-          {params.category.charAt(0).toUpperCase() + params.category.slice(1)}{" "}
-          Trading Cards
+          {groupName} Trading Cards
         </motion.h1>
 
         {filteredProducts.length > 0 ? (
@@ -73,16 +77,17 @@ export default function CategoryPage() {
               filterBy={filterBy}
               onSortChange={setSortBy}
               onFilterChange={setFilterBy}
+              currentGroup={null}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+              {filteredProducts.map(product => (
                 <ProductCard
                   key={product.id}
                   product={{
                     ...product,
                     image: product.imageUrls?.[0] || '/images/placeholder.png',
-                    stockQuantity: 0, // TODO: Get from Square API
+                    stockQuantity: product.stockQuantity ?? 0,
                   }}
                   imageConfig={IMAGE_CONFIG}
                 />

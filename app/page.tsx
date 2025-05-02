@@ -58,7 +58,7 @@ export default function Home() {
       title: "DBZ Super TCG",
       href: "/products/dragonball",
       image: "/dragonball.png",
-      aspectRatio: 2,
+      aspectRatio: 2.5,
     },
     {
       title: "Digimon",
@@ -70,13 +70,13 @@ export default function Home() {
       title: "One Piece",
       href: "/products/onepiece",
       image: "/one-piece-card-game.jpg",
-      aspectRatio: 2,
+      aspectRatio: 2.5,
     },
     {
       title: "MetaZoo",
       href: "/products/metazoo",
       image: "/Metazoo-logo.png",
-      aspectRatio: 2,
+      aspectRatio: 2.5,
     },
   ];
 

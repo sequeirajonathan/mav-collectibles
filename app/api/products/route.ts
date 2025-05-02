@@ -1,115 +1,136 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { SquareItem, SquareProduct } from "@interfaces";
+import { CATEGORY_GROUPS } from "@const/categories";
+import { fetchInventoryCounts } from "@services/squareService";
 
-interface ProductsResponse {
-  products: SquareProduct[];
-  debug?: {
-    searchType: string;
-    formattedCategory: string;
-    totalObjectsFound: number;
-    totalItemsFound: number;
-    hasRelatedObjects: boolean;
-  };
-  error?: string;
+function buildCategoryNameMap(
+  relatedObjects?: unknown[]
+): Record<string, string> {
+  const map: Record<string, string> = {};
+  relatedObjects?.forEach((obj) => {
+    const categoryObj = obj as {
+      type: string;
+      id: string;
+      categoryData?: { name?: string };
+    };
+    if (
+      categoryObj.type === "CATEGORY" &&
+      categoryObj.id &&
+      categoryObj.categoryData?.name
+    ) {
+      map[categoryObj.id] = categoryObj.categoryData.name;
+    }
+  });
+  return map;
 }
 
-// Helper to map images
 function buildImageMap(relatedObjects?: unknown[]): Record<string, string> {
   const map: Record<string, string> = {};
-  relatedObjects?.forEach(obj => {
-    const imageObj = obj as { type: string; id: string; imageData?: { url?: string } };
-    if (imageObj.type === 'IMAGE' && imageObj.id && imageObj.imageData?.url) {
+  relatedObjects?.forEach((obj) => {
+    const imageObj = obj as {
+      type: string;
+      id: string;
+      imageData?: { url?: string };
+    };
+    if (imageObj.type === "IMAGE" && imageObj.id && imageObj.imageData?.url) {
       map[imageObj.id] = imageObj.imageData.url;
     }
   });
   return map;
 }
 
-// Helper to map items to products
-function mapItemsToProducts(items: SquareItem[], imageMap: Record<string, string>): SquareProduct[] {
+function mapItemsToProducts(
+  items: SquareItem[],
+  imageMap: Record<string, string>,
+  categoryNameMap: Record<string, string>,
+  inventoryMap: Record<string, number>
+): SquareProduct[] {
   return items.map((item) => {
     const itemData = item.itemData ?? {};
     const mainVariation = itemData.variations?.[0]?.itemVariationData ?? {};
-    const imageUrls = itemData.imageIds?.map(id => imageMap[id]).filter(Boolean) || [];
+    const variationId = itemData.variations?.[0]?.id ?? "";
+    const quantity = inventoryMap[variationId] ?? 0;
 
     return {
       id: item.id ?? "",
       name: itemData.name ?? "Unnamed Product",
       description: itemData.description ?? "",
       price: Number(mainVariation.priceMoney?.amount ?? 0n) / 100,
-      status: "AVAILABLE" as const,
+      status: itemData.ecom_available ? "AVAILABLE" : "UNAVAILABLE",
+      availability: quantity > 0 ? "IN_STOCK" : "SOLD_OUT",
+      stockQuantity: quantity,
       imageIds: itemData.imageIds ?? [],
-      imageUrls,
-      category: itemData.categories?.[0]?.id ?? "",
-      variations: (itemData.variations ?? []).map(variation => ({
-        id: variation.id ?? "",
-        name: variation.itemVariationData?.name ?? "",
-        price: Number(variation.itemVariationData?.priceMoney?.amount ?? 0n) / 100,
-        sku: variation.itemVariationData?.sku,
-      })),
+      imageUrls:
+        itemData.imageIds?.map((id) => imageMap[id]).filter(Boolean) || [],
+      category:
+        categoryNameMap[itemData.categories?.[0]?.id ?? ""] ?? "Uncategorized",
+      categoryType: "REGULAR_CATEGORY",
+      variations: (itemData.variations ?? []).map((variation) => {
+        const vId = variation.id ?? "";
+        return {
+          id: vId,
+          name: variation.itemVariationData?.name ?? "",
+          price:
+            Number(variation.itemVariationData?.priceMoney?.amount ?? 0n) / 100,
+          sku: variation.itemVariationData?.sku,
+          stockable: variation.itemVariationData?.stockable ?? false,
+          sellable: variation.itemVariationData?.sellable ?? false,
+        };
+      }),
     };
   });
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const category = searchParams.get('category');
-  const searchType = searchParams.get('searchType') || 'text';
+  const filter = searchParams.get("filter") ?? "";
 
   try {
     const squareClient = createSquareClient();
-
-    let query: { prefixQuery?: { attributeName: string; attributePrefix: string }; 
-                exactQuery?: { attributeName: string; attributeValue: string };
-                textQuery?: { keywords: string[] } } | null = null;
-    if (category) {
-      // Configure search query if category exists
-      switch (searchType) {
-        case 'prefix':
-          query = { prefixQuery: { attributeName: "name", attributePrefix: category } };
-          break;
-        case 'exact':
-          query = { exactQuery: { attributeName: "name", attributeValue: category } };
-          break;
-        default:
-          query = { textQuery: { keywords: [category] } };
-      }
-    }
-
     const response = await squareClient.catalog.search({
-      objectTypes: ["ITEM"],
-      ...(query ? { query } : {}),
+      objectTypes: ["ITEM", "CATEGORY", "ITEM_VARIATION", "IMAGE"],
       includeRelatedObjects: true,
-      limit: 50,
+      limit: 5,
     });
 
-    const objects = response.objects ?? [];
-    if (objects.length === 0) {
-      return NextResponse.json({ products: [] });
+    const items = (response.objects ?? []).filter(
+      (obj) => obj.type === "ITEM"
+    ) as SquareItem[];
+    const imageMap = buildImageMap(response.relatedObjects);
+    const categoryMap = buildCategoryNameMap(response.relatedObjects);
+
+    const variationIds = items.flatMap(
+      (i) => i.itemData?.variations?.map((v) => v.id).filter(Boolean) ?? []
+    ).filter((id): id is string => id !== undefined);
+
+    const inventory = await fetchInventoryCounts(variationIds);
+
+    const allProducts = mapItemsToProducts(
+      items,
+      imageMap,
+      categoryMap,
+      inventory
+    );
+
+    if (filter) {
+      const groupCategories =
+        CATEGORY_GROUPS.find(
+          (g) => g.name.toLowerCase().replace(/\s+/g, "-") === filter
+        )?.categories.map((c) => c.squareCategory) || [];
+
+      const filtered = allProducts.filter((p) =>
+        groupCategories.includes(p.category)
+      );
+      return NextResponse.json({ products: filtered });
     }
 
-    const items = objects.filter(obj => obj.type === 'ITEM') as SquareItem[];
-    const imageMap = buildImageMap(response.relatedObjects);
-
-    const products = mapItemsToProducts(items, imageMap);
-
-    return NextResponse.json({ products });
+    return NextResponse.json({ products: allProducts });
   } catch (error) {
-    console.error("Error fetching products:", error);
-
-    const responseData: ProductsResponse = {
-      products: [],
-      error: error instanceof Error ? error.message : "Failed to fetch products",
-      debug: error instanceof Error ? {
-        searchType,
-        formattedCategory: category ?? '',
-        totalObjectsFound: 0,
-        totalItemsFound: 0,
-        hasRelatedObjects: false,
-      } : undefined,
-    };
-
-    return NextResponse.json(responseData, { status: 500 });
+    console.error("[API] Error in /api/products:", error);
+    return NextResponse.json(
+      { products: [], error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

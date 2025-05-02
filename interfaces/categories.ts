@@ -7,4 +7,5 @@ export interface Category {
   displayName: string;
   routeName: string;
   squareCategory: string;
+  squareId: string;
 } 

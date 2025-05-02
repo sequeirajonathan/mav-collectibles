@@ -19,19 +19,24 @@ export default function VideoSection() {
   const [videoError, setVideoError] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isVideoSectionEnabled = getFeatureFlag('showVideoPlayer');
   const isYouTubeEnabled = getFeatureFlag('showYouTubeVideo');
   const isDirectStreamingEnabled = getFeatureFlag('showDirectStreaming');
 
-  const hasYouTubeVideo = isVideoSectionEnabled && isYouTubeEnabled && youtubeSettings && (
+  const hasYouTubeVideo = mounted && isVideoSectionEnabled && isYouTubeEnabled && youtubeSettings && (
     youtubeSettings.videoId || 
     (youtubeSettings.isLiveStream && youtubeSettings.liveStreamId) ||
     youtubeSettings.playlistId
   );
 
-  const hasDirectVideo = isVideoSectionEnabled && isDirectStreamingEnabled && videoSettings && videoSettings.src;
+  const hasDirectVideo = mounted && isVideoSectionEnabled && isDirectStreamingEnabled && videoSettings && videoSettings.src;
   const hasVideo = hasYouTubeVideo || hasDirectVideo;
   const videoType = hasDirectVideo ? 'direct' : (hasYouTubeVideo ? 'youtube' : null);
 
@@ -122,8 +127,8 @@ export default function VideoSection() {
         {showBanner && (
           <motion.div
             className="absolute inset-0 sm:left-[-5%] sm:right-[-5%] md:left-[-10%] md:right-[-10%] lg:left-[-15%] lg:right-[-15%] top-0 bottom-0 z-20"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={mounted ? { opacity: 1 } : false}
+            animate={mounted ? { opacity: 1, scale: 1 } : false}
           >
             <div
               className="w-full h-full relative overflow-hidden rounded-md bg-black"
@@ -132,11 +137,11 @@ export default function VideoSection() {
               {/* Pulse Background Animation */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black"
-                initial={{ opacity: 1 }}
-                animate={{
+                initial={mounted ? { opacity: 1 } : false}
+                animate={mounted ? {
                   opacity: videoLoaded ? 0 : [0.7, 0.9, 0.7],
                   x: videoLoaded ? 0 : ["-100%", "100%", "-100%"]
-                }}
+                } : false}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />
 

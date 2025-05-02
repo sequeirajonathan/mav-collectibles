@@ -2,8 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  console.log('updateSession running for path:', request.nextUrl.pathname);
-  
   // This function might be redirecting users away from the signup page
   // Let's modify it to respect public routes
   
