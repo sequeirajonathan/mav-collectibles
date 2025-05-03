@@ -35,7 +35,7 @@ export async function GET(
       objectTypes: ["ITEM", "IMAGE", "ITEM_VARIATION"],
       query,
       includeRelatedObjects: true,
-      limit: 100,
+      limit: 5,
     });
 
     const items = (response.objects ?? []).filter(obj => obj.type === "ITEM") as SquareItem[];

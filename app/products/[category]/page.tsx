@@ -20,18 +20,23 @@ export default function CategoryPage() {
   const categoryRoute = params.category;
 
   const { data: products = [], isLoading } = useProductsByCategory(categoryRoute);
-  const [sortBy, setSortBy] = useState("best_selling");
-  const [filterBy, setFilterBy] = useState("all");
+  const [sortBy, setSortBy] = useState("name_asc");
+  const [filterBy, setFilterBy] = useState("IN_STOCK");
 
   const groupName =
     CATEGORY_GROUPS.find(group =>
       group.categories.some(c => c.routeName === categoryRoute)
     )?.name ?? categoryRoute.charAt(0).toUpperCase() + categoryRoute.slice(1);
 
+  console.log('[CategoryPage] products:', products);
+  console.log('[CategoryPage] filterBy:', filterBy);
+
   const filteredProducts = products
     .filter(product => {
       if (filterBy === "all") return true;
-      return product.status === filterBy;
+      const match = ("availability" in product && product.availability === filterBy) || product.category === filterBy;
+      console.log('[CategoryPage] filtering', {product, filterBy, match});
+      return match;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -47,6 +52,8 @@ export default function CategoryPage() {
           return 0;
       }
     });
+
+  console.log('[CategoryPage] filteredProducts:', filteredProducts);
 
   if (isLoading) {
     return (

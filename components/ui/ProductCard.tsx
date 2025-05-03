@@ -84,30 +84,24 @@ export function ProductCard({
             </div>
           )}
           
-          <div className="relative aspect-square overflow-hidden rounded-lg">
-            <div className={`relative ${imageConfig ? 'w-full h-full' : 'absolute inset-0'}`}>
-              <Image
-                src={product.image || '/images/placeholder.png'}
-                alt={product.name}
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes={sizes}
-                {...(imageConfig ? {
-                  width: imageConfig.width,
-                  height: imageConfig.height,
-                  quality: imageConfig.quality
-                } : {
-                  fill: true
-                })}
-              />
-              {product.status !== 'sold_out' && (
-                <motion.div 
-                  className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  initial={false}
-                >
-                  <span className="text-white font-semibold text-lg">View Details</span>
-                </motion.div>
-              )}
-            </div>
+          <div className="relative w-[280px] h-[280px] overflow-hidden rounded-lg flex items-center justify-center mx-auto bg-gradient-to-br from-black via-gray-900 to-[#E6B325]">
+            <Image
+              src={product.image || '/images/placeholder.png'}
+              alt={product.name}
+              fill
+              className="object-contain transition-transform duration-300 group-hover:scale-105"
+              sizes={sizes}
+              quality={imageConfig?.quality || 90}
+              priority={false}
+            />
+            {product.status !== 'sold_out' && (
+              <motion.div 
+                className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                initial={false}
+              >
+                <span className="text-white font-semibold text-lg">View Details</span>
+              </motion.div>
+            )}
           </div>
             
           <div className="p-4">
