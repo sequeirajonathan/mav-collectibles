@@ -28,11 +28,11 @@ export default function AlertBanner() {
       style={{
         backgroundColor: alertBanner.backgroundColor || '#E6B325',
         color: alertBanner.textColor || '#000000',
-        minHeight: '48px',
+        height: '48px',
       }}
     >
-      <div className="relative flex items-center justify-center px-2 py-2 text-center h-full w-full">
-        <p className="text-xs sm:text-sm font-medium pr-6 sm:pr-0 break-words w-full">
+      <div className="relative flex items-center justify-center px-4 py-2 text-center h-full">
+        <p className="text-sm font-medium pr-6 sm:pr-0">
           {alertBanner.message}
           {alertBanner.code && (
             <span className="ml-2 font-bold">{alertBanner.code}</span>
@@ -40,7 +40,7 @@ export default function AlertBanner() {
         </p>
         <button
           onClick={() => setIsVisible(false)}
-          className="absolute right-2 sm:right-4 p-1 rounded-full hover:bg-black/10 transition-colors block"
+          className="absolute right-4 p-1 rounded-full hover:bg-black/10 transition-colors hidden sm:block"
           aria-label="Close"
         >
           <X size={16} />
