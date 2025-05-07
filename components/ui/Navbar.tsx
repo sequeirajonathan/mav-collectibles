@@ -154,10 +154,10 @@ const Navbar = () => {
   };
 
   return (
-    <div className="bg-black shadow-md">
+    <div className="bg-black shadow-md overflow-x-hidden">
       <nav className="w-full bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-auto py-2 md:py-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex flex-wrap justify-between items-center h-auto py-2 md:py-3">
             {/* Logo and brand */}
             <div className="flex-shrink-0 flex items-center justify-center">
               <Link href="/" className="flex items-center">
@@ -173,7 +173,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Navigation and Search */}
-            <div className="flex-1 flex items-center space-x-4 justify-center">
+            <div className="flex-1 flex items-center space-x-2 sm:space-x-4 justify-center flex-wrap">
               {/* Category Group Dropdowns */}
               {CATEGORY_GROUPS.map((group) => {
                 const isTCG = group.name === "TCG";
@@ -284,7 +284,7 @@ const Navbar = () => {
             </div>
 
             {/* Right nav items */}
-            <div className="flex items-center space-x-4 relative">
+            <div className="flex items-center space-x-2 sm:space-x-4 relative">
               {/* Profile Menu */}
               <motion.div className="relative">
                 <button
@@ -382,13 +382,13 @@ const Navbar = () => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="md:hidden overflow-hidden"
+              className="fixed inset-0 z-50 bg-black overflow-y-auto md:hidden"
               variants={mobileMenuVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black border-t border-[#E6B325]/10">
+              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black border-t border-[#E6B325]/10 min-h-screen flex flex-col">
                 {CATEGORY_GROUPS.map((group) => {
                   const isTCG = group.name === "TCG";
                   return (
