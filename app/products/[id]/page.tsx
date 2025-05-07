@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ChevronLeft } from 'lucide-react';
-import { useSquareProduct } from '@hooks/useSquareProduct';
+import { useSquareProduct } from '@hooks/useSquareServices';
 import { useCart } from '@contexts/CartContext';
 
 const IMAGE_CONFIG = {
@@ -14,33 +14,26 @@ const IMAGE_CONFIG = {
   quality: 90,
 } as const;
 
-export default function ProductPage({ params }: { params: Promise<{ category: string; id: string }> }) {
-  const resolvedParams = use(params);
+export default function ProductPage({ params }: { params: Promise<{ id: string }> } ) {
+  const { id } = use(params); 
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
-  
-  const { data: product, isLoading, isError } = useSquareProduct(resolvedParams.id, resolvedParams.category);
 
-  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!product) {
-      return;
-    }
-    
-    try {
-      const mainVariation = product.variations[0];
-      const price = mainVariation?.price || product.price;
-      
+  const { data: product, isLoading, isError } = useSquareProduct(id);
+
+  const handleAddToCart = () => {
+    if (!product || !product.variations?.length) return;
+
+    const mainVariation = product.variations[0];
+    const price = mainVariation?.priceAmount || product.variations[0]?.priceAmount;
+
+    for (let i = 0; i < quantity; i++) {
       addItem({
         id: product.id,
         name: product.name,
         price,
         imageUrl: product.imageUrls?.[0],
       });
-    } catch {
-      // Silent error - animation in navbar will indicate success
     }
   };
 
@@ -55,13 +48,13 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
     );
   }
 
-  if (isError || !product) {
+  if (isError || !product || !product.variations?.length) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-[#E6B325] mb-4">Product Not Found</h1>
           <Link
-            href={`/products/${resolvedParams.category}`}
+            href="/products"
             className="text-white hover:text-[#E6B325] transition-colors"
           >
             Return to Products
@@ -72,14 +65,14 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
   }
 
   const mainVariation = product.variations[0];
-  const price = mainVariation?.price || product.price;
-  const isAvailable = product.status === "AVAILABLE";
+  const price = mainVariation?.priceAmount || product.variations[0]?.priceAmount;
+  const isAvailable = mainVariation?.inventoryCount > 0;
 
   return (
     <div className="min-h-[60vh] px-4 py-12">
       <div className="max-w-7xl mx-auto">
         <Link
-          href={`/products/${resolvedParams.category}`}
+          href={`/products`}
           className="inline-flex items-center text-[#E6B325] hover:text-[#FFD966] mb-8 transition-colors"
         >
           <ChevronLeft className="w-5 h-5 mr-1" />
@@ -87,20 +80,20 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image Container */}
+          {/* Product Image */}
           <div className="relative">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="relative aspect-square rounded-xl overflow-hidden bg-gray-900/50 backdrop-blur-sm border border-gray-800/50"
             >
-              {!isAvailable && (
+              {mainVariation?.inventoryCount === 0 && (
                 <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
                   <span className="text-white font-bold text-xl">SOLD OUT</span>
                 </div>
               )}
               <Image
-                src={product.imageUrls?.[0] || '/placeholder.jpg'}
+                src={product.imageUrls?.[0] || '/images/placeholder.png'}
                 alt={product.name}
                 width={IMAGE_CONFIG.width}
                 height={IMAGE_CONFIG.height}
@@ -118,13 +111,11 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
             className="flex flex-col"
           >
             <h1 className="text-3xl font-bold text-white mb-4">{product.name}</h1>
-            
+
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center">
-                <span className="text-2xl font-bold text-[#E6B325]">
-                  ${price.toFixed(2)}
-                </span>
-              </div>
+              <span className="text-2xl font-bold text-[#E6B325]">
+                ${(price / 100).toFixed(2)}
+              </span>
             </div>
 
             <p className="text-gray-300 mb-8">{product.description}</p>
@@ -144,7 +135,7 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
                       <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
                   </div>
@@ -160,7 +151,6 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
               </div>
             )}
 
-            {/* Product Variations */}
             {product.variations.length > 1 && (
               <div className="border-t border-gray-800 pt-8">
                 <h2 className="text-xl font-semibold text-white mb-4">Available Options</h2>
@@ -169,7 +159,7 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
                     <div key={variation.id} className="flex justify-between items-center">
                       <span className="text-gray-300">{variation.name}</span>
                       <span className="text-[#E6B325] font-semibold">
-                        ${variation.price.toFixed(2)}
+                        ${(variation.priceAmount / 100).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -177,14 +167,13 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
               </div>
             )}
 
-            {/* SKU Information */}
             {mainVariation?.sku && (
               <div className="border-t border-gray-800 pt-8 mt-8">
                 <h2 className="text-xl font-semibold text-white mb-4">Product Details</h2>
-                <div>
+                <dl>
                   <dt className="text-gray-400">SKU</dt>
                   <dd className="text-white">{mainVariation.sku}</dd>
-                </div>
+                </dl>
               </div>
             )}
           </motion.div>
@@ -192,4 +181,4 @@ export default function ProductPage({ params }: { params: Promise<{ category: st
       </div>
     </div>
   );
-} 
+}

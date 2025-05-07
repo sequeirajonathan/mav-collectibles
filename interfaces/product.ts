@@ -5,7 +5,7 @@ export interface Product {
   price: number;
   status: "AVAILABLE" | "UNAVAILABLE";
   availability?: "IN_STOCK" | "SOLD_OUT";
-  stockQuantity?: number;
+  stockQuantity: number;
   image: string;
   imageIds: string[];
   imageUrls?: string[];

@@ -32,8 +32,6 @@ export async function PATCH(
   try {
     const { enabled } = await request.json();
     
-    console.log(`Updating feature flag ${id} to ${enabled}`);
-    
     const updatedFlag = await prisma.featureFlag.update({
       where: { id: String(id) },
       data: { enabled }

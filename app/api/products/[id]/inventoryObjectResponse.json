@@ -1,0 +1,28 @@
+{
+    "counts": [
+      {
+        "catalog_object_id": "YA3SMPPAJHER5NBZOF7NXBWR",
+        "catalog_object_type": "ITEM_VARIATION",
+        "state": "IN_STOCK",
+        "location_id": "L1GPV6KCEG6BG",
+        "quantity": "0",
+        "calculated_at": "2024-12-01T02:22:20.607Z"
+      },
+      {
+        "catalog_object_id": "YA3SMPPAJHER5NBZOF7NXBWR",
+        "catalog_object_type": "ITEM_VARIATION",
+        "state": "IN_STOCK",
+        "location_id": "L25M9AE9NKYYH",
+        "quantity": "0",
+        "calculated_at": "2024-12-01T02:22:20.607Z"
+      },
+      {
+        "catalog_object_id": "YA3SMPPAJHER5NBZOF7NXBWR",
+        "catalog_object_type": "ITEM_VARIATION",
+        "state": "IN_STOCK",
+        "location_id": "LTZNXWZDB0FH9",
+        "quantity": "1",
+        "calculated_at": "2025-03-06T18:16:43.766Z"
+      }
+    ]
+  }

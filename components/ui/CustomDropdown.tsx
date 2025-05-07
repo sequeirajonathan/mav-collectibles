@@ -3,14 +3,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-interface DropdownProps {
-  options: { label: string; value: string; }[];
-  value: string;
-  onChange: (value: string) => void;
+export interface DropdownOption<T extends string> {
+  label: string;
+  value: T;
+}
+
+interface DropdownProps<T extends string> {
+  options: DropdownOption<T>[];
+  value: T;
+  onChange: (value: T) => void;
   className?: string;
 }
 
-export function CustomDropdown({ options, value, onChange, className = '' }: DropdownProps) {
+export function CustomDropdown<T extends string>({
+  options,
+  value,
+  onChange,
+  className = '',
+}: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(opt => opt.value === value);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -42,11 +52,11 @@ export function CustomDropdown({ options, value, onChange, className = '' }: Dro
         <span>{selectedOption?.label}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      
+
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-30" 
+          <div
+            className="fixed inset-0 z-30"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg overflow-hidden z-40 shadow-lg shadow-black/50">
@@ -58,9 +68,9 @@ export function CustomDropdown({ options, value, onChange, className = '' }: Dro
                   setIsOpen(false);
                 }}
                 className={`w-full text-left px-4 py-2 transition-colors
-                          ${option.value === value 
-                            ? 'bg-[#E6B325]/10 text-[#E6B325]' 
-                            : 'text-[#E6B325] hover:bg-[#E6B325]/10'}`}
+                          ${option.value === value
+                    ? 'bg-[#E6B325]/10 text-[#E6B325]'
+                    : 'text-[#E6B325] hover:bg-[#E6B325]/10'}`}
               >
                 {option.label}
               </button>
@@ -70,4 +80,4 @@ export function CustomDropdown({ options, value, onChange, className = '' }: Dro
       )}
     </div>
   );
-} 
+}

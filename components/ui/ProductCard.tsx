@@ -1,61 +1,52 @@
 "use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ShoppingCart } from 'lucide-react';
-import { useCart } from '@contexts/CartContext';
-import toast from 'react-hot-toast';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  description: string;
-  status: 'in_stock' | 'sale' | 'sold_out' | 'AVAILABLE' | 'UNAVAILABLE';
-  salePrice?: number;
-  stockQuantity: number;
-}
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { ShoppingCart } from "lucide-react";
+import { useCart } from "@contexts/CartContext";
+import toast from "react-hot-toast";
+import { NormalizedCatalogItem } from "@interfaces";
 
 interface ProductCardProps {
-  product: Product;
+  product: NormalizedCatalogItem;
   sizes?: string;
-  imageConfig?: {
+  imageConfig: {
     width: number;
     height: number;
     quality: number;
   };
 }
 
-export function ProductCard({ 
-  product, 
+export function ProductCard({
+  product,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw",
-  imageConfig
+  imageConfig,
 }: ProductCardProps) {
   const { addItem } = useCart();
+
+  const imageUrl = product.imageUrls?.[0] || "/images/placeholder.png";
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     try {
       const itemToAdd = {
-        id: product.id,
+        id: product.variationId,
         name: product.name,
-        price: product.salePrice || product.price,
-        imageUrl: product.image,
+        price: product.priceAmount / 100,
+        imageUrl,
       };
-      
+
       addItem(itemToAdd);
-      
+
       toast.success(`${product.name} added to cart!`, {
-        position: 'top-right',
+        position: "top-right",
         duration: 2000,
       });
     } catch {
-      toast.error('Failed to add item to cart');
+      toast.error("Failed to add item to cart");
     }
   };
 
@@ -63,74 +54,61 @@ export function ProductCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="group relative block max-w-[280px] mx-auto w-full"
+      className="group relative max-w-[280px] mx-auto w-full h-[420px] flex flex-col"
     >
-      {product.status === 'sale' && (
-        <div className="absolute -top-5 -left-2 z-10 bg-[#E6B325] text-black px-3 py-1 rounded-md text-sm font-bold shadow-lg">
-          SALE
-        </div>
-      )}
-      <Link 
-        href={`/products/${product.category}/${product.id}`}
+      <Link
+        href={`/products/${product.variationId}`}
         className="block h-full"
       >
-        <div className="relative flex flex-col h-full overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 
-                      transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
-          
-          {product.status === 'sold_out' && (
+        <div className="relative flex flex-col h-full overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
+          {product.soldOut && (
             <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
               <span className="text-white font-bold text-lg">SOLD OUT</span>
             </div>
           )}
-          
-          <div className="relative w-[280px] h-[280px] overflow-hidden rounded-lg flex items-center justify-center mx-auto bg-gradient-to-br from-black via-gray-900 to-[#E6B325]">
-            <Image
-              src={product.image || '/images/placeholder.png'}
-              alt={product.name}
-              fill
-              className="object-contain transition-transform duration-300 group-hover:scale-105"
-              sizes={sizes}
-              quality={imageConfig?.quality || 90}
-              priority={false}
-            />
-            {product.status !== 'sold_out' && (
-              <motion.div 
-                className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                initial={false}
-              >
-                <span className="text-white font-semibold text-lg">View Details</span>
-              </motion.div>
-            )}
-          </div>
-            
-          <div className="p-4">
+
+          <motion.div
+            className="aspect-[4/3] w-full bg-gradient-to-br from-black via-gray-900 to-[#E6B325] rounded-lg overflow-hidden"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="relative w-full h-full">
+              <Image
+                src={imageUrl}
+                alt={product.name}
+                fill
+                className="object-contain w-full h-full p-4 transition-transform duration-300 group-hover:scale-105"
+                sizes={sizes}
+                quality={imageConfig?.quality || 90}
+                priority={false}
+              />
+            </div>
+          </motion.div>
+
+          <div className="p-4 flex flex-col flex-1">
             <h3 className="text-sm font-medium text-white/90 group-hover:text-white mb-2 line-clamp-2 min-h-[2.5rem]">
               {product.name}
             </h3>
-            <p className="text-sm text-gray-400 mb-3 line-clamp-2 flex-grow">
+            <p className="text-sm text-gray-400 mb-3 line-clamp-2">
               {product.description}
             </p>
             <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-800/50">
-              <div className="flex items-center gap-2">
-                {product.salePrice ? (
-                  <>
-                    <span className="text-[#E6B325] font-semibold">${product.salePrice.toFixed(2)}</span>
-                    <span className="text-gray-500 line-through text-sm">${product.price.toFixed(2)}</span>
-                  </>
-                ) : (
-                  <span className="text-[#E6B325] font-semibold">${product.price.toFixed(2)}</span>
-                )}
-              </div>
-              {product.status !== 'sold_out' && (
-                <button
+              <span className="text-[#E6B325] font-semibold">
+                ${(product.priceAmount / 100).toFixed(2)}
+              </span>
+              {!product.soldOut && (
+                <motion.button
                   type="button"
                   onClick={handleAddToCart}
                   className="p-2 rounded-lg bg-[#E6B325]/10 text-[#E6B325] hover:bg-[#E6B325]/20 transition-colors"
                   aria-label="Quick add to cart"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <ShoppingCart size={18} />
-                </button>
+                </motion.button>
               )}
             </div>
           </div>
@@ -138,4 +116,4 @@ export function ProductCard({
       </Link>
     </motion.div>
   );
-} 
+}

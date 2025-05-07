@@ -21,10 +21,7 @@ export async function POST(request: NextRequest) {
     });
 
     const counts: InventoryCount[] = response.data ?? [];
-
-    console.log("[Inventory] variationIds sent:", variationIds);
-    console.log("[Inventory] raw response data:", response.data);
-
+    
     const inventoryMap = counts.reduce<Record<string, number>>((acc, count) => {
       const id = count.catalogObjectId;
       const qty = parseFloat(count.quantity ?? "0");

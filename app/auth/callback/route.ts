@@ -17,8 +17,6 @@ export async function GET(request: Request) {
 
     if (user) {
       try {
-        console.log('Creating/updating user profile for:', user.email);
-        
         // Create or update UserProfile with ADMIN role for your email
         const userProfile = await prisma.userProfile.upsert({
           where: { email: user.email! },
@@ -30,8 +28,6 @@ export async function GET(request: Request) {
             role: user.email === 'sequeira.s.jonathan@gmail.com' ? 'ADMIN' : 'CUSTOMER',
           },
         });
-
-        console.log('User profile created/updated:', userProfile);
 
         // Also update the Supabase user_profiles table to match Prisma
         const { error: supabaseError } = await supabase

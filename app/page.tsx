@@ -6,7 +6,6 @@ import Link from "next/link";
 import FeaturedEvents from "@components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
 import VideoSection from "@components/ui/VideoSection";
-import { ProductList } from "@components/ui/ProductList";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -85,14 +84,14 @@ export default function Home() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   };
 
   return (
@@ -110,15 +109,15 @@ export default function Home() {
 
       {/* Card Games Grid */}
       <div className="w-full max-w-6xl">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-bold text-center mb-8 text-brand-gold"
         >
           Trading Card Games
         </motion.h2>
-        
-        <motion.div 
+
+        <motion.div
           variants={container}
           initial="hidden"
           animate="show"
@@ -135,7 +134,10 @@ export default function Home() {
                   {/* Card Content */}
                   <div className="p-4 flex flex-col items-center space-y-2">
                     {/* Image Container */}
-                    <div className="relative w-full" style={{ aspectRatio: game.aspectRatio }}>
+                    <div
+                      className="relative w-full"
+                      style={{ aspectRatio: game.aspectRatio }}
+                    >
                       <Image
                         src={game.image}
                         alt={game.title}
@@ -144,7 +146,7 @@ export default function Home() {
                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     </div>
-                    
+
                     {/* Title & View All */}
                     <div className="text-center mt-2">
                       <h3 className="text-lg md:text-xl font-bold group-hover:text-brand-gold transition-colors">
@@ -167,7 +169,7 @@ export default function Home() {
 
       {/* Why Choose Section */}
       <div className="mt-4 text-center w-full max-w-6xl">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -175,7 +177,7 @@ export default function Home() {
         >
           Why Choose MAV Collectibles?
         </motion.h2>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -214,9 +216,6 @@ export default function Home() {
           ))}
         </motion.div>
       </div>
-
-      {/* Featured Products */}
-      <ProductList products={[]} />
     </div>
   );
 }

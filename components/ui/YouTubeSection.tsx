@@ -7,10 +7,7 @@ export default function YouTubeSection() {
   const { getFeatureFlag, youtubeSettings } = useAppContext();
   const showYouTubeVideo = getFeatureFlag('showYouTubeVideo');
   
-  console.log("Feature flag for YouTube:", showYouTubeVideo);
-  
   if (!showYouTubeVideo) {
-    console.log("YouTube section hidden due to feature flag");
     return null;
   }
   

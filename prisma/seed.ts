@@ -177,8 +177,6 @@ async function main() {
       muted: true
     }
   });
-
-  console.log('Database has been seeded.');
 }
 
 main()

@@ -1,54 +1,100 @@
-export interface SquareItem {
-  id: string;
-  itemData?: {
-    name?: string | null;
-    description?: string | null;
-    variations?: Array<{
-      id?: string;
-      itemVariationData?: {
-        name?: string | null;
-        priceMoney?: { amount?: bigint | null };
-        sku?: string | null;
-        stockable?: boolean | null;
-        sellable?: boolean | null;
-      };
-    }> | null;
-    imageIds?: string[] | null;
-    categories?: Array<{
-      id?: string;
-      ordinal?: bigint | null;
-    }> | null;
+import { Square } from "square";
+
+export type EcomVisibility = "UNINDEXED" | "UNAVAILABLE" | "HIDDEN" | "VISIBLE";
+export type SortOption = "price_asc" | "price_desc" | "name_asc" | "name_desc";
+export type StockOption = "IN_STOCK" | "SOLD_OUT" | "all";
+export type SearchCatalogObjectsResponse = Square.SearchCatalogObjectsResponse;
+export type CatalogObject = Square.CatalogObject;
+export type GetCatalogObjectResponse = Square.GetCatalogObjectResponse;
+export type InventoryCount = Square.InventoryCount;
+export interface NormalizedCatalogItem {
+  itemId: string;
+  variationId: string;
+  name: string;
+  description?: string;
+  imageIds?: string[];
+  imageUrls?: string[];
+  sku: string;
+  priceAmount: number;
+  priceCurrency: string;
+  isTaxable: boolean;
+  taxIds: string[];
+  taxInfo: Array<{
+    name: string;
+    percentage?: string;
+  }>;
+  isArchived: boolean;
+  updatedAt?: string;
+  soldOut: boolean;
+  presentAtAllLocations: boolean;
+  presentAtLocationIds: string[];
+  ecomAvailable: boolean;
+  ecomVisibility: EcomVisibility;
+  categoryId?: string;
+  categoryInfo?: {
+    name: string;
+  };
+  categoryName?: string;
+  group?: string;
+}
+
+export interface NormalizedCatalogResponse {
+  items: NormalizedCatalogItem[];
+  cursor: string | null;
+}
+
+export type ItemVariationObject = Square.CatalogObject & {
+  type: "ITEM_VARIATION";
+  itemVariationData: Square.CatalogItemVariation;
+};
+
+export type ItemObject = Square.CatalogObject & {
+  type: "ITEM";
+  itemData: Square.CatalogItem & {
+    ecom_visibility?: EcomVisibility;
     ecom_available?: boolean;
   };
+};
+
+export interface UseCatalogItemsOptions {
+  cursor?: string | null;
+  group?: string;
 }
 
-export interface SquareImage {
-  id: string;
-  type: string;
-  imageData: {
-    name?: string;
-    url?: string;
-  };
-}
-
-export interface SquareProduct {
+export interface NormalizedProductResponse {
   id: string;
   name: string;
   description: string;
-  price: number;
-  status: "AVAILABLE" | "UNAVAILABLE";
+  descriptionHtml?: string;
+  descriptionPlaintext?: string;
   imageIds: string[];
-  imageUrls?: string[];
-  category: string;
-  categoryType: string;
-  stockQuantity: number;
-  variations: {
+  imageUrls: string[];
+  variations: Array<{
     id: string;
     name: string;
-    price: number;
-    sku?: string | null;
-    stockable: boolean;
-    sellable: boolean;
-  }[];
+    sku: string;
+    upc?: string;
+    priceAmount: number;
+    priceCurrency: string;
+    inventoryCount: number;
+    locationInventory: Array<{
+      locationId: string;
+      quantity: number;
+      state: string;
+    }>;
+  }>;
+  category: {
+    id: string;
+    name: string;
+  };
+  taxInfo: Array<{
+    id: string;
+    name: string;
+    percentage: string;
+  }>;
+  isTaxable: boolean;
+  isArchived: boolean;
+  ecomAvailable: boolean;
+  ecomVisibility: string;
+  updatedAt: string;
 }
-  

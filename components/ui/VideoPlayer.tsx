@@ -113,8 +113,6 @@ export default function VideoPlayer({
 
     // Prevent re-initialization if we've already tried and failed with all fallbacks
     if (hasInitialized && error && videoSource.src && !videoSource.src.includes("fallback")) {
-      // Try a fallback stream
-      console.log("Trying fallback stream...");
       
       // Find a fallback that's different from the current source
       const fallback = FALLBACK_STREAMS.find(url => url !== videoSource.src);
