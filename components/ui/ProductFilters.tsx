@@ -86,14 +86,15 @@ export function ProductFilters({
   };
 
   return (
-    <div className="sticky top-0 z-20 -mx-4 px-4 py-4 bg-black/80 backdrop-blur-sm border-b border-[#E6B325]/10 mb-8">
+    <div className="sticky top-0 z-20 -mx-4 px-2 sm:px-4 py-3 bg-black/80 backdrop-blur-sm border-b border-[#E6B325]/10 mb-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-wrap justify-between items-center gap-4">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
+          {/* Category buttons: vertical stack on mobile, row on desktop */}
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             {CATEGORY_GROUPS.map((g) => (
               <button
                 key={g.name}
-                className={`px-4 py-2 rounded font-medium border transition-all duration-200 ${
+                className={`px-4 py-2 rounded font-medium border transition-all duration-200 text-sm sm:text-base w-full sm:w-auto ${
                   selectedGroup === g.name
                     ? "bg-[#E6B325] text-black border-[#E6B325]"
                     : "bg-transparent text-[#E6B325] border-[#E6B325]/30 hover:bg-[#E6B325]/10"
@@ -104,16 +105,19 @@ export function ProductFilters({
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-4">
+          {/* Dropdowns: side by side on all screens */}
+          <div className="flex flex-row gap-2 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-0">
             <CustomDropdown
               options={stockOptions}
               value={stockStatus}
               onChange={(value) => updateFilters(undefined, value)}
+              className="flex-1 min-w-0"
             />
             <CustomDropdown
               options={sortOptions}
               value={sortBy}
               onChange={(value) => updateFilters(value)}
+              className="flex-1 min-w-0"
             />
           </div>
         </div>

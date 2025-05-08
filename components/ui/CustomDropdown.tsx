@@ -45,7 +45,7 @@ export function CustomDropdown<T extends string>({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-48 bg-black border border-[#E6B325]/30 text-[#E6B325] py-2 px-4 rounded-lg 
+        className="w-full min-w-[140px] bg-black border border-[#E6B325]/30 text-[#E6B325] py-2 px-4 rounded-lg 
                  flex items-center justify-between
                  focus:outline-none focus:border-[#E6B325] hover:border-[#E6B325] transition-colors"
       >
@@ -59,7 +59,7 @@ export function CustomDropdown<T extends string>({
             className="fixed inset-0 z-30"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg overflow-hidden z-40 shadow-lg shadow-black/50">
+          <div className="absolute top-full left-0 mt-2 w-full min-w-[140px] bg-black border border-[#E6B325]/30 rounded-lg overflow-hidden z-40 shadow-lg shadow-black/50">
             {options.map((option) => (
               <button
                 key={option.value}

@@ -3,13 +3,27 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingCart, Menu, X, User, LogOut, ChevronDown } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  Menu,
+  X,
+  User,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSupabase } from "@contexts/SupabaseContext";
-import { useCart } from '@contexts/CartContext';
-import { CATEGORY_GROUPS, CATEGORY_MAPPING, COLLECTIBLES_MAPPING, SUPPLIES_MAPPING, EVENTS_MAPPING } from '@const/categories';
-import { Category } from '@interfaces/categories';
-import { useSearchParams } from 'next/navigation';
+import { useCart } from "@contexts/CartContext";
+import {
+  CATEGORY_GROUPS,
+  CATEGORY_MAPPING,
+  COLLECTIBLES_MAPPING,
+  SUPPLIES_MAPPING,
+  EVENTS_MAPPING,
+} from "@const/categories";
+import { Category } from "@interfaces/categories";
+import { useSearchParams } from "next/navigation";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,105 +40,83 @@ const Navbar = () => {
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         profileDropdownRef.current &&
         profileButtonRef.current &&
-        !profileDropdownRef.current.contains(event.target as Node) &&
-        !profileButtonRef.current.contains(event.target as Node)
+        !profileDropdownRef.current.contains(e.target as Node) &&
+        !profileButtonRef.current.contains(e.target as Node)
       ) {
         setIsProfileOpen(false);
       }
-
-      // Check if click is outside any dropdown
-      const clickedOutsideAllDropdowns = Object.values(dropdownRefs.current).every(
-        ref => !ref?.contains(event.target as Node)
+      const clickedOutsideAll = Object.values(dropdownRefs.current).every(
+        (ref) => !ref?.contains(e.target as Node)
       );
-      if (clickedOutsideAllDropdowns) {
-        setActiveDropdown(null);
-      }
+      if (clickedOutsideAll) setActiveDropdown(null);
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    setIsMenuOpen((o) => !o);
     if (isProfileOpen) setIsProfileOpen(false);
   };
-
   const toggleProfile = () => {
-    setIsProfileOpen(!isProfileOpen);
+    setIsProfileOpen((o) => !o);
     if (isMenuOpen) setIsMenuOpen(false);
   };
-
   const handleSignOut = async () => {
     setIsProfileOpen(false);
     await signOut();
   };
-
-  const hasAdminAccess = userProfile?.role && ['STAFF', 'MANAGER', 'ADMIN', 'OWNER'].includes(userProfile.role);
-
-  const navigationItems = hasAdminAccess ? [{ href: "/admin", label: "Admin" }] : [];
+  const hasAdminAccess =
+    userProfile?.role &&
+    ["STAFF", "MANAGER", "ADMIN", "OWNER"].includes(userProfile.role);
+  const navigationItems = hasAdminAccess
+    ? [{ href: "/admin", label: "Admin" }]
+    : [];
 
   const mobileMenuVariants = {
     hidden: { opacity: 0, height: 0 },
     visible: {
       opacity: 1,
       height: "auto",
-      transition: {
-        duration: 0.3,
-        staggerChildren: 0.05,
-        when: "beforeChildren",
-      },
+      transition: { duration: 0.3, when: "beforeChildren" },
     },
-    exit: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        duration: 0.2,
-        when: "afterChildren",
-      },
-    },
+    exit: { opacity: 0, height: 0, transition: { duration: 0.2 } },
   };
-
   const mobileItemVariants = {
     hidden: { opacity: 0, x: -10 },
     visible: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -10 },
   };
 
-  const toggleGroup = (groupName: string) => {
-    setExpandedGroup(expandedGroup === groupName ? null : groupName);
-  };
+  const toggleGroup = (g: string) =>
+    setExpandedGroup((cur) => (cur === g ? null : g));
 
-  // Group TCG categories for mobile
-  const getTopTCGCategories = (categories: Category[]) => {
-    const topGames = ['pokemon', 'yugioh', 'magic', 'dragonball', 'onepiece'];
-    return categories.filter(cat => topGames.includes(cat.routeName));
+  const getTopTCGCategories = (cats: Category[]) => {
+    const top = ["pokemon", "yugioh", "magic", "dragonball", "onepiece"];
+    return cats.filter((c) => top.includes(c.routeName));
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('search', searchTerm.trim());
-      // Clear categoryId when searching to avoid conflicts
-      params.delete('categoryId');
-      window.location.href = `/products?${params.toString()}`;
-      setSearchTerm("");
-    }
+    if (!searchTerm.trim()) return;
+    const p = new URLSearchParams(searchParams.toString());
+    p.set("search", searchTerm.trim());
+    p.delete("categoryId");
+    window.location.href = `/products?${p.toString()}`;
+    setSearchTerm("");
+    setIsMenuOpen(false);
   };
 
-  const handleCategoryClick = (groupName: string, category?: Category) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('group', groupName);
-    
+  const handleCategoryClick = (group: string, category?: Category) => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.set("group", group);
     if (category) {
       let squareId: string | undefined;
-      
-      switch (groupName) {
+      switch (group) {
         case "TCG":
           squareId = CATEGORY_MAPPING[category.squareCategory]?.squareId;
           break;
@@ -138,63 +130,68 @@ const Navbar = () => {
           squareId = EVENTS_MAPPING[category.squareCategory]?.squareId;
           break;
       }
-
       if (squareId) {
-        params.set('categoryId', squareId);
-        // Clear search when selecting a category
-        params.delete('search');
+        p.set("categoryId", squareId);
+        p.delete("search");
       }
     } else {
-      // If no specific category is selected, remove the categoryId parameter
-      params.delete('categoryId');
+      p.delete("categoryId");
     }
-
-    window.location.href = `/products?${params.toString()}`;
+    window.location.href = `/products?${p.toString()}`;
     setActiveDropdown(null);
+    setIsMenuOpen(false);
   };
 
   return (
     <div className="bg-black shadow-md">
       <nav className="w-full bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-auto py-2 md:py-3">
-            {/* Logo and brand */}
-            <div className="flex-shrink-0 flex items-center justify-center">
+          <div className="flex justify-between items-center py-2 md:py-3">
+            {/* Logo */}
+            <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="flex items-center">
                 <Image
                   src="/mav_collectibles.png"
                   alt="MAV Collectibles Logo"
                   width={400}
                   height={160}
-                  className="h-auto w-40 sm:w-44 md:w-48 my-2"
+                  className="w-40 sm:w-44 md:w-48"
                   priority
                 />
               </Link>
             </div>
 
-            {/* Desktop Navigation and Search */}
-            <div className="flex-1 flex items-center space-x-4 justify-center">
-              {/* Category Group Dropdowns */}
+            {/* Desktop nav + search (hidden on mobile) */}
+            <div className="hidden md:flex-1 md:flex items-center space-x-4 justify-center">
               {CATEGORY_GROUPS.map((group) => {
                 const isTCG = group.name === "TCG";
-                const categories = isTCG ? getTopTCGCategories(group.categories) : group.categories;
-
+                const cats = isTCG
+                  ? getTopTCGCategories(group.categories)
+                  : group.categories;
                 return (
-                  <div key={group.name} className="relative" ref={(el) => {
-                    if (el) {
-                      dropdownRefs.current[group.name] = el;
-                    }
-                  }}>
+                  <div
+                    key={group.name}
+                    className="relative"
+                    ref={(el) => {
+                      if (el) dropdownRefs.current[group.name] = el;
+                    }}
+                  >
                     <motion.button
-                      onClick={() => setActiveDropdown(activeDropdown === group.name ? null : group.name)}
-                      className="text-[#E6B325] font-semibold uppercase tracking-wide text-sm transition-colors px-2 py-1 drop-shadow-sm hover:text-[#FFD966] flex items-center"
-                      initial={{ y: 0 }}
-                      whileHover={{ y: -2 }}
+                      onClick={() =>
+                        setActiveDropdown((cur) =>
+                          cur === group.name ? null : group.name
+                        )
+                      }
+                      className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 flex items-center hover:text-[#FFD966]"
                     >
                       {group.name}
-                      <ChevronDown size={16} className={`ml-1 transition-transform ${activeDropdown === group.name ? 'rotate-180' : ''}`} />
+                      <ChevronDown
+                        size={16}
+                        className={`ml-1 transition-transform ${
+                          activeDropdown === group.name ? "rotate-180" : ""
+                        }`}
+                      />
                     </motion.button>
-
                     <AnimatePresence>
                       {activeDropdown === group.name && (
                         <motion.div
@@ -202,21 +199,25 @@ const Navbar = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 backdrop-blur-sm z-50"
+                          className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 z-50"
                         >
-                          {categories.map((category) => (
+                          {cats.map((cat) => (
                             <button
-                              key={category.routeName}
-                              onClick={() => handleCategoryClick(group.name, category)}
-                              className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                              key={cat.routeName}
+                              onClick={() =>
+                                handleCategoryClick(group.name, cat)
+                              }
+                              className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                             >
-                              {category.displayName}
+                              {cat.displayName}
                             </button>
                           ))}
                           {isTCG && (
                             <button
-                              onClick={() => handleCategoryClick(group.name)}
-                              className="w-full text-left px-4 py-2 text-sm text-[#E6B325]/80 hover:text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                              onClick={() =>
+                                handleCategoryClick("TCG")
+                              }
+                              className="w-full text-left px-4 py-2 text-sm text-[#E6B325]/80 hover:bg-[#E6B325]/10"
                             >
                               View All TCG
                             </button>
@@ -228,80 +229,54 @@ const Navbar = () => {
                 );
               })}
 
-              {/* Admin Link */}
               {navigationItems.map((item) => (
-                <motion.div
+                <Link
                   key={item.href}
-                  initial={{ y: 0 }}
-                  whileHover={{
-                    y: -2,
-                    color: "#E6B325",
-                    transition: { duration: 0.2 },
-                  }}
-                  className="relative"
+                  href={item.href}
+                  className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 hover:text-[#FFD966]"
                 >
-                  <Link
-                    href={item.href}
-                    className="text-[#E6B325] font-semibold uppercase tracking-wide text-sm transition-colors px-2 py-1 drop-shadow-sm hover:text-[#FFD966]"
-                  >
-                    {item.label}
-                  </Link>
-                  <motion.div
-                    className="absolute bottom-0 left-0 h-0.5 bg-[#E6B325]"
-                    initial={{ width: "0%" }}
-                    whileHover={{ width: "100%" }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.div>
+                  {item.label}
+                </Link>
               ))}
 
-              {/* Search input - always visible */}
-              <div className="relative flex items-center" style={{ minWidth: 0 }}>
-                <form
-                  onSubmit={handleSearch}
-                  className="flex items-center bg-black border border-[#E6B325]/80 rounded-full overflow-hidden shadow-lg"
-                  style={{ width: 240, position: 'relative', zIndex: 30 }}
+              {/* Search */}
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center bg-black border border-[#E6B325]/80 rounded-full overflow-hidden"
+                style={{ width: 240 }}
+              >
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search products..."
+                  className="bg-transparent text-white px-4 py-1 w-full focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="p-2 text-[#E6B325]"
                 >
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search products..."
-                    className="bg-transparent text-white px-4 py-1 w-full focus:outline-none placeholder:text-gray-400"
-                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-[#E6B325] hover:text-[#FFD966] transition-colors bg-transparent border-none outline-none focus:outline-none"
-                    style={{ background: 'none', border: 'none', outline: 'none' }}
-                    tabIndex={0}
-                  >
-                    <Search size={20} />
-                  </button>
-                </form>
-              </div>
+                  <Search size={20} />
+                </button>
+              </form>
             </div>
 
-            {/* Right nav items */}
-            <div className="flex items-center space-x-4 relative">
-              {/* Profile Menu */}
-              <motion.div className="relative">
+            {/* Profile, Cart & Mobile toggle */}
+            <div className="flex items-center space-x-4">
+              {/* Profile */}
+              <div className="relative">
                 <button
                   ref={profileButtonRef}
                   onClick={toggleProfile}
                   className={`p-2 rounded-full transition-colors ${
-                    isProfileOpen 
-                      ? 'bg-[#E6B325]/10 text-[#E6B325]' 
-                      : 'text-white hover:bg-brand-blue/20 hover:text-[#E6B325]'
+                    isProfileOpen
+                      ? "bg-[#E6B325]/10 text-[#E6B325]"
+                      : "text-white hover:bg-brand-blue/20 hover:text-[#E6B325]"
                   }`}
-                  aria-label="Profile"
-                  aria-expanded={isProfileOpen}
                 >
                   <User size={20} />
                 </button>
-
-                {/* Profile Dropdown */}
                 <AnimatePresence>
                   {isProfileOpen && (
                     <motion.div
@@ -310,32 +285,32 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 backdrop-blur-sm"
+                      className="absolute right-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1"
                     >
                       {user ? (
                         <>
                           <div className="px-4 py-2 border-b border-[#E6B325]/10">
-                            <p className="text-sm font-medium text-[#E6B325] truncate">
+                            <p className="text-sm text-[#E6B325] truncate">
                               {user.email}
                             </p>
                           </div>
                           <Link
                             href="/dashboard"
-                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                             onClick={() => setIsProfileOpen(false)}
                           >
                             Dashboard
                           </Link>
                           <Link
                             href="/profile"
-                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                            className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                             onClick={() => setIsProfileOpen(false)}
                           >
                             Profile Settings
                           </Link>
                           <button
                             onClick={handleSignOut}
-                            className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors flex items-center"
+                            className="w-full flex items-center px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                           >
                             <LogOut size={16} className="mr-2" />
                             Sign Out
@@ -344,7 +319,7 @@ const Navbar = () => {
                       ) : (
                         <Link
                           href="/login"
-                          className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                          className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                           onClick={() => setIsProfileOpen(false)}
                         >
                           Sign In
@@ -353,11 +328,12 @@ const Navbar = () => {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
 
+              {/* Cart */}
               <Link
                 href="/cart"
-                className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] relative transition-colors"
+                className="p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] relative"
               >
                 <ShoppingCart size={20} />
                 {totalItems > 0 && (
@@ -367,13 +343,13 @@ const Navbar = () => {
                 )}
               </Link>
 
-              <motion.button
-                className="md:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325] transition-colors"
+              {/* Mobile menu toggle */}
+              <button
+                className="md:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325]"
                 onClick={toggleMenu}
-                aria-label="Toggle menu"
               >
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
@@ -388,85 +364,76 @@ const Navbar = () => {
               animate="visible"
               exit="exit"
             >
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black border-t border-[#E6B325]/10">
+              <div className="px-2 pt-2 pb-3 space-y-1 bg-black border-t border-[#E6B325]/10">
+                {/* Mobile Search */}
+                <form
+                  onSubmit={handleSearch}
+                  className="flex items-center mb-2 bg-black border border-[#E6B325]/80 rounded-full overflow-hidden"
+                >
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search..."
+                    className="bg-transparent text-white px-4 py-2 w-full focus:outline-none"
+                  />
+                  <button type="submit" className="p-2 text-[#E6B325]">
+                    <Search size={20} />
+                  </button>
+                </form>
+
+                {/* Category groups */}
                 {CATEGORY_GROUPS.map((group) => {
                   const isTCG = group.name === "TCG";
                   return (
                     <div key={group.name} className="space-y-1">
                       <button
                         onClick={() => toggleGroup(group.name)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                        className="w-full flex items-center justify-between px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
                       >
                         {group.name}
                         <ChevronDown
                           size={20}
-                          className={`transition-transform duration-200 ${expandedGroup === group.name ? 'rotate-180' : ''}`}
+                          className={`transition-transform ${
+                            expandedGroup === group.name ? "rotate-180" : ""
+                          }`}
                         />
                       </button>
                       <AnimatePresence>
                         {expandedGroup === group.name && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
+                            animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="overflow-hidden"
+                            className="pl-4"
                           >
-                            <div className="pl-4 space-y-1">
-                              {isTCG ? (
-                                <>
-                                  {getTopTCGCategories(group.categories).map((category) => (
-                                    <motion.div
-                                      key={category.routeName}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      exit={{ opacity: 0, x: -10 }}
-                                      transition={{ duration: 0.2 }}
-                                    >
-                                      <Link
-                                        href={`/products?group=${group.name}&category=${category.squareCategory}`}
-                                        className="block px-3 py-2 text-base font-medium text-[#E6B325] drop-shadow-sm hover:bg-[#E6B325]/10 hover:text-[#FFD966] transition-colors"
-                                        onClick={() => setIsMenuOpen(false)}
-                                      >
-                                        {category.displayName}
-                                      </Link>
-                                    </motion.div>
-                                  ))}
-                                  <motion.div
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    <Link
-                                      href="/products"
-                                      className="block px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325] transition-colors"
-                                      onClick={() => setIsMenuOpen(false)}
-                                    >
-                                      View All TCG
-                                    </Link>
-                                  </motion.div>
-                                </>
-                              ) : (
-                                group.categories.map((category) => (
-                                  <motion.div
-                                    key={category.routeName}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    <Link
-                                      href={`/products/${category.routeName}`}
-                                      className="block px-3 py-2 text-base font-medium text-[#E6B325] drop-shadow-sm hover:bg-[#E6B325]/10 hover:text-[#FFD966] transition-colors"
-                                      onClick={() => setIsMenuOpen(false)}
-                                    >
-                                      {category.displayName}
-                                    </Link>
-                                  </motion.div>
-                                ))
-                              )}
-                            </div>
+                            {(isTCG
+                              ? getTopTCGCategories(group.categories)
+                              : group.categories
+                            ).map((cat) => (
+                              <Link
+                                key={cat.routeName}
+                                href="#"
+                                className="block px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
+                                onClick={() =>
+                                  handleCategoryClick(group.name, cat)
+                                }
+                              >
+                                {cat.displayName}
+                              </Link>
+                            ))}
+                            {isTCG && (
+                              <Link
+                                href="/products"
+                                className="block px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
+                                onClick={() =>
+                                  handleCategoryClick(group.name)
+                                }
+                              >
+                                View All TCG
+                              </Link>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -474,12 +441,12 @@ const Navbar = () => {
                   );
                 })}
 
-                {/* Admin Link in Mobile Menu */}
+                {/* Admin Link */}
                 {navigationItems.map((item) => (
                   <motion.div key={item.href} variants={mobileItemVariants}>
                     <Link
                       href={item.href}
-                      className="block px-3 py-2 rounded-md text-base font-semibold uppercase text-[#E6B325] drop-shadow-sm hover:bg-[#E6B325]/10 hover:text-[#FFD966] transition-colors"
+                      className="block px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.label}
@@ -495,4 +462,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;
