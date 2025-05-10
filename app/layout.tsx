@@ -15,6 +15,7 @@ import { SupabaseProvider } from '@contexts/SupabaseContext';
 import CookieConsent from '@components/ui/CookieConsent';
 import { fetchAlertBanner } from '@services/alertBannerService';
 import { CartProvider } from '@contexts/CartContext';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,17 +60,19 @@ export default async function RootLayout({
           <QueryProvider initialAlertBanner={alertBannerData}>
             <AppProvider>
               <CartProvider>
-                <AlertBanner />
-                <Navbar />
-                <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-                  <Suspense fallback={<div>Loading...</div>}>
-                    {children}
-                  </Suspense>
-                </main>
-                <Footer />
-                <ScrollToTop />
-                <Toaster position="top-right" />
-                <CookieConsent />
+                <NuqsAdapter>
+                  <AlertBanner />
+                  <Navbar />
+                  <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+                    <Suspense fallback={<div>Loading...</div>}>
+                      {children}
+                    </Suspense>
+                  </main>
+                  <Footer />
+                  <ScrollToTop />
+                  <Toaster position="top-right" />
+                  <CookieConsent />
+                </NuqsAdapter>
               </CartProvider>
             </AppProvider>
           </QueryProvider>

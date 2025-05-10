@@ -1,11 +1,10 @@
-export interface CategoryGroup {
-  name: string;
-  categories: Category[];
+export interface SquareCategory {
+  displayName: string;
+  slug: string;
+  squareCategoryId: string;
 }
 
-export interface Category {
-  displayName: string;
-  routeName: string;
-  squareCategory: string;
-  squareId: string;
-} 
+export interface CategoryGroup {
+  name: string;
+  categories: SquareCategory[];
+}

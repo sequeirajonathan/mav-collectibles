@@ -1,180 +1,154 @@
-import { Category, CategoryGroup } from '@interfaces';
+import { CategoryGroup } from "@interfaces";
 
-// Extend base category to include Square metadata
-export interface SquareCategory extends Category {
-  squareId: string;
-  squareCategory: string;
+export interface SquareCategory {
+  displayName: string;
+  slug: string;
+  squareCategoryId: string;
 }
 
 // --- Main TCG Categories ---
 export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
-  "Pokemon TCG": {
+  pokemon: {
     displayName: "Pokémon",
-    routeName: "pokemon",
-    squareCategory: "Pokemon TCG",
-    squareId: "JLGE7O4IOUUW36IB6ZJYWKUU",
+    slug: "pokemon",
+    squareCategoryId: "JLGE7O4IOUUW36IB6ZJYWKUU",
   },
-  "Dragon Ball Super TCG": {
+  dragonball: {
     displayName: "Dragon Ball",
-    routeName: "dragonball",
-    squareCategory: "Dragon Ball Super TCG",
-    squareId: "CQ3NSXZ4V3Q5ZHCMS4WS3YP6",
+    slug: "dragonball",
+    squareCategoryId: "CQ3NSXZ4V3Q5ZHCMS4WS3YP6",
   },
-  "One Piece Card Game": {
+  onepiece: {
     displayName: "One Piece",
-    routeName: "onepiece",
-    squareCategory: "One Piece Card Game",
-    squareId: "B6KGCQABXQDHFISWSRBS4QHF",
+    slug: "onepiece",
+    squareCategoryId: "B6KGCQABXQDHFISWSRBS4QHF",
   },
-  "Yu-Gi-Oh": {
+  yugioh: {
     displayName: "Yu-Gi-Oh!",
-    routeName: "yugioh",
-    squareCategory: "Yu-Gi-Oh",
-    squareId: "PLVAPCRCS4TJYIBC7CDALXYK",
+    slug: "yugioh",
+    squareCategoryId: "PLVAPCRCS4TJYIBC7CDALXYK",
   },
-  "Magic The Gathering": {
+  magic: {
     displayName: "Magic",
-    routeName: "magic",
-    squareCategory: "Magic The Gathering",
-    squareId: "LXZB7FOIRUA2YASQFGDHL2EF",
+    slug: "magic",
+    squareCategoryId: "LXZB7FOIRUA2YASQFGDHL2EF",
   },
-  "Weiss Schwarz": {
+  weiss: {
     displayName: "Weiss Schwarz",
-    routeName: "weiss",
-    squareCategory: "Weiss Schwarz",
-    squareId: "LQFRABCCR6DAFY4PSUWMO224",
+    slug: "weiss",
+    squareCategoryId: "LQFRABCCR6DAFY4PSUWMO224",
   },
-  "Digimon": {
+  digimon: {
     displayName: "Digimon",
-    routeName: "digimon",
-    squareCategory: "Digimon",
-    squareId: "SGHRJGTL6NRQZ7KZ2MUTK2YA",
+    slug: "digimon",
+    squareCategoryId: "SGHRJGTL6NRQZ7KZ2MUTK2YA",
   },
-  "Metazoo": {
+  metazoo: {
     displayName: "Metazoo",
-    routeName: "metazoo",
-    squareCategory: "Metazoo",
-    squareId: "ZIAZS6CHBXSSNYAZZFYHVXNL",
+    slug: "metazoo",
+    squareCategoryId: "ZIAZS6CHBXSSNYAZZFYHVXNL",
   },
-  "Union Arena": {
+  union: {
     displayName: "Union Arena",
-    routeName: "union",
-    squareCategory: "Union Arena",
-    squareId: "4VRRPJ3MOQWD2SOCVTV6YD2X",
+    slug: "union",
+    squareCategoryId: "4VRRPJ3MOQWD2SOCVTV6YD2X",
   },
-  "Uni Verses": {
+  universe: {
     displayName: "Uni Verses",
-    routeName: "universe",
-    squareCategory: "Uni Verses",
-    squareId: "RWSUXUIFXXKHNGE4IZMECBBU",
+    slug: "universe",
+    squareCategoryId: "RWSUXUIFXXKHNGE4IZMECBBU",
   },
-  "Lorcana": {
+  lorcana: {
     displayName: "Lorcana",
-    routeName: "lorcana",
-    squareCategory: "Lorcana",
-    squareId: "ULPV5UD3L5JKS52EYP7F64NX",
+    slug: "lorcana",
+    squareCategoryId: "ULPV5UD3L5JKS52EYP7F64NX",
   },
-  "Flesh & Blood TCG": {
+  fleshblood: {
     displayName: "Flesh & Blood",
-    routeName: "fleshblood",
-    squareCategory: "Flesh & Blood TCG",
-    squareId: "Z4TJ2BADGYQJSUPJUH2Y3422",
+    slug: "fleshblood",
+    squareCategoryId: "Z4TJ2BADGYQJSUPJUH2Y3422",
   },
-  "STAR WARS UNLIMITED": {
+  starwars: {
     displayName: "Star Wars",
-    routeName: "starwars",
-    squareCategory: "STAR WARS UNLIMITED",
-    squareId: "VTABJTWESVYYHE5SXAH4NKJE",
+    slug: "starwars",
+    squareCategoryId: "VTABJTWESVYYHE5SXAH4NKJE",
   },
-  "Grand Archive": {
+  grandarchive: {
     displayName: "Grand Archive",
-    routeName: "grandarchive",
-    squareCategory: "Grand Archive",
-    squareId: "5LEDQBMCJINSREERRQL4J2SG",
+    slug: "grandarchive",
+    squareCategoryId: "5LEDQBMCJINSREERRQL4J2SG",
   },
-  "Soul masters Tcg": {
+  soulmasters: {
     displayName: "Soul Masters",
-    routeName: "soulmasters",
-    squareCategory: "Soul masters Tcg",
-    squareId: "GESEFRWGMQAWUAGSEDQ2WMLB",
+    slug: "soulmasters",
+    squareCategoryId: "GESEFRWGMQAWUAGSEDQ2WMLB",
   },
 };
 
 // --- Collectibles ---
 export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
-  "Figures": {
+  figures: {
     displayName: "Figures",
-    routeName: "figures",
-    squareCategory: "Figures",
-    squareId: "HEUDTMZDNG5LLI3ZSCCC2KIL",
+    slug: "figures",
+    squareCategoryId: "HEUDTMZDNG5LLI3ZSCCC2KIL",
   },
-  "Funko": {
+  funko: {
     displayName: "Funko",
-    routeName: "funko",
-    squareCategory: "Funko",
-    squareId: "DMXYKGGPUSSZZBZMRC5LNLPV",
+    slug: "funko",
+    squareCategoryId: "DMXYKGGPUSSZZBZMRC5LNLPV",
   },
-  "Plushies": {
+  plushies: {
     displayName: "Plushies",
-    routeName: "plushies",
-    squareCategory: "Plushies",
-    squareId: "Y3HB2FYHP74AAKQ3MNMOQRYU",
+    slug: "plushies",
+    squareCategoryId: "Y3HB2FYHP74AAKQ3MNMOQRYU",
   },
-  "TOYS": {
+  toys: {
     displayName: "Toys",
-    routeName: "toys",
-    squareCategory: "TOYS",
-    squareId: "Y5QMJDVTICGYS63MD5G3MIXA",
+    slug: "toys",
+    squareCategoryId: "Y5QMJDVTICGYS63MD5G3MIXA",
   },
-  "Bandai Namco": {
+  bandai: {
     displayName: "Bandai",
-    routeName: "bandai",
-    squareCategory: "Bandai Namco",
-    squareId: "2WGAXPFOCVU6E3YCKLENXCBZ",
+    slug: "bandai",
+    squareCategoryId: "2WGAXPFOCVU6E3YCKLENXCBZ",
   },
-  "Square Enix": {
+  squareenix: {
     displayName: "Square Enix",
-    routeName: "squareenix",
-    squareCategory: "Square Enix",
-    squareId: "2UYGU6IBT5CC2XHPOFISKRDC",
+    slug: "squareenix",
+    squareCategoryId: "2UYGU6IBT5CC2XHPOFISKRDC",
   },
 };
 
 // --- Supplies & Grading ---
 export const SUPPLIES_MAPPING: Record<string, SquareCategory> = {
-  "Hobby Supplies": {
+  supplies: {
     displayName: "Supplies",
-    routeName: "supplies",
-    squareCategory: "Hobby Supplies",
-    squareId: "5PVJ4PTPSZQOWQAPNX2ABSZY",
+    slug: "supplies",
+    squareCategoryId: "5PVJ4PTPSZQOWQAPNX2ABSZY",
   },
-  "PSA SERVICE": {
+  psa: {
     displayName: "PSA Service",
-    routeName: "psa",
-    squareCategory: "PSA SERVICE",
-    squareId: "POBB6MGCLVUC2DPPTPMLBLIL",
+    slug: "psa",
+    squareCategoryId: "POBB6MGCLVUC2DPPTPMLBLIL",
   },
-  "Graded Guard": {
+  gradedguard: {
     displayName: "Graded Guard",
-    routeName: "gradedguard",
-    squareCategory: "Graded Guard",
-    squareId: "6RZANZZZ62FG33XW6AMMC5OI",
+    slug: "gradedguard",
+    squareCategoryId: "6RZANZZZ62FG33XW6AMMC5OI",
   },
-  "Graded Cards Slabs": {
+  gradedcards: {
     displayName: "Graded Cards",
-    routeName: "gradedcards",
-    squareCategory: "Graded Cards Slabs",
-    squareId: "SSTM2PVN2UEFTH72HLUBI7TI",
+    slug: "gradedcards",
+    squareCategoryId: "SSTM2PVN2UEFTH72HLUBI7TI",
   },
 };
 
 // --- Events ---
 export const EVENTS_MAPPING: Record<string, SquareCategory> = {
-  "WHEEL SPIN": {
+  wheelspin: {
     displayName: "Wheel Spin",
-    routeName: "wheelspin",
-    squareCategory: "WHEEL SPIN",
-    squareId: "T2CGZVNJAQXDNS6ZTOC3ULGC",
+    slug: "wheelspin",
+    squareCategoryId: "T2CGZVNJAQXDNS6ZTOC3ULGC",
   },
 };
 
@@ -197,3 +171,12 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     categories: Object.values(EVENTS_MAPPING),
   },
 ];
+
+export const CATEGORY_GROUP_SLUGS: Record<string, string[]> = {
+  tcg: Object.values(CATEGORY_MAPPING).map((cat) => cat.squareCategoryId),
+  collectibles: Object.values(COLLECTIBLES_MAPPING).map(
+    (cat) => cat.squareCategoryId
+  ),
+  supplies: Object.values(SUPPLIES_MAPPING).map((cat) => cat.squareCategoryId),
+  events: Object.values(EVENTS_MAPPING).map((cat) => cat.squareCategoryId),
+};

@@ -1,33 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useInfiniteCatalogItems } from "@hooks/useSquareServices";
 import { ProductFilters } from "@components/ui/ProductFilters";
 import { ProductCard } from "@components/ui/ProductCard";
 import { SkeletonProductCard } from "@components/ui/SkeletonProductCard";
-import { SortOption, StockOption } from "@interfaces/square";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 
 export default function ProductsPage() {
-  const searchParams = useSearchParams();
-  const searchQuery = searchParams.get("search") || "";
-  const categoryId = searchParams.get("categoryId");
-  const groupParam = searchParams.get("group") || "TCG";
-  const stockParam = searchParams.get("stock") as StockOption || "IN_STOCK";
-  const sortParam = searchParams.get("sort") as SortOption || "name_asc";
-  
-  const [selectedGroup, setSelectedGroup] = useState(groupParam);
-  const [stockStatus, setStockStatus] = useState<StockOption>(stockParam);
-  const [sortBy, setSortBy] = useState<SortOption>(sortParam);
-
-  // Update state when URL parameters change
-  useEffect(() => {
-    setSelectedGroup(groupParam);
-    setStockStatus(stockParam);
-    setSortBy(sortParam);
-  }, [groupParam, stockParam, sortParam]);
+  const [group] = useQueryState("group");
+  const [stock] = useQueryState("stock");
+  const [sort] = useQueryState("sort");
+  const [search] = useQueryState("search");
+  const [categoryId] = useQueryState("categoryId");
 
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -35,41 +22,18 @@ export default function ProductsPage() {
   });
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    useInfiniteCatalogItems(selectedGroup, searchQuery, categoryId);
+    useInfiniteCatalogItems(
+      group || "TCG",
+      search || "",
+      categoryId,
+      stock || "IN_STOCK",
+      sort || "name_asc"
+    );
 
   const allItems = data?.pages.flatMap((p) => p.items) ?? [];
 
-  const available = allItems.filter(
-    (item) => item.ecomVisibility === "VISIBLE" && item.ecomAvailable === true
-  );
-  const filtered = available.filter((item) => {
-    if (stockStatus === "all") return true;
-    return item.soldOut === (stockStatus === "SOLD_OUT");
-  });
-  const sorted = [...filtered].sort((a, b) => {
-    switch (sortBy) {
-      case "price_asc":
-        return a.priceAmount - b.priceAmount;
-      case "price_desc":
-        return b.priceAmount - a.priceAmount;
-      case "name_asc":
-        return a.name.localeCompare(b.name);
-      case "name_desc":
-        return b.name.localeCompare(a.name);
-      default:
-        return 0;
-    }
-  });
-
-  const seen = new Set();
-  const deduped = sorted.filter((item) => {
-    if (seen.has(item.variationId)) return false;
-    seen.add(item.variationId);
-    return true;
-  });
-
   const GRID_COLS = 4;
-  const MIN_INITIAL_ITEMS = GRID_COLS * 2; // Ensure at least 2 complete rows
+  const MIN_INITIAL_ITEMS = GRID_COLS * 2;
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -87,18 +51,18 @@ export default function ProductsPage() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
-  }, [selectedGroup, stockStatus, sortBy]);
+  }, [group, stock, sort]);
 
   useEffect(() => {
     if (
       !isLoading &&
       !isFetchingNextPage &&
       hasNextPage &&
-      deduped.length < MIN_INITIAL_ITEMS
+      allItems.length < MIN_INITIAL_ITEMS
     ) {
       fetchNextPage();
     }
-  }, [isLoading, isFetchingNextPage, hasNextPage, deduped.length, fetchNextPage, MIN_INITIAL_ITEMS]);
+  }, [isLoading, isFetchingNextPage, hasNextPage, allItems.length, fetchNextPage, MIN_INITIAL_ITEMS]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -122,8 +86,8 @@ export default function ProductsPage() {
   };
 
   const renderSkeletonGrid = () => {
-    const remainder = deduped.length % GRID_COLS;
-    const skeletonFill = deduped.length === 0
+    const remainder = allItems.length % GRID_COLS;
+    const skeletonFill = allItems.length === 0
       ? MIN_INITIAL_ITEMS
       : remainder === 0
       ? 0
@@ -152,14 +116,7 @@ export default function ProductsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <ProductFilters
-        stockStatus={stockStatus}
-        setStockStatus={setStockStatus}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        selectedGroup={selectedGroup}
-        setSelectedGroup={setSelectedGroup}
-      />
+      <ProductFilters />
 
       <motion.div
         className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -169,7 +126,7 @@ export default function ProductsPage() {
         layout
       >
         <AnimatePresence mode="popLayout">
-          {deduped.map((item) => (
+          {allItems.map((item) => (
             <motion.div
               key={`${item.variationId}-${item.updatedAt}`}
               variants={itemVariants}
@@ -186,7 +143,7 @@ export default function ProductsPage() {
             </motion.div>
           ))}
           {(() => {
-            const remainder = deduped.length % GRID_COLS;
+            const remainder = allItems.length % GRID_COLS;
             const placeholders = remainder === 0 ? 0 : GRID_COLS - remainder;
             return Array.from({ length: placeholders }).map((_, idx) => (
               <div key={`placeholder-${idx}`} className="invisible" />
@@ -196,18 +153,9 @@ export default function ProductsPage() {
           {isFetchingNextPage &&
             (() => {
               const previousItems =
-                data?.pages.slice(0, -1).flatMap((p) => p.items).filter(
-                  (item) =>
-                    item.ecomVisibility === "VISIBLE" &&
-                    item.ecomAvailable === true &&
-                    (stockStatus === "all" || item.soldOut === (stockStatus === "SOLD_OUT"))
-                ) ?? [];
+                data?.pages.slice(0, -1).flatMap((p) => p.items) ?? [];
 
-              const prevDeduped = Array.from(
-                new Map(previousItems.map((item) => [item.variationId, item])).values()
-              );
-
-              const remainder = prevDeduped.length % GRID_COLS;
+              const remainder = previousItems.length % GRID_COLS;
               const skeletonCount = remainder === 0 ? 0 : GRID_COLS - remainder;
 
               return [...Array(skeletonCount)].map((_, index) => (
@@ -228,41 +176,18 @@ export default function ProductsPage() {
 
       <div ref={ref} className="h-20" />
 
-      {!hasNextPage && !isLoading && (
-        <motion.div
-          className="flex flex-col items-center justify-center py-8 text-gray-300"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 120, damping: 12 }}
-        >
-          <motion.div
-            initial={{ scale: 0, rotate: -30 }}
-            animate={{ scale: 1.2, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 10 }}
-            className="mb-4"
+      {!hasNextPage && !isLoading && allItems.length === 0 && (
+        <div className="text-center text-gray-400 py-12">
+          <div className="text-2xl font-semibold mb-2">No results found</div>
+          <button
+            className="mt-4 px-6 py-2 rounded bg-[#E6B325] text-black font-semibold hover:bg-[#FFD966] transition"
+            onClick={() => {
+              window.location.href = "/products";
+            }}
           >
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="32" cy="32" r="32" fill="#FFD966"/>
-              <path d="M20 32L28 40L44 24" stroke="#222" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl font-semibold"
-          >
-            You&apos;ve reached the end! 🎉
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.7 }}
-            transition={{ delay: 0.5 }}
-            className="text-sm mt-2 text-gray-400"
-          >
-            No more products to show. Check back soon for new arrivals!
-          </motion.div>
-        </motion.div>
+            Reset Filters
+          </button>
+        </div>
       )}
     </div>
   );

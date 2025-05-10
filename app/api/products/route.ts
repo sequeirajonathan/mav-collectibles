@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import { createSquareClient } from "@lib/square";
-import { normalizeCatalogResponse } from "@utils";
-import { serializeBigIntValues } from "@utils";
+import { normalizeCatalogResponse, serializeBigIntValues } from "@utils";
 import {
   CATEGORY_MAPPING,
   COLLECTIBLES_MAPPING,
   SUPPLIES_MAPPING,
   EVENTS_MAPPING,
 } from "@const/categories";
+
+// Unified group-to-map lookup
+const CATEGORY_MAPS = {
+  TCG: CATEGORY_MAPPING,
+  Collectibles: COLLECTIBLES_MAPPING,
+  "Supplies & Grading": SUPPLIES_MAPPING,
+  Events: EVENTS_MAPPING,
+};
 
 export async function POST(request: Request) {
   try {
@@ -18,100 +25,54 @@ export async function POST(request: Request) {
       sort = "name_asc",
       group = "TCG",
       categoryId = null,
+      stock = "IN_STOCK",
     } = await request.json();
 
-    // Get category IDs based on group or specific category
-    let categoryIds: string[] = [];
+    const groupMapping = CATEGORY_MAPS[group as keyof typeof CATEGORY_MAPS];
+    if (!groupMapping) {
+      return NextResponse.json({ error: "Invalid group" }, { status: 400 });
+    }
+
+    // Build category ID list
+    const categoryIds: string[] = [];
 
     if (categoryId) {
-      // Validate that the categoryId belongs to the correct group
-      let isValidCategory = false;
-      switch (group) {
-        case "TCG":
-          isValidCategory = Object.values(CATEGORY_MAPPING).some(cat => cat.squareId === categoryId);
-          break;
-        case "Collectibles":
-          isValidCategory = Object.values(COLLECTIBLES_MAPPING).some(cat => cat.squareId === categoryId);
-          break;
-        case "Supplies & Grading":
-          isValidCategory = Object.values(SUPPLIES_MAPPING).some(cat => cat.squareId === categoryId);
-          break;
-        case "Events":
-          isValidCategory = Object.values(EVENTS_MAPPING).some(cat => cat.squareId === categoryId);
-          break;
-      }
+      const isValidCategory = Object.values(groupMapping).some(
+        (cat) => cat.squareCategoryId === categoryId
+      );
 
       if (isValidCategory) {
-        categoryIds = [categoryId];
+        categoryIds.push(categoryId);
       } else {
-        // If categoryId is invalid for the group, fall back to all categories in the group
-        switch (group) {
-          case "TCG":
-            categoryIds = Object.values(CATEGORY_MAPPING).map(cat => cat.squareId);
-            break;
-          case "Collectibles":
-            categoryIds = Object.values(COLLECTIBLES_MAPPING).map(cat => cat.squareId);
-            break;
-          case "Supplies & Grading":
-            categoryIds = Object.values(SUPPLIES_MAPPING).map(cat => cat.squareId);
-            break;
-          case "Events":
-            categoryIds = Object.values(EVENTS_MAPPING).map(cat => cat.squareId);
-            break;
-        }
+        // fallback to entire group if invalid
+        categoryIds.push(...Object.values(groupMapping).map((cat) => cat.squareCategoryId));
       }
     } else {
-      // Only get all category IDs if no specific categoryId is provided
-      switch (group) {
-        case "TCG":
-          categoryIds = Object.values(CATEGORY_MAPPING).map(cat => cat.squareId);
-          break;
-        case "Collectibles":
-          categoryIds = Object.values(COLLECTIBLES_MAPPING).map(cat => cat.squareId);
-          break;
-        case "Supplies & Grading":
-          categoryIds = Object.values(SUPPLIES_MAPPING).map(cat => cat.squareId);
-          break;
-        case "Events":
-          categoryIds = Object.values(EVENTS_MAPPING).map(cat => cat.squareId);
-          break;
-      }
+      categoryIds.push(...Object.values(groupMapping).map((cat) => cat.squareCategoryId));
     }
 
-    // Build CatalogQuery for sorting, filtering, and searching
-    let sortedAttributeQuery;
-    switch (sort) {
-      case "name_asc":
-        sortedAttributeQuery = { attributeName: "name", sortOrder: "ASC" };
-        break;
-      case "name_desc":
-        sortedAttributeQuery = { attributeName: "name", sortOrder: "DESC" };
-        break;
-      case "price_asc":
-        sortedAttributeQuery = { attributeName: "price", sortOrder: "ASC" };
-        break;
-      case "price_desc":
-        sortedAttributeQuery = { attributeName: "price", sortOrder: "DESC" };
-        break;
-      default:
-        sortedAttributeQuery = { attributeName: "name", sortOrder: "ASC" };
-    }
+    // Sorting
+    const sortedAttributeQuery =
+      sort === "name_desc" ? { attributeName: "name", sortOrder: "DESC" } :
+      sort === "price_asc" ? { attributeName: "price", sortOrder: "ASC" } :
+      sort === "price_desc" ? { attributeName: "price", sortOrder: "DESC" } :
+      { attributeName: "name", sortOrder: "ASC" }; // default
 
-    const query: Record<string, unknown> = {};
-    if (sortedAttributeQuery) {
-      query.sortedAttributeQuery = sortedAttributeQuery;
-    }
+    // Build query object
+    const query: Record<string, unknown> = {
+      sortedAttributeQuery,
+    };
+
     if (search) {
       query.textQuery = { keywords: search.split(/\s+/) };
     }
+
     if (categoryIds.length > 0) {
       query.setQuery = {
         attributeName: "category_id",
         attributeValues: categoryIds,
       };
     }
-
-    console.log('Square API Query:', JSON.stringify(query, null, 2));
 
     const searchResponse = await client.catalog.search({
       objectTypes: ["ITEM"],
@@ -122,6 +83,17 @@ export async function POST(request: Request) {
     });
 
     const normalized = normalizeCatalogResponse(searchResponse);
+
+    // Server-side stock filtering
+    if (stock !== "all") {
+      normalized.items = normalized.items.filter((item) => {
+        return stock === "IN_STOCK"
+          ? item.ecomAvailable === true && item.soldOut === false
+          : stock === "SOLD_OUT"
+          ? item.soldOut === true
+          : true;
+      });
+    }
 
     return NextResponse.json(
       JSON.parse(JSON.stringify(normalized, serializeBigIntValues))

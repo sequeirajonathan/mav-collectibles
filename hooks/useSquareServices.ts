@@ -1,21 +1,31 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import type { NormalizedCatalogResponse } from "@interfaces";
-import { fetchCatalogItems, fetchProduct } from "@services/squareService";
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type {
+  NormalizedCatalogResponse,
+  NormalizedProductResponse,
+} from "@interfaces";
+import {
+  fetchCatalogItems,
+  fetchCategoryItems,
+  fetchProduct,
+} from "@services/squareService";
 
 export function useInfiniteCatalogItems(
-  group: string, 
+  group: string,
   search: string = "",
-  categoryId: string | null = null
+  categoryId: string | null = null,
+  stock: string = "IN_STOCK",
+  sort: string = "name_asc"
 ) {
   return useInfiniteQuery<NormalizedCatalogResponse, Error>({
-    queryKey: ["catalogItemsInfinite", group, search, categoryId],
-    queryFn: ({ pageParam }) => 
+    queryKey: ["catalogItemsInfinite", group, search, categoryId, stock, sort],
+    queryFn: ({ pageParam }) =>
       fetchCatalogItems(
-        pageParam as string | null, 
-        group, 
+        pageParam as string | null,
+        group,
         search,
-        categoryId
+        categoryId,
+        stock,
+        sort
       ),
     getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
     initialPageParam: null,
@@ -24,9 +34,32 @@ export function useInfiniteCatalogItems(
   });
 }
 
+export function useInfiniteCatalogItemsBySlug(
+  slug: string,
+  search: string = "",
+  stock: string = "IN_STOCK",
+  sort: string = "name_asc"
+) {
+  return useInfiniteQuery<NormalizedCatalogResponse, Error>({
+    queryKey: ["catalogItemsBySlug", slug, search, stock, sort],
+    queryFn: ({ pageParam }) =>
+      fetchCategoryItems(
+        slug,
+        pageParam as string | null,
+        search,
+        stock,
+        sort
+      ),
+    getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
+    initialPageParam: null,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+}
+
 export function useSquareProduct(id: string) {
-  return useQuery({
-    queryKey: ['product', id],
+  return useQuery<NormalizedProductResponse, Error>({
+    queryKey: ["product", id],
     queryFn: () => fetchProduct(id),
   });
 }

@@ -2,11 +2,13 @@
 
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link"; // No longer needed
 import FeaturedEvents from "@components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
 import VideoSection from "@components/ui/VideoSection";
 import { motion } from "framer-motion";
+import { CATEGORY_MAPPING } from "@const/categories";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   // Sample announcements data
@@ -46,36 +48,42 @@ export default function Home() {
       href: "/products/pokemon",
       image: "/pokemon-logo.png",
       aspectRatio: 2.5,
+      squareCategory: "Pokemon TCG",
     },
     {
       title: "Yu-Gi-Oh TCG",
       href: "/products/yugioh",
       image: "/yugioh-logo.png",
       aspectRatio: 2.5,
+      squareCategory: "Yu-Gi-Oh",
     },
     {
       title: "DBZ Super TCG",
       href: "/products/dragonball",
       image: "/dragonball.png",
       aspectRatio: 2.5,
+      squareCategory: "Dragon Ball Super TCG",
     },
     {
       title: "Digimon",
       href: "/products/digimon",
       image: "/digimon_card_game_logo.png",
       aspectRatio: 2.5,
+      squareCategory: "Digimon",
     },
     {
       title: "One Piece",
       href: "/products/onepiece",
       image: "/one-piece-card-game.jpg",
       aspectRatio: 2.5,
+      squareCategory: "One Piece Card Game",
     },
     {
       title: "MetaZoo",
       href: "/products/metazoo",
       image: "/Metazoo-logo.png",
       aspectRatio: 2.5,
+      squareCategory: "Metazoo",
     },
   ];
 
@@ -93,6 +101,17 @@ export default function Home() {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
   };
+
+  const router = useRouter();
+
+  function handleCardGameClick(squareCategory: string) {
+    const mapping = CATEGORY_MAPPING[squareCategory];
+    if (!mapping) return;
+    const params = new URLSearchParams();
+    params.set("group", "TCG");
+    params.set("categoryId", mapping.squareCategoryId);
+    router.push(`/products?${params.toString()}`);
+  }
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8 pt-2">
@@ -127,9 +146,10 @@ export default function Home() {
             <motion.div
               key={game.href}
               variants={item}
-              className="group relative"
+              className="group relative cursor-pointer"
+              onClick={() => handleCardGameClick(game.squareCategory)}
             >
-              <Link href={game.href} className="block">
+              <div className="block">
                 <div className="relative overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
                   {/* Card Content */}
                   <div className="p-4 flex flex-col items-center space-y-2">
@@ -161,7 +181,7 @@ export default function Home() {
                   {/* Hover Effect Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
-              </Link>
+              </div>
             </motion.div>
           ))}
         </motion.div>

@@ -24,6 +24,23 @@ export async function fetchCatalogItems(
   return data;
 }
 
+export async function fetchCategoryItems(
+  slug: string,
+  cursor: string | null = null,
+  search: string = "",
+  stock: string = "IN_STOCK",
+  sort: string = "name_asc"
+): Promise<NormalizedCatalogResponse> {
+  const { data } = await axiosClient.post(`/api/v1/category/${slug}`, {
+    cursor,
+    search,
+    sort,
+    stock,
+  });
+
+  return data;
+}
+
 export async function fetchProduct(id: string): Promise<NormalizedProductResponse> {
   const response = await fetch(`/api/products/${id}`);
   if (!response.ok) {

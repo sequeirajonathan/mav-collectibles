@@ -98,9 +98,9 @@ const Footer = () => {
               </h3>
               <ul className="space-y-2">
                 {group.categories.slice(0, 6).map((category) => (
-                  <li key={category.routeName}>
+                  <li key={category.slug}>
                     <Link
-                      href={`/products/${category.routeName}`}
+                      href={`/products/${category.slug}`}
                       className="text-gray-400 hover:text-[#E6B325] transition-colors"
                     >
                       {category.displayName}

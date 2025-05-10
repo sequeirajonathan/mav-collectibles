@@ -18,15 +18,20 @@ const FeaturedEvents = () => {
   }
 
   return (
-    <section className="my-8 sm:my-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <h2 className="text-2xl sm:text-3xl font-bold text-brand-gold mb-8 sm:mb-10">
-        Featured Events
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {featuredEvents.map((event) => (
-          <FeaturedEvent key={event.id} {...event} />
-        ))}
-      </div>
+    <section className="my-8 sm:my-12 w-full">
+      {featuredEvents.length === 1 ? (
+        <div className="flex justify-center">
+          <div className="w-full px-4 md:px-8">
+            <FeaturedEvent {...featuredEvents[0]} />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 w-full">
+          {featuredEvents.map((event) => (
+            <FeaturedEvent key={event.id} {...event} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };

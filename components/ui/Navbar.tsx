@@ -22,7 +22,7 @@ import {
   SUPPLIES_MAPPING,
   EVENTS_MAPPING,
 } from "@const/categories";
-import { Category } from "@interfaces/categories";
+import { SquareCategory } from "@interfaces/categories";
 import { useSearchParams } from "next/navigation";
 
 const Navbar = () => {
@@ -95,9 +95,9 @@ const Navbar = () => {
   const toggleGroup = (g: string) =>
     setExpandedGroup((cur) => (cur === g ? null : g));
 
-  const getTopTCGCategories = (cats: Category[]) => {
+  const getTopTCGCategories = (cats: SquareCategory[]) => {
     const top = ["pokemon", "yugioh", "magic", "dragonball", "onepiece"];
-    return cats.filter((c) => top.includes(c.routeName));
+    return cats.filter((c) => top.includes(c.slug));
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -111,23 +111,23 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
-  const handleCategoryClick = (group: string, category?: Category) => {
+  const handleCategoryClick = (group: string, category?: SquareCategory) => {
     const p = new URLSearchParams(searchParams.toString());
     p.set("group", group);
     if (category) {
       let squareId: string | undefined;
       switch (group) {
         case "TCG":
-          squareId = CATEGORY_MAPPING[category.squareCategory]?.squareId;
+          squareId = CATEGORY_MAPPING[category.squareCategoryId].squareCategoryId;
           break;
         case "Collectibles":
-          squareId = COLLECTIBLES_MAPPING[category.squareCategory]?.squareId;
+          squareId = COLLECTIBLES_MAPPING[category.squareCategoryId].squareCategoryId;
           break;
         case "Supplies & Grading":
-          squareId = SUPPLIES_MAPPING[category.squareCategory]?.squareId;
+          squareId = SUPPLIES_MAPPING[category.squareCategoryId].squareCategoryId;
           break;
         case "Events":
-          squareId = EVENTS_MAPPING[category.squareCategory]?.squareId;
+          squareId = EVENTS_MAPPING[category.squareCategoryId].squareCategoryId;
           break;
       }
       if (squareId) {
@@ -203,7 +203,7 @@ const Navbar = () => {
                         >
                           {cats.map((cat) => (
                             <button
-                              key={cat.routeName}
+                              key={cat.slug}
                               onClick={() =>
                                 handleCategoryClick(group.name, cat)
                               }
@@ -413,7 +413,7 @@ const Navbar = () => {
                               : group.categories
                             ).map((cat) => (
                               <Link
-                                key={cat.routeName}
+                                key={cat.slug}
                                 href="#"
                                 className="block px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
                                 onClick={() =>

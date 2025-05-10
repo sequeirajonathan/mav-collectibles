@@ -4,17 +4,8 @@ import { CustomDropdown } from "./CustomDropdown";
 import { SortOption, StockOption } from "@interfaces/square";
 import type { DropdownOption } from "./CustomDropdown";
 import { CATEGORY_GROUPS } from "@const/categories";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-
-interface ProductFiltersProps {
-  sortBy: SortOption;
-  stockStatus: StockOption;
-  selectedGroup: string;
-  setSortBy: (value: SortOption) => void;
-  setStockStatus: (value: StockOption) => void;
-  setSelectedGroup: (value: string) => void;
-}
+import { useQueryState } from "nuqs";
+import { useRouter } from "next/navigation";
 
 const sortOptions: DropdownOption<SortOption>[] = [
   { label: "Name: A-Z", value: "name_asc" },
@@ -29,94 +20,51 @@ const stockOptions: DropdownOption<StockOption>[] = [
   { label: "All", value: "all" },
 ];
 
-export function ProductFilters({
-  sortBy,
-  stockStatus,
-  selectedGroup,
-  setSortBy,
-  setStockStatus,
-  setSelectedGroup,
-}: ProductFiltersProps) {
+export function ProductFilters() {
+  const [group, setGroup] = useQueryState("group");
+  const [stock, setStock] = useQueryState("stock");
+  const [sort, setSort] = useQueryState("sort");
+  const [, setCategoryId] = useQueryState("categoryId");
+  const [, setSearch] = useQueryState("search");
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Initialize URL with default values if no parameters are present
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    let shouldUpdate = false;
-
-    if (!params.has('group')) {
-      params.set('group', 'TCG');
-      shouldUpdate = true;
-    }
-    if (!params.has('stock')) {
-      params.set('stock', 'IN_STOCK');
-      shouldUpdate = true;
-    }
-    if (!params.has('sort')) {
-      params.set('sort', 'name_asc');
-      shouldUpdate = true;
-    }
-
-    if (shouldUpdate) {
-      router.replace(`/products?${params.toString()}`);
-    }
-  }, []); // Only run on mount
-
-  const updateFilters = (newSort?: SortOption, newStock?: StockOption, newGroup?: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (newSort) {
-      params.set('sort', newSort);
-      setSortBy(newSort);
-    }
-    if (newStock) {
-      params.set('stock', newStock);
-      setStockStatus(newStock);
-    }
-    if (newGroup) {
-      params.set('group', newGroup);
-      setSelectedGroup(newGroup);
-      // Clear categoryId when changing groups to avoid invalid combinations
-      params.delete('categoryId');
-    }
-
-    // Use window.location.href for consistency with Navbar
-    window.location.href = `/products?${params.toString()}`;
-  };
+  function handleGroupChange(newGroup: string) {
+    setGroup(newGroup);
+    setCategoryId(null);
+    setSearch(null);
+    router.push(`/products?group=${newGroup}`);
+  }
 
   return (
     <div className="sticky top-0 z-20 -mx-4 px-2 sm:px-4 py-3 bg-black/80 backdrop-blur-sm border-b border-[#E6B325]/10 mb-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-          {/* Category buttons: vertical stack on mobile, row on desktop */}
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             {CATEGORY_GROUPS.map((g) => (
               <button
                 key={g.name}
                 className={`px-4 py-2 rounded font-medium border transition-all duration-200 text-sm sm:text-base w-full sm:w-auto ${
-                  selectedGroup === g.name
+                  group === g.name
                     ? "bg-[#E6B325] text-black border-[#E6B325]"
                     : "bg-transparent text-[#E6B325] border-[#E6B325]/30 hover:bg-[#E6B325]/10"
                 }`}
-                onClick={() => updateFilters(undefined, undefined, g.name)}
+                onClick={() => handleGroupChange(g.name)}
               >
                 {g.name}
               </button>
             ))}
           </div>
-          {/* Dropdowns: side by side on all screens */}
           <div className="flex flex-row gap-2 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-0">
             <CustomDropdown
               options={stockOptions}
-              value={stockStatus}
-              onChange={(value) => updateFilters(undefined, value)}
+              value={(stock || "IN_STOCK") as StockOption}
+              onChange={(value) => setStock(value)}
               className="flex-1 min-w-0"
             />
             <CustomDropdown
               options={sortOptions}
-              value={sortBy}
-              onChange={(value) => updateFilters(value)}
+              value={(sort || "name_asc") as SortOption}
+              onChange={(value) => setSort(value)}
               className="flex-1 min-w-0"
             />
           </div>

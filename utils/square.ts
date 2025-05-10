@@ -14,99 +14,91 @@ export function normalizeCatalogResponse(
   search: SearchCatalogObjectsResponse
 ): NormalizedCatalogResponse {
   const items: NormalizedCatalogItem[] = [];
+  const duplicateVariationIds = new Set<string>();
+  const duplicateItemIds = new Set<string>(); // Track duplicate item IDs
 
-  // First, build maps of related objects
+  // Lookup maps
   const imageUrlMap = new Map<string, string>();
-  const categoryMap = new Map<string, { name: string }>();
+  const categoryMap = new Map<string, string>(); // Map category ID to name
   const taxMap = new Map<string, { name: string; percentage?: string }>();
 
-  // Process related objects first to build our lookup maps
   for (const obj of search.relatedObjects ?? []) {
     switch (obj.type) {
       case 'IMAGE':
-        if (obj.imageData?.url) {
-          imageUrlMap.set(obj.id, obj.imageData.url);
-        }
+        imageUrlMap.set(obj.id, obj.imageData?.url ?? '');
         break;
       case 'CATEGORY':
         if (obj.categoryData?.name && obj.id) {
-          categoryMap.set(obj.id, { name: obj.categoryData.name });
+          categoryMap.set(obj.id, obj.categoryData.name);
         }
         break;
       case 'TAX':
         if (obj.taxData?.name) {
           taxMap.set(obj.id, {
             name: obj.taxData.name,
-            percentage: obj.taxData.percentage?.toString()
+            percentage: obj.taxData.percentage ?? undefined,
           });
         }
         break;
     }
   }
 
-  const findCategoryGroup = (categoryName: string): string | undefined => {
-    for (const group of CATEGORY_GROUPS) {
-      if (group.categories.some(cat => cat.squareCategory === categoryName)) {
-        return group.name;
-      }
-    }
-    return undefined;
+  const findCategoryGroup = (categoryId: string): string | undefined => {
+    return CATEGORY_GROUPS.find(group =>
+      group.categories.some(cat => cat.squareCategoryId === categoryId)
+    )?.name;
   };
 
-  // Process items and their variations
   for (const object of search.objects ?? []) {
     if (object.type !== 'ITEM') continue;
 
     const item = object as ItemObject;
     const itemData = item.itemData;
-    if (!itemData) continue;
+    if (!itemData || duplicateItemIds.has(item.id)) continue; // Skip duplicate items
 
-    const imageUrls = itemData.imageIds
-      ?.map(id => imageUrlMap.get(id) ?? '')
-      .filter(Boolean) ?? [];
+    duplicateItemIds.add(item.id); // Mark item as processed
 
-    const categoryId = itemData.categories?.[0]?.id;
-    const categoryInfo = categoryId ? categoryMap.get(categoryId) : undefined;
-    const categoryName = categoryInfo?.name;
-    const group = categoryName ? findCategoryGroup(categoryName) : undefined;
+    const imageUrls = itemData.imageIds?.map(id => imageUrlMap.get(id) ?? '').filter(Boolean) ?? [];
+    const categoryId = itemData.categories?.[0]?.id ?? '';
+    const categoryName = categoryMap.get(categoryId) ?? '';
+    const group = categoryId ? findCategoryGroup(categoryId) : undefined;
 
     const taxInfo = itemData.taxIds
       ?.map(id => taxMap.get(id))
-      .filter((tax): tax is { name: string; percentage?: string } => tax !== undefined) ?? [];
+      .filter((tax): tax is { name: string; percentage?: string } => !!tax) ?? [];
 
     for (const variationEntry of itemData.variations ?? []) {
       if (variationEntry.type !== 'ITEM_VARIATION') continue;
 
       const variation = (variationEntry as ItemVariationObject).itemVariationData;
-      if (!variation) continue;
+      const variationId = variationEntry.id ?? '';
+      if (!variation || duplicateVariationIds.has(variationId)) continue; // Skip duplicate variations
 
-      const soldOut = (variation.locationOverrides?.some(loc => loc.soldOut) ?? false);
+      duplicateVariationIds.add(variationId); // Mark variation as processed
 
       items.push({
-        itemId: variation.itemId ?? '',
-        variationId: variationEntry.id ?? '',
-        name: itemData.name ?? '',
-        description: itemData.description ?? '',
-        imageIds: itemData.imageIds ?? [],
-        imageUrls,
-        sku: variation.sku ?? '',
-        priceAmount: Number(variation.priceMoney?.amount ?? 0),
-        priceCurrency: variation.priceMoney?.currency ?? 'USD',
-        isTaxable: itemData.isTaxable ?? false,
-        taxIds: itemData.taxIds ?? [],
-        taxInfo,
-        isArchived: itemData.isArchived ?? false,
-        updatedAt: object.updatedAt ?? '',
-        soldOut,
-        presentAtAllLocations: variationEntry.presentAtAllLocations ?? false,
-        presentAtLocationIds: variationEntry.presentAtLocationIds ?? [],
-        ecomAvailable: itemData.ecom_available ?? false,
-        ecomVisibility: itemData.ecom_visibility ?? 'UNINDEXED',
-        categoryId,
-        categoryInfo,
-        categoryName,
-        group,
-      });
+              itemId: item.id,
+              variationId: variationId,
+              name: itemData.name ?? '',
+              description: itemData.description ?? '',
+              imageUrls,
+              categoryId,
+              categoryName,
+              group,
+              taxInfo,
+              taxIds: itemData.taxIds ?? [], // Add taxIds property
+              priceAmount: Number(variation.priceMoney?.amount ?? 0), // Convert bigint to number
+              priceCurrency: variation.priceMoney?.currency ?? 'USD',
+              isTaxable: itemData.isTaxable ?? false,
+              sku: variation.sku ?? '',
+              isArchived: itemData.isArchived ?? false,
+              updatedAt: item.updatedAt ?? '',
+              soldOut: variation.inventoryAlertType === 'LOW_QUANTITY', // Correct logic for InventoryAlertType
+              presentAtAllLocations: item.presentAtAllLocations ?? false,
+              presentAtLocationIds: item.presentAtLocationIds ?? [],
+              ecomAvailable: itemData.ecom_available ?? false, // Correct property name
+              ecomVisibility: itemData.ecom_visibility ?? 'UNINDEXED', // Correct property name
+            });
     }
   }
 
@@ -215,4 +207,4 @@ export function normalizeProductResponse(
     ecomVisibility: itemData.ecom_visibility ?? 'UNINDEXED',
     updatedAt: catalogObject.object.updatedAt ?? ''
   };
-} 
+}
