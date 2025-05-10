@@ -7,15 +7,15 @@ import { QueryProvider } from "@providers/QueryProvider";
 import { AppProvider } from "@contexts/AppContext";
 import "@styles/globals.css";
 import "./videojs-theme.css";
-import ScrollToTop from '@components/ui/ScrollToTop';
-import { Toaster } from 'react-hot-toast';
-import { Suspense } from 'react';
-import '@styles/video-player.css';
-import { SupabaseProvider } from '@contexts/SupabaseContext';
-import CookieConsent from '@components/ui/CookieConsent';
-import { fetchAlertBanner } from '@services/alertBannerService';
-import { CartProvider } from '@contexts/CartContext';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import ScrollToTop from "@components/ui/ScrollToTop";
+import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
+import "@styles/video-player.css";
+import { SupabaseProvider } from "@contexts/SupabaseContext";
+import CookieConsent from "@components/ui/CookieConsent";
+import { fetchAlertBanner } from "@services/alertBannerService";
+import { CartProvider } from "@contexts/CartContext";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +29,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MAV Collectables - Trading Card Game Shop",
-  description: "Your local source for Pokémon, Yu-Gi-Oh!, Dragon Ball, One Piece and more trading cards",
+  description:
+    "Your local source for Pokémon, Yu-Gi-Oh!, Dragon Ball, One Piece and more trading cards",
 };
 
 // Preload alert banner data
@@ -62,16 +63,16 @@ export default async function RootLayout({
               <CartProvider>
                 <NuqsAdapter>
                   <AlertBanner />
-                  <Navbar />
-                  <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-                    <Suspense fallback={<div>Loading...</div>}>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <Navbar />
+                    <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
                       {children}
-                    </Suspense>
-                  </main>
-                  <Footer />
-                  <ScrollToTop />
-                  <Toaster position="top-right" />
-                  <CookieConsent />
+                    </main>
+                    <Footer />
+                    <ScrollToTop />
+                    <Toaster position="top-right" />
+                    <CookieConsent />
+                  </Suspense>
                 </NuqsAdapter>
               </CartProvider>
             </AppProvider>
