@@ -1,11 +1,11 @@
-# MAV Collectables
+# MAV Collectibles
 
 A Next.js e-commerce application for trading card games like Pokémon, Yu-Gi-Oh!, Dragon Ball, and more.
 
 ## Project Structure
 
 ```
-mav-collectables/
+mav-i/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/             # Authentication routes grouped
 │   │   ├── login/          # Login page

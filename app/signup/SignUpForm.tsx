@@ -30,7 +30,7 @@ export default function SignUpForm() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       },
     })
 
@@ -38,7 +38,10 @@ export default function SignUpForm() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/login?message=Check your email for the confirmation link')
+      // Show success message and instructions
+      setError(null)
+      setLoading(false)
+      router.push('/login?message=Please check your email for the confirmation link. Click the link to complete your registration.')
     }
   }
 
@@ -50,7 +53,7 @@ export default function SignUpForm() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       },
     })
 
@@ -68,7 +71,7 @@ export default function SignUpForm() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       },
     })
 
