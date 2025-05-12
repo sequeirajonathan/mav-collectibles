@@ -1,6 +1,6 @@
 "use client"; // Add this since we're using client-side features
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 // import Link from "next/link"; // No longer needed
 import FeaturedEvents from "@components/ui/FeaturedEvents";
@@ -104,6 +104,9 @@ export default function Home() {
 
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   function handleCardGameClick(squareCategory: string) {
     const mapping = CATEGORY_MAPPING[squareCategory];
     if (!mapping) return;
@@ -129,8 +132,8 @@ export default function Home() {
       {/* Card Games Grid */}
       <div className="w-full max-w-6xl">
         <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={false}
+          animate={mounted ? { opacity: 1, y: 0 } : false}
           className="text-3xl font-bold text-center mb-8 text-brand-gold"
         >
           Trading Card Games
@@ -190,17 +193,15 @@ export default function Home() {
       {/* Why Choose Section */}
       <div className="mt-4 text-center w-full max-w-6xl">
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          initial={false}
+          animate={mounted ? { opacity: 1, y: 0 } : false}
           className="text-3xl font-bold mb-4 text-brand-gold"
         >
           Why Choose MAV Collectibles?
         </motion.h2>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          initial={false}
+          animate={mounted ? { opacity: 1, y: 0 } : false}
           className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2"
         >
           {[
@@ -222,9 +223,8 @@ export default function Home() {
           ].map((feature, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={false}
+              animate={mounted ? { opacity: 1, y: 0 } : false}
               transition={{ delay: index * 0.1 }}
               className="p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800/50 hover:border-brand-blue/30 transition-all duration-300 hover:bg-gray-900/80"
             >

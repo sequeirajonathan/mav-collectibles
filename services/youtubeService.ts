@@ -3,12 +3,12 @@ import { YouTubeSettings } from '@interfaces';
 
 // Fetch the current YouTube settings
 export async function fetchYoutubeSettings(): Promise<YouTubeSettings> {
-  const { data } = await axiosClient.get('/api/youtube-settings/1');
+  const { data } = await axiosClient.get('/youtube-settings/current');
   return data;
 }
 
 // Update the YouTube settings
 export async function updateYoutubeSettings(settings: Partial<YouTubeSettings>): Promise<YouTubeSettings> {
-  const { data } = await axiosClient.put('/api/youtube-settings/1', settings);
+  const { data } = await axiosClient.put('/youtube-settings/current', settings);
   return data;
 }

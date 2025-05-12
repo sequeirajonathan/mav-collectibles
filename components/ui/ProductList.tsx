@@ -46,11 +46,15 @@ export function ProductList({
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
         {products.map((product) => (
-          <ProductCard 
-            key={product.variationId} 
-            product={product}
-            imageConfig={IMAGE_CONFIG}
-          />
+          <div 
+            key={product.variationId}
+            className="animate-fadeIn"
+          >
+            <ProductCard 
+              product={product}
+              imageConfig={IMAGE_CONFIG}
+            />
+          </div>
         ))}
         {/* Render skeletons in the same grid */}
         {[...Array(skeletonCount)].map((_, index) => (

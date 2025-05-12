@@ -54,7 +54,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="text-center">
           <h1 className="text-2xl font-bold text-[#E6B325] mb-4">Product Not Found</h1>
           <Link
-            href="/products"
+            href="/product"
             className="text-white hover:text-[#E6B325] transition-colors"
           >
             Return to Products
@@ -66,13 +66,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   const mainVariation = product.variations[0];
   const price = mainVariation?.priceAmount || product.variations[0]?.priceAmount;
-  const isAvailable = mainVariation?.inventoryCount > 0;
+  const isAvailable = !mainVariation?.soldOut;
 
   return (
     <div className="min-h-[60vh] px-4 py-12">
       <div className="max-w-7xl mx-auto">
         <Link
-          href={`/products`}
+          href={`/product`}
           className="inline-flex items-center text-[#E6B325] hover:text-[#FFD966] mb-8 transition-colors"
         >
           <ChevronLeft className="w-5 h-5 mr-1" />
@@ -87,7 +87,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               animate={{ opacity: 1, x: 0 }}
               className="relative aspect-square rounded-xl overflow-hidden bg-gray-900/50 backdrop-blur-sm border border-gray-800/50"
             >
-              {mainVariation?.inventoryCount === 0 && (
+              {!isAvailable && (
                 <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
                   <span className="text-white font-bold text-xl">SOLD OUT</span>
                 </div>

@@ -7,6 +7,7 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "@contexts/CartContext";
 import toast from "react-hot-toast";
 import { NormalizedCatalogItem } from "@interfaces";
+import React, { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   product: NormalizedCatalogItem;
@@ -24,6 +25,10 @@ export function ProductCard({
   imageConfig,
 }: ProductCardProps) {
   const { addItem } = useCart();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  console.log(product);
 
   const imageUrl = product.imageUrls?.[0] || "/images/placeholder.png";
 
@@ -52,14 +57,14 @@ export function ProductCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={false}
+      animate={mounted ? { opacity: 1, y: 0 } : false}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
       className="group relative max-w-[280px] mx-auto w-full h-[420px] flex flex-col"
     >
       <Link
-        href={`/products/${product.variationId}`}
+        href={`/product/${product.itemId}`}
         className="block h-full"
       >
         <div className="relative flex flex-col h-full overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">

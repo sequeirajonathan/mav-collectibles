@@ -17,10 +17,6 @@ import { useSupabase } from "@contexts/SupabaseContext";
 import { useCart } from "@contexts/CartContext";
 import {
   CATEGORY_GROUPS,
-  CATEGORY_MAPPING,
-  COLLECTIBLES_MAPPING,
-  SUPPLIES_MAPPING,
-  EVENTS_MAPPING,
 } from "@const/categories";
 import { SquareCategory } from "@interfaces/categories";
 import { useSearchParams } from "next/navigation";
@@ -103,10 +99,7 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
-    const p = new URLSearchParams(searchParams.toString());
-    p.set("search", searchTerm.trim());
-    p.delete("categoryId");
-    window.location.href = `/products?${p.toString()}`;
+    window.location.href = `/search?q=${encodeURIComponent(searchTerm.trim())}`;
     setSearchTerm("");
     setIsMenuOpen(false);
   };
@@ -114,30 +107,12 @@ const Navbar = () => {
   const handleCategoryClick = (group: string, category?: SquareCategory) => {
     const p = new URLSearchParams(searchParams.toString());
     p.set("group", group);
+    p.delete("q");
     if (category) {
-      let squareId: string | undefined;
-      switch (group) {
-        case "TCG":
-          squareId = CATEGORY_MAPPING[category.squareCategoryId].squareCategoryId;
-          break;
-        case "Collectibles":
-          squareId = COLLECTIBLES_MAPPING[category.squareCategoryId].squareCategoryId;
-          break;
-        case "Supplies & Grading":
-          squareId = SUPPLIES_MAPPING[category.squareCategoryId].squareCategoryId;
-          break;
-        case "Events":
-          squareId = EVENTS_MAPPING[category.squareCategoryId].squareCategoryId;
-          break;
-      }
-      if (squareId) {
-        p.set("categoryId", squareId);
-        p.delete("search");
-      }
+      window.location.href = `/category/${category.slug}?${p.toString()}`;
     } else {
-      p.delete("categoryId");
+      window.location.href = `/products?${p.toString()}`;
     }
-    window.location.href = `/products?${p.toString()}`;
     setActiveDropdown(null);
     setIsMenuOpen(false);
   };

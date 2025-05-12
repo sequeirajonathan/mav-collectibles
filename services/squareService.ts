@@ -12,11 +12,27 @@ export async function fetchCatalogItems(
   stock: string = "IN_STOCK",
   sort: string = "name_asc"
 ): Promise<NormalizedCatalogResponse> {
-  const { data } = await axiosClient.post("/api/products", {
+  const { data } = await axiosClient.post("/products", {
     cursor,
     group,
     search,
     categoryId,
+    stock,
+    sort,
+  });
+
+  return data;
+}
+
+export async function searchProducts(
+  search: string,
+  cursor: string | null = null,
+  stock: string = "IN_STOCK",
+  sort: string = "name_asc"
+): Promise<NormalizedCatalogResponse> {
+  const { data } = await axiosClient.post(`/search`, {
+    search,
+    cursor,
     stock,
     sort,
   });
@@ -31,7 +47,7 @@ export async function fetchCategoryItems(
   stock: string = "IN_STOCK",
   sort: string = "name_asc"
 ): Promise<NormalizedCatalogResponse> {
-  const { data } = await axiosClient.post(`/api/v1/category/${slug}`, {
+  const { data } = await axiosClient.post(`/category/${slug}`, {
     cursor,
     search,
     sort,
@@ -42,7 +58,7 @@ export async function fetchCategoryItems(
 }
 
 export async function fetchProduct(id: string): Promise<NormalizedProductResponse> {
-  const response = await fetch(`/api/products/${id}`);
+  const response = await fetch(`/api/v1/product/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch product');
   }

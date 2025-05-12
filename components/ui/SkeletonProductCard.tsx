@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
+import React, { useState, useEffect } from 'react';
 
 export function SkeletonProductCard() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   return (
     <motion.div
       className="bg-gray-800 rounded-lg overflow-hidden h-[420px] flex flex-col"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={false}
+      animate={mounted ? { opacity: 1 } : false}
       transition={{ duration: 0.5 }}
     >
       <div className="relative aspect-[4/3] bg-gray-700 animate-pulse" />

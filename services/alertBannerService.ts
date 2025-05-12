@@ -30,7 +30,7 @@ export async function fetchAlertBanner(): Promise<AlertBanner | null> {
 
   // If we're on the client, use axios
   try {
-    const { data } = await axiosClient.get('/api/alert-banner');
+    const { data } = await axiosClient.get('/alert-banner');
     // Add id field to the data
     const bannerWithId = {
       ...data,
@@ -48,7 +48,7 @@ export async function fetchAlertBanner(): Promise<AlertBanner | null> {
 export async function updateAlertBanner(id: string, bannerData: Partial<AlertBanner>): Promise<AlertBanner> {
   // Validate the data before sending
   const validatedData = alertBannerSchema.partial().parse(bannerData);
-  const { data } = await axiosClient.patch(`/api/alert-banner/${id}`, validatedData);
+  const { data } = await axiosClient.patch(`/alert-banner/${id}`, validatedData);
   // Validate the response
   return alertBannerSchema.parse(data);
 }
@@ -57,7 +57,7 @@ export async function updateAlertBanner(id: string, bannerData: Partial<AlertBan
 export async function createAlertBanner(bannerData: Partial<AlertBanner>): Promise<AlertBanner> {
   // Validate the data before sending
   const validatedData = alertBannerSchema.parse(bannerData);
-  const { data } = await axiosClient.post('/api/alert-banner', validatedData);
+  const { data } = await axiosClient.post('/alert-banner', validatedData);
   // Validate the response
   return alertBannerSchema.parse(data);
 }

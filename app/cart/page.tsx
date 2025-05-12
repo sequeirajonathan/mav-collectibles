@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2, ImageIcon } from "lucide-react";
 import { useCart } from "@contexts/CartContext";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import type { PanInfo } from "framer-motion";
+import React, { useState, useEffect } from 'react';
 
 interface CartItemType {
   id: string;
@@ -16,14 +17,17 @@ interface CartItemType {
 }
 
 const ImagePlaceholder = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <motion.div
       className="w-full h-full bg-gray-800/50 rounded-lg flex items-center justify-center"
-      initial={{ opacity: 0.6 }}
-      animate={{ 
+      initial={false}
+      animate={mounted ? { 
         opacity: [0.6, 0.8, 0.6],
         scale: [1, 1.05, 1],
-      }}
+      } : false}
       transition={{
         duration: 2,
         repeat: Infinity,
@@ -37,6 +41,8 @@ const ImagePlaceholder = () => {
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const handleQuantityChange = (itemId: string, currentQuantity: number, newQuantity: number) => {
     if (newQuantity >= 1) {
@@ -61,8 +67,8 @@ export default function CartPage() {
     return (
       <motion.div
         layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={false}
+        animate={mounted ? { opacity: 1, y: 0 } : false}
         exit={{ opacity: 0, y: -20 }}
         className="bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 rounded-xl overflow-hidden"
       >

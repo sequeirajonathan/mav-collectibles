@@ -15,22 +15,17 @@ export async function middleware(request: NextRequest) {
   finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   finalResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
-  // Check if the request is for a public route
+  // Check if the request is for the admin route
   const url = request.nextUrl.clone();
-  const isPublicRoute = 
-    url.pathname.startsWith('/login') || 
-    url.pathname.startsWith('/signup') ||
-    url.pathname.startsWith('/auth') ||
-    url.pathname.startsWith('/products') ||
-    url.pathname === '/';
+  const isAdminRoute = url.pathname.startsWith('/admin');
   
   // If it's an API route, just return the response with CORS headers
   if (url.pathname.startsWith('/api')) {
     return finalResponse;
   }
   
-  // For non-public routes, check if we have a user
-  if (!isPublicRoute) {
+  // For admin routes, check if we have a user
+  if (isAdminRoute) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

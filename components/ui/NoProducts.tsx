@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 export function NoProducts() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={false}
+      animate={mounted ? { opacity: 1, y: 0 } : false}
       className="flex flex-col items-center justify-center min-h-[40vh] text-center px-4"
     >
       <div className="mb-6">

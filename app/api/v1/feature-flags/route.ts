@@ -1,12 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
-import { z } from 'zod';
-
-const featureFlagSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  enabled: z.boolean().default(false),
-});
+import { featureFlagSchema } from '@validations/feature-flags';
 
 // GET all feature flags
 export async function GET() {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSquareClient } from "@lib/square";
-import { normalizeCatalogResponse, serializeBigIntValues } from "@utils";
+import { normalizeCatalogItems, serializeBigIntValues } from "@utils";
 import {
   CATEGORY_MAPPING,
   COLLECTIBLES_MAPPING,
@@ -22,8 +22,12 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const { cursor = null } = await request.json();
+    const { cursor = null, stock = "IN_STOCK", sort = "name_asc" } = await request.json();
     const client = createSquareClient();
+
+    // Determine sort order for Square API
+    let sortOrder: 'ASC' | 'DESC' = 'ASC';
+    if (sort === 'name_desc') sortOrder = 'DESC';
 
     // figure out which category IDs to filter by
     let categoryIds: string[] = [];
@@ -39,7 +43,6 @@ export async function POST(
         );
     }
 
-
     // pass cursor into Square so we really get page N
     const searchResponse = await client.catalog.search({
       objectTypes: ["ITEM"],
@@ -49,13 +52,17 @@ export async function POST(
           attributeName: "category_id",
           attributeValues: categoryIds,
         },
+        sortedAttributeQuery: {
+          attributeName: "name",
+          sortOrder,
+        },
       },
       limit: 100,
       ...(cursor ? { cursor } : {}),
     });
 
     // normalize and strip out BigInts
-    const normalized = normalizeCatalogResponse(searchResponse);
+    const normalized = normalizeCatalogItems(searchResponse, { stock });
     const payload = JSON.parse(
       JSON.stringify(normalized, serializeBigIntValues)
     );

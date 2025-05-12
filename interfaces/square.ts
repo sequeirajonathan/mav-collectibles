@@ -77,6 +77,7 @@ export interface NormalizedProductResponse {
     priceAmount: number;
     priceCurrency: string;
     inventoryCount: number;
+    soldOut: boolean;
     locationInventory: Array<{
       locationId: string;
       quantity: number;
