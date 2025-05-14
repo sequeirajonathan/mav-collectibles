@@ -7,17 +7,25 @@ import {
   GetCatalogObjectResponse,
   InventoryCount,
   NormalizedProductResponse,
+  CatalogObject
 } from "@interfaces";
 import { CATEGORY_GROUPS } from "@const/categories";
+import { serializeBigIntValues } from "./serialization";
+import { EcomVisibility } from '../interfaces/square';
+import { Square } from 'square';
 
+export function isCatalogItem(o: CatalogObject): o is CatalogObject & { type: "ITEM" } {
+  return o.type === "ITEM";
+}
 
 export function normalizeCatalogItems(
   response: SearchCatalogObjectsResponse,
   options: {
     stock?: string;
+    inventory?: Record<string, number>;
   } = {}
 ): NormalizedCatalogResponse {
-  const { stock = "IN_STOCK" } = options;
+  const { stock = "IN_STOCK", inventory = {} } = options;
 
   // Support multi-select stock filter
   const stockArray = stock
@@ -66,8 +74,14 @@ export function normalizeCatalogItems(
   for (const object of response.objects ?? []) {
     if (object.type !== "ITEM") continue;
     const item = object as ItemObject;
-    const itemData = item.itemData;
+    const itemData = item.itemData as Square.CatalogItem & {
+      ecom_available?: boolean;
+      ecom_visibility?: EcomVisibility;
+    };
     if (!itemData) continue;
+
+    // Skip items that are not available for ecommerce
+    if (!itemData.ecom_available || itemData.ecom_visibility === "UNAVAILABLE") continue;
 
     const categoryId = itemData.categories?.[0]?.id ?? "";
     const categoryName = categoryMap.get(categoryId) ?? "";
@@ -87,12 +101,7 @@ export function normalizeCatalogItems(
         .filter((tax): tax is { name: string; percentage?: string } => !!tax) ??
       [];
 
-    // Process variations to find the first available one that matches our stock filter
-    let selectedVariation: ItemVariationObject["itemVariationData"] | null = null;
-    let selectedVariationId = "";
-    let selectedPrice = Infinity;
-    let isItemSoldOut = true; // Default to true, will be false if we find any available variation
-
+    // Process all variations that match our stock filter
     for (const variationEntry of itemData.variations ?? []) {
       if (variationEntry.type !== "ITEM_VARIATION") continue;
       const variation = (variationEntry as ItemVariationObject).itemVariationData;
@@ -101,57 +110,39 @@ export function normalizeCatalogItems(
 
       const isVariationSoldOut = (variation.trackInventory && variation.locationOverrides?.some(override => override.soldOut)) ?? false;
       
-      // If this variation is available and matches our stock filter
-      if (!isVariationSoldOut && filterByStock(false)) {
-        const price = Number(variation.priceMoney?.amount ?? Infinity);
-        if (price < selectedPrice) {
-          selectedPrice = price;
-          selectedVariation = variation;
-          selectedVariationId = variationId;
-          isItemSoldOut = false;
-        }
-      }
-      // If we're showing sold out items and this one is sold out
-      else if (isVariationSoldOut && filterByStock(true)) {
-        const price = Number(variation.priceMoney?.amount ?? Infinity);
-        if (price < selectedPrice) {
-          selectedPrice = price;
-          selectedVariation = variation;
-          selectedVariationId = variationId;
-        }
+      // Only include variations that match our stock filter
+      if (filterByStock(isVariationSoldOut)) {
+        items.push({
+          itemId: item.id,
+          variationId,
+          name: itemData.name ?? "",
+          description: itemData.description ?? "",
+          imageUrls,
+          categoryId,
+          categoryName,
+          group,
+          taxInfo,
+          taxIds: itemData.taxIds ?? [],
+          priceAmount: Number(variation.priceMoney?.amount ?? 0),
+          priceCurrency: variation.priceMoney?.currency ?? "USD",
+          isTaxable: itemData.isTaxable ?? false,
+          sku: variation.sku ?? "",
+          isArchived: itemData.isArchived ?? false,
+          updatedAt: item.updatedAt ?? "",
+          soldOut: isVariationSoldOut,
+          presentAtAllLocations: item.presentAtAllLocations ?? false,
+          presentAtLocationIds: item.presentAtLocationIds ?? [],
+          ecomAvailable: itemData.ecom_available ?? false,
+          ecomVisibility: itemData.ecom_visibility ?? 'UNINDEXED',
+          inventoryCount: inventory[variationId] ?? 0,
+        });
       }
     }
-
-    if (!selectedVariation) continue;
-
-    items.push({
-      itemId: item.id,
-      variationId: selectedVariationId,
-      name: itemData.name ?? "",
-      description: itemData.description ?? "",
-      imageUrls,
-      categoryId,
-      categoryName,
-      group,
-      taxInfo,
-      taxIds: itemData.taxIds ?? [],
-      priceAmount: selectedPrice,
-      priceCurrency: selectedVariation.priceMoney?.currency ?? "USD",
-      isTaxable: itemData.isTaxable ?? false,
-      sku: selectedVariation.sku ?? "",
-      isArchived: itemData.isArchived ?? false,
-      updatedAt: item.updatedAt ?? "",
-      soldOut: isItemSoldOut,
-      presentAtAllLocations: item.presentAtAllLocations ?? false,
-      presentAtLocationIds: item.presentAtLocationIds ?? [],
-      ecomAvailable: itemData.ecom_available ?? false,
-      ecomVisibility: itemData.ecom_visibility ?? "UNINDEXED",
-    });
   }
 
   return {
     items,
-    cursor: response.cursor ?? null,
+    cursor: response.cursor ?? undefined,
   };
 }
 
@@ -289,7 +280,133 @@ export function normalizeProductResponse(
     isTaxable: itemData.isTaxable ?? false,
     isArchived: itemData.isArchived ?? false,
     ecomAvailable: itemData.ecom_available ?? false,
-    ecomVisibility: itemData.ecom_visibility ?? "UNINDEXED",
+    ecomVisibility: itemData.ecom_visibility ?? 'UNINDEXED',
     updatedAt: catalogObject.object.updatedAt ?? "",
   };
+}
+
+export interface NormalizedItemWithInventory {
+  id: string;
+  name: string;
+  description: string;
+  descriptionPlaintext: string;
+  descriptionHtml: string;
+  imageIds: string[];
+  ecom_available: boolean;
+  ecom_visibility: string;
+  variations: {
+    id: string;
+    name: string;
+    sku: string;
+    price: number;
+    inventory: number;
+    trackInventory: boolean;
+    sellable: boolean;
+    stockable: boolean;
+  }[];
+  categories: {
+    id: string;
+    ordinal: string;
+  }[];
+  isArchived: boolean;
+  isAlcoholic: boolean;
+  isTaxable: boolean;
+  taxIds: string[];
+  channels: string[];
+  reportingCategory: {
+    id: string;
+    ordinal: string;
+  };
+}
+
+export function normalizeItemsWithInventory(
+  items: CatalogObject[],
+  relatedObjects?: CatalogObject[]
+): NormalizedCatalogItem[] {
+  // Build lookup maps for related objects
+  const imageUrlMap = new Map<string, string>();
+  const categoryMap = new Map<string, { id: string; name: string }>();
+  const taxMap = new Map<string, { name: string; percentage?: string }>();
+
+  // Process related objects first
+  for (const obj of relatedObjects ?? []) {
+    switch (obj.type) {
+      case "IMAGE":
+        if (obj.imageData?.url) {
+          imageUrlMap.set(obj.id, obj.imageData.url);
+        }
+        break;
+      case "CATEGORY":
+        if (obj.categoryData?.name && obj.id) {
+          categoryMap.set(obj.id, {
+            id: obj.id,
+            name: obj.categoryData.name
+          });
+        }
+        break;
+      case "TAX":
+        if (obj.taxData?.name) {
+          taxMap.set(obj.id, {
+            name: obj.taxData.name,
+            percentage: obj.taxData.percentage ?? undefined
+          });
+        }
+        break;
+    }
+  }
+
+  return items
+    .filter((item): item is CatalogObject & { type: "ITEM" } => isCatalogItem(item))
+    .flatMap(item => {
+      const itemData = item.itemData as Square.CatalogItem & {
+        ecom_available?: boolean;
+        ecom_visibility?: EcomVisibility;
+      };
+      if (!itemData) return [];
+
+      // Get category info
+      const categoryId = itemData.categories?.[0]?.id ?? '';
+      const categoryInfo = categoryId ? categoryMap.get(categoryId) : undefined;
+
+      // Get tax info
+      const taxInfo = itemData.taxIds
+        ?.map(id => taxMap.get(id))
+        .filter((tax): tax is { name: string; percentage?: string } => !!tax) ?? [];
+
+      return itemData.variations?.map(variation => {
+        const variationData = (variation as ItemVariationObject).itemVariationData;
+        const amount = variationData?.priceMoney?.amount;
+        const isSoldOut = variationData?.locationOverrides?.some(override => override.soldOut) ?? false;
+
+        // Get location IDs from the variation's location overrides
+        const locationIds = variationData?.locationOverrides
+          ?.map(override => override.locationId)
+          .filter((id): id is string => id !== null && id !== undefined) ?? [];
+
+        return {
+          itemId: item.id ?? '',
+          variationId: variation.id ?? '',
+          name: itemData.name ?? '',
+          description: itemData.description ?? '',
+          imageUrls: itemData.imageIds?.map(id => imageUrlMap.get(id) ?? '').filter(Boolean) ?? [],
+          categoryId,
+          categoryName: categoryInfo?.name ?? '',
+          group: '',
+          taxInfo,
+          taxIds: itemData.taxIds ?? [],
+          priceAmount: amount ? Number(serializeBigIntValues('amount', amount)) : 0,
+          priceCurrency: variationData?.priceMoney?.currency ?? 'USD',
+          isTaxable: itemData.isTaxable ?? false,
+          sku: variationData?.sku ?? '',
+          isArchived: itemData.isArchived ?? false,
+          updatedAt: item.updatedAt ?? '',
+          soldOut: isSoldOut,
+          presentAtAllLocations: item.presentAtAllLocations ?? false,
+          presentAtLocationIds: locationIds,
+          ecomAvailable: itemData.ecom_available ?? false,
+          ecomVisibility: itemData.ecom_visibility ?? 'UNINDEXED',
+          inventoryCount: (variation as { inventory?: number }).inventory ?? 0,
+        };
+      }) ?? [];
+    });
 }

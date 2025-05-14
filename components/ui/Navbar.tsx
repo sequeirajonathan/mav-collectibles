@@ -92,7 +92,16 @@ const Navbar = () => {
     setExpandedGroup((cur) => (cur === g ? null : g));
 
   const getTopTCGCategories = (cats: SquareCategory[]) => {
-    const top = ["pokemon", "yugioh", "magic", "dragonball", "onepiece"];
+    const top = [
+      "pokemon",
+      "pokemonsingles",
+      "yugioh",
+      "magic",
+      "dragonball",
+      "onepiece",
+      "starwars",
+      "lorcana"
+    ];
     return cats.filter((c) => top.includes(c.slug));
   };
 
@@ -144,7 +153,7 @@ const Navbar = () => {
                   ? getTopTCGCategories(group.categories)
                   : group.categories;
                 return (
-                  <div
+                    <div
                     key={group.name}
                     className="relative"
                     ref={(el) => {
@@ -168,7 +177,7 @@ const Navbar = () => {
                       />
                     </motion.button>
                     <AnimatePresence>
-                      {activeDropdown === group.name && (
+                    {activeDropdown === group.name && (
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -198,7 +207,7 @@ const Navbar = () => {
                             </button>
                           )}
                         </motion.div>
-                      )}
+                    )}
                     </AnimatePresence>
                   </div>
                 );

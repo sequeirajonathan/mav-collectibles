@@ -7,6 +7,7 @@ import {
   fetchCategoryItems,
   fetchProduct,
   searchProducts,
+  fetchInventoryCounts,
 } from "@services/squareService";
 
 
@@ -30,6 +31,8 @@ export function useInfiniteCatalogItemsBySlug(
     initialPageParam: null,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: true,
   });
 }
 
@@ -59,5 +62,16 @@ export function useSquareProduct(id: string) {
   return useQuery<NormalizedProductResponse, Error>({
     queryKey: ["product", id],
     queryFn: () => fetchProduct(id),
+  });
+}
+
+export function useInventoryCounts(variationIds: string[]) {
+  return useQuery<Record<string, number>, Error>({
+    queryKey: ["inventory", variationIds],
+    queryFn: () => fetchInventoryCounts(variationIds),
+    enabled: variationIds.length > 0,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds
+    refetchIntervalInBackground: true,
   });
 }

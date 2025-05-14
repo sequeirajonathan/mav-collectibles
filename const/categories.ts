@@ -9,17 +9,17 @@ export interface SquareCategory {
 // --- Main TCG Categories ---
 export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
   pokemon: {
-    displayName: "Pokémon",
+    displayName: "Pokémon TCG",
     slug: "pokemon",
     squareCategoryId: "JLGE7O4IOUUW36IB6ZJYWKUU",
   },
   dragonball: {
-    displayName: "Dragon Ball",
+    displayName: "Dragon Ball Super TCG",
     slug: "dragonball",
     squareCategoryId: "CQ3NSXZ4V3Q5ZHCMS4WS3YP6",
   },
   onepiece: {
-    displayName: "One Piece",
+    displayName: "One Piece Card Game",
     slug: "onepiece",
     squareCategoryId: "B6KGCQABXQDHFISWSRBS4QHF",
   },
@@ -29,7 +29,7 @@ export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
     squareCategoryId: "PLVAPCRCS4TJYIBC7CDALXYK",
   },
   magic: {
-    displayName: "Magic",
+    displayName: "Magic The Gathering",
     slug: "magic",
     squareCategoryId: "LXZB7FOIRUA2YASQFGDHL2EF",
   },
@@ -64,12 +64,12 @@ export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
     squareCategoryId: "ULPV5UD3L5JKS52EYP7F64NX",
   },
   fleshblood: {
-    displayName: "Flesh & Blood",
+    displayName: "Flesh & Blood TCG",
     slug: "fleshblood",
     squareCategoryId: "Z4TJ2BADGYQJSUPJUH2Y3422",
   },
   starwars: {
-    displayName: "Star Wars",
+    displayName: "Star Wars Unlimited",
     slug: "starwars",
     squareCategoryId: "VTABJTWESVYYHE5SXAH4NKJE",
   },
@@ -79,9 +79,14 @@ export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
     squareCategoryId: "5LEDQBMCJINSREERRQL4J2SG",
   },
   soulmasters: {
-    displayName: "Soul Masters",
+    displayName: "Soul Masters TCG",
     slug: "soulmasters",
     squareCategoryId: "GESEFRWGMQAWUAGSEDQ2WMLB",
+  },
+  pokemonsingles: {
+    displayName: "Pokemon - Singles",
+    slug: "pokemonsingles",
+    squareCategoryId: "ZPLTFCCZRS3FENOS4324RK4E",
   },
 };
 
@@ -108,7 +113,7 @@ export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
     squareCategoryId: "Y5QMJDVTICGYS63MD5G3MIXA",
   },
   bandai: {
-    displayName: "Bandai",
+    displayName: "Bandai Namco",
     slug: "bandai",
     squareCategoryId: "2WGAXPFOCVU6E3YCKLENXCBZ",
   },
@@ -122,24 +127,34 @@ export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
 // --- Supplies & Grading ---
 export const SUPPLIES_MAPPING: Record<string, SquareCategory> = {
   supplies: {
-    displayName: "Supplies",
+    displayName: "Hobby Supplies",
     slug: "supplies",
     squareCategoryId: "5PVJ4PTPSZQOWQAPNX2ABSZY",
   },
   psa: {
-    displayName: "PSA Service",
+    displayName: "PSA Graded Slabs",
     slug: "psa",
     squareCategoryId: "POBB6MGCLVUC2DPPTPMLBLIL",
+  },
+  beckett: {
+    displayName: "Beckett Graded Slabs",
+    slug: "beckett",
+    squareCategoryId: "E4QEHP25KV63OP5BVG6BAWN5",
+  },
+  cgc: {
+    displayName: "CGC Graded Slabs",
+    slug: "cgc",
+    squareCategoryId: "QWH464QRNC725KULVO6XJAP5",
+  },
+  tag: {
+    displayName: "Tag Graded Slabs",
+    slug: "tag",
+    squareCategoryId: "BDXDK3UHNCYVGDP7XTXEGGGV",
   },
   gradedguard: {
     displayName: "Graded Guard",
     slug: "gradedguard",
     squareCategoryId: "6RZANZZZ62FG33XW6AMMC5OI",
-  },
-  gradedcards: {
-    displayName: "Graded Cards",
-    slug: "gradedcards",
-    squareCategoryId: "SSTM2PVN2UEFTH72HLUBI7TI",
   },
 };
 

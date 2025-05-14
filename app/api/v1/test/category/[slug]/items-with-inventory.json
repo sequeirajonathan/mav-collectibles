@@ -1,0 +1,1090 @@
+[
+	{
+		"type": "ITEM",
+		"created_at": "2025-02-15T18:36:28.101Z",
+		"itemData": {
+			"name": "151 Booster Pack - English",
+			"description": "151 Booster Pack - English",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-02-15T18:36:28.101Z",
+					"itemVariationData": {
+						"itemId": "I4PBTDVO5OL5XCX6ZKAEWCCS",
+						"name": "Regular",
+						"sku": "M969989",
+						"ordinal": 0,
+						"pricingType": "FIXED_PRICING",
+						"priceMoney": {
+							"amount": "1400",
+							"currency": "USD"
+						},
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true,
+								"soldOut": true
+							}
+						],
+						"trackInventory": true,
+						"price_description": "",
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 300,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"Z3GLCGBOSHEHH7B5SAWEVEHB",
+							"XBBGBBXER7AE4YBMVAELVOWH"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "Z3GLCGBOSHEHH7B5SAWEVEHB",
+								"updated_at": "2025-05-03T21:19:24.217Z",
+								"created_at": "2025-04-06T23:48:50.52Z",
+								"version": 1746307164217,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 0,
+									"price_money": {
+										"amount": 300,
+										"currency": "USD"
+									},
+									"item_variation_id": "4IFVE5DPEXJP3RDSD6IUBDKD",
+									"vendor_id": "SXBAMVPVSH2V7BYQ"
+								}
+							},
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "XBBGBBXER7AE4YBMVAELVOWH",
+								"updated_at": "2025-05-03T21:19:24.217Z",
+								"created_at": "2025-02-15T18:36:28.101Z",
+								"version": 1746307164217,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 1,
+									"price_money": {
+										"amount": 757,
+										"currency": "USD"
+									},
+									"item_variation_id": "4IFVE5DPEXJP3RDSD6IUBDKD",
+									"vendor_id": "LDAFKF5KUJ5DOXP3"
+								}
+							}
+						]
+					},
+					"id": "4IFVE5DPEXJP3RDSD6IUBDKD",
+					"updatedAt": "2025-05-03T22:58:38.215Z",
+					"version": "1746313118215",
+					"isDeleted": false,
+					"presentAtAllLocations": true,
+					"inventory": 0
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"imageIds": [
+				"Z3LNGVQQKK2MGEYJMOA4ZL33"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2232627079675904"
+				}
+			],
+			"descriptionHtml": "<p>151 Booster Pack - English</p>",
+			"descriptionPlaintext": "151 Booster Pack - English",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2232627079675904"
+			},
+			"isAlcoholic": false
+		},
+		"id": "I4PBTDVO5OL5XCX6ZKAEWCCS",
+		"updatedAt": "2025-05-03T22:58:38.215Z",
+		"version": "1746313118215",
+		"isDeleted": false,
+		"presentAtAllLocations": true
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2025-05-06T17:43:07.385Z",
+		"itemData": {
+			"name": "151 Pokémon Mat",
+			"abbreviation": "15",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-05-06T17:43:07.385Z",
+					"itemVariationData": {
+						"itemId": "LYKYZ6ZWKTKSPYM5YM2WTTQV",
+						"name": "Regular",
+						"sku": "2481360",
+						"ordinal": 0,
+						"pricingType": "FIXED_PRICING",
+						"priceMoney": {
+							"amount": "1500",
+							"currency": "USD"
+						},
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true,
+								"soldOut": true
+							}
+						],
+						"price_description": "",
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 750,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"HGSPSRE4HNSKVQUGL3UN3NS4"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "HGSPSRE4HNSKVQUGL3UN3NS4",
+								"updated_at": "2025-05-06T17:43:11.873Z",
+								"created_at": "2025-05-06T17:43:07.385Z",
+								"version": 1746553391873,
+								"is_deleted": false,
+								"present_at_all_locations": false,
+								"present_at_location_ids": [
+									"LTZNXWZDB0FH9"
+								],
+								"item_variation_vendor_info_data": {
+									"ordinal": 0,
+									"price_money": {
+										"amount": 750,
+										"currency": "USD"
+									},
+									"item_variation_id": "VH3WGJS43M6KV2JIQRP67QNU"
+								}
+							}
+						]
+					},
+					"id": "VH3WGJS43M6KV2JIQRP67QNU",
+					"updatedAt": "2025-05-06T17:43:39.839Z",
+					"version": "1746553419839",
+					"isDeleted": false,
+					"catalogV1Ids": [
+						{
+							"catalogV1Id": "3d5ba449-fb80-42d8-838c-5a95dc53db9e",
+							"locationId": "LTZNXWZDB0FH9"
+						}
+					],
+					"presentAtAllLocations": false,
+					"presentAtLocationIds": [
+						"LTZNXWZDB0FH9"
+					],
+					"inventory": 0
+				}
+			],
+			"productType": "REGULAR",
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2203902338400256"
+				},
+				{
+					"id": "5PVJ4PTPSZQOWQAPNX2ABSZY",
+					"ordinal": "-2243965793337344"
+				}
+			],
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2203902338400256"
+			},
+			"isAlcoholic": false
+		},
+		"id": "LYKYZ6ZWKTKSPYM5YM2WTTQV",
+		"updatedAt": "2025-05-06T17:43:46.049Z",
+		"version": "1746553426049",
+		"isDeleted": false,
+		"catalogV1Ids": [
+			{
+				"catalogV1Id": "65ad2742-9d2b-4c61-9b3b-a572ffe76fa1",
+				"locationId": "LTZNXWZDB0FH9"
+			}
+		],
+		"presentAtAllLocations": false,
+		"presentAtLocationIds": [
+			"LTZNXWZDB0FH9"
+		]
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2024-12-01T02:22:18.612Z",
+		"itemData": {
+			"name": "2024 Pokemon Paldea Adventure Chest",
+			"description": "The Pokémon TCG: Paldea Adventure Chest is a must-have for any Pokémon Trading Card Game enthusiast. This adventure chest features a Paldea theme, with stunning artwork and designs that capture the essence of the Pokémon world. Inside the chest, you'll find a variety of Pokémon TCG cards, including booster packs, promo cards, and more. The Adventure Chest also includes a collector's guide to help you keep track of your collection. Whether you're a seasoned player or just starting out, the Pokémon TCG: Paldea Adventure Chest is the perfect addition to your Pokémon card collection.",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2024-12-01T02:22:18.612Z",
+					"itemVariationData": {
+						"itemId": "JF4ITDF3MWKPQ7D2WKS6ENGH",
+						"name": "Regular",
+						"sku": "136722M",
+						"upc": "820650856082",
+						"ordinal": 1,
+						"pricingType": "FIXED_PRICING",
+						"priceMoney": {
+							"amount": "5000",
+							"currency": "USD"
+						},
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true
+							}
+						],
+						"trackInventory": true,
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 2500,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"IKS25W6MVAEC4ZPJJKEJYZ7R"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "IKS25W6MVAEC4ZPJJKEJYZ7R",
+								"updated_at": "2024-12-01T02:22:18.573Z",
+								"created_at": "2024-12-01T02:22:18.612Z",
+								"version": 1733019738573,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 1,
+									"price_money": {
+										"amount": 2500,
+										"currency": "USD"
+									},
+									"item_variation_id": "YA3SMPPAJHER5NBZOF7NXBWR"
+								}
+							}
+						]
+					},
+					"id": "YA3SMPPAJHER5NBZOF7NXBWR",
+					"updatedAt": "2024-12-08T22:09:12.272Z",
+					"version": "1733695752272",
+					"isDeleted": false,
+					"presentAtAllLocations": true,
+					"inventory": 1
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"imageIds": [
+				"PYOXUAXCCOHG3IGZ2HRKGST2"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2240804697407488"
+				}
+			],
+			"descriptionHtml": "The Pokémon TCG: Paldea Adventure Chest is a must-have for any Pokémon Trading Card Game enthusiast. This adventure chest features a Paldea theme, with stunning artwork and designs that capture the essence of the Pokémon world. Inside the chest, you&#39;ll find a variety of Pokémon TCG cards, including booster packs, promo cards, and more. The Adventure Chest also includes a collector&#39;s guide to help you keep track of your collection. Whether you&#39;re a seasoned player or just starting out, the Pokémon TCG: Paldea Adventure Chest is the perfect addition to your Pokémon card collection.",
+			"descriptionPlaintext": "The Pokémon TCG: Paldea Adventure Chest is a must-have for any Pokémon Trading Card Game enthusiast. This adventure chest features a Paldea theme, with stunning artwork and designs that capture the essence of the Pokémon world. Inside the chest, you'll find a variety of Pokémon TCG cards, including booster packs, promo cards, and more. The Adventure Chest also includes a collector's guide to help you keep track of your collection. Whether you're a seasoned player or just starting out, the Pokémon TCG: Paldea Adventure Chest is the perfect addition to your Pokémon card collection.",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2240804697407488"
+			}
+		},
+		"id": "JF4ITDF3MWKPQ7D2WKS6ENGH",
+		"updatedAt": "2024-12-08T23:30:26.459Z",
+		"version": "1733700626459",
+		"isDeleted": false,
+		"presentAtAllLocations": true
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2025-05-03T23:30:23.842Z",
+		"itemData": {
+			"name": "Bombirdier ex - 234/182 - SV04: Paradox Rift (PAR)",
+			"description": "Product Details\nCard Number / Rarity:234/182 / Ultra Rare\nCard Type / HP / Stage:Colorless / 200 / Basic\nAttack 1:[1] Fast Carrier\nIf you go first, you can use this attack during your first turn. Search your deck for up to 3 Basic Pokémon and put them onto your Bench. Then, shuffle your deck.\nAttack 2:[3] Shadowy Wind (130)\nYou may put this Pokémon and all attached cards into your hand.\nWeakness / Resistance / Retreat Cost:Lx2 / F-30 / 1\nArtist:PLANETA Mochizuki",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-05-03T23:30:23.842Z",
+					"itemVariationData": {
+						"itemId": "MBM76IUSRMQWE6OJMOBIWQON",
+						"name": "Regular",
+						"sku": "4664798",
+						"ordinal": 1,
+						"pricingType": "VARIABLE_PRICING",
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true
+							}
+						],
+						"trackInventory": true,
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 25,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"FBLBIMNMNKMCB4BWIG55JXRW"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "FBLBIMNMNKMCB4BWIG55JXRW",
+								"updated_at": "2025-05-03T23:30:23.759Z",
+								"created_at": "2025-05-03T23:30:23.842Z",
+								"version": 1746315023759,
+								"is_deleted": false,
+								"present_at_all_locations": false,
+								"present_at_location_ids": [
+									"LTZNXWZDB0FH9"
+								],
+								"item_variation_vendor_info_data": {
+									"ordinal": 1,
+									"price_money": {
+										"amount": 25,
+										"currency": "USD"
+									},
+									"item_variation_id": "WMGL37ZMEUZTGIOVLSHCWSQ3",
+									"vendor_id": "OHRHJPSFD2J4A5ZC"
+								}
+							}
+						]
+					},
+					"id": "WMGL37ZMEUZTGIOVLSHCWSQ3",
+					"updatedAt": "2025-05-03T23:30:26.115Z",
+					"version": "1746315026115",
+					"isDeleted": false,
+					"presentAtAllLocations": false,
+					"presentAtLocationIds": [
+						"LTZNXWZDB0FH9"
+					],
+					"inventory": 2
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": false,
+			"ecom_visibility": "UNAVAILABLE",
+			"imageIds": [
+				"RBWXINPJENR4SWMBACX4QY7O"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2209606054969344"
+				}
+			],
+			"descriptionHtml": "<p><strong>Product Details</strong></p><ul><li><strong>Card Number / Rarity:</strong>234/182 / Ultra Rare</li><li><strong>Card Type / HP / Stage:</strong>Colorless / 200 / Basic</li><li><strong>Attack 1:</strong>[1] Fast Carrier</li><li>If you go first, you can use this attack during your first turn. Search your deck for up to 3 Basic Pokémon and put them onto your Bench. Then, shuffle your deck.</li><li><strong>Attack 2:</strong>[3] Shadowy Wind (130)</li><li>You may put this Pokémon and all attached cards into your hand.</li><li><strong>Weakness / Resistance / Retreat Cost:</strong>Lx2 / F-30 / 1</li><li><strong>Artist:</strong><a href=\"https://www.tcgplayer.com/search/all/product?q=PLANETA+Mochizuki\" rel=\"nofollow\">PLANETA Mochizuki</a></li></ul><p><br/></p>",
+			"descriptionPlaintext": "Product Details\nCard Number / Rarity:234/182 / Ultra Rare\nCard Type / HP / Stage:Colorless / 200 / Basic\nAttack 1:[1] Fast Carrier\nIf you go first, you can use this attack during your first turn. Search your deck for up to 3 Basic Pokémon and put them onto your Bench. Then, shuffle your deck.\nAttack 2:[3] Shadowy Wind (130)\nYou may put this Pokémon and all attached cards into your hand.\nWeakness / Resistance / Retreat Cost:Lx2 / F-30 / 1\nArtist:PLANETA Mochizuki",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2209606054969344"
+			},
+			"isAlcoholic": false
+		},
+		"id": "MBM76IUSRMQWE6OJMOBIWQON",
+		"updatedAt": "2025-05-03T23:31:03.434Z",
+		"version": "1746315063434",
+		"isDeleted": false,
+		"presentAtAllLocations": false,
+		"presentAtLocationIds": [
+			"LTZNXWZDB0FH9"
+		]
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2025-05-04T20:57:48.457Z",
+		"itemData": {
+			"name": "Bulk Cards",
+			"abbreviation": "Bu",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-05-04T20:57:48.457Z",
+					"itemVariationData": {
+						"itemId": "FRT3QHNPP5GAJQNOZDVUOVOV",
+						"name": "Regular",
+						"sku": "5930900",
+						"ordinal": 0,
+						"pricingType": "VARIABLE_PRICING",
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true,
+								"soldOut": true
+							}
+						],
+						"price_description": "",
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 2380,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"SE4RRPT3TP6RSLQLRE3YTIU5"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "SE4RRPT3TP6RSLQLRE3YTIU5",
+								"updated_at": "2025-05-04T20:57:51.853Z",
+								"created_at": "2025-05-04T20:57:48.457Z",
+								"version": 1746392271853,
+								"is_deleted": false,
+								"present_at_all_locations": false,
+								"present_at_location_ids": [
+									"LTZNXWZDB0FH9"
+								],
+								"item_variation_vendor_info_data": {
+									"ordinal": 0,
+									"price_money": {
+										"amount": 2380,
+										"currency": "USD"
+									},
+									"item_variation_id": "E2KNBCLOR6NQIQC6JUI5NNC4"
+								}
+							}
+						]
+					},
+					"id": "E2KNBCLOR6NQIQC6JUI5NNC4",
+					"updatedAt": "2025-05-04T20:59:33.909Z",
+					"version": "1746392373909",
+					"isDeleted": false,
+					"catalogV1Ids": [
+						{
+							"catalogV1Id": "9c842800-9cad-41c5-b5bf-e60c782660a1",
+							"locationId": "LTZNXWZDB0FH9"
+						}
+					],
+					"presentAtAllLocations": false,
+					"presentAtLocationIds": [
+						"LTZNXWZDB0FH9"
+					],
+					"inventory": 0
+				}
+			],
+			"productType": "REGULAR",
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2206307520086016"
+				}
+			],
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2206307520086016"
+			},
+			"isAlcoholic": false
+		},
+		"id": "FRT3QHNPP5GAJQNOZDVUOVOV",
+		"updatedAt": "2025-05-04T20:59:33.909Z",
+		"version": "1746392373909",
+		"isDeleted": false,
+		"catalogV1Ids": [
+			{
+				"catalogV1Id": "a85c9d21-a935-4f25-b4a9-d8fce1b0080b",
+				"locationId": "LTZNXWZDB0FH9"
+			}
+		],
+		"presentAtAllLocations": false,
+		"presentAtLocationIds": [
+			"LTZNXWZDB0FH9"
+		]
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2024-12-01T02:15:37.911Z",
+		"itemData": {
+			"name": "Celebrations Special Collection Pikachu V- Union (25th Anniv)",
+			"description": "The Pokémon Celebrations Special Collection Pikachu V-UNION Card Game is a must-have for any fan of the franchise. This special collection features a single powerful Pokémon divided into four cards, which you can assemble from your discard pile with the help of Professor Burnet. Once assembled, Pikachu V-UNION brings four awesome attacks and impressive HP into battle. The collection also includes an oversize card showcasing Pikachu V-UNION as a single illustration, plus a handful of Pokémon TCG: Celebrations booster packs. With a playing time of 10+ minutes and designed for 2 players aged 6 and up, this card game is perfect for a fun new challenge. Can you put all the pieces together and become the ultimate Pokémon master?",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2024-12-01T02:15:37.911Z",
+					"itemVariationData": {
+						"itemId": "RQFP2UHT4FS7B5RIG6KNQJFF",
+						"name": "Regular",
+						"sku": "G914799",
+						"upc": "820650809156",
+						"ordinal": 1,
+						"pricingType": "FIXED_PRICING",
+						"priceMoney": {
+							"amount": "5000",
+							"currency": "USD"
+						},
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true,
+								"soldOut": true
+							}
+						],
+						"trackInventory": true,
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 1821,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"QITWQECPFBWSIHQBEUQWBMUH"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "QITWQECPFBWSIHQBEUQWBMUH",
+								"updated_at": "2024-12-01T02:15:37.847Z",
+								"created_at": "2024-12-01T02:15:37.911Z",
+								"version": 1733019337847,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 1,
+									"price_money": {
+										"amount": 1821,
+										"currency": "USD"
+									},
+									"item_variation_id": "KSS6N6J4PQBKI262OSGSJAXL"
+								}
+							}
+						]
+					},
+					"id": "KSS6N6J4PQBKI262OSGSJAXL",
+					"updatedAt": "2024-12-08T22:09:02.666Z",
+					"version": "1733695742666",
+					"isDeleted": false,
+					"presentAtAllLocations": true,
+					"inventory": 0
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"imageIds": [
+				"5C6A6AYGWSYDIAKRTFGMQIO6"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2240873416884224"
+				}
+			],
+			"descriptionHtml": "The Pokémon Celebrations Special Collection Pikachu V-UNION Card Game is a must-have for any fan of the franchise. This special collection features a single powerful Pokémon divided into four cards, which you can assemble from your discard pile with the help of Professor Burnet. Once assembled, Pikachu V-UNION brings four awesome attacks and impressive HP into battle. The collection also includes an oversize card showcasing Pikachu V-UNION as a single illustration, plus a handful of Pokémon TCG: Celebrations booster packs. With a playing time of 10+ minutes and designed for 2 players aged 6 and up, this card game is perfect for a fun new challenge. Can you put all the pieces together and become the ultimate Pokémon master?",
+			"descriptionPlaintext": "The Pokémon Celebrations Special Collection Pikachu V-UNION Card Game is a must-have for any fan of the franchise. This special collection features a single powerful Pokémon divided into four cards, which you can assemble from your discard pile with the help of Professor Burnet. Once assembled, Pikachu V-UNION brings four awesome attacks and impressive HP into battle. The collection also includes an oversize card showcasing Pikachu V-UNION as a single illustration, plus a handful of Pokémon TCG: Celebrations booster packs. With a playing time of 10+ minutes and designed for 2 players aged 6 and up, this card game is perfect for a fun new challenge. Can you put all the pieces together and become the ultimate Pokémon master?",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2240873416884224"
+			}
+		},
+		"id": "RQFP2UHT4FS7B5RIG6KNQJFF",
+		"updatedAt": "2024-12-08T23:18:27.872Z",
+		"version": "1733699907872",
+		"isDeleted": false,
+		"presentAtAllLocations": true
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2024-11-30T23:10:38.34Z",
+		"itemData": {
+			"name": "CoroCoro Comic February Issue 2022 with Pokemon TCG Pikachu VMAX 265/S-P Promo",
+			"description": "CoroCoro Comic February Issue 2022 with Pokemon TCG Pikachu VMAX 265/S-P Promo (DIGITAL MAGAZINE)",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2024-11-30T23:10:38.34Z",
+					"itemVariationData": {
+						"itemId": "PTPUH7BV45S7STSJFPVJ3KRR",
+						"name": "Regular",
+						"sku": "E297190",
+						"upc": "4910100390221",
+						"ordinal": 0,
+						"pricingType": "FIXED_PRICING",
+						"priceMoney": {
+							"amount": "3000",
+							"currency": "USD"
+						},
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true
+							}
+						],
+						"trackInventory": true,
+						"price_description": "",
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 1000,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"FQSV4MZGTMEQIJTPZ5O4SQ53"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "FQSV4MZGTMEQIJTPZ5O4SQ53",
+								"updated_at": "2024-12-12T03:15:05.197Z",
+								"created_at": "2024-11-30T23:10:38.34Z",
+								"version": 1733973305197,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 0,
+									"price_money": {
+										"amount": 1000,
+										"currency": "USD"
+									},
+									"item_variation_id": "CGL7RAQTGFEV4PHQYOAOUEM3"
+								}
+							}
+						]
+					},
+					"id": "CGL7RAQTGFEV4PHQYOAOUEM3",
+					"updatedAt": "2024-12-12T03:15:05.197Z",
+					"version": "1733973305197",
+					"isDeleted": false,
+					"presentAtAllLocations": true,
+					"inventory": 7
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"imageIds": [
+				"Y57AHRFXMD765M47AHC4QNRF"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2241904209035264"
+				}
+			],
+			"descriptionHtml": "<p>CoroCoro Comic February Issue 2022 with Pokemon TCG Pikachu VMAX 265/S-P Promo (DIGITAL MAGAZINE) </p>",
+			"descriptionPlaintext": "CoroCoro Comic February Issue 2022 with Pokemon TCG Pikachu VMAX 265/S-P Promo (DIGITAL MAGAZINE)",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2241904209035264"
+			}
+		},
+		"id": "PTPUH7BV45S7STSJFPVJ3KRR",
+		"updatedAt": "2024-12-12T03:15:05.197Z",
+		"version": "1733973305197",
+		"isDeleted": false,
+		"presentAtAllLocations": true
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2025-05-04T01:04:02.231Z",
+		"itemData": {
+			"name": "Dragonair - 181/165 - SV: Scarlet & Violet 151 (MEW)",
+			"description": "Product Details\nCard Number / Rarity:181/165 / Illustration Rare\nCard Type / HP / Stage:Dragon / 100 / Stage 1\nAttack 1:[W] Beat (20)\nAttack 2:[WL] Aqua Slash (90)\nDuring your next turn, this Pokémon can't attack.\nWeakness / Resistance / Retreat Cost:None / None / 2\nArtist:rika",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-05-04T01:04:02.231Z",
+					"itemVariationData": {
+						"itemId": "NOYEQMXKVL4RVDZRE7ZQCT3D",
+						"name": "Regular",
+						"sku": "C755423",
+						"ordinal": 1,
+						"pricingType": "VARIABLE_PRICING",
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true
+							}
+						],
+						"trackInventory": true,
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 1500,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"TSFRCMOPGYDDOLGTP653WKFJ"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "TSFRCMOPGYDDOLGTP653WKFJ",
+								"updated_at": "2025-05-04T01:04:02.166Z",
+								"created_at": "2025-05-04T01:04:02.231Z",
+								"version": 1746320642166,
+								"is_deleted": false,
+								"present_at_all_locations": false,
+								"present_at_location_ids": [
+									"LTZNXWZDB0FH9"
+								],
+								"item_variation_vendor_info_data": {
+									"ordinal": 1,
+									"price_money": {
+										"amount": 1500,
+										"currency": "USD"
+									},
+									"item_variation_id": "CT745T23HA6TGK27JROMOVJ3",
+									"vendor_id": "OHRHJPSFD2J4A5ZC"
+								}
+							}
+						]
+					},
+					"id": "CT745T23HA6TGK27JROMOVJ3",
+					"updatedAt": "2025-05-04T01:04:03.799Z",
+					"version": "1746320643799",
+					"isDeleted": false,
+					"presentAtAllLocations": false,
+					"presentAtLocationIds": [
+						"LTZNXWZDB0FH9"
+					],
+					"inventory": 1
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": false,
+			"ecom_visibility": "UNAVAILABLE",
+			"imageIds": [
+				"DP4J7Z6EMIEENSUE44LD6U4H"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2208231665434624"
+				}
+			],
+			"descriptionHtml": "<p><strong>Product Details</strong></p><ul><li><strong>Card Number / Rarity:</strong>181/165 / Illustration Rare</li><li><strong>Card Type / HP / Stage:</strong>Dragon / 100 / Stage 1</li><li><strong>Attack 1:</strong>[W] Beat (20)</li><li><strong>Attack 2:</strong>[WL] Aqua Slash (90)</li><li>During your next turn, this Pokémon can&#39;t attack.</li><li><strong>Weakness / Resistance / Retreat Cost:</strong>None / None / 2</li><li><strong>Artist:</strong><a href=\"https://www.tcgplayer.com/search/all/product?q=rika\" rel=\"nofollow\">rika</a></li></ul><p><br/></p>",
+			"descriptionPlaintext": "Product Details\nCard Number / Rarity:181/165 / Illustration Rare\nCard Type / HP / Stage:Dragon / 100 / Stage 1\nAttack 1:[W] Beat (20)\nAttack 2:[WL] Aqua Slash (90)\nDuring your next turn, this Pokémon can't attack.\nWeakness / Resistance / Retreat Cost:None / None / 2\nArtist:rika",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2208231665434624"
+			},
+			"isAlcoholic": false
+		},
+		"id": "NOYEQMXKVL4RVDZRE7ZQCT3D",
+		"updatedAt": "2025-05-04T01:04:53.424Z",
+		"version": "1746320693424",
+		"isDeleted": false,
+		"presentAtAllLocations": false,
+		"presentAtLocationIds": [
+			"LTZNXWZDB0FH9"
+		]
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2025-04-23T23:38:39.843Z",
+		"itemData": {
+			"name": "Flareon Vmax Premium Collection Box",
+			"description": "Product Details\nCard Text:Each Pokémon TCG: Eevee Evolution VMAX Premium Collection includes:\n• 1 etched card featuring Vaporeon VMAX, Jolteon VMAX, or Flareon VMAX\n• 1 full-art card featuring Vaporeon V, Jolteon V, or Flareon V\n• 1 etched oversize card featuring Vaporeon VMAX, Jolteon VMAX, or Flareon VMAX, suitable for display\n• 1 colorful pin featuring Vaporeon, Jolteon, or Flareon\n• 6 Pokémon TCG booster packs\n• 1 large metallic coin\n• A code card for the Pokémon Trading Card Game Online\nTCGplayer Tip:Featuring an oversized Flareon VMAX that's perfect to display on your desk or walls, this premium collection is the perfect fit for any trainer that loves Flareon. Even better, it includes the cozy, alternate-art variant of Flareon V that's perfect for eeveelution collectors.",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-04-23T23:38:39.843Z",
+					"itemVariationData": {
+						"itemId": "7757JP27WNADFA5CLC7KOZHX",
+						"name": "Regular",
+						"sku": "520688J",
+						"ordinal": 0,
+						"pricingType": "FIXED_PRICING",
+						"priceMoney": {
+							"amount": "20500",
+							"currency": "USD"
+						},
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true,
+								"soldOut": true
+							}
+						],
+						"trackInventory": true,
+						"price_description": "",
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 14336,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"DRGTMMP4CL5LRFOCKGP3U2GY"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "DRGTMMP4CL5LRFOCKGP3U2GY",
+								"updated_at": "2025-05-07T18:59:56.72Z",
+								"created_at": "2025-04-23T23:38:39.843Z",
+								"version": 1746644396720,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 0,
+									"price_money": {
+										"amount": 14336,
+										"currency": "USD"
+									},
+									"item_variation_id": "XARENCPVBR4CJL77JXPITMU6",
+									"vendor_id": "IYPGS656K6XYYPED"
+								}
+							}
+						]
+					},
+					"id": "XARENCPVBR4CJL77JXPITMU6",
+					"updatedAt": "2025-05-07T18:59:56.72Z",
+					"version": "1746644396720",
+					"isDeleted": false,
+					"presentAtAllLocations": true,
+					"inventory": 0
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": true,
+			"ecom_visibility": "VISIBLE",
+			"imageIds": [
+				"ERW5O2RFCE4UAW6IMDMQLX2A"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2217027758456832"
+				}
+			],
+			"descriptionHtml": "<p><strong>Product Details</strong></p><ul><li><strong>Card Text:</strong>Each Pokémon TCG: Eevee Evolution VMAX Premium Collection includes:</li><li>• 1 etched card featuring Vaporeon VMAX, Jolteon VMAX, or Flareon VMAX</li><li>• 1 full-art card featuring Vaporeon V, Jolteon V, or Flareon V</li><li>• 1 etched oversize card featuring Vaporeon VMAX, Jolteon VMAX, or Flareon VMAX, suitable for display</li><li>• 1 colorful pin featuring Vaporeon, Jolteon, or Flareon</li><li>• 6 Pokémon TCG booster packs</li><li>• 1 large metallic coin</li><li>• A code card for the Pokémon Trading Card Game Online</li><li><strong>TCGplayer Tip:</strong>Featuring an oversized Flareon VMAX that&#39;s perfect to display on your desk or walls, this premium collection is the perfect fit for any trainer that loves Flareon. Even better, it includes the cozy, alternate-art variant of Flareon V that&#39;s perfect for eeveelution collectors.</li></ul><p><br/></p>",
+			"descriptionPlaintext": "Product Details\nCard Text:Each Pokémon TCG: Eevee Evolution VMAX Premium Collection includes:\n• 1 etched card featuring Vaporeon VMAX, Jolteon VMAX, or Flareon VMAX\n• 1 full-art card featuring Vaporeon V, Jolteon V, or Flareon V\n• 1 etched oversize card featuring Vaporeon VMAX, Jolteon VMAX, or Flareon VMAX, suitable for display\n• 1 colorful pin featuring Vaporeon, Jolteon, or Flareon\n• 6 Pokémon TCG booster packs\n• 1 large metallic coin\n• A code card for the Pokémon Trading Card Game Online\nTCGplayer Tip:Featuring an oversized Flareon VMAX that's perfect to display on your desk or walls, this premium collection is the perfect fit for any trainer that loves Flareon. Even better, it includes the cozy, alternate-art variant of Flareon V that's perfect for eeveelution collectors.",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2217027758456832"
+			},
+			"isAlcoholic": false
+		},
+		"id": "7757JP27WNADFA5CLC7KOZHX",
+		"updatedAt": "2025-05-07T18:59:56.72Z",
+		"version": "1746644396720",
+		"isDeleted": false,
+		"presentAtAllLocations": true
+	},
+	{
+		"type": "ITEM",
+		"created_at": "2025-05-08T06:11:56.344Z",
+		"itemData": {
+			"name": "Fletchinder - 199/193 - SV02: Paldea Evolved (PAL)",
+			"description": "Product Details\nCard Number / Rarity:199/193 / Illustration Rare\nCard Type / HP / Stage:Fire / 80 / Stage 1\nAttack 1:[R] Heat Dive (50)\nThis Pokémon also does 10 damage to itself.\nWeakness / Resistance / Retreat Cost:Lx2 / F-30 / 1",
+			"isTaxable": true,
+			"taxIds": [
+				"2ZDQWBKSKCFEY4GHTL34ZV7V"
+			],
+			"variations": [
+				{
+					"type": "ITEM_VARIATION",
+					"created_at": "2025-05-08T06:11:56.344Z",
+					"itemVariationData": {
+						"itemId": "O56TDT2RM2PBN3KBU2P2KDEA",
+						"name": "Regular",
+						"sku": "827499F",
+						"ordinal": 1,
+						"pricingType": "VARIABLE_PRICING",
+						"locationOverrides": [
+							{
+								"locationId": "LTZNXWZDB0FH9",
+								"trackInventory": true
+							}
+						],
+						"trackInventory": true,
+						"sellable": true,
+						"stockable": true,
+						"default_unit_cost": {
+							"amount": 455,
+							"currency": "USD"
+						},
+						"channels": [
+							"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+						],
+						"item_variation_vendor_info_ids": [
+							"YW2HHRBVKIY4A4ZYO7KUUICO"
+						],
+						"item_variation_vendor_infos": [
+							{
+								"type": "ITEM_VARIATION_VENDOR_INFO",
+								"id": "YW2HHRBVKIY4A4ZYO7KUUICO",
+								"updated_at": "2025-05-08T06:11:56.29Z",
+								"created_at": "2025-05-08T06:11:56.344Z",
+								"version": 1746684716290,
+								"is_deleted": false,
+								"present_at_all_locations": true,
+								"item_variation_vendor_info_data": {
+									"ordinal": 1,
+									"price_money": {
+										"amount": 455,
+										"currency": "USD"
+									},
+									"item_variation_id": "IYVMBQ6LJJWWX2WG6X5X6FGG",
+									"vendor_id": "OHRHJPSFD2J4A5ZC"
+								}
+							}
+						]
+					},
+					"id": "IYVMBQ6LJJWWX2WG6X5X6FGG",
+					"updatedAt": "2025-05-08T06:11:57.921Z",
+					"version": "1746684717921",
+					"isDeleted": false,
+					"presentAtAllLocations": true,
+					"inventory": 2
+				}
+			],
+			"productType": "REGULAR",
+			"skipModifierScreen": false,
+			"ecom_available": false,
+			"ecom_visibility": "UNAVAILABLE",
+			"imageIds": [
+				"7FUAP77TVTNGEMAVCSTVT4OJ"
+			],
+			"categories": [
+				{
+					"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+					"ordinal": "-2200122767179776"
+				}
+			],
+			"descriptionHtml": "<p><strong>Product Details</strong></p><ul><li><strong>Card Number / Rarity:</strong>199/193 / Illustration Rare</li><li><strong>Card Type / HP / Stage:</strong>Fire / 80 / Stage 1</li><li><strong>Attack 1:</strong>[R] Heat Dive (50)</li><li>This Pokémon also does 10 damage to itself.</li><li><strong>Weakness / Resistance / Retreat Cost:</strong>Lx2 / F-30 / 1</li></ul><p><br/></p>",
+			"descriptionPlaintext": "Product Details\nCard Number / Rarity:199/193 / Illustration Rare\nCard Type / HP / Stage:Fire / 80 / Stage 1\nAttack 1:[R] Heat Dive (50)\nThis Pokémon also does 10 damage to itself.\nWeakness / Resistance / Retreat Cost:Lx2 / F-30 / 1",
+			"channels": [
+				"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+			],
+			"isArchived": false,
+			"reportingCategory": {
+				"id": "JLGE7O4IOUUW36IB6ZJYWKUU",
+				"ordinal": "-2200122767179776"
+			},
+			"isAlcoholic": false
+		},
+		"id": "O56TDT2RM2PBN3KBU2P2KDEA",
+		"updatedAt": "2025-05-09T21:07:22.455Z",
+		"version": "1746824842455",
+		"isDeleted": false,
+		"presentAtAllLocations": true
+	}
+]

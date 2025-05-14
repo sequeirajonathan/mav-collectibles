@@ -64,3 +64,10 @@ export async function fetchProduct(id: string): Promise<NormalizedProductRespons
   }
   return response.json();
 }
+
+export async function fetchInventoryCounts(variationIds: string[]): Promise<Record<string, number>> {
+  const { data } = await axiosClient.post("/inventory", {
+    variationIds,
+  });
+  return data.inventory;
+}

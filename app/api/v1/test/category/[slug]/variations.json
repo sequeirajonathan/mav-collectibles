@@ -1,0 +1,657 @@
+[
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-02-15T18:36:28.101Z",
+			"itemVariationData": {
+				"itemId": "I4PBTDVO5OL5XCX6ZKAEWCCS",
+				"name": "Regular",
+				"sku": "M969989",
+				"ordinal": 0,
+				"pricingType": "FIXED_PRICING",
+				"priceMoney": {
+					"amount": "1400",
+					"currency": "USD"
+				},
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true,
+						"soldOut": true
+					}
+				],
+				"trackInventory": true,
+				"price_description": "",
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 300,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"Z3GLCGBOSHEHH7B5SAWEVEHB",
+					"XBBGBBXER7AE4YBMVAELVOWH"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "Z3GLCGBOSHEHH7B5SAWEVEHB",
+						"updated_at": "2025-05-03T21:19:24.217Z",
+						"created_at": "2025-04-06T23:48:50.52Z",
+						"version": 1746307164217,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 0,
+							"price_money": {
+								"amount": 300,
+								"currency": "USD"
+							},
+							"item_variation_id": "4IFVE5DPEXJP3RDSD6IUBDKD",
+							"vendor_id": "SXBAMVPVSH2V7BYQ"
+						}
+					},
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "XBBGBBXER7AE4YBMVAELVOWH",
+						"updated_at": "2025-05-03T21:19:24.217Z",
+						"created_at": "2025-02-15T18:36:28.101Z",
+						"version": 1746307164217,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 1,
+							"price_money": {
+								"amount": 757,
+								"currency": "USD"
+							},
+							"item_variation_id": "4IFVE5DPEXJP3RDSD6IUBDKD",
+							"vendor_id": "LDAFKF5KUJ5DOXP3"
+						}
+					}
+				]
+			},
+			"id": "4IFVE5DPEXJP3RDSD6IUBDKD",
+			"updatedAt": "2025-05-03T22:58:38.215Z",
+			"version": "1746313118215",
+			"isDeleted": false,
+			"presentAtAllLocations": true
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-05-06T17:43:07.385Z",
+			"itemVariationData": {
+				"itemId": "LYKYZ6ZWKTKSPYM5YM2WTTQV",
+				"name": "Regular",
+				"sku": "2481360",
+				"ordinal": 0,
+				"pricingType": "FIXED_PRICING",
+				"priceMoney": {
+					"amount": "1500",
+					"currency": "USD"
+				},
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true,
+						"soldOut": true
+					}
+				],
+				"price_description": "",
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 750,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"HGSPSRE4HNSKVQUGL3UN3NS4"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "HGSPSRE4HNSKVQUGL3UN3NS4",
+						"updated_at": "2025-05-06T17:43:11.873Z",
+						"created_at": "2025-05-06T17:43:07.385Z",
+						"version": 1746553391873,
+						"is_deleted": false,
+						"present_at_all_locations": false,
+						"present_at_location_ids": [
+							"LTZNXWZDB0FH9"
+						],
+						"item_variation_vendor_info_data": {
+							"ordinal": 0,
+							"price_money": {
+								"amount": 750,
+								"currency": "USD"
+							},
+							"item_variation_id": "VH3WGJS43M6KV2JIQRP67QNU"
+						}
+					}
+				]
+			},
+			"id": "VH3WGJS43M6KV2JIQRP67QNU",
+			"updatedAt": "2025-05-06T17:43:39.839Z",
+			"version": "1746553419839",
+			"isDeleted": false,
+			"catalogV1Ids": [
+				{
+					"catalogV1Id": "3d5ba449-fb80-42d8-838c-5a95dc53db9e",
+					"locationId": "LTZNXWZDB0FH9"
+				}
+			],
+			"presentAtAllLocations": false,
+			"presentAtLocationIds": [
+				"LTZNXWZDB0FH9"
+			]
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2024-12-01T02:22:18.612Z",
+			"itemVariationData": {
+				"itemId": "JF4ITDF3MWKPQ7D2WKS6ENGH",
+				"name": "Regular",
+				"sku": "136722M",
+				"upc": "820650856082",
+				"ordinal": 1,
+				"pricingType": "FIXED_PRICING",
+				"priceMoney": {
+					"amount": "5000",
+					"currency": "USD"
+				},
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true
+					}
+				],
+				"trackInventory": true,
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 2500,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"IKS25W6MVAEC4ZPJJKEJYZ7R"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "IKS25W6MVAEC4ZPJJKEJYZ7R",
+						"updated_at": "2024-12-01T02:22:18.573Z",
+						"created_at": "2024-12-01T02:22:18.612Z",
+						"version": 1733019738573,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 1,
+							"price_money": {
+								"amount": 2500,
+								"currency": "USD"
+							},
+							"item_variation_id": "YA3SMPPAJHER5NBZOF7NXBWR"
+						}
+					}
+				]
+			},
+			"id": "YA3SMPPAJHER5NBZOF7NXBWR",
+			"updatedAt": "2024-12-08T22:09:12.272Z",
+			"version": "1733695752272",
+			"isDeleted": false,
+			"presentAtAllLocations": true
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-05-03T23:30:23.842Z",
+			"itemVariationData": {
+				"itemId": "MBM76IUSRMQWE6OJMOBIWQON",
+				"name": "Regular",
+				"sku": "4664798",
+				"ordinal": 1,
+				"pricingType": "VARIABLE_PRICING",
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true
+					}
+				],
+				"trackInventory": true,
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 25,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"FBLBIMNMNKMCB4BWIG55JXRW"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "FBLBIMNMNKMCB4BWIG55JXRW",
+						"updated_at": "2025-05-03T23:30:23.759Z",
+						"created_at": "2025-05-03T23:30:23.842Z",
+						"version": 1746315023759,
+						"is_deleted": false,
+						"present_at_all_locations": false,
+						"present_at_location_ids": [
+							"LTZNXWZDB0FH9"
+						],
+						"item_variation_vendor_info_data": {
+							"ordinal": 1,
+							"price_money": {
+								"amount": 25,
+								"currency": "USD"
+							},
+							"item_variation_id": "WMGL37ZMEUZTGIOVLSHCWSQ3",
+							"vendor_id": "OHRHJPSFD2J4A5ZC"
+						}
+					}
+				]
+			},
+			"id": "WMGL37ZMEUZTGIOVLSHCWSQ3",
+			"updatedAt": "2025-05-03T23:30:26.115Z",
+			"version": "1746315026115",
+			"isDeleted": false,
+			"presentAtAllLocations": false,
+			"presentAtLocationIds": [
+				"LTZNXWZDB0FH9"
+			]
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-05-04T20:57:48.457Z",
+			"itemVariationData": {
+				"itemId": "FRT3QHNPP5GAJQNOZDVUOVOV",
+				"name": "Regular",
+				"sku": "5930900",
+				"ordinal": 0,
+				"pricingType": "VARIABLE_PRICING",
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true,
+						"soldOut": true
+					}
+				],
+				"price_description": "",
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 2380,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"SE4RRPT3TP6RSLQLRE3YTIU5"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "SE4RRPT3TP6RSLQLRE3YTIU5",
+						"updated_at": "2025-05-04T20:57:51.853Z",
+						"created_at": "2025-05-04T20:57:48.457Z",
+						"version": 1746392271853,
+						"is_deleted": false,
+						"present_at_all_locations": false,
+						"present_at_location_ids": [
+							"LTZNXWZDB0FH9"
+						],
+						"item_variation_vendor_info_data": {
+							"ordinal": 0,
+							"price_money": {
+								"amount": 2380,
+								"currency": "USD"
+							},
+							"item_variation_id": "E2KNBCLOR6NQIQC6JUI5NNC4"
+						}
+					}
+				]
+			},
+			"id": "E2KNBCLOR6NQIQC6JUI5NNC4",
+			"updatedAt": "2025-05-04T20:59:33.909Z",
+			"version": "1746392373909",
+			"isDeleted": false,
+			"catalogV1Ids": [
+				{
+					"catalogV1Id": "9c842800-9cad-41c5-b5bf-e60c782660a1",
+					"locationId": "LTZNXWZDB0FH9"
+				}
+			],
+			"presentAtAllLocations": false,
+			"presentAtLocationIds": [
+				"LTZNXWZDB0FH9"
+			]
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2024-12-01T02:15:37.911Z",
+			"itemVariationData": {
+				"itemId": "RQFP2UHT4FS7B5RIG6KNQJFF",
+				"name": "Regular",
+				"sku": "G914799",
+				"upc": "820650809156",
+				"ordinal": 1,
+				"pricingType": "FIXED_PRICING",
+				"priceMoney": {
+					"amount": "5000",
+					"currency": "USD"
+				},
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true,
+						"soldOut": true
+					}
+				],
+				"trackInventory": true,
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 1821,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"QITWQECPFBWSIHQBEUQWBMUH"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "QITWQECPFBWSIHQBEUQWBMUH",
+						"updated_at": "2024-12-01T02:15:37.847Z",
+						"created_at": "2024-12-01T02:15:37.911Z",
+						"version": 1733019337847,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 1,
+							"price_money": {
+								"amount": 1821,
+								"currency": "USD"
+							},
+							"item_variation_id": "KSS6N6J4PQBKI262OSGSJAXL"
+						}
+					}
+				]
+			},
+			"id": "KSS6N6J4PQBKI262OSGSJAXL",
+			"updatedAt": "2024-12-08T22:09:02.666Z",
+			"version": "1733695742666",
+			"isDeleted": false,
+			"presentAtAllLocations": true
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2024-11-30T23:10:38.34Z",
+			"itemVariationData": {
+				"itemId": "PTPUH7BV45S7STSJFPVJ3KRR",
+				"name": "Regular",
+				"sku": "E297190",
+				"upc": "4910100390221",
+				"ordinal": 0,
+				"pricingType": "FIXED_PRICING",
+				"priceMoney": {
+					"amount": "3000",
+					"currency": "USD"
+				},
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true
+					}
+				],
+				"trackInventory": true,
+				"price_description": "",
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 1000,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"FQSV4MZGTMEQIJTPZ5O4SQ53"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "FQSV4MZGTMEQIJTPZ5O4SQ53",
+						"updated_at": "2024-12-12T03:15:05.197Z",
+						"created_at": "2024-11-30T23:10:38.34Z",
+						"version": 1733973305197,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 0,
+							"price_money": {
+								"amount": 1000,
+								"currency": "USD"
+							},
+							"item_variation_id": "CGL7RAQTGFEV4PHQYOAOUEM3"
+						}
+					}
+				]
+			},
+			"id": "CGL7RAQTGFEV4PHQYOAOUEM3",
+			"updatedAt": "2024-12-12T03:15:05.197Z",
+			"version": "1733973305197",
+			"isDeleted": false,
+			"presentAtAllLocations": true
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-05-04T01:04:02.231Z",
+			"itemVariationData": {
+				"itemId": "NOYEQMXKVL4RVDZRE7ZQCT3D",
+				"name": "Regular",
+				"sku": "C755423",
+				"ordinal": 1,
+				"pricingType": "VARIABLE_PRICING",
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true
+					}
+				],
+				"trackInventory": true,
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 1500,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"TSFRCMOPGYDDOLGTP653WKFJ"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "TSFRCMOPGYDDOLGTP653WKFJ",
+						"updated_at": "2025-05-04T01:04:02.166Z",
+						"created_at": "2025-05-04T01:04:02.231Z",
+						"version": 1746320642166,
+						"is_deleted": false,
+						"present_at_all_locations": false,
+						"present_at_location_ids": [
+							"LTZNXWZDB0FH9"
+						],
+						"item_variation_vendor_info_data": {
+							"ordinal": 1,
+							"price_money": {
+								"amount": 1500,
+								"currency": "USD"
+							},
+							"item_variation_id": "CT745T23HA6TGK27JROMOVJ3",
+							"vendor_id": "OHRHJPSFD2J4A5ZC"
+						}
+					}
+				]
+			},
+			"id": "CT745T23HA6TGK27JROMOVJ3",
+			"updatedAt": "2025-05-04T01:04:03.799Z",
+			"version": "1746320643799",
+			"isDeleted": false,
+			"presentAtAllLocations": false,
+			"presentAtLocationIds": [
+				"LTZNXWZDB0FH9"
+			]
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-04-23T23:38:39.843Z",
+			"itemVariationData": {
+				"itemId": "7757JP27WNADFA5CLC7KOZHX",
+				"name": "Regular",
+				"sku": "520688J",
+				"ordinal": 0,
+				"pricingType": "FIXED_PRICING",
+				"priceMoney": {
+					"amount": "20500",
+					"currency": "USD"
+				},
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true,
+						"soldOut": true
+					}
+				],
+				"trackInventory": true,
+				"price_description": "",
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 14336,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"DRGTMMP4CL5LRFOCKGP3U2GY"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "DRGTMMP4CL5LRFOCKGP3U2GY",
+						"updated_at": "2025-05-07T18:59:56.72Z",
+						"created_at": "2025-04-23T23:38:39.843Z",
+						"version": 1746644396720,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 0,
+							"price_money": {
+								"amount": 14336,
+								"currency": "USD"
+							},
+							"item_variation_id": "XARENCPVBR4CJL77JXPITMU6",
+							"vendor_id": "IYPGS656K6XYYPED"
+						}
+					}
+				]
+			},
+			"id": "XARENCPVBR4CJL77JXPITMU6",
+			"updatedAt": "2025-05-07T18:59:56.72Z",
+			"version": "1746644396720",
+			"isDeleted": false,
+			"presentAtAllLocations": true
+		}
+	],
+	[
+		{
+			"type": "ITEM_VARIATION",
+			"created_at": "2025-05-08T06:11:56.344Z",
+			"itemVariationData": {
+				"itemId": "O56TDT2RM2PBN3KBU2P2KDEA",
+				"name": "Regular",
+				"sku": "827499F",
+				"ordinal": 1,
+				"pricingType": "VARIABLE_PRICING",
+				"locationOverrides": [
+					{
+						"locationId": "LTZNXWZDB0FH9",
+						"trackInventory": true
+					}
+				],
+				"trackInventory": true,
+				"sellable": true,
+				"stockable": true,
+				"default_unit_cost": {
+					"amount": 455,
+					"currency": "USD"
+				},
+				"channels": [
+					"CH_9ENQpj1SLv4wItl9qSS90HZoPEaJGtyZahpfYRlQuYC"
+				],
+				"item_variation_vendor_info_ids": [
+					"YW2HHRBVKIY4A4ZYO7KUUICO"
+				],
+				"item_variation_vendor_infos": [
+					{
+						"type": "ITEM_VARIATION_VENDOR_INFO",
+						"id": "YW2HHRBVKIY4A4ZYO7KUUICO",
+						"updated_at": "2025-05-08T06:11:56.29Z",
+						"created_at": "2025-05-08T06:11:56.344Z",
+						"version": 1746684716290,
+						"is_deleted": false,
+						"present_at_all_locations": true,
+						"item_variation_vendor_info_data": {
+							"ordinal": 1,
+							"price_money": {
+								"amount": 455,
+								"currency": "USD"
+							},
+							"item_variation_id": "IYVMBQ6LJJWWX2WG6X5X6FGG",
+							"vendor_id": "OHRHJPSFD2J4A5ZC"
+						}
+					}
+				]
+			},
+			"id": "IYVMBQ6LJJWWX2WG6X5X6FGG",
+			"updatedAt": "2025-05-08T06:11:57.921Z",
+			"version": "1746684717921",
+			"isDeleted": false,
+			"presentAtAllLocations": true
+		}
+	]
+]

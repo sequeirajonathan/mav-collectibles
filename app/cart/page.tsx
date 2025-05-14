@@ -99,7 +99,7 @@ export default function CartPage() {
             </div>
             <div className="flex-grow">
               <h3 className="text-lg font-medium text-white">{item.name}</h3>
-              <p className="text-[#E6B325] font-semibold">${item.price.toFixed(2)}</p>
+              <p className="text-[#E6B325] font-semibold">${(item.price / 100).toFixed(2)}</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -177,8 +177,8 @@ export default function CartPage() {
               <h2 className="text-xl font-semibold text-white mb-4">Cart Summary</h2>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-gray-300">
-                  <span>Items ({totalItems})</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>Items ({(totalItems / 100).toFixed(2)})</span>
+                  <span>${(totalPrice / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
@@ -187,7 +187,7 @@ export default function CartPage() {
                 <div className="border-t border-gray-800 pt-2 mt-2">
                   <div className="flex justify-between text-white font-semibold">
                     <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>${(totalPrice / 100).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -31,17 +31,24 @@ export async function GET(
       }
     }
 
-    // Get inventory counts
-    const inventoryResponse = await client.inventory.get({
-      catalogObjectId: id,
-      locationIds: "LTZNXWZDB0FH9",
+    // Get all variation IDs from the item
+    const variationIds = catalogResponse.object?.type === 'ITEM' 
+      ? (catalogResponse.object.itemData?.variations ?? [])
+          .map(v => v.id)
+          .filter((id): id is string => id !== undefined)
+      : [id];
+
+    // Get inventory counts for all variations
+    const inventoryResponse = await client.inventory.batchGetCounts({
+      catalogObjectIds: variationIds,
+      locationIds: ["LTZNXWZDB0FH9"],
     });
 
     // Normalize the response
     const normalizedProduct = normalizeProductResponse(
       catalogResponse,
       {
-        counts: inventoryResponse.data,
+        counts: inventoryResponse.data ?? [],
       },
       "LTZNXWZDB0FH9"
     );

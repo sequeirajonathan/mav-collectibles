@@ -6,6 +6,7 @@ import { ProductCard } from "./ProductCard";
 import { SkeletonProductCard } from "./SkeletonProductCard";
 import { useInfiniteCatalogItemsBySlug } from "@hooks/useSquareServices";
 import type { NormalizedCatalogItem } from "@interfaces";
+import { toast } from "react-hot-toast";
 
 // Enhanced loading indicator component
 const LoadingSpinner = () => (
@@ -29,6 +30,9 @@ export function InfiniteCardGrid({
   sort = "name_asc",
 }: InfiniteCardGridProps) {
   const [mounted, setMounted] = useState(false);
+  const [previousItemCount, setPreviousItemCount] = useState(0);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
   useEffect(() => setMounted(true), []);
 
   const {
@@ -41,6 +45,25 @@ export function InfiniteCardGrid({
 
   const items: NormalizedCatalogItem[] =
     data?.pages.flatMap((p) => p.items) ?? [];
+
+  // Show toast notification when items are added in the background
+  useEffect(() => {
+    if (items.length > previousItemCount) {
+      // Don't show toast on initial load
+      if (!isInitialLoad) {
+        toast.success("More items available to view!", {
+          duration: 3000,
+          position: "top-right",
+          style: {
+            background: "#E6B325",
+            color: "#000000",
+          },
+        });
+      }
+      setIsInitialLoad(false);
+    }
+    setPreviousItemCount(items.length);
+  }, [items.length, previousItemCount, isInitialLoad]);
 
   if (!mounted || isLoading) {
     // initial loading: show 8 skeleton cards with a fade-in effect
@@ -75,7 +98,7 @@ export function InfiniteCardGrid({
       className="animate-fade-in"
     >
       <div className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {items.map((item) => (
+        {items.filter(item => item && item.variationId).map((item) => (
           <ProductCard
             key={item.variationId}
             product={item}

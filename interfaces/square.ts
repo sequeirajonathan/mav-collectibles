@@ -5,6 +5,7 @@ export type SortOption = "price_asc" | "price_desc" | "name_asc" | "name_desc";
 export type StockOption = "IN_STOCK" | "SOLD_OUT" | "all";
 export type SearchCatalogObjectsResponse = Square.SearchCatalogObjectsResponse;
 export type CatalogObject = Square.CatalogObject;
+export type CatalogObjectItem = Square.CatalogObjectItem;
 export type GetCatalogObjectResponse = Square.GetCatalogObjectResponse;
 export type InventoryCount = Square.InventoryCount;
 export interface NormalizedCatalogItem {
@@ -36,11 +37,12 @@ export interface NormalizedCatalogItem {
   };
   categoryName?: string;
   group?: string;
+  inventoryCount?: number;
 }
 
 export interface NormalizedCatalogResponse {
   items: NormalizedCatalogItem[];
-  cursor: string | null;
+  cursor?: string;
 }
 
 export type ItemVariationObject = Square.CatalogObject & {

@@ -19,6 +19,15 @@ interface ProductCardProps {
   };
 }
 
+// Helper function to determine max quick add quantity based on stock
+const getMaxQuickAddQuantity = (stock: number): number => {
+  if (stock <= 5) return 1;
+  if (stock <= 10) return 1;
+  if (stock <= 20) return 3;
+  if (stock <= 50) return 4;
+  return 10; // Default max for stock > 50
+};
+
 export function ProductCard({
   product,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw",
@@ -26,17 +35,30 @@ export function ProductCard({
 }: ProductCardProps) {
   const { addItem } = useCart();
   const [mounted, setMounted] = useState(false);
+  const [quickAddCount, setQuickAddCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => setMounted(true), []);
 
-  console.log(product);
-
   const imageUrl = product.imageUrls?.[0] || "/images/placeholder.png";
+  const stockCount = product.inventoryCount ?? 0;
 
-  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (isLoading) return;
+
     try {
+      setIsLoading(true);
+
+      // Check if we've reached the quick add limit
+      const maxQuickAdd = getMaxQuickAddQuantity(stockCount);
+      if (quickAddCount >= maxQuickAdd) {
+        toast.error(`Maximum quick add limit reached (${maxQuickAdd})`);
+        return;
+      }
+
       const itemToAdd = {
         id: product.variationId,
         name: product.name,
@@ -45,6 +67,7 @@ export function ProductCard({
       };
 
       addItem(itemToAdd);
+      setQuickAddCount(prev => prev + 1);
 
       toast.success(`${product.name} added to cart!`, {
         position: "top-right",
@@ -52,7 +75,19 @@ export function ProductCard({
       });
     } catch {
       toast.error("Failed to add item to cart");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const renderStockBadge = () => {
+    if (!stockCount || stockCount > 5) return null;
+    
+    return (
+      <div className="absolute top-2 right-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+        Only {stockCount} left
+      </div>
+    );
   };
 
   return (
@@ -73,6 +108,8 @@ export function ProductCard({
               <span className="text-white font-bold text-lg">SOLD OUT</span>
             </div>
           )}
+
+          {renderStockBadge()}
 
           <motion.div
             className="aspect-[4/3] w-full bg-gradient-to-br from-black via-gray-900 to-[#E6B325] rounded-lg overflow-hidden"
@@ -107,10 +144,15 @@ export function ProductCard({
                 <motion.button
                   type="button"
                   onClick={handleAddToCart}
-                  className="p-2 rounded-lg bg-[#E6B325]/10 text-[#E6B325] hover:bg-[#E6B325]/20 transition-colors"
+                  disabled={isLoading || quickAddCount >= getMaxQuickAddQuantity(stockCount)}
+                  className={`p-2 rounded-lg ${
+                    isLoading || quickAddCount >= getMaxQuickAddQuantity(stockCount)
+                      ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                      : 'bg-[#E6B325]/10 text-[#E6B325] hover:bg-[#E6B325]/20'
+                  } transition-colors`}
                   aria-label="Quick add to cart"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={!isLoading ? { scale: 1.1 } : undefined}
+                  whileTap={!isLoading ? { scale: 0.95 } : undefined}
                 >
                   <ShoppingCart size={18} />
                 </motion.button>

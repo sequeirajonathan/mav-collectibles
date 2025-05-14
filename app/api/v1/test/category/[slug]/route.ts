@@ -25,7 +25,7 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const { cursor = null, sort = "name_asc", stock = "IN_STOCK" } = await request.json();
+    const { cursor = null, sort = "name_asc" } = await request.json();
     const client = createSquareClient();
 
     // Determine sort order for Square API
@@ -114,27 +114,10 @@ export async function POST(
         })) || [];
 
     //normalize data
-    const normalizedItems = normalizeItemsWithInventory(itemsWithInventory, searchResponse.relatedObjects);
+    const normalizedItems = normalizeItemsWithInventory(itemsWithInventory);
 
-    // Filter normalizedItems based on stock
-    const stockArray = stock.split(",").map((s: string) => s.trim()).filter(Boolean);
-    let filteredItems = normalizedItems;
-    if (stockArray.length === 1) {
-      if (stockArray[0] === "IN_STOCK") {
-        filteredItems = normalizedItems.filter(item => !item.soldOut);
-      } else if (stockArray[0] === "SOLD_OUT") {
-        filteredItems = normalizedItems.filter(item => item.soldOut);
-      }
-    } else if (stockArray.length === 2) {
-      // both in stock and sold out, show all
-      filteredItems = normalizedItems;
-    }
-
-    // Return the filtered data with cursor
-    return NextResponse.json({
-      items: filteredItems,
-      cursor: searchResponse.cursor
-    });
+    // Return the normalized data
+    return NextResponse.json(normalizedItems);
   } catch (error) {
     console.error("Error fetching catalog:", error);
     return NextResponse.json(
