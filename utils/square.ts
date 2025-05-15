@@ -364,6 +364,9 @@ export function normalizeItemsWithInventory(
       };
       if (!itemData) return [];
 
+      // Filter out items not available for e-commerce
+      if (itemData.ecom_available === false || itemData.ecom_visibility === 'UNAVAILABLE') return [];
+
       // Get category info
       const categoryId = itemData.categories?.[0]?.id ?? '';
       const categoryInfo = categoryId ? categoryMap.get(categoryId) : undefined;

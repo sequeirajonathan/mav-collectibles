@@ -2,6 +2,7 @@
 
 import { useState, use } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ChevronLeft } from 'lucide-react';
@@ -18,6 +19,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const { id } = use(params); 
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
+  const router = useRouter();
 
   const { data: product, isLoading, isError } = useSquareProduct(id);
 
@@ -71,13 +73,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   return (
     <div className="min-h-[60vh] px-4 py-12">
       <div className="max-w-7xl mx-auto">
-        <Link
-          href={`/product`}
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="inline-flex items-center text-[#E6B325] hover:text-[#FFD966] mb-8 transition-colors"
         >
           <ChevronLeft className="w-5 h-5 mr-1" />
           Back to Products
-        </Link>
+        </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Image */}

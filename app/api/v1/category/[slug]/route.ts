@@ -25,115 +25,118 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const { cursor = null, sort = "name_asc", stock = "IN_STOCK" } = await request.json();
-    const client = createSquareClient();
+    const {
+      cursor: initialCursor = null,
+      sort = "name_asc",
+      stock = "IN_STOCK",
+      limit = 100, // how many valid items to return per page
+    } = await request.json();
 
-    // Determine sort order for Square API
-    let sortOrder: "ASC" | "DESC" = "ASC";
-    if (sort === "name_desc") sortOrder = "DESC";
-
-    // figure out which category IDs to filter by
+    // Determine category IDs from slug
     let categoryIds: string[] = [];
     if (CATEGORY_GROUP_SLUGS[slug]) {
       categoryIds = CATEGORY_GROUP_SLUGS[slug];
     } else {
-      const matched = ALL_MAPPINGS.find((cat) => cat.slug === slug);
-      if (matched) categoryIds = [matched.squareCategoryId];
-      else
+      const match = ALL_MAPPINGS.find((c) => c.slug === slug);
+      if (match) {
+        categoryIds = [match.squareCategoryId];
+      } else {
         return NextResponse.json(
           { error: "Invalid category or group slug" },
           { status: 404 }
         );
+      }
     }
 
-    // pass cursor into Square so we really get page N
-    const searchResponse = await client.catalog.search({
-      objectTypes: ["ITEM"],
-      includeRelatedObjects: true,
-      query: {
-        setQuery: {
-          attributeName: "category_id",
-          attributeValues: categoryIds,
+    const client = createSquareClient();
+    const sortOrder: "ASC" | "DESC" = sort === "name_desc" ? "DESC" : "ASC";
+
+    const collectedItems: Array<ReturnType<typeof normalizeItemsWithInventory>[0]> = [];
+    let cursor: string | null = initialCursor;
+    let keepPaging = true;
+
+    // Keep fetching until we've got `limit` valid items or run out of pages
+    while (collectedItems.length < limit && keepPaging) {
+      const searchResponse = await client.catalog.search({
+        objectTypes: ["ITEM"],
+        includeRelatedObjects: true,
+        query: {
+          setQuery: {
+            attributeName: "category_id",
+            attributeValues: categoryIds,
+          },
+          sortedAttributeQuery: {
+            attributeName: "name",
+            sortOrder,
+          },
         },
-        sortedAttributeQuery: {
-          attributeName: "name",
-          sortOrder,
+        limit: 100,
+        ...(cursor ? { cursor } : {}),
+      });
+
+      // Build variation ID list
+      const variationIds = (searchResponse.objects ?? [])
+        .filter(isCatalogItem)
+        .flatMap((item) => item.itemData?.variations?.map((v) => v.id) ?? []);
+
+      // Fetch inventory counts
+      const inventoryResponse = await client.inventory.batchGetCounts({
+        catalogObjectIds: [...variationIds.filter((id): id is string => typeof id === 'string'), ...categoryIds],
+        locationIds: ACTIVE_LOCATION_IDS,
+      });
+
+      // Build inventory map
+      const inventoryMap = (inventoryResponse.data ?? []).reduce<Record<string, number>>(
+        (acc, c) => {
+          if (c.catalogObjectId && c.state === "IN_STOCK") {
+            acc[c.catalogObjectId] = (acc[c.catalogObjectId] || 0) + parseFloat(c.quantity ?? "0");
+          }
+          return acc;
         },
-      },
-      limit: 100,
-      ...(cursor ? { cursor } : {}),
-    });
+        {}
+      );
 
-    // Get all variation IDs from the response
-    const variations =
-      searchResponse.objects
-        ?.filter((obj) => isCatalogItem(obj))
-        .map((obj) => obj.itemData?.variations) ?? [];
-
-    const variationIds = variations
-      .flatMap((variation) => variation?.map((v) => v.id) ?? [])
-      .filter((id): id is string => id !== undefined);
-
-    // Fetch inventory counts for all variations
-    const inventoryResponse = await client.inventory.batchGetCounts({
-      catalogObjectIds: variationIds,
-      locationIds: ACTIVE_LOCATION_IDS,
-    });
-
-    // Create inventory map with proper state handling
-    const inventoryMap =
-      inventoryResponse.data?.reduce<Record<string, number>>((acc, count) => {
-        const id = count.catalogObjectId;
-        if (!id) return acc;
-
-        // Only count IN_STOCK items
-        if (count.state === "IN_STOCK") {
-          const qty = parseFloat(count.quantity ?? "0");
-          acc[id] = (acc[id] || 0) + qty;
-        }
-        return acc;
-      }, {}) ?? {};
-
-    // Create a map of items with their variations and inventory
-    const itemsWithInventory =
-      searchResponse.objects
-        ?.filter((obj): obj is CatalogObject & { type: "ITEM" } =>
-          isCatalogItem(obj)
-        )
+      // Attach inventory to items
+      const itemsWithInventory = (searchResponse.objects ?? [])
+        .filter((obj): obj is CatalogObject & { type: "ITEM" } => isCatalogItem(obj))
         .map((item) => ({
           ...item,
           itemData: {
             ...item.itemData,
-            variations: item.itemData?.variations?.map(
-              (variation: CatalogObject) => ({
-                ...variation,
-                inventory: variation.id ? inventoryMap[variation.id] ?? 0 : 0,
-              })
-            ),
+            variations: item.itemData?.variations?.map((v) => ({
+              ...v,
+              inventory: v.id ? inventoryMap[v.id] ?? 0 : 0,
+            })),
           },
-        })) || [];
+        }));
 
-    //normalize data
-    const normalizedItems = normalizeItemsWithInventory(itemsWithInventory, searchResponse.relatedObjects);
+      // Normalize and filter by stock
+      const normalized = normalizeItemsWithInventory(itemsWithInventory, searchResponse.relatedObjects);
+      const stockArray = stock.split(",").map((s: string) => s.trim()).filter(Boolean);
+      const filtered =
+        stockArray.length === 1
+          ? stockArray[0] === "IN_STOCK"
+            ? normalized.filter((i) => !i.soldOut)
+            : normalized.filter((i) => i.soldOut)
+          : normalized;
 
-    // Filter normalizedItems based on stock
-    const stockArray = stock.split(",").map((s: string) => s.trim()).filter(Boolean);
-    let filteredItems = normalizedItems;
-    if (stockArray.length === 1) {
-      if (stockArray[0] === "IN_STOCK") {
-        filteredItems = normalizedItems.filter(item => !item.soldOut);
-      } else if (stockArray[0] === "SOLD_OUT") {
-        filteredItems = normalizedItems.filter(item => item.soldOut);
-      }
-    } else if (stockArray.length === 2) {
-      // both in stock and sold out, show all
-      filteredItems = normalizedItems;
+      collectedItems.push(...filtered);
+
+      cursor = searchResponse.cursor ?? null;
+      keepPaging = Boolean(cursor);
     }
 
-    // Return the filtered data with cursor
+    // Slice to exactly `limit`
+    const itemsToReturn = collectedItems.slice(0, limit);
+    // Only return cursor if more valid items may exist
+    const returnCursor =
+      keepPaging && collectedItems.length > limit
+        ? cursor
+        : null;
+
     return NextResponse.json({
-      items: filteredItems,
-      cursor: searchResponse.cursor
+      items: itemsToReturn,
+      cursor: returnCursor,
     });
   } catch (error) {
     console.error("Error fetching catalog:", error);
