@@ -19,18 +19,18 @@ const ALL_MAPPINGS = [
   ...Object.values(EVENTS_MAPPING),
 ];
 
-export async function POST(
+export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
-    const {
-      cursor: initialCursor = null,
-      sort = "name_asc",
-      stock = "IN_STOCK",
-      limit = 100, // how many valid items to return per page
-    } = await request.json();
+    const { searchParams } = new URL(request.url);
+    
+    const initialCursor = searchParams.get('cursor');
+    const sort = searchParams.get('sort') || "name_asc";
+    const stock = searchParams.get('stock') || "IN_STOCK";
+    const limit = parseInt(searchParams.get('limit') || "100", 10);
 
     // Determine category IDs from slug
     let categoryIds: string[] = [];

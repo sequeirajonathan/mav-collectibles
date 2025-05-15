@@ -12,15 +12,15 @@ export async function fetchCatalogItems(
   stock: string = "IN_STOCK",
   sort: string = "name_asc"
 ): Promise<NormalizedCatalogResponse> {
-  const { data } = await axiosClient.post("/products", {
-    cursor,
-    group,
-    search,
-    categoryId,
-    stock,
-    sort,
-  });
+  const params = new URLSearchParams();
+  if (cursor) params.append('cursor', cursor);
+  if (group) params.append('group', group);
+  if (search) params.append('search', search);
+  if (categoryId) params.append('categoryId', categoryId);
+  if (stock) params.append('stock', stock);
+  if (sort) params.append('sort', sort);
 
+  const { data } = await axiosClient.get(`/products?${params.toString()}`);
   return data;
 }
 
@@ -36,7 +36,6 @@ export async function searchProducts(
     stock,
     sort,
   });
-
   return data;
 }
 
@@ -47,13 +46,13 @@ export async function fetchCategoryItems(
   stock: string = "IN_STOCK",
   sort: string = "name_asc"
 ): Promise<NormalizedCatalogResponse> {
-  const { data } = await axiosClient.post(`/category/${slug}`, {
-    cursor,
-    search,
-    sort,
-    stock,
-  });
+  const params = new URLSearchParams();
+  if (cursor) params.append('cursor', cursor);
+  if (search) params.append('search', search);
+  if (stock) params.append('stock', stock);
+  if (sort) params.append('sort', sort);
 
+  const { data } = await axiosClient.get(`/category/${slug}?${params.toString()}`);
   return data;
 }
 
@@ -66,8 +65,9 @@ export async function fetchProduct(id: string): Promise<NormalizedProductRespons
 }
 
 export async function fetchInventoryCounts(variationIds: string[]): Promise<Record<string, number>> {
-  const { data } = await axiosClient.post("/inventory", {
-    variationIds,
-  });
+  const params = new URLSearchParams();
+  variationIds.forEach(id => params.append('variationIds', id));
+  
+  const { data } = await axiosClient.get(`/inventory?${params.toString()}`);
   return data.inventory;
 }

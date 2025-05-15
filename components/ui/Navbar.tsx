@@ -235,11 +235,12 @@ const Navbar = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search products..."
-                  className="bg-transparent text-white px-4 py-1 w-full focus:outline-none"
+                  className="bg-transparent text-white px-4 py-1 w-full focus:outline-none focus:ring-0 focus:border-none"
                 />
                 <button
                   type="submit"
-                  className="p-2 text-[#E6B325]"
+                  className="p-2 text-[#E6B325] bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none focus:shadow-none"
+                  style={{ boxShadow: 'none', border: 'none' }}
                 >
                   <Search size={20} />
                 </button>
@@ -359,9 +360,13 @@ const Navbar = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search..."
-                    className="bg-transparent text-white px-4 py-2 w-full focus:outline-none"
+                    className="bg-transparent text-white px-4 py-2 w-full focus:outline-none focus:ring-0 focus:border-none"
                   />
-                  <button type="submit" className="p-2 text-[#E6B325]">
+                  <button
+                    type="submit"
+                    className="p-2 text-[#E6B325] bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none focus:shadow-none"
+                    style={{ boxShadow: 'none', border: 'none' }}
+                  >
                     <Search size={20} />
                   </button>
                 </form>
