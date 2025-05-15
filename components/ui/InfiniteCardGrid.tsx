@@ -7,6 +7,7 @@ import { SkeletonProductCard } from "./SkeletonProductCard";
 import { useInfiniteCatalogItemsBySlug } from "@hooks/useSquareServices";
 import type { NormalizedCatalogItem } from "@interfaces";
 import { toast } from "react-hot-toast";
+import { EndOfListMessage } from "./EndOfListMessage";
 
 // Enhanced loading indicator component
 const LoadingSpinner = () => (
@@ -68,7 +69,7 @@ export function InfiniteCardGrid({
   if (!mounted || isLoading) {
     // initial loading: show 8 skeleton cards with a fade-in effect
     return (
-      <div className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
+      <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 animate-fade-in">
         {[...Array(8)].map((_, i) => (
           <SkeletonProductCard key={`init-${i}`} />
         ))}
@@ -85,24 +86,20 @@ export function InfiniteCardGrid({
         }
       }}
       hasMore={Boolean(hasNextPage)}
-      loader={<LoadingSpinner />}
+      loader={hasNextPage && isFetchingNextPage ? <LoadingSpinner /> : null}
       endMessage={
-        <div className="text-center text-gray-400 py-12 animate-fade-in">
-          <div className="text-2xl font-semibold mb-2">
-            You have reached the end of the list
-          </div>
-        </div>
+        <EndOfListMessage />
       }
-      scrollThreshold="300px"
+      scrollThreshold="10%"
       style={{ overflow: "visible" }}
       className="animate-fade-in"
     >
-      <div className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {items.filter(item => item && item.variationId).map((item) => (
           <ProductCard
             key={item.variationId}
             product={item}
-            imageConfig={{ width: 280, height: 280, quality: 90 }}
+            imageConfig={{ width: 160, height: 160, quality: 80 }}
           />
         ))}
       </div>

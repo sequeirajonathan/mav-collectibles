@@ -96,7 +96,7 @@ export function ProductCard({
       animate={mounted ? { opacity: 1, y: 0 } : false}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="group relative max-w-[280px] mx-auto w-full h-[420px] flex flex-col"
+      className="group relative w-full h-[260px] md:max-w-[280px] md:h-[420px] mx-auto flex flex-col"
     >
       <Link
         href={`/product/${product.itemId}`}
@@ -112,7 +112,7 @@ export function ProductCard({
           {renderStockBadge()}
 
           <motion.div
-            className="aspect-[4/3] w-full bg-gradient-to-br from-black via-gray-900 to-[#E6B325] rounded-lg overflow-hidden"
+            className="aspect-[4/5] h-[180px] md:aspect-[4/3] md:h-[220px] w-full bg-gradient-to-br from-black via-gray-900 to-[#E6B325] rounded-lg overflow-hidden"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
           >
@@ -121,7 +121,7 @@ export function ProductCard({
                 src={imageUrl}
                 alt={product.name}
                 fill
-                className="object-contain w-full h-full p-4 transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-contain p-0 md:p-4 transition-transform duration-300 group-hover:scale-105"
                 sizes={sizes}
                 quality={imageConfig?.quality || 90}
                 priority={false}
@@ -129,15 +129,15 @@ export function ProductCard({
             </div>
           </motion.div>
 
-          <div className="p-4 flex flex-col flex-1">
-            <h3 className="text-sm font-medium text-white/90 group-hover:text-white mb-2 line-clamp-2 min-h-[2.5rem]">
+          <div className="p-2 md:p-4 flex flex-col flex-1">
+            <h3 className="text-xs md:text-sm font-medium text-white/90 group-hover:text-white mb-1 md:mb-2 line-clamp-2 min-h-[1.5rem] md:min-h-[2.5rem]">
               {product.name}
             </h3>
-            <p className="text-sm text-gray-400 mb-3 line-clamp-2">
+            <p className="hidden md:block text-sm text-gray-400 mb-3 line-clamp-3 max-h-[4.5em] overflow-hidden">
               {product.description}
             </p>
-            <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-800/50">
-              <span className="text-[#E6B325] font-semibold">
+            <div className="flex items-center justify-between mt-auto pt-1 md:pt-2 border-t border-gray-800/50">
+              <span className="text-[#E6B325] font-semibold text-sm md:text-base">
                 ${(product.priceAmount / 100).toFixed(2)}
               </span>
               {!product.soldOut && (

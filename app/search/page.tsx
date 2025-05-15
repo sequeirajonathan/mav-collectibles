@@ -8,6 +8,7 @@ import { ProductCard } from "@components/ui/ProductCard";
 import { SkeletonProductCard } from "@components/ui/SkeletonProductCard";
 import { useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
+import { EndOfListMessage } from "@components/ui/EndOfListMessage";
 
 export default function SearchPage() {
   const [stock] = useQueryState("stock");
@@ -31,7 +32,7 @@ export default function SearchPage() {
 
   // Initial loader: 8 skeletons
   const initialLoader = (
-    <div className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {[...Array(8)].map((_, i) => (
         <SkeletonProductCard key={`init-${i}`} />
       ))}
@@ -40,7 +41,7 @@ export default function SearchPage() {
 
   // Next-page loader: 4 skeletons
   const nextLoader = isFetchingNextPage ? (
-    <div className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {[...Array(4)].map((_, i) => (
         <SkeletonProductCard key={`next-${i}`} />
       ))}
@@ -72,12 +73,12 @@ export default function SearchPage() {
           scrollThreshold="200px"
           style={{ overflow: "visible" }}
         >
-          <div className="grid gap-6 mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.map((item) => (
               <ProductCard
                 key={item.variationId}
                 product={item}
-                imageConfig={{ width: 280, height: 280, quality: 90 }}
+                imageConfig={{ width: 160, height: 160, quality: 80 }}
               />
             ))}
           </div>
@@ -98,13 +99,7 @@ export default function SearchPage() {
       )}
 
       {/* End of list message */}
-      {!hasNextPage && items.length > 0 && (
-        <div className="text-center text-gray-400 py-12">
-          <div className="text-2xl font-semibold mb-2">
-            You have reached the end of the list
-          </div>
-        </div>
-      )}
+      {!hasNextPage && items.length > 0 && <EndOfListMessage />}
     </div>
   );
 }

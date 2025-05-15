@@ -129,10 +129,7 @@ export async function GET(
     // Slice to exactly `limit`
     const itemsToReturn = collectedItems.slice(0, limit);
     // Only return cursor if more valid items may exist
-    const returnCursor =
-      keepPaging && collectedItems.length > limit
-        ? cursor
-        : null;
+    const returnCursor = (cursor && itemsToReturn.length === limit) ? cursor : null;
 
     return NextResponse.json({
       items: itemsToReturn,
