@@ -5,8 +5,8 @@ import Image from "next/image";
 import { Minus, Plus, Trash2, ImageIcon } from "lucide-react";
 import { useCart } from "@contexts/CartContext";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import type { PanInfo } from "framer-motion";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { Button } from "@components/ui/button";
 
 interface CartItemType {
   id: string;
@@ -17,17 +17,11 @@ interface CartItemType {
 }
 
 const ImagePlaceholder = () => {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   return (
     <motion.div
       className="w-full h-full bg-gray-800/50 rounded-lg flex items-center justify-center"
       initial={false}
-      animate={mounted ? { 
-        opacity: [0.6, 0.8, 0.6],
-        scale: [1, 1.05, 1],
-      } : false}
+      animate={true}
       transition={{
         duration: 2,
         repeat: Infinity,
@@ -41,8 +35,6 @@ const ImagePlaceholder = () => {
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const handleQuantityChange = (itemId: string, currentQuantity: number, newQuantity: number) => {
     if (newQuantity >= 1) {
@@ -58,17 +50,11 @@ export default function CartPage() {
       ["rgba(239, 68, 68, 0.2)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]
     );
 
-    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      if (Math.abs(info.offset.x) > 100) {
-        removeItem(item.id);
-      }
-    };
-
     return (
       <motion.div
         layout
         initial={false}
-        animate={mounted ? { opacity: 1, y: 0 } : false}
+        animate={true}
         exit={{ opacity: 0, y: -20 }}
         className="bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 rounded-xl overflow-hidden"
       >
@@ -76,57 +62,56 @@ export default function CartPage() {
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.7}
-          onDragEnd={handleDragEnd}
           style={{ x, background }}
-          className="p-4 relative"
+          className="p-3 sm:p-4 relative"
         >
-          <div className="absolute inset-y-0 left-0 flex items-center justify-start pl-4 text-red-500 opacity-50">
-            <Trash2 size={24} />
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative w-24 h-24 rounded-lg overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-3 sm:gap-4">
+            <div className="w-20 h-20 flex-shrink-0 relative">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
                   fill
-                  className="object-contain"
-                  sizes="96px"
+                  className="object-contain rounded-lg"
+                  sizes="80px"
                 />
               ) : (
                 <ImagePlaceholder />
               )}
             </div>
-            <div className="flex-grow">
-              <h3 className="text-lg font-medium text-white">{item.name}</h3>
-              <p className="text-[#E6B325] font-semibold">${(item.price / 100).toFixed(2)}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleQuantityChange(item.id, item.quantity, item.quantity - 1)}
-                className={`p-1 rounded-lg ${
-                  item.quantity <= 1
-                    ? 'bg-gray-800/30 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-800/50 text-white hover:bg-gray-700/50'
-                } transition-colors`}
-                disabled={item.quantity <= 1}
-              >
-                <Minus size={16} />
-              </button>
-              <span className="w-8 text-center text-white">{item.quantity}</span>
-              <button
-                onClick={() => handleQuantityChange(item.id, item.quantity, item.quantity + 1)}
-                className="p-1 rounded-lg bg-gray-800/50 text-white hover:bg-gray-700/50 transition-colors"
-              >
-                <Plus size={16} />
-              </button>
-              <button
-                onClick={() => removeItem(item.id)}
-                className="p-1 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors ml-2 lg:block hidden"
-                aria-label="Remove item"
-              >
-                <Trash2 size={16} />
-              </button>
+            <div className="flex-1 flex flex-col justify-between w-full">
+              <div>
+                <h3 className="text-base font-medium text-white line-clamp-2 break-words mb-1">{item.name}</h3>
+                <p className="text-[#E6B325] font-semibold text-sm">${(item.price / 100).toFixed(2)}</p>
+              </div>
+              <div className="flex items-center gap-2 mt-2 w-full">
+                <Button
+                  onClick={() => handleQuantityChange(item.id, item.quantity, item.quantity - 1)}
+                  variant="secondary"
+                  size="icon"
+                  disabled={item.quantity <= 1}
+                  className={item.quantity <= 1 ? 'opacity-50' : ''}
+                >
+                  <Minus size={16} />
+                </Button>
+                <span className="w-8 text-center text-white select-none">{item.quantity}</span>
+                <Button
+                  onClick={() => handleQuantityChange(item.id, item.quantity, item.quantity + 1)}
+                  variant="secondary"
+                  size="icon"
+                >
+                  <Plus size={16} />
+                </Button>
+                <Button
+                  onClick={() => removeItem(item.id)}
+                  variant="destructive"
+                  size="icon"
+                  aria-label="Remove item"
+                  className="ml-2"
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -142,9 +127,11 @@ export default function CartPage() {
           <p className="text-xl mb-8 text-white">Your cart is currently empty.</p>
           <Link 
             href="/products" 
-            className="inline-block px-8 py-3 bg-[#E6B325] text-black font-medium rounded hover:bg-[#FFD966] transition-colors"
+            className="inline-block"
           >
-            CONTINUE BROWSING
+            <Button variant="gold">
+              CONTINUE BROWSING
+            </Button>
           </Link>
         </div>
       </div>
@@ -191,11 +178,12 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-              <button
-                className="w-full bg-[#E6B325] hover:bg-[#FFD966] text-black font-semibold py-3 px-6 rounded-lg transition-colors"
+              <Button
+                variant="gold"
+                className="w-full"
               >
                 Proceed to Checkout
-              </button>
+              </Button>
               <Link
                 href="/products"
                 className="block text-center mt-4 text-[#E6B325] hover:text-[#FFD966] transition-colors"

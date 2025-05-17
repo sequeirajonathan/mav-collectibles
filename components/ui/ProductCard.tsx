@@ -104,24 +104,51 @@ export function ProductCard({
       >
         <div className="relative flex flex-col h-full overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-[#E6B325]/30 group-hover:bg-gray-900/80">
           {product.soldOut && (
-            <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SOLD OUT</span>
-            </div>
+            <motion.div
+              className="absolute inset-0 z-20 bg-black/30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            />
           )}
 
           {renderStockBadge()}
 
           <motion.div
-            className="aspect-[4/5] h-[180px] md:aspect-[4/3] md:h-[220px] w-full bg-gradient-to-br from-black via-gray-900 to-[#E6B325] rounded-lg overflow-hidden"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
+            className="aspect-[4/5] h-[180px] md:aspect-[4/3] md:h-[220px] w-full bg-gradient-to-br from-black via-gray-900 to-[#E6B325] rounded-lg overflow-hidden relative"
           >
+            {product.soldOut && (
+              <>
+                <motion.div 
+                  className="absolute inset-0 z-20 bg-black/30"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.div 
+                  className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <motion.div
+                    className="absolute w-[141.4%] h-[32px] bg-red-500 transform -rotate-45 flex items-center justify-center"
+                    style={{ transformOrigin: 'center' }}
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "0%" }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <span className="text-white font-bold text-lg">SOLD OUT</span>
+                  </motion.div>
+                </motion.div>
+              </>
+            )}
             <div className="relative w-full h-full">
               <Image
                 src={imageUrl}
                 alt={product.name}
                 fill
-                className="w-full h-full object-contain p-0 md:p-4 transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-contain p-0 md:p-4"
                 sizes={sizes}
                 quality={imageConfig?.quality || 90}
                 priority={false}

@@ -213,7 +213,7 @@ export default function FeatureFlagsTab() {
             </Button>
             <Button 
               onClick={saveChanges}
-              className="inline-flex items-center justify-center gap-2 bg-[#E6B325] text-black hover:bg-[#FFD966] border border-[#B38A00]"
+              variant="gold"
             >
               Save Changes
             </Button>
