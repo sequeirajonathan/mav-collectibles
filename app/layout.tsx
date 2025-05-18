@@ -16,7 +16,6 @@ import CookieConsent from "@components/ui/CookieConsent";
 import { fetchAlertBanner } from "@services/alertBannerService";
 import { CartProvider } from "@contexts/CartContext";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import NotFoundPage from "./_not-found/page";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,7 +62,11 @@ export default async function RootLayout({
             <AppProvider>
               <CartProvider>
                 <NuqsAdapter>
-                  <Suspense fallback={<NotFoundPage />}>
+                  <Suspense fallback={
+                    <div className="min-h-screen flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
+                    </div>
+                  }>
                     <AlertBanner />
                     <Navbar />
                     <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
