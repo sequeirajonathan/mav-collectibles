@@ -27,6 +27,11 @@ const DEFAULT_FLAGS = [
     description: 'Controls visibility of direct streaming content',
     enabled: false,
   },
+  {
+    name: 'maintenanceMode',
+    description: 'Enables maintenance mode, restricting access to admin users only',
+    enabled: false,
+  },
 ];
 
 export async function POST() {

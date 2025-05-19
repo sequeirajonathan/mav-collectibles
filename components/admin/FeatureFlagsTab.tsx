@@ -13,7 +13,7 @@ import { useSeedFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag
 type LocalFlags = Record<string, boolean>;
 
 export default function FeatureFlagsTab() {
-  const { featureFlags } = useAppContext();
+  const { featureFlags, refreshData } = useAppContext();
   const [localFlags, setLocalFlags] = useState<LocalFlags>({});
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -65,21 +65,22 @@ export default function FeatureFlagsTab() {
       return original && original.enabled !== value;
     });
 
-    for (const [name, enabled] of changedFlags) {
-      const flag = featureFlags.find(f => f.name === name);
-      if (flag) {
-        try {
+    try {
+      for (const [name, enabled] of changedFlags) {
+        const flag = featureFlags.find(f => f.name === name);
+        if (flag) {
           await triggerUpdateFlag({ id: flag.id, enabled });
-        } catch {
-          toast.error('Feature flag update failed. Trying to reinitialize...');
-          await handleSeedFeatureFlags();
-          return;
         }
       }
-    }
 
-    toast.success("Feature flags updated successfully");
-    setHasChanges(false);
+      // Force a refresh of all data
+      await refreshData();
+      toast.success("Feature flags updated successfully");
+      setHasChanges(false);
+    } catch {
+      toast.error('Feature flag update failed. Trying to reinitialize...');
+      await handleSeedFeatureFlags();
+    }
   };
 
   if (!featureFlags) {
@@ -128,6 +129,18 @@ export default function FeatureFlagsTab() {
             id="showAlertBanner"
             checked={localFlags.showAlertBanner || false}
             onCheckedChange={(checked) => handleFlagChange("showAlertBanner", checked)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="maintenanceMode" className="text-lg">Maintenance Mode</Label>
+            <p className="text-sm text-gray-400">Enable maintenance mode (restricts access to admin users only)</p>
+          </div>
+          <Switch
+            id="maintenanceMode"
+            checked={localFlags.maintenanceMode || false}
+            onCheckedChange={(checked) => handleFlagChange("maintenanceMode", checked)}
           />
         </div>
 

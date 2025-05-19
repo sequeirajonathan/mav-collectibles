@@ -177,6 +177,16 @@ async function main() {
       muted: true
     }
   });
+
+  await prisma.featureFlag.upsert({
+    where: { name: 'maintenanceMode' },
+    update: {},
+    create: {
+      name: 'maintenanceMode',
+      description: 'Enables maintenance mode, restricting access to admin users only',
+      enabled: false,
+    },
+  });
 }
 
 main()

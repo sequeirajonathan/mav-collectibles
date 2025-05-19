@@ -76,7 +76,12 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    const path = window.location.pathname;
+    if (path.startsWith("/admin") || path.startsWith("/dashboard")) {
+      router.push("/");
+    } else {
+      router.refresh();
+    }
   };
 
   const value: SupabaseContextType = {

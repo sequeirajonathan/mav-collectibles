@@ -14,8 +14,10 @@ export function useUpdateFeatureFlag() {
 
   return useMutation({
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => updateFeatureFlag(id, enabled),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['featureFlags'] });
+    onSuccess: async () => {
+      // Invalidate and refetch immediately
+      await queryClient.invalidateQueries({ queryKey: ['featureFlags'] });
+      await queryClient.refetchQueries({ queryKey: ['featureFlags'] });
     }
   });
 }
