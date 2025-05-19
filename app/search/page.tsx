@@ -1,13 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteCatalogItemsBySearch } from "@hooks/useSquareServices";
 import { ProductFilters } from "@components/ui/ProductFilters";
 import { ProductCard } from "@components/ui/ProductCard";
 import { SkeletonProductCard } from "@components/ui/SkeletonProductCard";
 import { useQueryState } from "nuqs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EndOfListMessage } from "@components/ui/EndOfListMessage";
 
 export default function SearchPage() {
@@ -15,6 +15,7 @@ export default function SearchPage() {
   const [sort] = useQueryState("sort");
   const [search] = useQueryState("q");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     data,
@@ -22,6 +23,8 @@ export default function SearchPage() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    isError,
+    refetch,
   } = useInfiniteCatalogItemsBySearch(
     search || "",
     stock || "IN_STOCK",
@@ -29,6 +32,10 @@ export default function SearchPage() {
   );
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
+
+  useEffect(() => {
+    refetch();
+  }, [search, stock, sort, refetch]);
 
   // Initial loader: 8 skeletons
   const initialLoader = (
@@ -48,6 +55,20 @@ export default function SearchPage() {
     </div>
   ) : null;
 
+  if (isError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500 mb-4">Failed to load search results</p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-[#E6B325] text-black rounded-lg hover:bg-[#FFD966] transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-[#E6B325] mb-6">
@@ -62,6 +83,7 @@ export default function SearchPage() {
         initialLoader
       ) : (
         <InfiniteScroll
+          key={`${search}-${stock}-${sort}-${searchParams.toString()}`}
           dataLength={items.length}
           next={() => {
             if (hasNextPage && !isFetchingNextPage) {

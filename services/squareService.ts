@@ -57,11 +57,8 @@ export async function fetchCategoryItems(
 }
 
 export async function fetchProduct(id: string): Promise<NormalizedProductResponse> {
-  const response = await fetch(`/api/v1/product/${id}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch product');
-  }
-  return response.json();
+  const { data } = await axiosClient.get(`/product/${id}`);
+  return data;
 }
 
 export async function fetchInventoryCounts(variationIds: string[]): Promise<Record<string, number>> {

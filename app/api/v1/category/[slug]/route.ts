@@ -34,7 +34,9 @@ export async function GET(
 
     // Determine category IDs from slug
     let categoryIds: string[] = [];
-    if (CATEGORY_GROUP_SLUGS[slug]) {
+    if (slug === "tcg") {
+      categoryIds = Object.values(CATEGORY_MAPPING).map(cat => cat.squareCategoryId);
+    } else if (CATEGORY_GROUP_SLUGS[slug]) {
       categoryIds = CATEGORY_GROUP_SLUGS[slug];
     } else {
       const match = ALL_MAPPINGS.find((c) => c.slug === slug);

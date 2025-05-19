@@ -33,6 +33,9 @@ export function useInfiniteCatalogItemsBySlug(
     refetchOnWindowFocus: false,
     refetchInterval: 30000,
     refetchIntervalInBackground: true,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    enabled: !!slug,
   });
 }
 

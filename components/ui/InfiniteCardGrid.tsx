@@ -42,6 +42,9 @@ export function InfiniteCardGrid({
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
+    error,
+    refetch,
   } = useInfiniteCatalogItemsBySlug(slug, search, stock, sort);
 
   const items: NormalizedCatalogItem[] =
@@ -66,6 +69,21 @@ export function InfiniteCardGrid({
     setPreviousItemCount(items.length);
   }, [items.length, previousItemCount, isInitialLoad]);
 
+  useEffect(() => {
+    if (isError && error) {
+      toast.error("Failed to load products. Please try again.", {
+        duration: 5000,
+        position: "top-right",
+      });
+    }
+  }, [isError, error]);
+
+  useEffect(() => {
+    if (mounted) {
+      refetch();
+    }
+  }, [slug, search, stock, sort, mounted, refetch]);
+
   if (!mounted || isLoading) {
     // initial loading: show 8 skeleton cards with a fade-in effect
     return (
@@ -73,6 +91,20 @@ export function InfiniteCardGrid({
         {[...Array(8)].map((_, i) => (
           <SkeletonProductCard key={`init-${i}`} />
         ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500 mb-4">Failed to load products</p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-[#E6B325] text-black rounded-lg hover:bg-[#FFD966] transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

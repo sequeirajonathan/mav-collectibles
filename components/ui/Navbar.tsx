@@ -19,7 +19,7 @@ import {
   CATEGORY_GROUPS,
 } from "@const/categories";
 import { SquareCategory } from "@interfaces/categories";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,6 +29,7 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { user, userProfile, signOut } = useSupabase();
   const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -108,7 +109,7 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
-    window.location.href = `/search?q=${encodeURIComponent(searchTerm.trim())}`;
+    router.replace(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
     setSearchTerm("");
     setIsMenuOpen(false);
   };
@@ -118,9 +119,9 @@ const Navbar = () => {
     p.set("group", group);
     p.delete("q");
     if (category) {
-      window.location.href = `/category/${category.slug}?${p.toString()}`;
+      router.replace(`/category/${category.slug}?${p.toString()}`);
     } else {
-      window.location.href = `/products?${p.toString()}`;
+      router.replace(`/category/tcg`);
     }
     setActiveDropdown(null);
     setIsMenuOpen(false);
