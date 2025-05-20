@@ -2,55 +2,79 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@lib/supabase/middleware';
 import { createServerClient } from '@supabase/ssr';
 
+const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
+
 export async function middleware(request: NextRequest) {
-  // First, update the session using Supabase
   const response = await updateSession(request);
-  
-  // If we got a response from updateSession, use that as the base
-  // Otherwise, create a new response
   const finalResponse = response || NextResponse.next();
-  
-  // Add CORS headers
+
   finalResponse.headers.set('Access-Control-Allow-Origin', '*');
   finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   finalResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  // Check if the request is for the admin route
+
   const url = request.nextUrl.clone();
-  const isAdminRoute = url.pathname.startsWith('/admin');
-  
-  // If it's an API route, just return the response with CORS headers
-  if (url.pathname.startsWith('/api')) {
-    return finalResponse;
-  }
-  
-  // For admin routes, check if we have a user
-  if (isAdminRoute) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll() {
-            // We don't need to set cookies here
-          },
-        },
+  const pathname = url.pathname;
+
+  // Define paths that should be accessible during maintenance
+  const isApiRoute = pathname.startsWith('/api');
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isMaintenancePage = pathname === '/maintenance';
+  const isLoginRoute = pathname.startsWith('/login');
+  const isStaticAsset = pathname.match(/\.(jpg|jpeg|png|gif|ico|css|js|svg|webp)$/);
+  const isNextInternal = pathname.startsWith('/_next');
+
+  // Skip checks for API, static assets, and Next.js internal routes
+  if (isApiRoute || isStaticAsset || isNextInternal) return finalResponse;
+
+  // Create Supabase client once
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: () => {},
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // During maintenance, only allow admin users, /admin, /maintenance, and /login paths
+  if (MAINTENANCE_MODE && !isMaintenancePage && !isLoginRoute) {
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const isAdmin = profile?.role === 'ADMIN';
+
+      if (!isAdmin) {
+        url.pathname = '/maintenance';
+        return NextResponse.redirect(url);
       }
-    );
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      // No user, redirect to login with the original URL as redirectTo
-      url.pathname = '/login';
-      url.searchParams.set('redirectTo', request.nextUrl.pathname);
+    } else {
+      // Not logged in: redirect to maintenance page
+      url.pathname = '/maintenance';
       return NextResponse.redirect(url);
     }
   }
-  
+
+  // If maintenance mode is off and trying to access maintenance page, redirect to home
+  if (!MAINTENANCE_MODE && isMaintenancePage) {
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect unauthenticated users on /admin to login
+  if (isAdminRoute && !user) {
+    url.pathname = '/login';
+    url.searchParams.set('redirectTo', pathname);
+    return NextResponse.redirect(url);
+  }
+
   return finalResponse;
 }
 

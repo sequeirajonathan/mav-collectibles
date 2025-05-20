@@ -8,6 +8,7 @@ export default function AlertBanner() {
   const { alertBanner, getFeatureFlag } = useAppContext();
   const [isVisible, setIsVisible] = useState(true);
   const showAlertBanner = getFeatureFlag('showAlertBanner');
+  const isMaintenanceMode = getFeatureFlag('maintenanceMode');
 
   useEffect(() => {
     if (alertBanner) {
@@ -15,8 +16,8 @@ export default function AlertBanner() {
     }
   }, [alertBanner]);
 
-  // Always render the placeholder to prevent layout shift
-  if (!showAlertBanner || !alertBanner) {
+  // Always render the placeholder to prevent layout shift, but hide during maintenance
+  if (!showAlertBanner || !alertBanner || isMaintenanceMode) {
     return <div className="h-[48px]" />;
   }
 

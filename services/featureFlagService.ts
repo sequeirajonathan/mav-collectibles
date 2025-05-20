@@ -3,7 +3,8 @@ import { FeatureFlag } from '@interfaces';
 
 export async function fetchFeatureFlags(): Promise<FeatureFlag[]> {
   const { data } = await axiosClient.get('/feature-flags');
-  return data;
+  // Filter out maintenanceMode if present
+  return data.filter((flag: FeatureFlag) => flag.name !== 'maintenanceMode');
 }
 
 export async function updateFeatureFlag(id: string, enabled: boolean): Promise<FeatureFlag> {

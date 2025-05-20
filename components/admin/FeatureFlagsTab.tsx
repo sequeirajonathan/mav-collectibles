@@ -134,18 +134,6 @@ export default function FeatureFlagsTab() {
 
         <div className="flex items-center justify-between">
           <div>
-            <Label htmlFor="maintenanceMode" className="text-lg">Maintenance Mode</Label>
-            <p className="text-sm text-gray-400">Enable maintenance mode (restricts access to admin users only)</p>
-          </div>
-          <Switch
-            id="maintenanceMode"
-            checked={localFlags.maintenanceMode || false}
-            onCheckedChange={(checked) => handleFlagChange("maintenanceMode", checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
             <Label htmlFor="showFeaturedEvents" className="text-lg">Featured Events</Label>
             <p className="text-sm text-gray-400">Show featured events on the homepage</p>
           </div>
