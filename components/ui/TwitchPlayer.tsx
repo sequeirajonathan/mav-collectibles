@@ -33,6 +33,14 @@ interface TwitchPlayerProps {
   muted?: boolean;
 }
 
+/**
+ * TwitchPlayer component for embedding Twitch streams
+ * Features:
+ * - Dynamic script loading
+ * - Error handling
+ * - Loading states
+ * - Cleanup on unmount
+ */
 export default function TwitchPlayer({
   channel,
   autoplay = true,
@@ -86,8 +94,7 @@ export default function TwitchPlayer({
                 setIsLoading(false);
               }
             });
-          } catch (err) {
-            console.error('Error creating Twitch player:', err);
+          } catch {
             if (isMounted) {
               setError('Failed to load Twitch player');
               setIsLoading(false);
@@ -136,8 +143,7 @@ export default function TwitchPlayer({
                   setIsLoading(false);
                 }
               }, 5000);
-            } catch (err) {
-              console.error('Error creating Twitch player:', err);
+            } catch {
               if (isMounted) {
                 setError('Failed to load Twitch player');
                 setIsLoading(false);
@@ -155,8 +161,7 @@ export default function TwitchPlayer({
         
         document.body.appendChild(scriptElement);
       }
-    } catch (err) {
-      console.error('Error in Twitch player setup:', err);
+    } catch {
       if (isMounted) {
         setError('Error setting up Twitch player');
         setIsLoading(false);

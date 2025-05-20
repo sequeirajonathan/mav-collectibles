@@ -64,8 +64,24 @@ const Navbar = () => {
     if (isMenuOpen) setIsMenuOpen(false);
   };
   const handleSignOut = async () => {
-    setIsProfileOpen(false);
-    await signOut();
+    try {
+      setIsProfileOpen(false);
+      console.log('Attempting to sign out...');
+      
+      // Force close any open dropdowns
+      setActiveDropdown(null);
+      setExpandedGroup(null);
+      
+      await signOut();
+      console.log('Sign out successful');
+      
+      // Force a hard refresh to ensure all state is cleared
+      window.location.replace('/');
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Even if there's an error, try to force a refresh
+      window.location.replace('/');
+    }
   };
   const hasAdminAccess =
     userProfile?.role &&

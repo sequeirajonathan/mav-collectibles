@@ -15,6 +15,15 @@ interface YouTubePlayerProps {
   onError?: () => void;
 }
 
+/**
+ * YouTubePlayer component for embedding YouTube videos and live streams
+ * Features:
+ * - Support for regular videos and live streams
+ * - Context-based settings
+ * - URL parsing for various YouTube formats
+ * - Error handling
+ * - Loading states
+ */
 export default function YouTubePlayer({
   videoId,
   title,
@@ -87,8 +96,7 @@ export default function YouTubePlayer({
           
           iframeRef.current.src = `https://www.youtube.com/embed/${extractedId}?rel=0&modestbranding=1&color=white&controls=1${autoplayParam}${mutedParam}${playlistParam}`;
         }
-      } catch (e) {
-        console.error('Error parsing YouTube URL:', e);
+      } catch {
         setError('Invalid YouTube URL');
         if (onError) onError();
       }
@@ -145,7 +153,7 @@ export default function YouTubePlayer({
       
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-gold"></div>
         </div>
       )}
       

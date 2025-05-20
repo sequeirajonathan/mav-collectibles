@@ -26,10 +26,11 @@ export function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      console.log('Login result:', { data, error });
 
       if (error) {
         throw error;

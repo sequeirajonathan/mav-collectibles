@@ -6,7 +6,6 @@ import { useAppContext } from "@contexts/AppContext";
 import { useSupabase } from "@contexts/SupabaseContext";
 import { Button } from "@components/ui/button";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { LoginModal } from "@components/ui/LoginModal";
 import CautionTape from "@components/ui/CautionTape";
 
@@ -28,20 +27,11 @@ export default function MaintenancePage() {
       <CautionTape text="UNDER CONSTRUCTION" position="top" offset={0} height="4rem" />
       <CautionTape text="UNDER CONSTRUCTION" position="bottom" offset={48} height="4rem" />
       <div
-        className="flex flex-col items-center justify-center w-full relative z-30 min-h-[calc(100vh-8rem)] mt-[4rem] mb-[4rem] md:min-h-[calc(100vh-12rem)] md:mt-[6rem] md:mb-[6rem]"
+        className="flex flex-col justify-center items-center min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-12rem)] w-full relative z-30 px-2"
       >
-        <div className="text-center p-8 max-w-2xl mx-4 flex flex-col items-center justify-center">
-          <motion.div 
-            initial={{ scale: 0.8, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            transition={{ 
-              type: "spring",
-              stiffness: 260,
-              damping: 20,
-              delay: 0.2
-            }}
-            className="relative w-64 h-64 mx-auto mb-8"
-          >
+        {/* Pikachu and heading */}
+        <div className="flex flex-col items-center w-full max-w-xl">
+          <div className="relative w-40 h-40 md:w-64 md:h-64 mx-auto mb-4 md:mb-8">
             <Image
               src="/images/pikachu_construction.gif"
               alt="Pikachu Construction"
@@ -50,51 +40,34 @@ export default function MaintenancePage() {
               className="object-contain"
               priority
             />
-          </motion.div>
-          <motion.h1 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-5xl font-bold text-[#E6B325] mb-6"
-          >
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#E6B325] mb-4 md:mb-6">
             Coming Soon
-          </motion.h1>
-          <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="space-y-4"
+          </h1>
+          <p className="text-gray-300 text-base md:text-lg mb-4 md:mb-8 max-w-xs md:max-w-lg mx-auto">
+            We&apos;re building something special for all card game enthusiasts! 
+            Our team is hard at work creating the ultimate trading card game experience. 
+            Stay tuned for the grand opening of MAV Collectibles!
+          </p>
+        </div>
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full mb-4">
+          <Button
+            variant="gold"
+            onClick={() => setIsLoginModalOpen(true)}
+            className="px-8 py-4 text-base md:text-lg"
           >
-            <p className="text-gray-300 text-lg mb-8 max-w-lg mx-auto">
-              We&apos;re building something special for all card game enthusiasts! 
-              Our team is hard at work creating the ultimate trading card game experience. 
-              Stay tuned for the grand opening of MAV Collectibles!
-            </p>
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-            >
-              <Button
-                variant="gold"
-                onClick={() => setIsLoginModalOpen(true)}
-                className="px-8 py-6 text-lg"
-              >
-                Admin Login
-              </Button>
-              <Button
-                variant="outlineGold"
-                onClick={() => window.location.reload()}
-                className="px-8 py-6 text-lg"
-              >
-                Check Progress
-              </Button>
-            </motion.div>
-          </motion.div>
+            Admin Login
+          </Button>
+          <Button
+            variant="outlineGold"
+            onClick={() => window.location.reload()}
+            className="px-8 py-4 text-base md:text-lg"
+          >
+            Check Progress
+          </Button>
         </div>
       </div>
-
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 

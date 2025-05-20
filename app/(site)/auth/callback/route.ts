@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     if (user) {
       try {
-        // Create or update UserProfile with ADMIN role for your email
+        // Create or update UserProfile
         const userProfile = await prisma.userProfile.upsert({
           where: { email: user.email! },
           update: {
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
           },
           create: {
             email: user.email!,
-            role: user.email === 'sequeira.s.jonathan@gmail.com' ? 'ADMIN' : 'CUSTOMER',
+            role: 'CUSTOMER', // Default role
           },
         });
 

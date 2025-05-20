@@ -17,7 +17,6 @@ interface VideoPlayerProps {
   fluid?: boolean;
   useContextSettings?: boolean;
   onError?: () => void;
-  debug?: boolean;
 }
 
 const FALLBACK_STREAMS = [
@@ -26,6 +25,15 @@ const FALLBACK_STREAMS = [
   "https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8"
 ];
 
+/**
+ * VideoPlayer component that supports both HLS streams and Twitch embeds
+ * Features:
+ * - Fallback streams for HLS playback
+ * - Twitch channel embedding
+ * - Error handling and recovery
+ * - Loading states
+ * - Context-based settings
+ */
 export default function VideoPlayer({
   src,
   type = 'application/x-mpegURL',
@@ -36,7 +44,6 @@ export default function VideoPlayer({
   fluid = true,
   useContextSettings = false,
   onError,
-  debug = false,
 }: VideoPlayerProps) {
   const { videoSettings } = useAppContext();
   const videoRef = useRef<HTMLDivElement>(null);
@@ -70,8 +77,10 @@ export default function VideoPlayer({
             setTwitchChannel(pathParts[0]);
             return { ...source, twitchChannel: pathParts[0] };
           }
-        } catch (e) {
-          console.error('Error parsing Twitch URL:', e);
+        } catch {
+          // Invalid Twitch URL, continue with regular video
+          setIsTwitch(false);
+          setTwitchChannel('');
         }
       }
       
@@ -96,8 +105,10 @@ export default function VideoPlayer({
             twitchChannel: pathParts[0]
           };
         }
-      } catch (e) {
-        console.error('Error parsing Twitch URL:', e);
+      } catch {
+        // Invalid Twitch URL, continue with regular video
+        setIsTwitch(false);
+        setTwitchChannel('');
       }
     }
     
@@ -113,26 +124,22 @@ export default function VideoPlayer({
 
     // Prevent re-initialization if we've already tried and failed with all fallbacks
     if (hasInitialized && error && videoSource.src && !videoSource.src.includes("fallback")) {
-      
       // Find a fallback that's different from the current source
       const fallback = FALLBACK_STREAMS.find(url => url !== videoSource.src);
       
-      if (fallback) {
-        // Update the source with a fallback
-        if (playerRef.current) {
-          try {
-            playerRef.current.src([{
-              src: fallback,
-              type: 'application/x-mpegURL'
-            }]);
-            playerRef.current.load();
-            playerRef.current.play();
-            setError(null);
-            setIsLoading(true);
-            return;
-          } catch (e) {
-            console.error("Error setting fallback source:", e);
-          }
+      if (fallback && playerRef.current) {
+        try {
+          playerRef.current.src([{
+            src: fallback,
+            type: 'application/x-mpegURL'
+          }]);
+          playerRef.current.load();
+          playerRef.current.play();
+          setError(null);
+          setIsLoading(true);
+          return;
+        } catch {
+          // Fallback failed, continue with error state
         }
       }
     }
@@ -191,7 +198,6 @@ export default function VideoPlayer({
         player.on('error', () => {
           const errorObj = player.error();
           if (errorObj) {
-            console.error('Video.js error:', errorObj.code, errorObj.message);
             setError(`Error loading video: ${errorObj.message || 'Unknown error'}`);
           }
           setIsLoading(false);
@@ -225,8 +231,7 @@ export default function VideoPlayer({
         }, 10000); // 10 second timeout
         
         return () => clearTimeout(timeout);
-      } catch (e) {
-        console.error('Error initializing video player:', e);
+      } catch {
         setError('Failed to initialize video player');
         setIsLoading(false);
         return;
@@ -238,8 +243,8 @@ export default function VideoPlayer({
       if (playerRef.current) {
         try {
           playerRef.current.dispose();
-        } catch (e) {
-          console.error('Error disposing video player:', e);
+        } catch {
+          // Ignore disposal errors
         }
         playerRef.current = null;
       }
@@ -248,62 +253,32 @@ export default function VideoPlayer({
 
   // Render function with conditional for Twitch
   return (
-    <div className="relative w-full h-full">
-      {isTwitch && twitchChannel ? (
-        // Twitch embed
-        <>
-          <iframe
-            src={`https://player.twitch.tv/?channel=${twitchChannel}&parent=${window.location.hostname}&autoplay=${videoSource.autoplay ? 'true' : 'false'}&muted=${videoSource.muted ? 'true' : 'false'}`}
-            height="100%"
-            width="100%"
-            allowFullScreen
-            title={`${twitchChannel} on Twitch`}
-          ></iframe>
-          
-          {debug && (
-            <div className="absolute top-0 left-0 right-0 bg-black/80 p-2 z-20 text-xs text-white">
-              <p>Type: Twitch Embed</p>
-              <p>Channel: {twitchChannel}</p>
-              <p>Autoplay: {videoSource.autoplay ? 'Yes' : 'No'}</p>
-              <p>Muted: {videoSource.muted ? 'Yes' : 'No'}</p>
-            </div>
-          )}
-        </>
-      ) : (
-        // Regular video.js player
-        <>
-          <div ref={videoRef} className="w-full h-full">
-            {/* Video.js will replace this div with the video element */}
-          </div>
-          
-          {isLoading && !error && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
-            </div>
-          )}
-          
-          {error && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 p-4 text-center">
-              <p className="text-red-400 mb-2">⚠️ {error}</p>
-              <p className="text-white/70 text-sm">Please check your stream settings or try again later.</p>
-            </div>
-          )}
-          
-          {videoSource.title && !error && !isLoading && (
-            <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-3 z-10">
-              <h3 className="text-white font-medium truncate">{videoSource.title}</h3>
-            </div>
-          )}
-        </>
+    <div className="relative w-full aspect-video bg-black">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-gold"></div>
+        </div>
       )}
       
-      {debug && !isTwitch && (
-        <div className="absolute top-0 left-0 right-0 bg-black/80 p-2 z-20 text-xs text-white">
-          <p>Source: {videoSource.src}</p>
-          <p>Type: {videoSource.type}</p>
-          <p>State: {error ? 'Error' : (isLoading ? 'Loading' : 'Ready')}</p>
-          {error && <p className="text-red-400">Error: {error}</p>}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="text-white text-center p-4">
+            <p className="text-red-500 mb-2">{error}</p>
+            <p className="text-sm text-gray-400">Please try refreshing the page</p>
+          </div>
         </div>
+      )}
+      
+      {isTwitch && twitchChannel ? (
+        <iframe
+          src={`https://player.twitch.tv/?channel=${twitchChannel}&parent=${window.location.hostname}&muted=${muted}&autoplay=${autoplay}`}
+          height="100%"
+          width="100%"
+          allowFullScreen
+          className="absolute inset-0"
+        />
+      ) : (
+        <div ref={videoRef} className="w-full h-full" />
       )}
     </div>
   );

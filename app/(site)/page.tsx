@@ -1,4 +1,4 @@
-"use client"; // Add this since we're using client-side features
+"use client"; // Enable client-side features for this component
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -10,8 +10,17 @@ import { motion } from "framer-motion";
 import { CATEGORY_MAPPING } from "@const/categories";
 import { useRouter } from "next/navigation";
 
+/**
+ * Home page component that serves as the main landing page for MAV Collectibles
+ * Features:
+ * - Video section showcasing featured content
+ * - Announcement carousel for important updates
+ * - Featured events section
+ * - Trading card games grid
+ * - Why choose us section
+ */
 export default function Home() {
-  // Sample announcements data
+  // Marketing announcements displayed in the carousel
   const announcements = [
     {
       id: "1",
@@ -42,6 +51,7 @@ export default function Home() {
     },
   ];
 
+  // Trading card game categories with their respective metadata
   const cardGames = [
     {
       title: "Pokemon",
@@ -87,6 +97,7 @@ export default function Home() {
     },
   ];
 
+  // Animation variants for staggered animations
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -104,9 +115,14 @@ export default function Home() {
 
   const router = useRouter();
 
+  // Client-side mounting state to prevent hydration issues
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  /**
+   * Handles navigation to the product category page when a card game is clicked
+   * @param squareCategory - The category identifier from Square
+   */
   function handleCardGameClick(squareCategory: string) {
     const mapping = CATEGORY_MAPPING[squareCategory];
     if (!mapping) return;
@@ -117,20 +133,20 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 pt-2">
-      {/* Video Section - moved above the announcement carousel */}
+    <div className="flex flex-col w-full min-h-screen space-y-8 pt-2">
+      {/* Hero video section for featured content */}
       <VideoSection />
 
-      {/* Announcement Carousel */}
-      <div className="w-full max-w-6xl">
+      {/* Marketing announcements carousel */}
+      <div className="w-full">
         <AnnouncementCarousel announcements={announcements} />
       </div>
 
-      {/* Featured Events Section */}
+      {/* Upcoming events section */}
       <FeaturedEvents />
 
-      {/* Card Games Grid */}
-      <div className="w-full max-w-6xl">
+      {/* Trading card games grid with hover effects and animations */}
+      <div className="w-full">
         <motion.h2
           initial={false}
           animate={mounted ? { opacity: 1, y: 0 } : false}
@@ -190,8 +206,8 @@ export default function Home() {
         </motion.div>
       </div>
 
-      {/* Why Choose Section */}
-      <div className="mt-4 text-center w-full max-w-6xl">
+      {/* Value proposition section highlighting key benefits */}
+      <div className="mt-4 text-center w-full">
         <motion.h2
           initial={false}
           animate={mounted ? { opacity: 1, y: 0 } : false}

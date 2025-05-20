@@ -12,6 +12,15 @@ const VIDEO_CDN = {
   mp4: "https://ubkfii3geuyo44gn.public.blob.vercel-storage.com/banner_2_5-QCGuDaJzZ6ezLznNqGr6umGNPDgx2p.mp4"
 };
 
+/**
+ * VideoSection component that displays either a YouTube video, direct video stream, or fallback banner
+ * Features:
+ * - Feature flag-based video selection
+ * - Smooth transitions and animations
+ * - Fallback handling
+ * - Error recovery
+ * - Loading states
+ */
 export default function VideoSection() {
   const { youtubeSettings, videoSettings, getFeatureFlag } = useAppContext();
   const [videoReady, setVideoReady] = useState(false);
@@ -72,8 +81,7 @@ export default function VideoSection() {
 
   const handleVideoPlaying = () => setVideoPlaying(true);
 
-  const handleVideoError = (e: Event) => {
-    console.error("Video error:", e);
+  const handleVideoError = () => {
     setVideoError(true);
     setVideoLoaded(false);
     setVideoPlaying(false);
@@ -94,7 +102,7 @@ export default function VideoSection() {
 
     const timeout = setTimeout(() => {
       if (!videoLoaded) {
-        handleVideoError(new Event('timeout'));
+        handleVideoError();
       }
     }, 5000);
 
@@ -177,7 +185,7 @@ export default function VideoSection() {
                       preload="auto"
                       className="absolute w-full h-full object-cover object-center"
                       style={{ objectPosition: '50% 25%' }}
-                      onError={(e) => handleVideoError(e.nativeEvent)}
+                      onError={handleVideoError}
                       poster={VIDEO_CDN.fallbackImage}
                     >
                       <source src={VIDEO_CDN.webm} type="video/webm" />
@@ -222,28 +230,33 @@ export default function VideoSection() {
             </div>
           </motion.div>
         )}
-      </div>
 
-      {/* Secondary Video container (if needed) */}
-      {hasVideo && showVideo && !showBanner && (
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            className="w-full relative rounded-lg border border-[#E6B325]/20 shadow-lg overflow-hidden"
-            style={{ aspectRatio: "16/9" }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              transition: { type: "spring", duration: 1, bounce: 0.3, delay: 0.2 }
-            }}
-          >
-            <div className="absolute inset-0">
-              {videoType === 'youtube' && <YouTubePlayer useContextSettings={true} onError={handlePlayerError} />}
-              {videoType === 'direct' && <VideoPlayer useContextSettings={true} onError={handlePlayerError} />}
-            </div>
-          </motion.div>
-        </div>
-      )}
+        {/* Video Players */}
+        {showVideo && !videoError && (
+          <AnimatePresence>
+            <motion.div
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {videoType === 'youtube' && (
+                <YouTubePlayer
+                  useContextSettings={true}
+                  onError={handlePlayerError}
+                />
+              )}
+              {videoType === 'direct' && (
+                <VideoPlayer
+                  useContextSettings={true}
+                  onError={handlePlayerError}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
+      </div>
 
       <style jsx global>{`
         @keyframes pulse {

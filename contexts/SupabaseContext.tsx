@@ -9,17 +9,20 @@ import {
 } from "react";
 
 import { useRouter } from "next/navigation";
-import { createClient } from "@lib/supabase/client";
+import { createBrowserClient } from "@supabase/ssr";
+import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { fetchUserProfile } from "@services/userProfileService";
 
 import type { SupabaseContextType } from "@interfaces/supabase";
-import type { User, Session } from "@supabase/supabase-js";
 import type { UserProfile } from "@interfaces";
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
 
 export function SupabaseProvider({ children }: { children: ReactNode }) {
-  const [supabase] = useState(() => createClient());
+  const [supabase] = useState(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ));
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -27,35 +30,36 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        setSession(session ?? null);
-
-        if (event === "SIGNED_IN") {
+    // Initialize Supabase client
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      setSession(session);
+      if (event === 'SIGNED_OUT') {
+        setUserProfile(null);
+        setUser(null);
+      } else if (session?.user) {
+        setUser(session.user);
+        try {
           const profile = await fetchUserProfile();
-          setUserProfile(profile ?? null);
-        } else if (event === "SIGNED_OUT") {
+          setUserProfile(profile);
+        } catch {
+          // Handle profile fetch error silently
           setUserProfile(null);
         }
-
-        setLoading(false);
-
-        if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-          router.refresh();
-        }
       }
-    );
+      router.refresh();
+    });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setSession(session ?? null);
-
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+      setSession(session);
       if (session?.user) {
-        const profile = await fetchUserProfile();
-        setUserProfile(profile ?? null);
+        setUser(session.user);
+        fetchUserProfile()
+          .then(setUserProfile)
+          .catch(() => setUserProfile(null));
       }
-
       setLoading(false);
     });
 
@@ -75,12 +79,16 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   }, [user, loading, router]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    const path = window.location.pathname;
-    if (path.startsWith("/admin") || path.startsWith("/dashboard")) {
-      router.push("/");
-    } else {
+    try {
+      await supabase.auth.signOut();
+      setUserProfile(null);
+      setUser(null);
+      setSession(null);
+      router.push('/');
       router.refresh();
+    } catch {
+      // Handle sign out error silently
+      router.push('/');
     }
   };
 
