@@ -23,11 +23,12 @@ export default function MaintenancePage() {
   }, [featureFlags, userProfile, router]);
 
   return (
-    <div className="relative min-h-screen w-full bg-black overflow-hidden">
-      <CautionTape text="UNDER CONSTRUCTION" position="top" offset={0} height="4rem" />
+    <div className="flex flex-col min-h-screen w-full bg-black overflow-hidden">
+      <CautionTape text="UNDER CONSTRUCTION" position="top" offset={48} height="4rem" />
       <CautionTape text="UNDER CONSTRUCTION" position="bottom" offset={48} height="4rem" />
       <div
-        className="flex flex-col justify-center items-center min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-12rem)] w-full relative z-30 px-2"
+        className="flex flex-col justify-center items-center flex-1 w-full relative z-30 px-2"
+        style={{ paddingTop: "112px", paddingBottom: "112px" }}
       >
         {/* Pikachu and heading */}
         <div className="flex flex-col items-center w-full max-w-xl">
