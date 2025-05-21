@@ -41,7 +41,7 @@ const FeaturedEvent: React.FC<FeaturedEventProps> = ({
         
         {/* Content Section */}
         <div className="flex-1 p-4 md:p-6 flex flex-col">
-          <h2 className="text-xl md:text-2xl font-bold mb-2 text-brand-gold hover:text-brand-gold-light transition-colors">{title}</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#E6B325] hover:text-[#FFD966] transition-colors">{title}</h2>
           <p className="text-gray-300 mb-3 text-sm md:text-base">{date}</p>
           
           <div className="prose prose-invert mb-4 max-w-none text-sm md:text-base">

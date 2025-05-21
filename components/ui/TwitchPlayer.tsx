@@ -193,7 +193,7 @@ export default function TwitchPlayer({
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 border-4 border-t-brand-gold border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-brand-gold">Loading Twitch stream...</p>
+            <p className="text-[#E6B325]">Loading Twitch stream...</p>
           </div>
         </div>
       )}

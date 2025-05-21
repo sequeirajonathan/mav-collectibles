@@ -8,8 +8,6 @@ import VideoSection from "@components/ui/VideoSection";
 import { motion } from "framer-motion";
 import { CATEGORY_MAPPING } from "@const/categories";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@components/ui/button";
 import GoogleReviews from "@components/ui/GoogleReviews";
 
 /**
@@ -152,7 +150,7 @@ export default function Home() {
         <motion.h2
           initial={false}
           animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="text-3xl font-bold text-center mb-8 text-brand-gold"
+          className="text-3xl font-bold text-center mb-8 text-[#E6B325]"
         >
           Trading Card Games
         </motion.h2>
@@ -190,7 +188,7 @@ export default function Home() {
 
                     {/* Title & View All */}
                     <div className="text-center mt-2">
-                      <h3 className="text-lg md:text-xl font-bold group-hover:text-brand-gold transition-colors">
+                      <h3 className="text-lg md:text-xl font-bold group-hover:text-[#E6B325] transition-colors">
                         {game.title}
                       </h3>
                       <span className="text-xs md:text-sm text-brand-blue group-hover:text-brand-blue-light transition-colors">
@@ -218,7 +216,7 @@ export default function Home() {
         <motion.h2
           initial={false}
           animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="text-3xl font-bold mb-4 text-brand-gold"
+          className="text-3xl font-bold mb-4 text-[#E6B325]"
         >
           Why Choose MAV Collectibles?
         </motion.h2>
@@ -241,7 +239,7 @@ export default function Home() {
             {
               title: "Community Focus",
               description:
-                "We're more than a store - we're a hub for collectors and players.",
+                "We're more than a store – we're a hub for collectors and players, where everyone gets treated like family.",
             },
           ].map((feature, index) => (
             <motion.div
