@@ -55,44 +55,9 @@ const Footer = () => {
               Your premier destination for trading card games including Pokémon, Yu-Gi-Oh!, Dragon Ball, One Piece and more.
             </p>
           </div>
-
-          {/* Categories */}
-          {CATEGORY_GROUPS.map((group) => (
-            <div key={group.name} className="col-span-1">
-              <h3 className="text-[#E6B325] font-semibold text-lg mb-4">
-                {group.name}
-              </h3>
-              <ul className="space-y-2">
-                {group.categories.slice(0, 6).map((category) => (
-                  <li key={category.slug}>
-                    <Link
-                      href={`/category/${category.slug}`}
-                      className="text-gray-400 hover:text-[#E6B325] transition-colors"
-                    >
-                      {category.displayName}
-                    </Link>
-                  </li>
-                ))}
-                {group.categories.length > 6 && (
-                  <li>
-                    <Link
-                      href={`/category/${group.name.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="text-[#E6B325] hover:underline transition-colors"
-                    >
-                      View All {group.name}
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </div>
-          ))}
-
-          {/* Quick Links */}
-          <div className="col-span-1">
-            <h3 className="text-[#E6B325] font-semibold text-lg mb-4">
-              Information
-            </h3>
-            <ul className="space-y-2">
+          <div className="w-full max-w-xs mx-auto md:mx-0 md:bg-gray-900/70 md:rounded-lg md:p-4 md:shadow-sm mt-2">
+            <h3 className="text-[#E6B325] font-bold text-base mb-2 uppercase tracking-wide text-center md:text-left">Events</h3>
+            <ul className="space-y-1 text-center md:text-left">
               <li>
                 <Link href="/events" className="text-gray-300 hover:text-[#E6B325] transition-colors">Wheel Spin</Link>
               </li>

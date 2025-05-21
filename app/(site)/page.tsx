@@ -208,6 +208,12 @@ export default function Home() {
         </motion.div>
       </div>
 
+      {/* Google Reviews Section */}
+      <div className="w-full px-4 md:px-8">
+        <h2 className="text-2xl font-bold mb-4 text-[#E6B325]">Customer Reviews</h2>
+        <GoogleReviews />
+      </div>
+
       {/* Value proposition section highlighting key benefits */}
       <div className="mt-4 text-center w-full">
         <motion.h2
