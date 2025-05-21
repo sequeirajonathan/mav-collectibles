@@ -27,8 +27,13 @@ export default function MaintenancePage() {
       <CautionTape text="UNDER CONSTRUCTION" position="top" offset={48} height="4rem" />
       <CautionTape text="UNDER CONSTRUCTION" position="bottom" offset={48} height="4rem" />
       <div
-        className="flex flex-col justify-center items-center flex-1 w-full relative z-30 px-2"
-        style={{ paddingTop: "112px", paddingBottom: "112px" }}
+        className="flex flex-col justify-center items-center w-full relative z-30 px-2"
+        style={{
+          height: 'calc(100vh - 224px)', // 112px top + 112px bottom
+          marginTop: '112px',
+          marginBottom: '112px',
+          overflowY: 'auto',
+        }}
       >
         {/* Pikachu and heading */}
         <div className="flex flex-col items-center w-full max-w-xl">
@@ -62,7 +67,7 @@ export default function MaintenancePage() {
           </Button>
           <Button
             variant="outlineGold"
-            onClick={() => window.location.reload()}
+            onClick={() => router.refresh()}
             className="px-8 py-4 text-base md:text-lg"
           >
             Check Progress

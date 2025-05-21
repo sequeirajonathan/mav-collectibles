@@ -22,9 +22,13 @@ export async function fetchAlertBanner(): Promise<AlertBanner | null> {
       
       // Validate the data before returning
       return alertBannerSchema.parse(bannerWithId);
-    } catch (error) {
-      console.error('Error fetching alert banner from database:', error);
-      return null;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error fetching alert banner from database:', error, error.message, error.stack);
+      } else {
+        console.error('Error fetching alert banner from database:', error);
+      }
+      throw error;
     }
   }
 
@@ -38,9 +42,13 @@ export async function fetchAlertBanner(): Promise<AlertBanner | null> {
     };
     // Validate the response data
     return alertBannerSchema.parse(bannerWithId);
-  } catch (error) {
-    console.error('Error fetching alert banner from API:', error);
-    return null;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error fetching alert banner from API:', error, error.message, error.stack);
+    } else {
+      console.error('Error fetching alert banner from API:', error);
+    }
+    throw error;
   }
 }
 

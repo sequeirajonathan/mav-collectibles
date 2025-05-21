@@ -20,6 +20,7 @@ import {
 } from "@const/categories";
 import { SquareCategory } from "@interfaces/categories";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@components/ui/button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -69,10 +70,10 @@ const Navbar = () => {
       setActiveDropdown(null);
       setExpandedGroup(null);
       await signOut();
-      window.location.replace('/');
+      router.replace('/');
     } catch (error) {
       console.error('Error during sign out:', error);
-      window.location.replace('/');
+      router.replace('/');
     }
   };
   const hasAdminAccess =
@@ -155,7 +156,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop nav + search (hidden on mobile) */}
-            <div className="hidden md:flex-1 md:flex items-center space-x-4 justify-center">
+            <div className="hidden lg:flex lg:flex-1 items-center space-x-4 justify-center">
               {CATEGORY_GROUPS.map((group) => {
                 const isTCG = group.name === "TCG";
                 const cats = isTCG
@@ -169,7 +170,7 @@ const Navbar = () => {
                       if (el) dropdownRefs.current[group.name] = el;
                     }}
                   >
-                    <motion.button
+                    <Button
                       onClick={() =>
                         setActiveDropdown((cur) =>
                           cur === group.name ? null : group.name
@@ -184,7 +185,7 @@ const Navbar = () => {
                           activeDropdown === group.name ? "rotate-180" : ""
                         }`}
                       />
-                    </motion.button>
+                    </Button>
                     <AnimatePresence>
                     {activeDropdown === group.name && (
                         <motion.div
@@ -195,7 +196,7 @@ const Navbar = () => {
                           className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 z-50"
                         >
                           {cats.map((cat) => (
-                            <button
+                            <Button
                               key={cat.slug}
                               onClick={() =>
                                 handleCategoryClick(group.name, cat)
@@ -203,17 +204,17 @@ const Navbar = () => {
                               className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                             >
                               {cat.displayName}
-                            </button>
+                            </Button>
                           ))}
                           {isTCG && (
-                            <button
+                            <Button
                               onClick={() =>
                                 handleCategoryClick("TCG")
                               }
                               className="w-full text-left px-4 py-2 text-sm text-[#E6B325]/80 hover:bg-[#E6B325]/10"
                             >
                               View All TCG
-                            </button>
+                            </Button>
                           )}
                         </motion.div>
                     )}
@@ -246,13 +247,13 @@ const Navbar = () => {
                   placeholder="Search products..."
                   className="bg-transparent text-white px-4 py-1 w-full focus:outline-none focus:ring-0 focus:border-none"
                 />
-                <button
+                <Button
                   type="submit"
                   className="p-2 text-[#E6B325] bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none focus:shadow-none"
                   style={{ boxShadow: 'none', border: 'none' }}
                 >
                   <Search size={20} />
-                </button>
+                </Button>
               </form>
             </div>
 
@@ -260,7 +261,7 @@ const Navbar = () => {
             <div className="flex items-center space-x-4">
               {/* Profile */}
               <div className="relative">
-                <button
+                <Button
                   ref={profileButtonRef}
                   onClick={toggleProfile}
                   className={`p-2 rounded-full transition-colors ${
@@ -270,7 +271,7 @@ const Navbar = () => {
                   }`}
                 >
                   <User size={20} />
-                </button>
+                </Button>
                 <AnimatePresence>
                   {isProfileOpen && (
                     <motion.div
@@ -302,13 +303,13 @@ const Navbar = () => {
                           >
                             Profile Settings
                           </Link>
-                          <button
+                          <Button
                             onClick={handleSignOut}
                             className="w-full flex items-center px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                           >
                             <LogOut size={16} className="mr-2" />
                             Sign Out
-                          </button>
+                          </Button>
                         </>
                       ) : (
                         <Link
@@ -338,12 +339,12 @@ const Navbar = () => {
               </Link>
 
               {/* Mobile menu toggle */}
-              <button
-                className="md:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325]"
+              <Button
+                className="flex lg:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325]"
                 onClick={toggleMenu}
               >
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -352,7 +353,7 @@ const Navbar = () => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="md:hidden overflow-hidden"
+              className="overflow-hidden lg:hidden"
               variants={mobileMenuVariants}
               initial="hidden"
               animate="visible"
@@ -371,13 +372,13 @@ const Navbar = () => {
                     placeholder="Search..."
                     className="bg-transparent text-white px-4 py-2 w-full focus:outline-none focus:ring-0 focus:border-none"
                   />
-                  <button
+                  <Button
                     type="submit"
                     className="p-2 text-[#E6B325] bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none focus:shadow-none"
                     style={{ boxShadow: 'none', border: 'none' }}
                   >
                     <Search size={20} />
-                  </button>
+                  </Button>
                 </form>
 
                 {/* Category groups */}
@@ -385,7 +386,7 @@ const Navbar = () => {
                   const isTCG = group.name === "TCG";
                   return (
                     <div key={group.name} className="space-y-1">
-                      <button
+                      <Button
                         onClick={() => toggleGroup(group.name)}
                         className="w-full flex items-center justify-between px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
                       >
@@ -396,7 +397,7 @@ const Navbar = () => {
                             expandedGroup === group.name ? "rotate-180" : ""
                           }`}
                         />
-                      </button>
+                      </Button>
                       <AnimatePresence>
                         {expandedGroup === group.name && (
                           <motion.div
@@ -410,27 +411,23 @@ const Navbar = () => {
                               ? getTopTCGCategories(group.categories)
                               : group.categories
                             ).map((cat) => (
-                              <Link
+                              <Button
                                 key={cat.slug}
-                                href="#"
-                                className="block px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
-                                onClick={() =>
-                                  handleCategoryClick(group.name, cat)
-                                }
+                                type="button"
+                                className="block w-full text-left px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
+                                onClick={() => handleCategoryClick(group.name, cat)}
                               >
                                 {cat.displayName}
-                              </Link>
+                              </Button>
                             ))}
                             {isTCG && (
-                              <Link
-                                href="/products"
-                                className="block px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
-                                onClick={() =>
-                                  handleCategoryClick(group.name)
-                                }
+                              <Button
+                                type="button"
+                                className="block w-full text-left px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
+                                onClick={() => handleCategoryClick(group.name)}
                               >
                                 View All TCG
-                              </Link>
+                              </Button>
                             )}
                           </motion.div>
                         )}
