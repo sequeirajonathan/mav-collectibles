@@ -209,10 +209,7 @@ export default function Home() {
       </div>
 
       {/* Google Reviews Section */}
-      <div className="w-full px-4 md:px-8">
-        <h2 className="text-2xl font-bold mb-4 text-[#E6B325]">Customer Reviews</h2>
-        <GoogleReviews />
-      </div>
+      <GoogleReviews />
 
       {/* Value proposition section highlighting key benefits */}
       <div className="mt-4 text-center w-full">
@@ -262,13 +259,8 @@ export default function Home() {
       </div>
 
       <div className="mt-4 text-center w-full">
-        <Link 
-          href="/category/tcg" 
-          className="inline-block"
-        >
-          <Button variant="gold">
-            CONTINUE BROWSING
-          </Button>
+        <Link href="/category/tcg" className="inline-block">
+          <Button variant="gold">CONTINUE BROWSING</Button>
         </Link>
       </div>
     </div>

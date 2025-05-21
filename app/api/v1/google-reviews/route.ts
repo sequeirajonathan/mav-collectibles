@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export async function GET() {
   const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID;
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   if (!placeId) {
     return NextResponse.json(
