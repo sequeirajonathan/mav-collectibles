@@ -11,7 +11,7 @@ import "@styles/admin.css";
 export default function AdminDashboard() {
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6 text-brand-gold">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-[#E6B325]">Admin Dashboard</h1>
       
       <Tabs defaultValue="feature-flags" className="w-full">
         <div className="overflow-x-auto pb-2">

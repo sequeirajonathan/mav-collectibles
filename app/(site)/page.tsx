@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-// import Link from "next/link"; // No longer needed
 import FeaturedEvents from "@components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
 import VideoSection from "@components/ui/VideoSection";
 import { motion } from "framer-motion";
 import { CATEGORY_MAPPING } from "@const/categories";
 import { useRouter } from "next/navigation";
+import GoogleReviews from "@components/ui/GoogleReviews";
 import Link from "next/link";
 import { Button } from "@components/ui/button";
 
@@ -30,7 +30,7 @@ export default function Home() {
       description:
         "Check out the latest Paldean Fates expansion, now available in store and online!",
       buttonText: "Shop Now",
-      buttonLink: "/products/pokemon/paldean-fates",
+      buttonLink: "/category/pokemon-tcg?group=TCG",
       bgColor: "bg-gradient-to-r from-blue-900 to-purple-900",
     },
     {
@@ -39,7 +39,7 @@ export default function Home() {
       description:
         "Join us every Friday at 6PM for our weekly Pokémon TCG tournament. All skill levels welcome!",
       buttonText: "Learn More",
-      buttonLink: "/events/tournaments",
+      buttonLink: "/category/events",
       bgColor: "bg-gradient-to-r from-gray-900 to-gray-800",
     },
     {
@@ -48,7 +48,7 @@ export default function Home() {
       description:
         "For a limited time, get free shipping on all orders over $50. No coupon needed!",
       buttonText: "Start Shopping",
-      buttonLink: "/products",
+      buttonLink: "/category/tcg",
       bgColor: "bg-gradient-to-r from-[#B38A00]/20 to-[#E6B325]/20",
     },
   ];
@@ -152,7 +152,7 @@ export default function Home() {
         <motion.h2
           initial={false}
           animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="text-3xl font-bold text-center mb-8 text-brand-gold"
+          className="text-3xl font-bold text-center mb-8 text-[#E6B325]"
         >
           Trading Card Games
         </motion.h2>
@@ -190,7 +190,7 @@ export default function Home() {
 
                     {/* Title & View All */}
                     <div className="text-center mt-2">
-                      <h3 className="text-lg md:text-xl font-bold group-hover:text-brand-gold transition-colors">
+                      <h3 className="text-lg md:text-xl font-bold group-hover:text-[#E6B325] transition-colors">
                         {game.title}
                       </h3>
                       <span className="text-xs md:text-sm text-brand-blue group-hover:text-brand-blue-light transition-colors">
@@ -213,7 +213,7 @@ export default function Home() {
         <motion.h2
           initial={false}
           animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="text-3xl font-bold mb-4 text-brand-gold"
+          className="text-3xl font-bold mb-4 text-[#E6B325]"
         >
           Why Choose MAV Collectibles?
         </motion.h2>
@@ -236,7 +236,7 @@ export default function Home() {
             {
               title: "Community Focus",
               description:
-                "We're more than a store - we're a hub for collectors and players.",
+                "We're more than a store – we're a hub for collectors and players, where everyone gets treated like family.",
             },
           ].map((feature, index) => (
             <motion.div

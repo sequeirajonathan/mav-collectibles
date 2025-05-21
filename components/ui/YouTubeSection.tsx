@@ -13,7 +13,7 @@ export default function YouTubeSection() {
   
   return (
     <section className="w-full max-w-6xl mx-auto my-8">
-      <h2 className="text-2xl font-bold mb-4 text-brand-gold">
+      <h2 className="text-2xl font-bold mb-4 text-[#E6B325]">
         {youtubeSettings?.isLiveStream ? 'Live Stream' : 'Featured Video'}
       </h2>
       <YouTubePlayer useContextSettings={true} />
