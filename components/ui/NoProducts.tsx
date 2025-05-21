@@ -22,7 +22,7 @@ export function NoProducts() {
         We couldn&apos;t find any products in this category. Check back later or explore our other collections.
       </p>
       <Link 
-        href="/products" 
+        href="/category/tcg" 
         className="inline-flex items-center px-6 py-3 rounded-lg bg-[#E6B325] text-black font-semibold hover:bg-[#c49920] transition-colors"
       >
         Continue Shopping

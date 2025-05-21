@@ -4,26 +4,6 @@ import {
 } from "@interfaces";
 import { axiosClient } from "@lib/axios";
 
-export async function fetchCatalogItems(
-  cursor: string | null = null,
-  group: string = "TCG",
-  search: string = "",
-  categoryId: string | null = null,
-  stock: string = "IN_STOCK",
-  sort: string = "name_asc"
-): Promise<NormalizedCatalogResponse> {
-  const params = new URLSearchParams();
-  if (cursor) params.append('cursor', cursor);
-  if (group) params.append('group', group);
-  if (search) params.append('search', search);
-  if (categoryId) params.append('categoryId', categoryId);
-  if (stock) params.append('stock', stock);
-  if (sort) params.append('sort', sort);
-
-  const { data } = await axiosClient.get(`/products?${params.toString()}`);
-  return data;
-}
-
 export async function searchProducts(
   search: string,
   cursor: string | null = null,

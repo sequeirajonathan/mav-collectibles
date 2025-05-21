@@ -113,7 +113,7 @@ export default function SearchPage() {
           <div className="text-2xl font-semibold mb-2">No results found</div>
           <button
             className="mt-4 px-6 py-2 rounded bg-[#E6B325] text-black font-semibold hover:bg-[#FFD966] transition"
-            onClick={() => router.push("/products")}
+            onClick={() => router.push("/category/tcg")}
           >
             Reset Filters
           </button>

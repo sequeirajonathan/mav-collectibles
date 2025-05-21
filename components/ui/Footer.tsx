@@ -100,7 +100,7 @@ const Footer = () => {
                 {group.categories.slice(0, 6).map((category) => (
                   <li key={category.slug}>
                     <Link
-                      href={`/products/${category.slug}`}
+                      href={`/category/${category.slug}`}
                       className="text-gray-400 hover:text-[#E6B325] transition-colors"
                     >
                       {category.displayName}
@@ -110,9 +110,7 @@ const Footer = () => {
                 {group.categories.length > 6 && (
                   <li>
                     <Link
-                      href={`/products?filter=${group.name
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
+                      href={`/category/${group.name.toLowerCase().replace(/\s+/g, "-")}`}
                       className="text-[#E6B325] hover:underline transition-colors"
                     >
                       View All {group.name}

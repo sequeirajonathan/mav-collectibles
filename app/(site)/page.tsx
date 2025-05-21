@@ -9,6 +9,8 @@ import VideoSection from "@components/ui/VideoSection";
 import { motion } from "framer-motion";
 import { CATEGORY_MAPPING } from "@const/categories";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@components/ui/button";
 
 /**
  * Home page component that serves as the main landing page for MAV Collectibles
@@ -251,6 +253,17 @@ export default function Home() {
             </motion.div>
           ))}
         </motion.div>
+      </div>
+
+      <div className="mt-4 text-center w-full">
+        <Link 
+          href="/category/tcg" 
+          className="inline-block"
+        >
+          <Button variant="gold">
+            CONTINUE BROWSING
+          </Button>
+        </Link>
       </div>
     </div>
   );
