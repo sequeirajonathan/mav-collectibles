@@ -10,6 +10,7 @@ export default function SignUpForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -31,6 +32,7 @@ export default function SignUpForm() {
       password,
       options: {
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        data: { phoneNumber },
       },
     })
 
@@ -38,7 +40,6 @@ export default function SignUpForm() {
       setError(error.message)
       setLoading(false)
     } else {
-      // Show success message and instructions
       setError(null)
       setLoading(false)
       router.push('/login?message=Please check your email for the confirmation link. Click the link to complete your registration.')
@@ -141,6 +142,20 @@ export default function SignUpForm() {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:border-[#E6B325] focus:ring-0 text-white autofill:bg-gray-900 [-webkit-autofill:focus]:bg-gray-900 [-webkit-autofill:hover]:bg-gray-900 [-webkit-autofill:active]:bg-gray-900 [-webkit-autofill]:bg-gray-900 [-webkit-autofill]:text-white [-webkit-autofill]:shadow-[0_0_0_30px_rgb(17,24,39)_inset]"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phoneNumber" className="block text-sm font-medium text-[#E6B325]">
+            Phone Number
+          </label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             required
             className="mt-1 block w-full px-3 py-2 bg-gray-900 border border-[#E6B325]/50 rounded-md shadow-sm focus:outline-none focus:border-[#E6B325] focus:ring-0 text-white autofill:bg-gray-900 [-webkit-autofill:focus]:bg-gray-900 [-webkit-autofill:hover]:bg-gray-900 [-webkit-autofill:active]:bg-gray-900 [-webkit-autofill]:bg-gray-900 [-webkit-autofill]:text-white [-webkit-autofill]:shadow-[0_0_0_30px_rgb(17,24,39)_inset]"
           />

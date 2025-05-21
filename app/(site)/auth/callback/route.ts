@@ -22,10 +22,12 @@ export async function GET(request: Request) {
           where: { email: user.email! },
           update: {
             lastLoginAt: new Date(),
+            ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
           },
           create: {
             email: user.email!,
             role: 'CUSTOMER', // Default role
+            ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
           },
         });
 

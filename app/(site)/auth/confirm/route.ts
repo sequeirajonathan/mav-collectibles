@@ -2,6 +2,7 @@ import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest } from 'next/server'
 import { createClient } from '@lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { prisma } from '@lib/prisma'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -20,8 +21,19 @@ export async function GET(request: NextRequest) {
       // Create or update UserProfile after successful verification
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        // Here you would create/update the UserProfile in your database
-        // This is where you'd sync Supabase auth user with your UserProfile
+        // Create or update UserProfile in your database
+        await prisma.userProfile.upsert({
+          where: { email: user.email! },
+          update: {
+            lastLoginAt: new Date(),
+            ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
+          },
+          create: {
+            email: user.email!,
+            role: 'CUSTOMER',
+            ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
+          },
+        });
       }
       
       redirect(next)
