@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-// import Link from "next/link"; // No longer needed
 import FeaturedEvents from "@components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
 import VideoSection from "@components/ui/VideoSection";
 import { motion } from "framer-motion";
 import { CATEGORY_MAPPING } from "@const/categories";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@components/ui/button";
+import GoogleReviews from "@components/ui/GoogleReviews";
 
 /**
  * Home page component that serves as the main landing page for MAV Collectibles
@@ -28,7 +30,7 @@ export default function Home() {
       description:
         "Check out the latest Paldean Fates expansion, now available in store and online!",
       buttonText: "Shop Now",
-      buttonLink: "/products/pokemon/paldean-fates",
+      buttonLink: "/category/pokemon-tcg?group=TCG",
       bgColor: "bg-gradient-to-r from-blue-900 to-purple-900",
     },
     {
@@ -37,7 +39,7 @@ export default function Home() {
       description:
         "Join us every Friday at 6PM for our weekly Pokémon TCG tournament. All skill levels welcome!",
       buttonText: "Learn More",
-      buttonLink: "/events/tournaments",
+      buttonLink: "/category/events",
       bgColor: "bg-gradient-to-r from-gray-900 to-gray-800",
     },
     {
@@ -46,7 +48,7 @@ export default function Home() {
       description:
         "For a limited time, get free shipping on all orders over $50. No coupon needed!",
       buttonText: "Start Shopping",
-      buttonLink: "/products",
+      buttonLink: "/category/tcg",
       bgColor: "bg-gradient-to-r from-[#B38A00]/20 to-[#E6B325]/20",
     },
   ];
@@ -204,6 +206,11 @@ export default function Home() {
             </motion.div>
           ))}
         </motion.div>
+      </div>
+
+      {/* Google Reviews Section */}
+      <div className="w-full px-4 md:px-8">
+        <GoogleReviews />
       </div>
 
       {/* Value proposition section highlighting key benefits */}
