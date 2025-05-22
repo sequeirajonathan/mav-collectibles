@@ -7,8 +7,7 @@ import { useGoogleReviews } from "@hooks/useGoogleReviews";
 function renderStars(rating: number) {
   // Google returns float, e.g. 4.7, 3.5
   const stars = [];
-  const rounded = Math.round(rating * 2) / 2; // nearest 0.5
-  console.log("Rating:", rating, "Rounded:", rounded);
+  const rounded = Math.round(rating * 2) / 2;
 
   for (let i = 1; i <= 5; i++) {
     let icon;
@@ -19,10 +18,6 @@ function renderStars(rating: number) {
     } else {
       icon = <Star className="w-5 h-5 text-[#E6B325] fill-none" />;
     }
-    console.log(
-      `Star ${i}:`,
-      i <= rounded ? "filled" : i - 0.5 === rounded ? "half" : "empty"
-    );
     stars.push(
       <motion.span
         key={i}

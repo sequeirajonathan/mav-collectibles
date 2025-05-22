@@ -6,6 +6,9 @@ export function useFeaturedEvents() {
   return useQuery<FeaturedEvent[]>({
     queryKey: ['featuredEvents'],
     queryFn: fetchFeaturedEvents,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (v5 uses gcTime instead of cacheTime)
+    refetchOnWindowFocus: false, // less network usage
   });
 }
 

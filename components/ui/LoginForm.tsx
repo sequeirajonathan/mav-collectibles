@@ -20,6 +20,8 @@ export function LoginForm({ redirectTo = '/dashboard', hideSignupLink = false }:
   const router = useRouter();
   const searchParams = useSearchParams();
   const finalRedirectTo = redirectTo || searchParams.get('redirectTo') || '/dashboard';
+  const message = searchParams.get('message');
+  const retryEmail = searchParams.get('retryEmail');
 
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -101,6 +103,40 @@ export function LoginForm({ redirectTo = '/dashboard', hideSignupLink = false }:
       </div>
       
       <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">Login</h1>
+      
+      {message && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-4">
+          {decodeURIComponent(message)}
+        </div>
+      )}
+      {retryEmail && (
+        <button
+          className="bg-[#E6B325] text-black px-4 py-2 rounded font-medium hover:bg-[#FFD966] transition-colors mb-4"
+          onClick={async () => {
+            setLoading(true);
+            setError(null);
+            try {
+              const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: retryEmail,
+                options: {
+                  emailRedirectTo: `${window.location.origin}/auth/callback`,
+                },
+              });
+              if (error) throw error;
+              alert('Confirmation email resent! Please check your inbox.');
+            } catch {
+              setError('Failed to resend confirmation email.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading}
+          type="button"
+        >
+          Resend Confirmation Email
+        </button>
+      )}
       
       {error && (
         <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded mb-4">

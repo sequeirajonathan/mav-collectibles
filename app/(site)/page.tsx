@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import FeaturedEvents from "@components/ui/FeaturedEvents";
 import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
 import VideoSection from "@components/ui/VideoSection";
 import { motion } from "framer-motion";
@@ -11,6 +10,8 @@ import { useRouter } from "next/navigation";
 import GoogleReviews from "@components/ui/GoogleReviews";
 import Link from "next/link";
 import { Button } from "@components/ui/button";
+import { useFeaturedEvents } from "@hooks/useFeaturedEvents";
+import FeaturedEvent from "@components/ui/FeaturedEvent";
 
 /**
  * Home page component that serves as the main landing page for MAV Collectibles
@@ -144,8 +145,8 @@ export default function Home() {
         <AnnouncementCarousel announcements={announcements} />
       </div>
 
-      {/* Upcoming events section */}
-      <FeaturedEvents />
+      {/* Nearest upcoming event section */}
+      <NearestEventSection />
 
       {/* Trading card games grid with hover effects and animations */}
       <div className="w-full">
@@ -264,5 +265,43 @@ export default function Home() {
         </Link>
       </div>
     </div>
+  );
+}
+
+function NearestEventSection() {
+  const { data: events, isLoading } = useFeaturedEvents();
+  if (isLoading) {
+    return (
+      <div className="animate-pulse h-32 sm:h-40 bg-gray-800 rounded-md w-full mb-6 sm:mb-8" />
+    );
+  }
+  if (!events || events.length === 0) return null;
+  // Find the soonest upcoming enabled event
+  const now = new Date();
+  const enabledEvents = events
+    .filter(e => e.enabled && e.date && !isNaN(Date.parse(e.date)))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  let nearest = enabledEvents.find(e => new Date(e.date) >= now);
+  if (!nearest && enabledEvents.length > 0) {
+    nearest = enabledEvents[0]; // fallback to first event if all are in the past
+  }
+  if (!nearest) return null;
+  return (
+    <section className="my-8 sm:my-12 w-full">
+      <h2 className="text-2xl font-bold text-center mb-4 text-[#E6B325]">Upcoming Event</h2>
+      <div className="flex justify-center">
+        <div className="w-full px-4 md:px-8 cursor-pointer" onClick={() => window.location.assign('/events')}>
+          <FeaturedEvent
+            title={nearest.title}
+            date={nearest.date}
+            description={nearest.description}
+            imageSrc={nearest.imageSrc}
+            imageAlt={nearest.imageAlt || nearest.title || "Event image"}
+            link={nearest.link}
+          />
+        </div>
+      </div>
+    </section>
   );
 }

@@ -9,14 +9,12 @@ import {
   CATEGORY_MAPPING,
   COLLECTIBLES_MAPPING,
   SUPPLIES_MAPPING,
-  EVENTS_MAPPING,
 } from "@const/categories";
 
 const ALL_CATEGORIES = {
   ...CATEGORY_MAPPING,
   ...COLLECTIBLES_MAPPING,
   ...SUPPLIES_MAPPING,
-  ...EVENTS_MAPPING,
 };
 
 export default function CategoryPage() {

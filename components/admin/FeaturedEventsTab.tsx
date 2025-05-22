@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useAppContext } from "@contexts/AppContext";
-import { type FeaturedEvent } from "@interfaces";
+import type { FeaturedEvent as FeaturedEventType } from "@interfaces";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import EventForm from "./EventForm";
-import Image from "next/image";
+import FeaturedEvent from "@components/ui/FeaturedEvent";
 import { Edit, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -21,7 +21,7 @@ export default function FeaturedEventsTab() {
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [showNewEventForm, setShowNewEventForm] = useState(false);
   
-  const handleAddEvent = (event: Partial<FeaturedEvent>) => {
+  const handleAddEvent = (event: Partial<FeaturedEventType>) => {
     // Ensure all required fields are present
     if (!event.title || !event.description || !event.imageSrc) {
       toast.error("Missing required fields");
@@ -29,13 +29,12 @@ export default function FeaturedEventsTab() {
     }
     
     // Create a complete event object with defaults for optional fields
-    const completeEvent: Omit<FeaturedEvent, "id" | "createdAt" | "updatedAt"> = {
+    const completeEvent: Omit<FeaturedEventType, "id" | "createdAt" | "updatedAt"> = {
       title: event.title,
       description: event.description,
       imageSrc: event.imageSrc,
       date: event.date || "",
       imageAlt: event.imageAlt || "",
-      bulletPoints: event.bulletPoints || [],
       link: event.link || "",
       enabled: event.enabled !== undefined ? event.enabled : true,
       order: event.order || 0
@@ -46,7 +45,7 @@ export default function FeaturedEventsTab() {
     toast.success("New event added successfully!");
   };
   
-  const handleUpdateEvent = (id: string, event: Partial<FeaturedEvent>) => {
+  const handleUpdateEvent = (id: string, event: Partial<FeaturedEventType>) => {
     updateFeaturedEvent(id, event);
     setEditingEventId(null);
     toast.success("Event updated successfully!");
@@ -68,7 +67,6 @@ export default function FeaturedEventsTab() {
                 description: '',
                 imageSrc: '',
                 imageAlt: '',
-                bulletPoints: [],
                 link: '',
                 enabled: true,
                 order: 0
@@ -136,24 +134,7 @@ export default function FeaturedEventsTab() {
               </CardContent>
             ) : (
               <CardContent>
-                <div className="relative w-full h-40">
-                  <Image
-                    src={event.imageSrc}
-                    alt={event.imageAlt}
-                    fill
-                    className="object-contain rounded"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm mb-2">{event.description}</p>
-                  {event.bulletPoints && event.bulletPoints.length > 0 && (
-                    <ul className="list-disc list-inside text-sm">
-                      {event.bulletPoints.map((point, index) => (
-                        <li key={index}>{point}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                <FeaturedEvent {...event} />
               </CardContent>
             )}
           </Card>

@@ -23,7 +23,6 @@ export interface FeaturedEvent {
   description: string;
   imageSrc: string;
   imageAlt: string;
-  bulletPoints: string[];
   link?: string;
   enabled: boolean;
   order: number;

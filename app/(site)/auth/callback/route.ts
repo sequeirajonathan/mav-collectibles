@@ -11,7 +11,20 @@ export async function GET(request: Request) {
     const { data: { user }, error: authError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (authError) {
-      console.error('Auth error:', authError);
+      // Detect OTP expired or invalid
+      if (
+        authError.message?.includes('expired') ||
+        authError.message?.includes('invalid') ||
+        authError.message?.includes('OTP')
+      ) {
+        // Try to get the email from the query or session
+        const email = requestUrl.searchParams.get('email') || '';
+        const retryUrl = new URL('/login', requestUrl.origin);
+        retryUrl.searchParams.set('message', 'Your confirmation link is invalid or expired. Please try again or resend the confirmation email.');
+        if (email) retryUrl.searchParams.set('retryEmail', email);
+        return NextResponse.redirect(retryUrl);
+      }
+      // Other auth errors
       return NextResponse.redirect(new URL('/login?error=auth', requestUrl.origin));
     }
 

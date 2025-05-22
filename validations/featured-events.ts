@@ -10,7 +10,6 @@ export const featuredEventSchema = z.object({
   date: dateSchema,
   imageSrc: urlSchema,
   imageAlt: nonEmptyStringSchema,
-  bulletPoints: z.array(bulletPointSchema).default([]),
   link: optionalUrlSchema,
   enabled: booleanSchema.default(true),
   order: positiveNumberSchema.default(0),

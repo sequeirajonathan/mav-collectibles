@@ -63,7 +63,6 @@ model FeaturedEvent {
   description  String
   imageSrc     String
   imageAlt     String
-  bulletPoints String[]
   link         String?
   enabled      Boolean   @default(true)
   order        Int       @default(0)

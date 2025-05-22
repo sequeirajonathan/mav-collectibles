@@ -8,7 +8,6 @@ import {
   CATEGORY_MAPPING,
   COLLECTIBLES_MAPPING,
   SUPPLIES_MAPPING,
-  EVENTS_MAPPING,
   CATEGORY_GROUP_SLUGS,
 } from "@const/categories";
 
@@ -16,7 +15,6 @@ const ALL_MAPPINGS = [
   ...Object.values(CATEGORY_MAPPING),
   ...Object.values(COLLECTIBLES_MAPPING),
   ...Object.values(SUPPLIES_MAPPING),
-  ...Object.values(EVENTS_MAPPING),
 ];
 
 export async function GET(

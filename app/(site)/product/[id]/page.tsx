@@ -70,6 +70,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const mainVariation = product.variations[0];
   const price = mainVariation?.priceAmount || product.variations[0]?.priceAmount;
   const isAvailable = !mainVariation?.soldOut;
+  const maxQty = Math.max(1, Math.min(5, mainVariation.inventoryCount || 1));
 
   return (
     <div className="min-h-[60vh] px-4 py-12">
@@ -132,7 +133,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     onChange={(e) => setQuantity(Number(e.target.value))}
                     className="appearance-none bg-gray-900 border border-gray-800/50 hover:border-[#E6B325]/30 text-white py-2 pl-4 pr-10 rounded-xl focus:outline-none focus:border-[#E6B325] transition-colors"
                   >
-                    {[...Array(10)].map((_, i) => (
+                    {[...Array(maxQty)].map((_, i) => (
                       <option key={i + 1} value={i + 1}>
                         {i + 1}
                       </option>

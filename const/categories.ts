@@ -88,6 +88,11 @@ export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
     slug: "pokemonsingles",
     squareCategoryId: "ZPLTFCCZRS3FENOS4324RK4E",
   },
+  squareenix: {
+    displayName: "Square Enix",
+    slug: "squareenix",
+    squareCategoryId: "2UYGU6IBT5CC2XHPOFISKRDC",
+  },
 };
 
 // --- Collectibles ---
@@ -116,12 +121,7 @@ export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
     displayName: "Bandai Namco",
     slug: "bandai",
     squareCategoryId: "2WGAXPFOCVU6E3YCKLENXCBZ",
-  },
-  squareenix: {
-    displayName: "Square Enix",
-    slug: "squareenix",
-    squareCategoryId: "2UYGU6IBT5CC2XHPOFISKRDC",
-  },
+  }
 };
 
 // --- Supplies & Grading ---

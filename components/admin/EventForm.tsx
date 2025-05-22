@@ -4,7 +4,6 @@ import { Label } from "@components/ui/label";
 import { Input } from "@components/ui/input";
 import { Textarea } from "@components/ui/textarea";
 import { Button } from "@components/ui/button";
-import { Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { supabase } from "@lib/supabase";
@@ -19,35 +18,9 @@ interface EventFormProps {
 
 export default function EventForm({ event, onSave, onCancel, buttonText = "Save" }: EventFormProps) {
   const [formData, setFormData] = useState(event);
-  const [newBulletPoint, setNewBulletPoint] = useState("");
   
   const handleChange = (field: keyof FeaturedEvent, value: string | string[] | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-  
-  const handleAddBulletPoint = () => {
-    if (newBulletPoint.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        bulletPoints: [...(prev.bulletPoints || []), newBulletPoint.trim()]
-      }));
-      setNewBulletPoint("");
-    }
-  };
-  
-  const handleRemoveBulletPoint = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      bulletPoints: prev.bulletPoints?.filter((_, i) => i !== index) || []
-    }));
-  };
-  
-  const handleEditBulletPoint = (index: number, value: string) => {
-    setFormData(prev => {
-      const newBulletPoints = [...(prev.bulletPoints || [])];
-      newBulletPoints[index] = value;
-      return { ...prev, bulletPoints: newBulletPoints };
-    });
   };
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,42 +164,6 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
           value={formData.link || ""}
           onChange={(e) => handleChange("link", e.target.value)}
         />
-      </div>
-      
-      <div>
-        <Label>Bullet Points</Label>
-        <div className="space-y-2 mt-2">
-          {formData.bulletPoints?.map((point, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <Input
-                value={point}
-                onChange={(e) => handleEditBulletPoint(index, e.target.value)}
-              />
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => handleRemoveBulletPoint(index)}
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          ))}
-          
-          <div className="flex items-center space-x-2">
-            <Input
-              value={newBulletPoint}
-              onChange={(e) => setNewBulletPoint(e.target.value)}
-              placeholder="Add a bullet point"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleAddBulletPoint}
-            >
-              <Plus size={16} />
-            </Button>
-          </div>
-        </div>
       </div>
       
       <div className="flex justify-end space-x-2 pt-4">
