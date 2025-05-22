@@ -103,12 +103,6 @@ async function main() {
       description: 'Join us for our monthly Pokémon Trading Card Game championship! Great prizes for top players.',
       imageSrc: '/images/pokemon-event.jpg',
       imageAlt: 'Pokémon Trading Card Game Championship',
-      bulletPoints: [
-        'Date: December 15, 2023',
-        'Time: 1:00 PM - 6:00 PM',
-        'Entry Fee: $10',
-        'Prizes: Booster packs and exclusive promos',
-      ],
       link: '/events/pokemon-championship',
       enabled: true,
       order: 0,
