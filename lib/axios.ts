@@ -14,6 +14,23 @@ const axiosClient = axios.create({
   },
 });
 
+// Debug: Log all requests and responses
+axiosClient.interceptors.request.use((config) => {
+  console.log('[AXIOS REQUEST]', config.method, `${config.baseURL || ''}${config.url || ''}`, config);
+  return config;
+});
+
+axiosClient.interceptors.response.use(
+  (response) => {
+    console.log('[AXIOS RESPONSE]', response.config.url, response);
+    return response;
+  },
+  (error) => {
+    console.error('[AXIOS ERROR]', error.config?.url, error);
+    return Promise.reject(error);
+  }
+);
+
 if (!isServer) {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
