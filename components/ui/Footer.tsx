@@ -59,9 +59,8 @@ const Footer = () => {
             <h3 className="text-[#E6B325] font-bold text-base mb-2 uppercase tracking-wide text-center md:text-left">Events</h3>
             <ul className="space-y-1 text-center md:text-left">
               <li>
-                <Link href="/events" className="text-gray-300 hover:text-[#E6B325] transition-colors">Wheel Spin</Link>
+                <Link href="/events" className="text-gray-300 hover:text-[#E6B325] transition-colors">View All Events</Link>
               </li>
-              {/* Add more events as needed */}
             </ul>
           </div>
         </div>

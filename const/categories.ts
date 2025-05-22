@@ -158,15 +158,6 @@ export const SUPPLIES_MAPPING: Record<string, SquareCategory> = {
   },
 };
 
-// --- Events ---
-export const EVENTS_MAPPING: Record<string, SquareCategory> = {
-  wheelspin: {
-    displayName: "Wheel Spin",
-    slug: "wheelspin",
-    squareCategoryId: "T2CGZVNJAQXDNS6ZTOC3ULGC",
-  },
-};
-
 // --- Grouped for Navigation/Filtering ---
 export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
@@ -181,10 +172,6 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     name: "Supplies & Grading",
     categories: Object.values(SUPPLIES_MAPPING),
   },
-  {
-    name: "Events",
-    categories: Object.values(EVENTS_MAPPING),
-  },
 ];
 
 export const CATEGORY_GROUP_SLUGS: Record<string, string[]> = {
@@ -193,5 +180,4 @@ export const CATEGORY_GROUP_SLUGS: Record<string, string[]> = {
     (cat) => cat.squareCategoryId
   ),
   supplies: Object.values(SUPPLIES_MAPPING).map((cat) => cat.squareCategoryId),
-  events: Object.values(EVENTS_MAPPING).map((cat) => cat.squareCategoryId),
 };

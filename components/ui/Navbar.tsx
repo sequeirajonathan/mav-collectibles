@@ -156,8 +156,8 @@ const Navbar = () => {
             </div>
 
             {/* Desktop nav + search (hidden on mobile) */}
-            <div className="hidden lg:flex lg:flex-1 items-center space-x-4 justify-center">
-              {CATEGORY_GROUPS.map((group) => {
+            <div className="hidden min-[1110px]:flex min-[1110px]:flex-1 items-center space-x-4 justify-center">
+              {CATEGORY_GROUPS.filter(group => group.name !== "Events").map((group) => {
                 const isTCG = group.name === "TCG";
                 const cats = isTCG
                   ? getTopTCGCategories(group.categories)
@@ -222,6 +222,13 @@ const Navbar = () => {
                   </div>
                 );
               })}
+
+              <Link
+                href="/events"
+                className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 hover:text-[#FFD966]"
+              >
+                Events
+              </Link>
 
               {navigationItems.map((item) => (
                 <Link
@@ -340,7 +347,7 @@ const Navbar = () => {
 
               {/* Mobile menu toggle */}
               <Button
-                className="flex lg:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325]"
+                className="flex min-[1110px]:hidden p-2 rounded-full text-white hover:bg-brand-blue/20 hover:text-[#E6B325]"
                 onClick={toggleMenu}
               >
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -353,7 +360,7 @@ const Navbar = () => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="overflow-hidden lg:hidden"
+              className="overflow-hidden min-[1110px]:hidden"
               variants={mobileMenuVariants}
               initial="hidden"
               animate="visible"
@@ -382,7 +389,7 @@ const Navbar = () => {
                 </form>
 
                 {/* Category groups */}
-                {CATEGORY_GROUPS.map((group) => {
+                {CATEGORY_GROUPS.filter(group => group.name !== "Events").map((group) => {
                   const isTCG = group.name === "TCG";
                   return (
                     <div key={group.name} className="space-y-1">
