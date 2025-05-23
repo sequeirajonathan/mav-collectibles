@@ -31,8 +31,10 @@ export default function VideoSection() {
   const [mounted, setMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Initialize mounted state
   useEffect(() => {
     setMounted(true);
+    return () => setMounted(false);
   }, []);
 
   const isVideoSectionEnabled = getFeatureFlag('showVideoPlayer');
@@ -49,6 +51,7 @@ export default function VideoSection() {
   const hasVideo = hasYouTubeVideo || hasDirectVideo;
   const videoType = hasDirectVideo ? 'direct' : (hasYouTubeVideo ? 'youtube' : null);
 
+  // Handle video ready state
   useEffect(() => {
     if (!hasVideo || videoReady) return;
 
@@ -60,6 +63,7 @@ export default function VideoSection() {
     return () => clearTimeout(timer);
   }, [hasVideo, videoReady]);
 
+  // Reset video states when hasVideo changes
   useEffect(() => {
     if (!hasVideo) {
       setVideoReady(false);
@@ -69,10 +73,13 @@ export default function VideoSection() {
     }
   }, [hasVideo]);
 
+  // Preload fallback image
   useEffect(() => {
+    if (!mounted) return;
+    
     const img = new Image();
     img.src = VIDEO_CDN.fallbackImage;
-  }, []);
+  }, [mounted]);
 
   const handleVideoLoad = () => {
     setVideoLoaded(true);
@@ -87,14 +94,21 @@ export default function VideoSection() {
     setVideoPlaying(false);
   };
 
+  // Handle video element events
   useEffect(() => {
+    if (!mounted) return;
+    
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    videoElement.addEventListener('loadeddata', handleVideoLoad);
-    videoElement.addEventListener('canplay', handleVideoLoad);
-    videoElement.addEventListener('playing', handleVideoPlaying);
-    videoElement.addEventListener('error', handleVideoError);
+    const handleLoad = () => handleVideoLoad();
+    const handlePlaying = () => handleVideoPlaying();
+    const handleError = () => handleVideoError();
+
+    videoElement.addEventListener('loadeddata', handleLoad);
+    videoElement.addEventListener('canplay', handleLoad);
+    videoElement.addEventListener('playing', handlePlaying);
+    videoElement.addEventListener('error', handleError);
 
     if (videoElement.readyState >= 3) {
       handleVideoLoad();
@@ -108,12 +122,12 @@ export default function VideoSection() {
 
     return () => {
       clearTimeout(timeout);
-      videoElement.removeEventListener('loadeddata', handleVideoLoad);
-      videoElement.removeEventListener('canplay', handleVideoLoad);
-      videoElement.removeEventListener('playing', handleVideoPlaying);
-      videoElement.removeEventListener('error', handleVideoError);
+      videoElement.removeEventListener('loadeddata', handleLoad);
+      videoElement.removeEventListener('canplay', handleLoad);
+      videoElement.removeEventListener('playing', handlePlaying);
+      videoElement.removeEventListener('error', handleError);
     };
-  }, [videoLoaded]);
+  }, [mounted, videoLoaded]);
 
   const showBanner = !hasVideo || !videoReady || !showVideo;
 
@@ -129,14 +143,25 @@ export default function VideoSection() {
     backgroundColor: '#000'
   };
 
+  // Server-side render fallback
+  if (!mounted) {
+    return (
+      <div className="w-full mb-8 relative overflow-x-hidden bg-black">
+        <div className="relative w-full" style={{ aspectRatio: "16/9", maxHeight: "400px" }}>
+          <div className="absolute inset-0 bg-black" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full mb-8 relative overflow-x-hidden bg-black">
       <div className="relative w-full" style={{ aspectRatio: "16/9", maxHeight: "400px" }}>
         {showBanner && (
           <motion.div
             className="absolute inset-0 sm:left-[-5%] sm:right-[-5%] md:left-[-10%] md:right-[-10%] lg:left-[-15%] lg:right-[-15%] top-0 bottom-0 z-20"
-            initial={mounted ? { opacity: 1 } : false}
-            animate={mounted ? { opacity: 1, scale: 1 } : false}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1, scale: 1 }}
           >
             <div
               className="w-full h-full relative overflow-hidden rounded-md bg-black"
@@ -145,11 +170,11 @@ export default function VideoSection() {
               {/* Pulse Background Animation */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black"
-                initial={mounted ? { opacity: 1 } : false}
-                animate={mounted ? {
+                initial={{ opacity: 1 }}
+                animate={{
                   opacity: videoLoaded ? 0 : [0.7, 0.9, 0.7],
                   x: videoLoaded ? 0 : ["-100%", "100%", "-100%"]
-                } : false}
+                }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />
 
@@ -162,38 +187,36 @@ export default function VideoSection() {
               />
 
               {/* Video */}
-              {!videoError && (
-                <AnimatePresence>
-                  <motion.div
-                    className="absolute inset-0"
-                    initial={{ opacity: 0 }}
-                    animate={{
-                      opacity: videoPlaying ? 1 : 0,
-                      scale: videoPlaying ? 1 : 1.02
-                    }}
-                    transition={{
-                      opacity: { duration: 1.2, ease: "easeOut" },
-                      scale: { duration: 1.5, ease: "easeOut" }
-                    }}
+              <AnimatePresence>
+                <motion.div
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: videoPlaying ? 1 : 0,
+                    scale: videoPlaying ? 1 : 1.02
+                  }}
+                  transition={{
+                    opacity: { duration: 1.2, ease: "easeOut" },
+                    scale: { duration: 1.5, ease: "easeOut" }
+                  }}
+                >
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    className="absolute w-full h-full object-cover object-center"
+                    style={{ objectPosition: '50% 25%' }}
+                    onError={handleVideoError}
+                    poster={VIDEO_CDN.fallbackImage}
                   >
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="auto"
-                      className="absolute w-full h-full object-cover object-center"
-                      style={{ objectPosition: '50% 25%' }}
-                      onError={handleVideoError}
-                      poster={VIDEO_CDN.fallbackImage}
-                    >
-                      <source src={VIDEO_CDN.webm} type="video/webm" />
-                      <source src={VIDEO_CDN.mp4} type="video/mp4" />
-                    </video>
-                  </motion.div>
-                </AnimatePresence>
-              )}
+                    <source src={VIDEO_CDN.webm} type="video/webm" />
+                    <source src={VIDEO_CDN.mp4} type="video/mp4" />
+                  </video>
+                </motion.div>
+              </AnimatePresence>
 
               {/* Lighting Effects */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
@@ -258,7 +281,7 @@ export default function VideoSection() {
         )}
       </div>
 
-      <style jsx global>{`
+      <style jsx>{`
         @keyframes pulse {
           0% { opacity: 0.1; transform: scale(0.95); }
           100% { opacity: 0.3; transform: scale(1.05); }

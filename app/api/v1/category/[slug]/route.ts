@@ -17,6 +17,22 @@ const ALL_MAPPINGS = [
   ...Object.values(SUPPLIES_MAPPING),
 ];
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  retries: number = MAX_RETRIES
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries === 0) throw error;
+    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries + 1)));
+    return retryWithBackoff(fn, retries - 1);
+  }
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
@@ -57,21 +73,24 @@ export async function GET(
 
     // Keep fetching until we've got `limit` valid items or run out of pages
     while (collectedItems.length < limit && keepPaging) {
-      const searchResponse = await client.catalog.search({
-        objectTypes: ["ITEM"],
-        includeRelatedObjects: true,
-        query: {
-          setQuery: {
-            attributeName: "category_id",
-            attributeValues: categoryIds,
+      const searchResponse = await retryWithBackoff(async () => {
+        const response = await client.catalog.search({
+          objectTypes: ["ITEM"],
+          includeRelatedObjects: true,
+          query: {
+            setQuery: {
+              attributeName: "category_id",
+              attributeValues: categoryIds,
+            },
+            sortedAttributeQuery: {
+              attributeName: "name",
+              sortOrder,
+            },
           },
-          sortedAttributeQuery: {
-            attributeName: "name",
-            sortOrder,
-          },
-        },
-        limit: 100,
-        ...(cursor ? { cursor } : {}),
+          limit: 100,
+          ...(cursor ? { cursor } : {}),
+        });
+        return response;
       });
 
       // Build variation ID list
@@ -79,10 +98,13 @@ export async function GET(
         .filter(isCatalogItem)
         .flatMap((item) => item.itemData?.variations?.map((v) => v.id) ?? []);
 
-      // Fetch inventory counts
-      const inventoryResponse = await client.inventory.batchGetCounts({
-        catalogObjectIds: [...variationIds.filter((id): id is string => typeof id === 'string'), ...categoryIds],
-        locationIds: ACTIVE_LOCATION_IDS,
+      // Fetch inventory counts with retry
+      const inventoryResponse = await retryWithBackoff(async () => {
+        const response = await client.inventory.batchGetCounts({
+          catalogObjectIds: [...variationIds.filter((id): id is string => typeof id === 'string'), ...categoryIds],
+          locationIds: ACTIVE_LOCATION_IDS,
+        });
+        return response;
       });
 
       // Build inventory map
@@ -138,7 +160,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching catalog:", error);
     return NextResponse.json(
-      { error: "Failed to fetch catalog" },
+      { error: "Failed to fetch catalog", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

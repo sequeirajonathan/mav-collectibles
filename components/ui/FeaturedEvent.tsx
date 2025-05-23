@@ -21,10 +21,10 @@ const FeaturedEvent: React.FC<FeaturedEventProps> = ({
   link
 }) => {
   return (
-    <div className="w-full bg-gradient-to-b from-black to-gray-900 rounded-lg overflow-hidden shadow-xl border border-brand-blue/20 hover:border-brand-blue/40 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-blue/10">
+    <div className="w-full bg-gradient-to-b from-black to-gray-900 rounded-lg overflow-hidden shadow-xl border border-brand-blue/20 hover:border-brand-blue/40 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-blue/10 h-full min-h-[340px] md:max-h-none">
       <div className="flex flex-col md:flex-row h-full">
         {/* Image Section */}
-        <div className="md:w-2/5 flex items-center justify-center p-4">
+        <div className="md:w-2/5 flex items-center justify-center p-2 md:p-4">
           <div className="relative w-full aspect-square max-w-[200px] sm:max-w-[260px] mx-auto rounded-xl overflow-hidden">
             <Image
               src={imageSrc}
@@ -38,7 +38,7 @@ const FeaturedEvent: React.FC<FeaturedEventProps> = ({
         </div>
         
         {/* Content Section */}
-        <div className="flex-1 p-4 md:p-6 flex flex-col">
+        <div className="flex-1 pt-2 pb-4 px-2 md:p-6 flex flex-col h-full justify-center items-center text-center">
           <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#E6B325] hover:text-[#FFD966] transition-colors">{title}</h2>
           <p className="text-gray-300 mb-3 text-sm md:text-base">{date}</p>
           

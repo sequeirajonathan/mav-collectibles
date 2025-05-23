@@ -1,4 +1,4 @@
-"use client"; // Enable client-side features for this component
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -11,19 +11,14 @@ import GoogleReviews from "@components/ui/GoogleReviews";
 import Link from "next/link";
 import { Button } from "@components/ui/button";
 import { useFeaturedEvents } from "@hooks/useFeaturedEvents";
-import FeaturedEvent from "@components/ui/FeaturedEvent";
+import NearestEventSection from "@components/ui/NearestEventSection";
 
-/**
- * Home page component that serves as the main landing page for MAV Collectibles
- * Features:
- * - Video section showcasing featured content
- * - Announcement carousel for important updates
- * - Featured events section
- * - Trading card games grid
- * - Why choose us section
- */
 export default function Home() {
-  // Marketing announcements displayed in the carousel
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const announcements = [
     {
       id: "1",
@@ -54,78 +49,59 @@ export default function Home() {
     },
   ];
 
-  // Trading card game categories with their respective metadata
-  const cardGames = [
-    {
-      title: "Pokemon",
-      href: "/products/pokemon",
-      image: "/pokemon-logo.png",
-      aspectRatio: 2.5,
-      squareCategory: "Pokemon TCG",
-    },
-    {
-      title: "Yu-Gi-Oh TCG",
-      href: "/products/yugioh",
-      image: "/yugioh-logo.png",
-      aspectRatio: 2.5,
-      squareCategory: "Yu-Gi-Oh",
-    },
-    {
-      title: "DBZ Super TCG",
-      href: "/products/dragonball",
-      image: "/dragonball.png",
-      aspectRatio: 2.5,
-      squareCategory: "Dragon Ball Super TCG",
-    },
-    {
-      title: "Digimon",
-      href: "/products/digimon",
-      image: "/digimon_card_game_logo.png",
-      aspectRatio: 2.5,
-      squareCategory: "Digimon",
-    },
-    {
-      title: "One Piece",
-      href: "/products/onepiece",
-      image: "/one-piece-card-game.jpg",
-      aspectRatio: 2.5,
-      squareCategory: "One Piece Card Game",
-    },
-    {
-      title: "MetaZoo",
-      href: "/products/metazoo",
-      image: "/Metazoo-logo.png",
-      aspectRatio: 2.5,
-      squareCategory: "Metazoo",
-    },
-  ];
+  const getTopCardGames = () => {
+    const topSlugs = [
+      "pokemon",
+      "magic",
+      "onepiece",
+      "dragonball",
+      "digimon",
+      "yugioh",
+      "weiss",
+      "union",
+    ];
 
-  // Animation variants for staggered animations
+    const imageMap: Record<string, string> = {
+      pokemon: "/pokemon-logo.png",
+      magic: "/magic_1.webp",
+      onepiece: "/one-piece-card-game.jpg",
+      dragonball: "/dragonball.png",
+      digimon: "/digimon_card_game_logo.png",
+      yugioh: "/yugioh-logo.png",
+      weiss: "/weiss.png",
+      union: "/union.png",
+    };
+
+    return topSlugs
+      .map((slug) => CATEGORY_MAPPING[slug])
+      .filter(Boolean)
+      .map((category) => ({
+        title: category.displayName,
+        href: `/category/${category.slug}`,
+        image: imageMap[category.slug] || `/${category.slug}-logo.png`,
+        squareCategory: category.displayName,
+        scaleClass:
+          category.slug === "dragonball"
+            ? "scale-90 md:scale-95"
+            : category.slug === "union"
+            ? "scale-95 md:scale-100"
+            : category.slug === "yugioh"
+            ? "scale-65 md:scale-75 object-center"
+            : "scale-85 md:scale-95",
+      }));
+  };
+
+  const cardGames = getTopCardGames();
+
   const container = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  };
+  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
   const router = useRouter();
+  const { data: events, isLoading } = useFeaturedEvents();
 
-  // Client-side mounting state to prevent hydration issues
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  /**
-   * Handles navigation to the product category page when a card game is clicked
-   * @param squareCategory - The category identifier from Square
-   */
   function handleCardGameClick(squareCategory: string) {
     const mapping = CATEGORY_MAPPING[squareCategory];
     if (!mapping) return;
@@ -136,172 +112,174 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col w-full min-h-screen space-y-8 pt-2">
-      {/* Hero video section for featured content */}
+    <div className="flex flex-col w-full min-h-screen space-y-12 pt-2">
+      {/* Video Hero */}
       <VideoSection />
 
-      {/* Marketing announcements carousel */}
+      {/* Announcements Carousel */}
       <div className="w-full">
         <AnnouncementCarousel announcements={announcements} />
       </div>
 
-      {/* Nearest upcoming event section */}
-      <NearestEventSection />
-
-      {/* Trading card games grid with hover effects and animations */}
-      <div className="w-full">
-        <motion.h2
-          initial={false}
-          animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="text-3xl font-bold text-center mb-8 text-[#E6B325]"
-        >
+      {/* ─── Trading Card Games ─────────────────────────────────────────────── */}
+      <motion.div
+        initial={false}
+        animate={mounted ? { opacity: 1, y: 0 } : {}}
+        className="flex items-center w-full"
+      >
+        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
+        <span className="mx-4 text-2xl font-bold text-[#E6B325] uppercase">
           Trading Card Games
-        </motion.h2>
+        </span>
+        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
+      </motion.div>
 
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
+      >
+        {cardGames.map((game) => (
+          <motion.div
+            key={game.href}
+            variants={item}
+            className="group relative flex flex-col cursor-pointer"
+            onClick={() => handleCardGameClick(game.squareCategory)}
+          >
+            <div className="relative w-full aspect-square overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
+              <Image
+                src={game.image}
+                alt={game.title}
+                fill
+                className={`object-contain transition-transform duration-300 group-hover:scale-105 ${game.scaleClass}`}
+                sizes="(max-width:640px)100vw,(max-width:768px)50vw,(max-width:1024px)33vw,25vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+            <div className="mt-2 text-center">
+              <h3 className="text-lg md:text-xl font-bold group-hover:text-[#E6B325] transition-colors">
+                {game.title}
+              </h3>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* ─── Community Divider ─────────────────────────────────────────────── */}
+      <motion.div
+        initial={false}
+        animate={mounted ? { opacity: 1, y: 0 } : {}}
+        className="flex items-center w-full"
+      >
+        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
+        <span className="mx-4 text-2xl font-bold text-[#E6B325] uppercase">
+          Community
+        </span>
+        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
+      </motion.div>
+
+      {/* Community + Upcoming Event side by side */}
+      <div className="w-full flex flex-col md:flex-row gap-6">
+        {/* Discord Card */}
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6"
+          className="flex-shrink-0 w-full md:w-1/3 h-[340px]"
         >
-          {cardGames.map((game) => (
-            <motion.div
-              key={game.href}
-              variants={item}
-              className="group relative cursor-pointer"
-              onClick={() => handleCardGameClick(game.squareCategory)}
-            >
-              <div className="block">
-                <div className="relative overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
-                  {/* Card Content */}
-                  <div className="p-4 flex flex-col items-center space-y-2">
-                    {/* Image Container */}
-                    <div
-                      className="relative w-full"
-                      style={{ aspectRatio: game.aspectRatio }}
-                    >
-                      <Image
-                        src={game.image}
-                        alt={game.title}
-                        fill
-                        className="object-contain transition-transform duration-300 group-hover:scale-110"
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      />
-                    </div>
-
-                    {/* Title & View All */}
-                    <div className="text-center mt-2">
-                      <h3 className="text-lg md:text-xl font-bold group-hover:text-[#E6B325] transition-colors">
-                        {game.title}
-                      </h3>
-                      <span className="text-xs md:text-sm text-brand-blue group-hover:text-brand-blue-light transition-colors">
-                        VIEW ALL
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Hover Effect Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <motion.div
+            variants={item}
+            className="cursor-pointer h-full"
+            onClick={() => window.open("https://discord.gg/szgNfjR8", "_blank")}
+          >
+            <div className="relative w-full h-full overflow-hidden rounded-xl bg-gradient-to-br from-[#5865F2]/80 to-black border border-brand-blue/20 hover:border-brand-blue/40 flex flex-col items-center justify-center p-6 transition-transform hover:scale-[1.02]">
+              <div className="flex flex-col items-center justify-center flex-grow w-full">
+                <div className="relative w-32 h-32 mb-4 md:w-36 md:h-36 flex items-center justify-center mx-auto">
+                  <Image
+                    src="/mav_collectibles.png"
+                    alt="MAV Collectibles Logo"
+                    fill
+                    className="object-contain"
+                  />
                 </div>
+                <h3 className="text-lg font-bold text-white text-center mb-6 mt-2">
+                  Join Our Discord
+                </h3>
               </div>
-            </motion.div>
-          ))}
+              <span className="inline-block px-3 py-1 bg-[#5865F2] text-white rounded-full text-xs font-semibold mt-4">
+                discord.gg/szgNfjR8
+              </span>
+            </div>
+          </motion.div>
         </motion.div>
+
+        {/* Upcoming Event Card */}
+        <div className="flex-1 h-[340px]">
+          <NearestEventSection
+            events={events}
+            isLoading={isLoading}
+            hideTitle
+          />
+        </div>
       </div>
 
-      {/* Google Reviews Section */}
+      {/* ─── Why Us Divider ─────────────────────────────────────────────── */}
+      <motion.div
+        initial={false}
+        animate={mounted ? { opacity: 1, y: 0 } : {}}
+        className="flex items-center w-full"
+      >
+        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
+        <span className="mx-4 text-2xl font-bold text-[#E6B325] uppercase">
+          Why Us?
+        </span>
+        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
+      </motion.div>
+
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate={mounted ? "show" : "hidden"}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
+        {[
+          {
+            title: "Quality Selection",
+            description:
+              "We carefully curate our inventory to offer only the best cards.",
+          },
+          {
+            title: "Expert Knowledge",
+            description:
+              "Our team is passionate about trading cards and ready to help.",
+          },
+          {
+            title: "Community Focus",
+            description:
+              "We're more than a store – we're a hub for collectors and players, where everyone gets treated like family.",
+          },
+        ].map((feature, i) => (
+          <motion.div
+            key={i}
+            variants={item}
+            className="p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800/50 hover:border-brand-blue/30 transition-all duration-300 hover:bg-gray-900/80"
+          >
+            <h3 className="text-xl font-semibold mb-2 text-brand-blue-light">
+              {feature.title}
+            </h3>
+            <p className="text-gray-300">{feature.description}</p>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Google Reviews & Continue Browsing */}
       <GoogleReviews />
-
-      {/* Value proposition section highlighting key benefits */}
-      <div className="mt-4 text-center w-full">
-        <motion.h2
-          initial={false}
-          animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="text-3xl font-bold mb-4 text-[#E6B325]"
-        >
-          Why Choose MAV Collectibles?
-        </motion.h2>
-        <motion.div
-          initial={false}
-          animate={mounted ? { opacity: 1, y: 0 } : false}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2"
-        >
-          {[
-            {
-              title: "Quality Selection",
-              description:
-                "We carefully curate our inventory to offer only the best cards.",
-            },
-            {
-              title: "Expert Knowledge",
-              description:
-                "Our team is passionate about trading cards and ready to help.",
-            },
-            {
-              title: "Community Focus",
-              description:
-                "We're more than a store – we're a hub for collectors and players, where everyone gets treated like family.",
-            },
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={false}
-              animate={mounted ? { opacity: 1, y: 0 } : false}
-              transition={{ delay: index * 0.1 }}
-              className="p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800/50 hover:border-brand-blue/30 transition-all duration-300 hover:bg-gray-900/80"
-            >
-              <h3 className="text-xl font-semibold mb-2 text-brand-blue-light">
-                {feature.title}
-              </h3>
-              <p className="text-gray-300">{feature.description}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-
-      <div className="mt-4 text-center w-full">
-        <Link href="/category/tcg" className="inline-block">
+      <div className="mt-6 text-center">
+        <Link href="/category/tcg">
           <Button variant="gold">CONTINUE BROWSING</Button>
         </Link>
       </div>
     </div>
-  );
-}
-
-function NearestEventSection() {
-  const { data: events, isLoading } = useFeaturedEvents();
-  if (isLoading) {
-    return (
-      <div className="animate-pulse h-32 sm:h-40 bg-gray-800 rounded-md w-full mb-6 sm:mb-8" />
-    );
-  }
-  if (!events || events.length === 0) return null;
-  // Find the soonest upcoming enabled event
-  const now = new Date();
-  const enabledEvents = events
-    .filter(e => e.enabled && e.date && !isNaN(Date.parse(e.date)))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  let nearest = enabledEvents.find(e => new Date(e.date) >= now);
-  if (!nearest && enabledEvents.length > 0) {
-    nearest = enabledEvents[0]; // fallback to first event if all are in the past
-  }
-  if (!nearest) return null;
-  return (
-    <section className="my-8 sm:my-12 w-full">
-      <h2 className="text-2xl font-bold text-center mb-4 text-[#E6B325]">Upcoming Event</h2>
-      <div className="flex justify-center">
-        <div className="w-full px-4 md:px-8 cursor-pointer" onClick={() => window.location.assign('/events')}>
-          <FeaturedEvent
-            title={nearest.title}
-            date={nearest.date}
-            description={nearest.description}
-            imageSrc={nearest.imageSrc}
-            imageAlt={nearest.imageAlt || nearest.title || "Event image"}
-            link={nearest.link}
-          />
-        </div>
-      </div>
-    </section>
   );
 }

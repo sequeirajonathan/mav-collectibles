@@ -10,6 +10,15 @@ import {
   fetchInventoryCounts,
 } from "@services/squareService";
 
+const DEFAULT_QUERY_CONFIG = {
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  refetchOnWindowFocus: false,
+  retry: 3,
+  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  refetchOnMount: true,
+  refetchOnReconnect: true,
+  cacheTime: 10 * 60 * 1000, // 10 minutes
+};
 
 export function useInfiniteCatalogItemsBySlug(
   slug: string,
@@ -29,12 +38,9 @@ export function useInfiniteCatalogItemsBySlug(
       ),
     getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
     initialPageParam: null,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    ...DEFAULT_QUERY_CONFIG,
     refetchInterval: 30000,
     refetchIntervalInBackground: true,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     enabled: !!slug,
   });
 }
@@ -55,8 +61,7 @@ export function useInfiniteCatalogItemsBySearch(
       ),
     getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
     initialPageParam: null,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    ...DEFAULT_QUERY_CONFIG,
     enabled: !!search,
   });
 }
@@ -65,6 +70,7 @@ export function useSquareProduct(id: string) {
   return useQuery<NormalizedProductResponse, Error>({
     queryKey: ["product", id],
     queryFn: () => fetchProduct(id),
+    ...DEFAULT_QUERY_CONFIG,
   });
 }
 
@@ -73,8 +79,8 @@ export function useInventoryCounts(variationIds: string[]) {
     queryKey: ["inventory", variationIds],
     queryFn: () => fetchInventoryCounts(variationIds),
     enabled: variationIds.length > 0,
-    staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
     refetchIntervalInBackground: true,
+    ...DEFAULT_QUERY_CONFIG,
   });
 }
