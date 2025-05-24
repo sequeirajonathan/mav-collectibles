@@ -6,6 +6,8 @@ export function useFeatureFlags() {
   return useQuery<FeatureFlag[]>({
     queryKey: ['featureFlags'],
     queryFn: fetchFeatureFlags,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }
 

@@ -11,8 +11,8 @@ import {
 } from "@services/squareService";
 
 const DEFAULT_QUERY_CONFIG = {
-  staleTime: 5 * 60 * 1000, // 5 minutes
-  refetchOnWindowFocus: false,
+  staleTime: 0,
+  refetchOnWindowFocus: true,
   retry: 3,
   retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   refetchOnMount: true,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteCatalogItemsBySearch } from "@hooks/useSquareServices";
 import { ProductFilters } from "@components/ui/ProductFilters";
@@ -10,12 +10,21 @@ import { useQueryState } from "nuqs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EndOfListMessage } from "@components/ui/EndOfListMessage";
 
+// Enhanced loading indicator component (copied from InfiniteCardGrid)
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center py-8 space-y-4">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+    <p className="text-sm text-gray-500 animate-pulse">Loading more items...</p>
+  </div>
+);
+
 export default function SearchPage() {
   const [stock] = useQueryState("stock");
   const [sort] = useQueryState("sort");
   const [search] = useQueryState("q");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [mounted, setMounted] = useState(false);
 
   const {
     data,
@@ -37,23 +46,19 @@ export default function SearchPage() {
     refetch();
   }, [search, stock, sort, refetch]);
 
-  // Initial loader: 8 skeletons
+  useEffect(() => setMounted(true), []);
+
+  // Initial loader: 8 skeletons (with fade-in and md:grid-cols-3)
   const initialLoader = (
-    <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 animate-fade-in">
       {[...Array(8)].map((_, i) => (
         <SkeletonProductCard key={`init-${i}`} />
       ))}
     </div>
   );
 
-  // Next-page loader: 4 skeletons
-  const nextLoader = isFetchingNextPage ? (
-    <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
-        <SkeletonProductCard key={`next-${i}`} />
-      ))}
-    </div>
-  ) : null;
+  // Next-page loader: spinner (for consistency)
+  const nextLoader = isFetchingNextPage ? <LoadingSpinner /> : null;
 
   if (isError) {
     return (
@@ -79,7 +84,8 @@ export default function SearchPage() {
 
       <ProductFilters />
 
-      {isLoading ? (
+      {/* Mount check for initial loader */}
+      {!mounted || isLoading ? (
         initialLoader
       ) : (
         <InfiniteScroll
@@ -95,7 +101,7 @@ export default function SearchPage() {
           scrollThreshold="200px"
           style={{ overflow: "visible" }}
         >
-          <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 animate-fade-in">
             {items.map((item) => (
               <ProductCard
                 key={item.variationId}

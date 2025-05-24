@@ -13,7 +13,8 @@ export function useGoogleReviews(): UseGoogleReviewsResult {
     queryFn: getGoogleReviews,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   return {
