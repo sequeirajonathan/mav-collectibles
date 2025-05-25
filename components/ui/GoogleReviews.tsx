@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Star, StarHalf } from "lucide-react";
 import { useGoogleReviews } from "@hooks/useGoogleReviews";
+import { useState, useEffect } from "react";
 
 function renderStars(rating: number) {
   // Google returns float, e.g. 4.7, 3.5
@@ -34,10 +35,15 @@ function renderStars(rating: number) {
 }
 
 export default function GoogleReviews() {
+  const [mounted, setMounted] = useState(false);
   const { reviews, isLoading, error } = useGoogleReviews();
 
-  // If error, render nothing
-  if (error) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // If not mounted or error, render nothing
+  if (!mounted || error) return null;
 
   // Sort by time descending and take top 3
   const latestReviews = [...reviews]
@@ -46,15 +52,24 @@ export default function GoogleReviews() {
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="bg-gray-900/80 rounded-xl p-6 h-32 shadow-lg"
-          />
-        ))}
+      <div className="w-full px-4 md:px-8">
+        <div className="space-y-6">
+          <div className="animate-pulse h-8 w-48 bg-gray-800 rounded mx-auto mb-8" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-gray-900/80 rounded-xl p-6 h-32 shadow-lg animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     );
+  }
+
+  if (latestReviews.length === 0) {
+    return null;
   }
 
   return (

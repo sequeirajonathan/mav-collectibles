@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ChevronLeft } from 'lucide-react';
 import { useSquareProduct } from '@hooks/useSquareServices';
 import { useCart } from '@contexts/CartContext';
 import { Button } from "@components/ui/button";
+import { toast } from 'react-hot-toast';
 
 const IMAGE_CONFIG = {
   width: 500,
@@ -16,13 +16,18 @@ const IMAGE_CONFIG = {
   quality: 90,
 } as const;
 
-export default function ProductPage({ params }: { params: Promise<{ id: string }> } ) {
-  const { id } = use(params); 
+export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const [quantity, setQuantity] = useState(1);
+  const [mounted, setMounted] = useState(false);
   const { addItem } = useCart();
   const router = useRouter();
 
-  const { data: product, isLoading, isError } = useSquareProduct(id);
+  const { data: product, isLoading, isError, error } = useSquareProduct(id);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleAddToCart = () => {
     if (!product || !product.variations?.length) return;
@@ -38,7 +43,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         imageUrl: product.imageUrls?.[0],
       });
     }
+
+    toast.success(`${product.name} added to cart!`, {
+      duration: 2000,
+      position: "top-right",
+    });
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -55,13 +69,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#E6B325] mb-4">Product Not Found</h1>
-          <Link
-            href="/product"
-            className="text-white hover:text-[#E6B325] transition-colors"
+          <h1 className="text-2xl font-bold text-[#E6B325] mb-4">
+            {error ? "Error loading product" : "Product Not Found"}
+          </h1>
+          <Button
+            onClick={() => router.back()}
+            variant="gold"
+            className="mt-4"
           >
-            Return to Products
-          </Link>
+            <ChevronLeft className="w-5 h-5 mr-1" />
+            Go Back
+          </Button>
         </div>
       </div>
     );

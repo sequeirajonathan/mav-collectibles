@@ -6,10 +6,17 @@ import { ItemVariationObject } from "@interfaces";
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ category: string; id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
+    const { id } = params;
+    if (!id) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
+    }
+
     const client = createSquareClient();
 
     // Get catalog object
@@ -17,6 +24,13 @@ export async function GET(
       objectId: id,
       includeRelatedObjects: true,
     });
+
+    if (!catalogResponse.object) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
 
     // If we got a variation, fetch the parent item
     if (catalogResponse.object?.type === 'ITEM_VARIATION') {
@@ -26,8 +40,10 @@ export async function GET(
           objectId: parentItemId,
           includeRelatedObjects: true,
         });
-        catalogResponse.object = parentResponse.object;
-        catalogResponse.relatedObjects = parentResponse.relatedObjects;
+        if (parentResponse.object) {
+          catalogResponse.object = parentResponse.object;
+          catalogResponse.relatedObjects = parentResponse.relatedObjects;
+        }
       }
     }
 

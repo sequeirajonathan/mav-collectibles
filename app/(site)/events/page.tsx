@@ -24,7 +24,7 @@ export default function EventsPage() {
   return (
     <>
       <div className="min-h-screen max-w-4xl mx-auto bg-gradient-to-br from-pink-100 via-pink-200 to-pink-300 py-10 px-2 md:px-0 rounded-3xl">
-        <h1 className="text-4xl font-extrabold text-center text-pink-700 mb-8 drop-shadow-lg sakura-font">Upcoming Pokémon Events</h1>
+        <h1 className="text-4xl font-extrabold text-center text-pink-700 mb-8 drop-shadow-lg sakura-font">Upcoming Events</h1>
         <SakuraEventBoard events={mappedEvents} loading={isLoading} />
         <p className="mt-8 text-center text-lg font-bold text-pink-800 opacity-90">*Please arrive 30 minutes early to register for events*</p>
       </div>

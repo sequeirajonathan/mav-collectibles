@@ -78,14 +78,17 @@ export function InfiniteCardGrid({
     }
   }, [isError, error]);
 
+  // Force refetch when key parameters change
   useEffect(() => {
     if (mounted) {
+      // Reset initial load state when parameters change
+      setIsInitialLoad(true);
       refetch();
     }
   }, [slug, search, stock, sort, mounted, refetch]);
 
+  // Show loading state for initial load
   if (!mounted || isLoading) {
-    // initial loading: show 8 skeleton cards with a fade-in effect
     return (
       <div className="grid gap-4 mt-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 animate-fade-in">
         {[...Array(8)].map((_, i) => (
@@ -95,16 +98,29 @@ export function InfiniteCardGrid({
     );
   }
 
+  // Show error state
   if (isError) {
     return (
       <div className="text-center py-12">
         <p className="text-red-500 mb-4">Failed to load products</p>
         <button
-          onClick={() => refetch()}
+          onClick={() => {
+            setIsInitialLoad(true);
+            refetch();
+          }}
           className="px-4 py-2 bg-[#E6B325] text-black rounded-lg hover:bg-[#FFD966] transition-colors"
         >
           Try Again
         </button>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-400">No products found</p>
       </div>
     );
   }

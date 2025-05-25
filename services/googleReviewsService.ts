@@ -16,8 +16,17 @@ export interface GoogleReviewsResponse {
 export async function getGoogleReviews(): Promise<GoogleReviewsResponse> {
   try {
     const response = await axiosClient.get('/google-reviews');
-    return response.data;
+    
+    if (!response.data || !Array.isArray(response.data.reviews)) {
+      throw new Error('Invalid response format');
+    }
+
+    return {
+      reviews: response.data.reviews,
+    };
   } catch (error) {
+    console.error('Error fetching Google reviews:', error);
+    
     if (error instanceof Error) {
       return {
         reviews: [],
