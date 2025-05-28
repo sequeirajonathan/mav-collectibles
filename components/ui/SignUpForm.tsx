@@ -42,7 +42,12 @@ export function SignupForm({ redirectTo = "/dashboard", hideLoginLink = false }:
       const { data, error } = await signup(email, password, phoneNumber);
       
       if (error) {
-        throw error;
+        if (error.message.includes('10 seconds')) {
+          toast.error('Please wait 10 seconds before trying again');
+        } else {
+          throw error;
+        }
+        return;
       }
 
       if (data?.user) {

@@ -10,15 +10,29 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') as EmailOtpType | null
   const next = searchParams.get('next') ?? '/dashboard'
 
+  console.log('Auth confirmation params:', {
+    token_hash,
+    type,
+    next,
+    url: request.url
+  })
+
   if (token_hash && type) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.verifyOtp({
+    const { error, data } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     })
     
+    console.log('OTP verification result:', {
+      error,
+      data,
+      type,
+      token_hash
+    })
+    
     if (!error) {
-      // Get the user after verification
+      // Create or update UserProfile after successful verification
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         // Create or update UserProfile in your database
@@ -34,29 +48,23 @@ export async function GET(request: NextRequest) {
             ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
           },
         });
-
-        // Redirect to dashboard with success message
-        const url = new URL(next, request.url)
-        url.searchParams.set('verified', 'true')
-        return redirect(url.toString())
       }
+      
+      redirect(next)
     } else {
-      // Handle specific error cases
-      const url = new URL('/login', request.url)
-      if (error.message.includes('expired')) {
-        url.searchParams.set('error', 'token_expired')
-        url.searchParams.set('message', 'Your verification link has expired. Please request a new one.')
-      } else {
-        url.searchParams.set('error', 'verification_failed')
-        url.searchParams.set('message', 'Email verification failed. Please try again.')
-      }
-      return redirect(url.toString())
+      console.error('OTP verification failed:', {
+        error,
+        type,
+        token_hash
+      })
     }
+  } else {
+    console.error('Missing required parameters:', {
+      hasTokenHash: !!token_hash,
+      hasType: !!type
+    })
   }
 
-  // If no token or type provided
-  const url = new URL('/login', request.url)
-  url.searchParams.set('error', 'invalid_link')
-  url.searchParams.set('message', 'Invalid verification link. Please try again.')
-  return redirect(url.toString())
+  // redirect the user to an error page with some instructions
+  redirect('/error')
 } 

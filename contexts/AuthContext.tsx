@@ -5,7 +5,6 @@ import { createClient } from "@utils/supabase/client";
 import { User, AuthResponse } from "@supabase/supabase-js";
 import { UserProfile } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { axiosClient } from "@lib/axios";
 
 interface AuthContextType {
   user: User | null;
@@ -70,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const response = await axiosClient.get('/user-profile', {
+      const response = await fetch('/api/v1/user-profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -82,8 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      debug('User profile fetched:', response.data);
-      setUserProfile(response.data);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user profile: ${response.status}`);
+      }
+
+      const profile = await response.json();
+      debug('User profile fetched:', profile);
+      setUserProfile(profile);
     } catch (error) {
       debug('Error fetching user profile:', error);
       setUserProfile(null);
@@ -94,24 +98,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       const supabase = createClient();
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      // If there is no user, just clear state (don't treat as error)
-      if (!user) {
+      // If there's no session, just clear state (don't treat as error)
+      if (!session) {
         setUser(null);
         setUserProfile(null);
         return;
       }
 
-      setUser(user);
-      if (user?.email) {
-        await fetchUserProfile(user.id);
+      // If there's an error and it's not a missing refresh token, handle it
+      if (error && !error.message.includes('Refresh Token Not Found')) {
+        console.error('Error refreshing user:', error);
+        setUser(null);
+        setUserProfile(null);
+        return;
+      }
+
+      setUser(session.user);
+      if (session.user?.email) {
+        await fetchUserProfile(session.user.id);
       } else {
         setUserProfile(null);
       }
     } catch (error: any) {
       // Only log unexpected errors
-      if (error?.name !== 'AuthSessionMissingError') {
+      if (error?.name !== 'AuthSessionMissingError' && 
+          !error?.message?.includes('Refresh Token Not Found')) {
         console.error('Error refreshing user:', error);
       }
       setUser(null);
@@ -191,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             phone_number: phoneNumber,
           },
+          emailRedirectTo: `${window.location.origin}/confirm-signup`,
         },
       });
 
