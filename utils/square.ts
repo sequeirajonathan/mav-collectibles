@@ -285,40 +285,6 @@ export function normalizeProductResponse(
   };
 }
 
-export interface NormalizedItemWithInventory {
-  id: string;
-  name: string;
-  description: string;
-  descriptionPlaintext: string;
-  descriptionHtml: string;
-  imageIds: string[];
-  ecom_available: boolean;
-  ecom_visibility: string;
-  variations: {
-    id: string;
-    name: string;
-    sku: string;
-    price: number;
-    inventory: number;
-    trackInventory: boolean;
-    sellable: boolean;
-    stockable: boolean;
-  }[];
-  categories: {
-    id: string;
-    ordinal: string;
-  }[];
-  isArchived: boolean;
-  isAlcoholic: boolean;
-  isTaxable: boolean;
-  taxIds: string[];
-  channels: string[];
-  reportingCategory: {
-    id: string;
-    ordinal: string;
-  };
-}
-
 export function normalizeItemsWithInventory(
   items: CatalogObject[],
   relatedObjects?: CatalogObject[]

@@ -28,18 +28,26 @@ export async function fetchAlertBanner(): Promise<AlertBanner | null> {
       } else {
         console.error('Error fetching alert banner from database:', error);
       }
-      throw error;
+      return null;
     }
   }
 
   // If we're on the client, use axios
   try {
     const { data } = await axiosClient.get('/alert-banner');
+    
+    // Check if data exists and has an id
+    if (!data || !data.id) {
+      console.warn('No alert banner data received from API');
+      return null;
+    }
+
     // Add id field to the data
     const bannerWithId = {
       ...data,
       id: data.id.toString()
     };
+
     // Validate the response data
     return alertBannerSchema.parse(bannerWithId);
   } catch (error: unknown) {
@@ -48,15 +56,25 @@ export async function fetchAlertBanner(): Promise<AlertBanner | null> {
     } else {
       console.error('Error fetching alert banner from API:', error);
     }
-    throw error;
+    return null;
   }
 }
 
 // Update existing alert banner
 export async function updateAlertBanner(id: string, bannerData: Partial<AlertBanner>): Promise<AlertBanner> {
+  if (!id) {
+    throw new Error('Alert banner ID is required for update');
+  }
+
   // Validate the data before sending
   const validatedData = alertBannerSchema.partial().parse(bannerData);
   const { data } = await axiosClient.patch(`/alert-banner/${id}`, validatedData);
+  
+  // Check if data exists and has an id
+  if (!data || !data.id) {
+    throw new Error('Invalid response from alert banner update');
+  }
+
   // Validate the response
   return alertBannerSchema.parse(data);
 }
@@ -66,6 +84,12 @@ export async function createAlertBanner(bannerData: Partial<AlertBanner>): Promi
   // Validate the data before sending
   const validatedData = alertBannerSchema.parse(bannerData);
   const { data } = await axiosClient.post('/alert-banner', validatedData);
+  
+  // Check if data exists and has an id
+  if (!data || !data.id) {
+    throw new Error('Invalid response from alert banner creation');
+  }
+
   // Validate the response
   return alertBannerSchema.parse(data);
 }

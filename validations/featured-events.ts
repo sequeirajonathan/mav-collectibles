@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { idSchema, dateSchema, urlSchema, booleanSchema, positiveNumberSchema, nonEmptyStringSchema, optionalUrlSchema } from "./base";
 
-export const bulletPointSchema = z.string().min(1).max(200);
-
 export const featuredEventSchema = z.object({
   id: idSchema,
   title: nonEmptyStringSchema,
@@ -22,5 +20,3 @@ export const createFeaturedEventSchema = featuredEventSchema.omit({
   createdAt: true,
   updatedAt: true,
 });
-
-export const updateFeaturedEventSchema = createFeaturedEventSchema.partial(); 

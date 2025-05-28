@@ -1,51 +1,5 @@
-/*
-  Warnings:
-
-  - You are about to drop the `AlertBanner` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `CardProduct` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `FeatureFlag` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `FeaturedEvent` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `YouTubeSettings` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-DROP TABLE "AlertBanner";
-
--- DropTable
-DROP TABLE "CardProduct";
-
--- DropTable
-DROP TABLE "FeatureFlag";
-
--- DropTable
-DROP TABLE "FeaturedEvent";
-
--- DropTable
-DROP TABLE "YouTubeSettings";
-
--- CreateTable
-CREATE TABLE "card_products" (
-    "id" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "setName" TEXT,
-    "imageFront" TEXT NOT NULL,
-    "imageBack" TEXT,
-    "description" TEXT,
-    "price" DOUBLE PRECISION NOT NULL,
-    "marketPrice" DOUBLE PRECISION,
-    "quantity" INTEGER NOT NULL,
-    "rarity" TEXT,
-    "printing" TEXT,
-    "language" TEXT,
-    "releaseDate" TIMESTAMP(3),
-    "cardType" TEXT,
-    "tcgplayerId" INTEGER,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "card_products_pkey" PRIMARY KEY ("id")
-);
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN', 'OWNER');
 
 -- CreateTable
 CREATE TABLE "feature_flags" (
@@ -77,11 +31,10 @@ CREATE TABLE "alert_banners" (
 CREATE TABLE "featured_events" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "date" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
     "description" TEXT NOT NULL,
     "imageSrc" TEXT NOT NULL,
     "imageAlt" TEXT NOT NULL,
-    "bulletPoints" TEXT[],
     "link" TEXT,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
     "order" INTEGER NOT NULL DEFAULT 0,
@@ -105,8 +58,51 @@ CREATE TABLE "youtube_settings" (
     CONSTRAINT "youtube_settings_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "card_products_slug_key" ON "card_products"("slug");
+-- CreateTable
+CREATE TABLE "VideoSettings" (
+    "id" INTEGER NOT NULL DEFAULT 1,
+    "src" TEXT NOT NULL,
+    "type" TEXT NOT NULL DEFAULT 'application/x-mpegURL',
+    "isLive" BOOLEAN NOT NULL DEFAULT false,
+    "poster" TEXT NOT NULL DEFAULT '',
+    "title" TEXT NOT NULL DEFAULT 'Live Stream',
+    "autoplay" BOOLEAN NOT NULL DEFAULT true,
+    "muted" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "VideoSettings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_profiles" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "username" TEXT,
+    "firstName" TEXT,
+    "lastName" TEXT,
+    "phoneNumber" TEXT,
+    "role" "UserRole" NOT NULL DEFAULT 'CUSTOMER',
+    "address" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "zipCode" TEXT,
+    "country" TEXT DEFAULT 'US',
+    "preferredLanguage" TEXT DEFAULT 'en',
+    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "phoneVerified" BOOLEAN NOT NULL DEFAULT false,
+    "lastLoginAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_profiles_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "feature_flags_name_key" ON "feature_flags"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_profiles_email_key" ON "user_profiles"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_profiles_username_key" ON "user_profiles"("username");

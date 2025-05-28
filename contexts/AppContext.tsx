@@ -99,7 +99,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const addFeaturedEvent = async (event: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
-    await createFeaturedEvent(event);
+    try {
+      console.log('Creating featured event:', event);
+      await createFeaturedEvent(event);
+      // Show success toast
+      if (typeof window !== 'undefined') {
+        const { toast } = await import('react-hot-toast');
+        toast.success('Featured event created successfully!');
+      }
+    } catch (error) {
+      console.error('Error creating featured event:', error);
+      if (typeof window !== 'undefined') {
+        const { toast } = await import('react-hot-toast');
+        toast.error('Failed to create featured event.');
+      }
+      throw error;
+    }
   };
 
   const updateFeaturedEvent = async (id: string, event: Partial<FeaturedEvent>) => {

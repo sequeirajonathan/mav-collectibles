@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@providers/QueryProvider";
 import { AppProvider } from "@contexts/AppContext";
 import "@styles/globals.css";
-import { SupabaseProvider } from "@contexts/SupabaseContext";
 import { CartProvider } from "@contexts/CartContext";
+import { AuthProvider } from "@contexts/AuthContext";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const geistSans = Geist({
@@ -31,17 +31,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased min-h-screen bg-black text-white font-sans flex flex-col">
-        <SupabaseProvider>
           <QueryProvider>
-            <AppProvider>
-              <CartProvider>
-                <NuqsAdapter>
-                  {children}
-                </NuqsAdapter>
-              </CartProvider>
-            </AppProvider>
+            <AuthProvider>
+              <AppProvider>
+                <CartProvider>
+                  <NuqsAdapter>
+                    {children}
+                  </NuqsAdapter>
+                </CartProvider>
+              </AppProvider>
+            </AuthProvider>
           </QueryProvider>
-        </SupabaseProvider>
       </body>
     </html>
   );

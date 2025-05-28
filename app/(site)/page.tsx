@@ -15,6 +15,8 @@ import NearestEventSection from "@components/ui/NearestEventSection";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const { data: events, isLoading, error } = useFeaturedEvents();
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -100,7 +102,6 @@ export default function Home() {
   const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
   const router = useRouter();
-  const { data: events, isLoading } = useFeaturedEvents();
 
   function handleCardGameClick(squareCategory: string) {
     const mapping = CATEGORY_MAPPING[squareCategory];
@@ -220,6 +221,7 @@ export default function Home() {
             events={events}
             isLoading={isLoading}
             hideTitle
+            error={error}
           />
         </div>
       </div>

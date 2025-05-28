@@ -21,39 +21,34 @@ const FeaturedEvent: React.FC<FeaturedEventProps> = ({
   link
 }) => {
   return (
-    <div className="w-full bg-gradient-to-b from-black to-gray-900 rounded-lg overflow-hidden shadow-xl border border-brand-blue/20 hover:border-brand-blue/40 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-blue/10 h-full min-h-[340px] md:max-h-none">
-      <div className="flex flex-col md:flex-row h-full">
-        {/* Image Section */}
-        <div className="md:w-2/5 flex items-center justify-center p-2 md:p-4">
-          <div className="relative w-full aspect-square max-w-[200px] sm:max-w-[260px] mx-auto rounded-xl overflow-hidden">
-            <Image
-              src={imageSrc}
-              alt={imageAlt}
-              fill
-              className="object-contain"
-              priority
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-            />
-          </div>
+    <div className="w-full bg-gradient-to-b from-black to-gray-900 rounded-lg overflow-hidden shadow border border-brand-blue/20 hover:border-brand-blue/40 transition-all duration-150 hover:shadow-md hover:shadow-brand-blue/10 h-full min-h-[120px] flex flex-col md:flex-row gap-2 p-2 md:p-3">
+      {/* Image Section */}
+      <div className="flex-shrink-0 flex items-center justify-center w-full md:w-auto">
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-md overflow-hidden">
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            fill
+            className="object-contain"
+            priority
+            sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
+          />
         </div>
-        
-        {/* Content Section */}
-        <div className="flex-1 pt-2 pb-4 px-2 md:p-6 flex flex-col h-full justify-center items-center text-center">
-          <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#E6B325] hover:text-[#FFD966] transition-colors">{title}</h2>
-          <p className="text-gray-300 mb-3 text-sm md:text-base">{date}</p>
-          
-          <div className="prose prose-invert mb-4 max-w-none text-sm md:text-base">
-            <p className="line-clamp-3 md:line-clamp-none">{description}</p>
-          </div>
-          
-          {link && (
-            <Button variant="gold" size="lg" asChild className="mt-auto">
-              <Link href={link}>
-                Learn More
-              </Link>
-            </Button>
-          )}
+      </div>
+      {/* Content Section */}
+      <div className="flex-1 flex flex-col justify-center items-start text-left gap-1 min-w-0">
+        <h2 className="text-base md:text-lg font-bold text-[#E6B325] hover:text-[#FFD966] transition-colors leading-tight truncate w-full">{title}</h2>
+        <p className="text-gray-400 text-xs md:text-sm font-medium truncate w-full">{date}</p>
+        <div className="prose prose-invert max-w-none text-xs md:text-sm mb-1 w-full">
+          <p className="line-clamp-2 md:line-clamp-3 break-words">{description}</p>
         </div>
+        {link && (
+          <Button variant="gold" size="sm" asChild className="mt-1">
+            <Link href={link}>
+              Learn More
+            </Link>
+          </Button>
+        )}
       </div>
     </div>
   );

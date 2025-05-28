@@ -1,6 +1,6 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest } from 'next/server'
-import { createClient } from '@lib/supabase/server'
+import { createClient } from '@utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@lib/prisma'
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     })
     
     if (!error) {
-      // Create or update UserProfile after successful verification
+      // Get the user after verification
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         // Create or update UserProfile in your database
@@ -34,12 +34,29 @@ export async function GET(request: NextRequest) {
             ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
           },
         });
+
+        // Redirect to dashboard with success message
+        const url = new URL(next, request.url)
+        url.searchParams.set('verified', 'true')
+        return redirect(url.toString())
       }
-      
-      redirect(next)
+    } else {
+      // Handle specific error cases
+      const url = new URL('/login', request.url)
+      if (error.message.includes('expired')) {
+        url.searchParams.set('error', 'token_expired')
+        url.searchParams.set('message', 'Your verification link has expired. Please request a new one.')
+      } else {
+        url.searchParams.set('error', 'verification_failed')
+        url.searchParams.set('message', 'Email verification failed. Please try again.')
+      }
+      return redirect(url.toString())
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect('/error')
+  // If no token or type provided
+  const url = new URL('/login', request.url)
+  url.searchParams.set('error', 'invalid_link')
+  url.searchParams.set('message', 'Invalid verification link. Please try again.')
+  return redirect(url.toString())
 } 

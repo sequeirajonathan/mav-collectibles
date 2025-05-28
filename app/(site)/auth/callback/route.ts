@@ -1,4 +1,4 @@
-import { createClient } from '@lib/supabase/server'
+import { createClient } from '@utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { prisma } from '@lib/prisma'
 
@@ -8,62 +8,75 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (authError) {
-      // Detect OTP expired or invalid
-      if (
-        authError.message?.includes('expired') ||
-        authError.message?.includes('invalid') ||
-        authError.message?.includes('OTP')
-      ) {
-        // Try to get the email from the query or session
-        const email = requestUrl.searchParams.get('email') || '';
-        const retryUrl = new URL('/login', requestUrl.origin);
-        retryUrl.searchParams.set('message', 'Your confirmation link is invalid or expired. Please try again or resend the confirmation email.');
-        if (email) retryUrl.searchParams.set('retryEmail', email);
-        return NextResponse.redirect(retryUrl);
-      }
-      // Other auth errors
-      return NextResponse.redirect(new URL('/login?error=auth', requestUrl.origin));
-    }
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (user) {
-      try {
-        // Create or update UserProfile
-        const userProfile = await prisma.userProfile.upsert({
-          where: { email: user.email! },
-          update: {
-            lastLoginAt: new Date(),
-            ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
-          },
-          create: {
-            email: user.email!,
-            role: 'CUSTOMER', // Default role
-            ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
-          },
-        });
+    if (!error) {
+      const { data: { user } } = await supabase.auth.getUser()
 
-        // Also update the Supabase user_profiles table to match Prisma
-        const { error: supabaseError } = await supabase
-          .from('user_profiles')
-          .upsert({
-            email: user.email,
-            role: userProfile.role,
-            created_at: userProfile.createdAt,
-            updated_at: userProfile.updatedAt,
-          });
+      if (user) {
+        try {
+          // Create or update UserProfile
+          const userProfile = await prisma.userProfile.upsert({
+            where: { email: user.email! },
+            update: {
+              lastLoginAt: new Date(),
+              ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
+            },
+            create: {
+              email: user.email!,
+              role: 'CUSTOMER', // Default role
+              ...(user.user_metadata?.phoneNumber ? { phoneNumber: user.user_metadata.phoneNumber } : {}),
+            },
+          })
 
-        if (supabaseError) {
-          console.error('Error syncing with Supabase:', supabaseError);
+          // Update user metadata with role - this is crucial for middleware
+          const { error: updateError } = await supabase.auth.updateUser({
+            data: {
+              role: userProfile.role,
+              phoneNumber: userProfile.phoneNumber,
+            }
+          })
+
+          if (updateError) {
+            console.error('Error updating user metadata:', updateError)
+          }
+
+          // Also update the Supabase user_profiles table to match Prisma
+          const { error: supabaseError } = await supabase
+            .from('user_profiles')
+            .upsert({
+              email: user.email,
+              role: userProfile.role,
+              created_at: userProfile.createdAt,
+              updated_at: userProfile.updatedAt,
+            })
+
+          if (supabaseError) {
+            console.error('Error syncing with Supabase:', supabaseError)
+          }
+
+          // Force a session refresh to ensure new metadata is available
+          const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
+          
+          if (refreshError) {
+            console.error('Error refreshing session:', refreshError)
+          } else {
+            console.log('Session refreshed with metadata:', session?.user?.user_metadata)
+          }
+
+          // Double-check the user metadata was updated
+          const { data: { user: updatedUser } } = await supabase.auth.getUser()
+          console.log('Updated user metadata:', updatedUser?.user_metadata)
+
+          // Redirect to dashboard after successful authentication
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        } catch (error) {
+          console.error('Error in profile creation:', error)
         }
-      } catch (error) {
-        console.error('Error in profile creation:', error);
       }
     }
   }
 
-  // Get the redirectTo parameter or default to dashboard
-  const redirectTo = requestUrl.searchParams.get('redirectTo') || '/dashboard';
-  return NextResponse.redirect(new URL(redirectTo, requestUrl.origin));
+  // If we get here, something went wrong
+  return NextResponse.redirect(new URL('/error', request.url))
 } 

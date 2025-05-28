@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FeaturedEvent } from "@interfaces";
 import { Label } from "@components/ui/label";
 import { Input } from "@components/ui/input";
@@ -6,22 +6,68 @@ import { Textarea } from "@components/ui/textarea";
 import { Button } from "@components/ui/button";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
-import { supabase } from "@lib/supabase";
+import { createClient } from "@utils/supabase/client";
 import { v4 as uuidv4 } from "uuid";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface EventFormProps {
   event: Partial<FeaturedEvent>;
-  onSave: (event: Partial<FeaturedEvent>) => void;
+  onSave: (event: Partial<FeaturedEvent>) => Promise<void>;
   onCancel?: () => void;
   buttonText?: string;
 }
 
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const hour = 12 + Math.floor(i / 4);
+  const minute = (i % 4) * 15;
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+});
+
+// Helper to combine date and time strings into a Date object
+function combineDateAndTime(date: Date, time: string): Date {
+  const [timeStr, ampm] = time.split(' ');
+  const [hours, minutesStr] = timeStr.split(':');
+  let hoursNum = Number(hours);
+  const minutes = Number(minutesStr);
+  if (ampm === 'PM' && hoursNum < 12) hoursNum += 12;
+  if (ampm === 'AM' && hoursNum === 12) hoursNum = 0;
+  const combined = new Date(date);
+  combined.setHours(hoursNum, minutes, 0, 0);
+  return combined;
+}
+
 export default function EventForm({ event, onSave, onCancel, buttonText = "Save" }: EventFormProps) {
   const [formData, setFormData] = useState(event);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const supabase = createClient();
   
-  const handleChange = (field: keyof FeaturedEvent, value: string | string[] | boolean) => {
+  const handleChange = (field: keyof FeaturedEvent, value: string | string[] | boolean | Date) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+  
+  // Dynamically update description with selected time
+  useEffect(() => {
+    if (!selectedTime) return;
+    let desc = formData.description || "";
+    // Remove any previous 'Starts @ ... CST' from the description
+    desc = desc.replace(/Starts @ [0-9]{1,2}:[0-9]{2} (AM|PM) CST\s*/g, "").trim();
+    desc = `Starts @ ${selectedTime} CST\n` + desc;
+    setFormData(prev => ({ ...prev, description: desc }));
+  }, [selectedTime, formData.description]);
+  
+  // Combine date and time into ISO string when both are selected
+  useEffect(() => {
+    if (formData.date && selectedTime) {
+      const dateObj = new Date(formData.date);
+      if (!isNaN(dateObj.getTime())) {
+        const combined = combineDateAndTime(dateObj, selectedTime);
+        setFormData(prev => ({ ...prev, date: combined.toISOString() }));
+      }
+    }
+  }, [formData.date, selectedTime]);
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,13 +126,22 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
     }
   };
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title || !formData.description || !formData.imageSrc) {
       toast.error("Please fill in all required fields (title, description, and image)");
       return;
     }
-    
-    onSave(formData);
+    try {
+      console.log("Submitting event:", formData);
+      toast.loading("Submitting event...");
+      await onSave(formData);
+      toast.dismiss();
+      toast.success("Event submitted!");
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.dismiss();
+      toast.error("Failed to save event. Please try again.");
+    }
   };
   
   return (
@@ -100,14 +155,38 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
             onChange={(e) => handleChange("title", e.target.value)}
           />
         </div>
-        
-        <div>
+        <div className="flex flex-col gap-2">
           <Label htmlFor="date">Date</Label>
-          <Input
+          <DatePicker
             id="date"
-            value={formData.date || ""}
-            onChange={(e) => handleChange("date", e.target.value)}
+            selected={formData.date ? new Date(formData.date) : null}
+            onChange={(date: Date | null) => {
+              if (date instanceof Date && !isNaN(date.getTime())) {
+                handleChange("date", date.toISOString().split("T")[0]);
+              } else {
+                handleChange("date", "");
+              }
+            }}
+            dateFormat="MMMM d, yyyy"
+            placeholderText="Select date"
+            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+            autoComplete="off"
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="time">Time</Label>
+          <select
+            id="time"
+            value={selectedTime}
+            onChange={e => setSelectedTime(e.target.value)}
+            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+            autoComplete="off"
+          >
+            <option value="">Select time</option>
+            {TIME_OPTIONS.map(time => (
+              <option key={time} value={time}>{time}</option>
+            ))}
+          </select>
         </div>
       </div>
       
@@ -140,6 +219,7 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
                     alt="Preview"
                     fill
                     className="object-contain rounded"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                   />
                 </div>
               </div>

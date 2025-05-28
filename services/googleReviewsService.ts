@@ -1,29 +1,31 @@
 import { axiosClient } from '@lib/axios';
-
-export interface GoogleReview {
-  author_name: string;
-  rating: number;
-  text: string;
-  time: number;
-  profile_photo_url: string;
-}
-
-export interface GoogleReviewsResponse {
-  reviews: GoogleReview[];
-  error?: string;
-}
+import { googleReviewsResponseSchema, type GoogleReviewsResponse } from '@validations/google-reviews';
 
 export async function getGoogleReviews(): Promise<GoogleReviewsResponse> {
   try {
     const response = await axiosClient.get('/google-reviews');
     
-    if (!response.data || !Array.isArray(response.data.reviews)) {
-      throw new Error('Invalid response format');
+    // Check if response data exists
+    if (!response.data) {
+      console.warn('No data received from Google reviews API');
+      return {
+        reviews: [],
+        error: 'No data received from API'
+      };
     }
 
-    return {
-      reviews: response.data.reviews,
-    };
+    // Validate response format using Zod
+    const result = googleReviewsResponseSchema.safeParse(response.data);
+    
+    if (!result.success) {
+      console.warn('Invalid response format from Google reviews API:', result.error);
+      return {
+        reviews: [],
+        error: 'Invalid response format from API'
+      };
+    }
+
+    return result.data;
   } catch (error) {
     console.error('Error fetching Google reviews:', error);
     

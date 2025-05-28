@@ -3,24 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@contexts/AppContext";
-import { useSupabase } from "@contexts/SupabaseContext";
+import { useAuth } from "@contexts/AuthContext";
 import { Button } from "@components/ui/button";
 import Image from "next/image";
 import { LoginModal } from "@components/ui/LoginModal";
 import CautionTape from "@components/ui/CautionTape";
 
-export default function MaintenancePage() {
+export default function MaintenancePage() {  
   const router = useRouter();
   const { featureFlags } = useAppContext();
-  const { userProfile } = useSupabase();
+  const { isAdmin } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
     // If maintenance mode is disabled or user is admin, redirect to home
-    if (!featureFlags?.find(f => f.name === "maintenanceMode")?.enabled || userProfile?.role === "ADMIN") {
+    if (!featureFlags?.find(f => f.name === "maintenanceMode")?.enabled || isAdmin) {
       router.push("/");
     }
-  }, [featureFlags, userProfile, router]);
+  }, [featureFlags, isAdmin, router]);
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-black overflow-hidden">

@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@utils/supabase/client';
 
 const isServer = typeof window === 'undefined';
 
@@ -38,7 +38,6 @@ axiosClient.interceptors.request.use((config: CustomInternalAxiosRequestConfig) 
   // Check if there's a pending request within the deduplication window
   const existingRequest = pendingRequests.get(requestKey);
   if (existingRequest && (now - existingRequest.timestamp) < DEDUPLICATION_WINDOW) {
-    // Return the existing promise instead of rejecting
     return existingRequest.promise as Promise<CustomInternalAxiosRequestConfig>;
   }
 
@@ -46,7 +45,6 @@ axiosClient.interceptors.request.use((config: CustomInternalAxiosRequestConfig) 
     config.metadata = { ...config.metadata, resolveRequest: resolve };
   });
   
-  // Store the request with its timestamp
   pendingRequests.set(requestKey, {
     promise: requestPromise,
     timestamp: now
@@ -95,21 +93,25 @@ if (process.env.NEXT_PUBLIC_DEBUG) {
 }
 
 if (!isServer) {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   // Add token to request
   axiosClient.interceptors.request.use(async (config) => {
-    const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+      } else {
+        delete config.headers.Authorization;
+      }
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    } catch (error) {
+      console.error('Error getting session:', error);
+      delete config.headers.Authorization;
+      return config;
     }
-
-    return config;
   });
 
   // Handle response errors + retry on 401
@@ -118,33 +120,57 @@ if (!isServer) {
     async (error: AxiosError) => {
       const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-      if (
-        error.response?.status === 401 &&
-        !originalRequest._retry
-      ) {
+      // Handle 401 errors
+      if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
         try {
           const { data, error: refreshError } = await supabase.auth.refreshSession();
-          const token = data.session?.access_token;
-
-          if (refreshError || !token) {
+          
+          if (refreshError || !data.session?.access_token) {
             console.warn('[Axios] Token refresh failed', refreshError);
+            // Clear session and redirect to login
+            await supabase.auth.signOut();
+            window.location.href = '/login';
             return Promise.reject(error);
           }
 
           originalRequest.headers = {
             ...originalRequest.headers,
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${data.session.access_token}`,
           };
 
           return axiosClient(originalRequest);
         } catch (refreshErr) {
           console.error('[Axios] Retry after token refresh failed:', refreshErr);
+          // Clear session and redirect to login
+          await supabase.auth.signOut();
+          window.location.href = '/login';
           return Promise.reject(error);
         }
       }
 
+      // Handle 403 errors (Forbidden)
+      if (error.response?.status === 403) {
+        console.warn('[Axios] Access forbidden');
+        return Promise.reject({
+          message: 'You do not have permission to access this resource',
+          status: 403,
+          data: error.response?.data,
+        });
+      }
+
+      // Handle 503 errors (Service Unavailable)
+      if (error.response?.status === 503) {
+        console.warn('[Axios] Service unavailable');
+        return Promise.reject({
+          message: 'The service is currently unavailable. Please try again later.',
+          status: 503,
+          data: error.response?.data,
+        });
+      }
+
+      // For all other errors
       return Promise.reject({
         message: (error.response?.data as { message?: string })?.message || error.message,
         status: error.response?.status,

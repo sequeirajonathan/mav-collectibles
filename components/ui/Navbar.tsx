@@ -13,7 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSupabase } from "@contexts/SupabaseContext";
+import { useAuth } from "@contexts/AuthContext";
 import { useCart } from "@contexts/CartContext";
 import {
   CATEGORY_GROUPS,
@@ -31,11 +31,25 @@ const Navbar = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, userProfile, signOut } = useSupabase();
+  const { user, userProfile, isAdmin, isStaff, isManager, isOwner, signOut } = useAuth();
   const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Debug logging for auth state
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+      console.log('🔐 Navbar Auth State:', {
+        user: user?.email,
+        userProfile,
+        isAdmin,
+        isStaff,
+        isManager,
+        isOwner
+      });
+    }
+  }, [user, userProfile, isAdmin, isStaff, isManager, isOwner]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -66,19 +80,30 @@ const Navbar = () => {
   };
   const handleSignOut = async () => {
     try {
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+        console.log('🔐 Navbar - Starting sign out process');
+      }
+
       setIsProfileOpen(false);
       setActiveDropdown(null);
       setExpandedGroup(null);
+      
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+        console.log('🔐 Navbar - Calling AuthContext signOut');
+      }
+      
       await signOut();
-      router.replace('/');
+      
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+        console.log('🔐 Navbar - Sign out completed successfully');
+      }
     } catch (error) {
-      console.error('Error during sign out:', error);
-      router.replace('/');
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+        console.error('🔐 Navbar - Sign out error:', error);
+      }
     }
   };
-  const hasAdminAccess =
-    userProfile?.role &&
-    ["STAFF", "MANAGER", "ADMIN", "OWNER"].includes(userProfile.role);
+  const hasAdminAccess = isAdmin || isStaff || isManager || isOwner;
   const navigationItems = hasAdminAccess
     ? [{ href: "/admin", label: "Admin" }]
     : [];

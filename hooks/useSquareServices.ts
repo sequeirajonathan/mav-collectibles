@@ -7,7 +7,6 @@ import {
   fetchCategoryItems,
   fetchProduct,
   searchProducts,
-  fetchInventoryCounts,
 } from "@services/squareService";
 
 const DEFAULT_QUERY_CONFIG = {
@@ -70,17 +69,6 @@ export function useSquareProduct(id: string) {
   return useQuery<NormalizedProductResponse, Error>({
     queryKey: ["product", id],
     queryFn: () => fetchProduct(id),
-    ...DEFAULT_QUERY_CONFIG,
-  });
-}
-
-export function useInventoryCounts(variationIds: string[]) {
-  return useQuery<Record<string, number>, Error>({
-    queryKey: ["inventory", variationIds],
-    queryFn: () => fetchInventoryCounts(variationIds),
-    enabled: variationIds.length > 0,
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds
-    refetchIntervalInBackground: true,
     ...DEFAULT_QUERY_CONFIG,
   });
 }

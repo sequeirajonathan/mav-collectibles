@@ -20,13 +20,6 @@ declare global {
       };
     };
   }
-  
-  // Merge the VideoSettings interface into the same global declaration
-  interface VideoSettings {
-    url: string;
-    enabled: boolean;
-    autoplay: boolean;
-  }
 }
 
 export {}; // This makes the file a module 

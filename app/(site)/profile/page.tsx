@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSupabase } from "@contexts/SupabaseContext";
 import { motion } from "framer-motion";
+import { useAuth } from "@contexts/AuthContext";
 
 export default function ProfilePage() {
-  const { user, userProfile } = useSupabase();
+  const { user, userProfile } = useAuth();
   const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {

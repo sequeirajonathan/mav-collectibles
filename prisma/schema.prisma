@@ -7,29 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model CardProduct {
-  id             String    @id @default(uuid())
-  slug           String    @unique
-  name           String
-  setName        String?
-  imageFront     String
-  imageBack      String?
-  description    String?
-  price          Float
-  marketPrice    Float?
-  quantity       Int
-  rarity         String?
-  printing       String?
-  language       String?
-  releaseDate    DateTime?
-  cardType       String?
-  tcgplayerId    Int?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  @@map("card_products")
-}
-
 // Feature Flag Management
 model FeatureFlag {
   id          String    @id @default(uuid())
@@ -59,7 +36,7 @@ model AlertBanner {
 model FeaturedEvent {
   id           String    @id @default(uuid())
   title        String
-  date         String
+  date         DateTime
   description  String
   imageSrc     String
   imageAlt     String

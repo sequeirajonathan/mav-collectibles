@@ -22,6 +22,9 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 const SakuraEventBoard: React.FC<SakuraEventBoardProps> = ({ events, loading }) => {
+  const now = new Date();
+  const upcomingEvents = events.filter(event => new Date(event.date) >= now);
+
   return (
     <div className="relative w-full max-w-[1350px] mx-auto pt-16 pb-8 px-4 overflow-visible min-h-[128px]">
       {/* Black background layer */}
@@ -71,7 +74,7 @@ const SakuraEventBoard: React.FC<SakuraEventBoardProps> = ({ events, loading }) 
             </div>
           </div>
         ) : (
-          events.map((event, idx) => (
+          upcomingEvents.map((event, idx) => (
             <React.Fragment key={event.id}>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/90 rounded-2xl shadow-lg border-2 border-pink-200 px-2 sm:px-4 py-3 gap-2 sm:gap-0">
                 {/* Event image */}
@@ -121,7 +124,7 @@ const SakuraEventBoard: React.FC<SakuraEventBoardProps> = ({ events, loading }) 
               </div>
 
               {/* Dotted divider */}
-              {idx < events.length - 1 && (
+              {idx < upcomingEvents.length - 1 && (
                 <div className="w-full h-2 flex items-center justify-center">
                   <div className="w-3/4 border-t-2 border-dotted border-pink-200" />
                 </div>

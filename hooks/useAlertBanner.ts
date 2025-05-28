@@ -15,18 +15,28 @@ export function useAlertBanner() {
   const loadAlertBanner = async () => {
     try {
       setLoading(true);
+      setError(null);
       const banner = await fetchAlertBanner();
       setAlertBanner(banner);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to load alert banner'));
+      const error = err instanceof Error ? err : new Error('Failed to load alert banner');
+      setError(error);
+      setAlertBanner(null);
     } finally {
       setLoading(false);
     }
   };
 
   const updateBanner = async (id: string, data: Partial<AlertBanner>) => {
+    if (!id) {
+      const error = new Error('Alert banner ID is required for update');
+      setError(error);
+      throw error;
+    }
+
     try {
       setLoading(true);
+      setError(null);
       const validatedData = alertBannerSchema.partial().parse(data);
       const updatedBanner = await updateAlertBanner(id, validatedData);
       setAlertBanner(updatedBanner);
@@ -43,6 +53,7 @@ export function useAlertBanner() {
   const createBanner = async (data: AlertBanner) => {
     try {
       setLoading(true);
+      setError(null);
       const validatedData = alertBannerSchema.parse(data);
       const newBanner = await createAlertBanner(validatedData);
       setAlertBanner(newBanner);
@@ -70,10 +81,4 @@ export function useAlertBanner() {
 export function useUpdateAlertBanner() {
   const { updateBanner } = useAlertBanner();
   return updateBanner;
-}
-
-// Separate hook for creating alert banner
-export function useCreateAlertBanner() {
-  const { createBanner } = useAlertBanner();
-  return createBanner;
 }

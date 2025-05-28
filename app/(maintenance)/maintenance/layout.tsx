@@ -2,6 +2,7 @@ import "@styles/globals.css";
 import { Toaster } from "react-hot-toast";
 import { QueryProvider } from "@providers/QueryProvider";
 import { AppProvider } from "@contexts/AppContext";
+import { AuthProvider } from "@contexts/AuthContext";
 
 export const metadata = {
   title: "MAV Collectables - Maintenance",
@@ -16,12 +17,14 @@ export default function MaintenanceLayout({
   return (
     <QueryProvider>
       <AppProvider>
-        <main className="flex flex-1 w-full min-h-screen bg-black text-white">
-          <div className="flex flex-1 items-center justify-center w-full h-full">
-            {children}
-          </div>
-        </main>
-        <Toaster position="top-right" />
+        <AuthProvider>
+          <main className="flex flex-1 w-full min-h-screen bg-black text-white">
+            <div className="flex flex-1 items-center justify-center w-full h-full">
+              {children}
+            </div>
+          </main>
+          <Toaster position="top-right" />
+        </AuthProvider>
       </AppProvider>
     </QueryProvider>
   );
