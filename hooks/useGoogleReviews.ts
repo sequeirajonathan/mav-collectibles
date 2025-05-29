@@ -33,9 +33,9 @@ export function useGoogleReviews(): UseGoogleReviewsResult {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    retry: 2,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 

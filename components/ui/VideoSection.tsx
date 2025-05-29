@@ -287,14 +287,6 @@ export default function VideoSection() {
           100% { opacity: 0.3; transform: scale(1.05); }
         }
       `}</style>
-
-      {videoError && (
-        <div className="max-w-6xl mx-auto mb-4">
-          <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-3 rounded-md text-center">
-            There was an error loading the video. Please try again later.
-          </div>
-        </div>
-      )}
     </div>
   );
 }

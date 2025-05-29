@@ -35,15 +35,7 @@ function renderStars(rating: number) {
 }
 
 export default function GoogleReviews() {
-  const [mounted, setMounted] = useState(false);
   const { reviews, isLoading, error } = useGoogleReviews();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // If not mounted or error, render nothing
-  if (!mounted || error) return null;
 
   // Sort by time descending and take top 3
   const latestReviews = [...reviews]
@@ -68,7 +60,7 @@ export default function GoogleReviews() {
     );
   }
 
-  if (latestReviews.length === 0) {
+  if (error || latestReviews.length === 0) {
     return null;
   }
 

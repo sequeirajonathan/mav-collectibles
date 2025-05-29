@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { GoogleSignInButton } from "@components/ui/GoogleSignInButton";
 
 interface SignupFormProps {
   redirectTo?: string;
@@ -138,15 +139,23 @@ export function SignupForm({ redirectTo = "/dashboard", hideLoginLink = false }:
         >
           {isLoading ? "Creating Account..." : "Sign Up"}
         </Button>
-        {!hideLoginLink && (
-          <p className="text-center text-sm text-gray-500">
-            Already have an account?{" "}
-            <Link href="/login" className="text-[#E6B325] hover:underline">
-              Log in
-            </Link>
-          </p>
-        )}
       </form>
+      <div className="my-6 flex items-center gap-4">
+        <hr className="flex-1 border-[#E6B325] opacity-40" />
+        <span className="text-[#E6B325] text-sm font-semibold">Or continue with</span>
+        <hr className="flex-1 border-[#E6B325] opacity-40" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <GoogleSignInButton redirectTo={redirectTo} />
+      </div>
+      {!hideLoginLink && (
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Already have an account?{" "}
+          <Link href="/login" className="text-[#E6B325] hover:underline">
+            Log in
+          </Link>
+        </p>
+      )}
     </div>
   );
 } 
