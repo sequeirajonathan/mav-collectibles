@@ -57,7 +57,7 @@ export default function FeaturedEventsTab() {
         imageSrc: event.imageSrc,
         date: formattedDate,
         imageAlt: event.imageAlt || "",
-        link: event.link || `${process.env.NEXT_PUBLIC_SITE_URL}/events`,
+        link: event.link || "/events",
         enabled: event.enabled !== undefined ? event.enabled : true,
         order: 1 // Set a default order of 1 to satisfy the validation
       };

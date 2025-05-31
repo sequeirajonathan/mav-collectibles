@@ -32,8 +32,13 @@ export async function fetchCategoryItems(
   if (stock) params.append('stock', stock);
   if (sort) params.append('sort', sort);
 
-  const { data } = await axiosClient.get(`/category/${slug}?${params.toString()}`);
-  return data;
+  const url = `/category/${slug}?${params.toString()}`;
+  try {
+    const { data } = await axiosClient.get(url);
+    return data;
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function fetchProduct(id: string): Promise<NormalizedProductResponse> {

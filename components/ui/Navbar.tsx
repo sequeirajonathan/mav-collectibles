@@ -19,7 +19,7 @@ import {
   CATEGORY_GROUPS,
 } from "@const/categories";
 import { SquareCategory } from "@interfaces/categories";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@components/ui/button";
 
 const Navbar = () => {
@@ -31,6 +31,7 @@ const Navbar = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const { user, userProfile, isAdmin, isStaff, isManager, isOwner, signOut } = useAuth();
   const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -71,7 +72,11 @@ const Navbar = () => {
   }, []);
 
   const toggleMenu = () => {
-    setIsMenuOpen((o) => !o);
+    setIsMenuOpen((o) => {
+      const newState = !o;
+      if (!newState) setExpandedGroup(null);
+      return newState;
+    });
     if (isProfileOpen) setIsProfileOpen(false);
   };
   const toggleProfile = () => {
@@ -160,6 +165,14 @@ const Navbar = () => {
     setActiveDropdown(null);
     setIsMenuOpen(false);
   };
+
+  // Close all menus/accordions on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsProfileOpen(false);
+    setExpandedGroup(null);
+    setActiveDropdown(null);
+  }, [pathname]);
 
   return (
     <div className="bg-black shadow-md">
@@ -467,6 +480,15 @@ const Navbar = () => {
                     </div>
                   );
                 })}
+
+                {/* Events Link (mobile only) */}
+                <Link
+                  href="/events"
+                  className="block px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Events
+                </Link>
 
                 {/* Admin Link */}
                 {navigationItems.map((item) => (

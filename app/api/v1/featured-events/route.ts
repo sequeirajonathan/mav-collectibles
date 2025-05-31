@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { z } from 'zod';
-import { createFeaturedEvent } from "@services/featuredEventService";
 import { createFeaturedEventSchema } from "@validations/featured-events";
+
+// Helper function to convert Prisma event to API response
+const convertPrismaEventToResponse = (event: any) => ({
+  ...event,
+  date: event.date.toISOString(),
+  createdAt: event.createdAt.toISOString(),
+  updatedAt: event.updatedAt.toISOString()
+});
 
 export async function GET() {
   try {
@@ -13,7 +20,7 @@ export async function GET() {
       }
     });
     
-    return NextResponse.json(featuredEvents, {
+    return NextResponse.json(featuredEvents.map(convertPrismaEventToResponse), {
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
@@ -39,9 +46,17 @@ export async function POST(request: Request) {
     // Validate the request body
     const validatedData = createFeaturedEventSchema.parse(body);
     
-    const event = await createFeaturedEvent(validatedData);
+    // Convert the date string to a Date object for Prisma
+    const eventData = {
+      ...validatedData,
+      date: new Date(validatedData.date)
+    };
     
-    return NextResponse.json(event);
+    const event = await prisma.featuredEvent.create({
+      data: eventData
+    });
+    
+    return NextResponse.json(convertPrismaEventToResponse(event));
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

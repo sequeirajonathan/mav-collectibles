@@ -100,7 +100,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addFeaturedEvent = async (event: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      console.log('Creating featured event:', event);
       await createFeaturedEvent(event);
       // Show success toast
       if (typeof window !== 'undefined') {

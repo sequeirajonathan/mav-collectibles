@@ -27,20 +27,35 @@ export function useInfiniteCatalogItemsBySlug(
 ) {
   return useInfiniteQuery<NormalizedCatalogResponse, Error>({
     queryKey: ["catalogItemsBySlug", slug, search, stock, sort],
-    queryFn: ({ pageParam }) =>
-      fetchCategoryItems(
-        slug,
-        pageParam as string | null,
-        search,
-        stock,
-        sort
-      ),
-    getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
+    queryFn: async ({ pageParam }) => {
+      try {
+        const result = await fetchCategoryItems(
+          slug,
+          pageParam as string | null,
+          search,
+          stock,
+          sort
+        );
+        return result;
+      } catch (err) {
+        throw err;
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.cursor ?? undefined;
+    },
     initialPageParam: null,
     ...DEFAULT_QUERY_CONFIG,
     refetchInterval: 30000,
     refetchIntervalInBackground: true,
-    enabled: !!slug,
+    enabled: Boolean(slug),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache between navigations
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -61,7 +76,7 @@ export function useInfiniteCatalogItemsBySearch(
     getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
     initialPageParam: null,
     ...DEFAULT_QUERY_CONFIG,
-    enabled: !!search,
+    enabled: true,
   });
 }
 

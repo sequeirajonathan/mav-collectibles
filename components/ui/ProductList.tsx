@@ -3,6 +3,7 @@
 import { NormalizedCatalogItem } from '@interfaces';
 import { ProductCard } from './ProductCard';
 import { SkeletonProductCard } from './SkeletonProductCard';
+import { EmptyStateMessage } from './EmptyStateMessage';
 // Add image dimensions configuration
 const IMAGE_CONFIG = {
   width: 160,    // Significantly reduced width
@@ -26,11 +27,7 @@ export function ProductList({
   gridCols = 4,
 }: ProductListProps) {
   if (!products?.length) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-gray-500">No products found</p>
-      </div>
-    );
+    return <EmptyStateMessage />;
   }
 
   // Calculate skeletons needed to fill the last row

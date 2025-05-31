@@ -10,6 +10,16 @@ export interface FeaturedEventProps {
   imageSrc: string;
   imageAlt: string;
   link?: string;
+  className?: string;
+  showSeeMoreButton?: boolean;
+}
+
+function getMonthAndDay(dateString: string) {
+  const dateObj = new Date(dateString);
+  if (isNaN(dateObj.getTime())) return { month: '', day: '' };
+  const month = dateObj.toLocaleString('en-US', { month: 'short' });
+  const day = dateObj.getDate();
+  return { month, day };
 }
 
 const FeaturedEvent: React.FC<FeaturedEventProps> = ({
@@ -18,38 +28,135 @@ const FeaturedEvent: React.FC<FeaturedEventProps> = ({
   description,
   imageSrc,
   imageAlt,
-  link
+  link,
+  className = "",
+  showSeeMoreButton = false
 }) => {
-  return (
-    <div className="w-full bg-gradient-to-b from-black to-gray-900 rounded-lg overflow-hidden shadow border border-brand-blue/20 hover:border-brand-blue/40 transition-all duration-150 hover:shadow-md hover:shadow-brand-blue/10 h-full min-h-[120px] flex flex-col md:flex-row gap-2 p-2 md:p-3">
+  const hasNoShadow = className.includes('shadow-none');
+  const hasNoBorder = className.includes('border-0');
+  const baseShadow = hasNoShadow ? '' : 'shadow hover:shadow-md hover:shadow-brand-blue/10';
+  const baseBorder = hasNoBorder ? '' : 'border border-brand-blue/20 hover:border-brand-blue/40';
+  const { month, day } = getMonthAndDay(date);
+
+  // If showSeeMoreButton, make the card clickable on mobile only
+  const cardContent = (
+    <>
       {/* Image Section */}
-      <div className="flex-shrink-0 flex items-center justify-center w-full md:w-auto">
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-md overflow-hidden">
+      <div className="flex items-center justify-center">
+        <div className="relative w-[48px] h-[72px] md:w-[96px] md:h-[144px]">
           <Image
             src={imageSrc}
             alt={imageAlt}
             fill
             className="object-contain"
             priority
-            sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
+            sizes="(max-width: 640px) 48px, (max-width: 768px) 64px, 96px"
           />
         </div>
       </div>
-      {/* Content Section */}
-      <div className="flex-1 flex flex-col justify-center items-start text-left gap-1 min-w-0">
-        <h2 className="text-base md:text-lg font-bold text-[#E6B325] hover:text-[#FFD966] transition-colors leading-tight truncate w-full">{title}</h2>
-        <p className="text-gray-400 text-xs md:text-sm font-medium truncate w-full">{date}</p>
+      {/* Center: Title, Description, Button/Link */}
+      <div className="flex-1 min-w-0 flex flex-col items-center justify-center text-center gap-2 px-2 min-h-[80px]">
+        <h2 className="text-base md:text-lg font-bold text-[#E6B325] hover:text-[#FFD966] transition-colors leading-tight break-words whitespace-normal w-full">{title}</h2>
         <div className="prose prose-invert max-w-none text-xs md:text-sm mb-1 w-full">
           <p className="line-clamp-2 md:line-clamp-3 break-words">{description}</p>
         </div>
-        {link && (
-          <Button variant="gold" size="sm" asChild className="mt-1">
-            <Link href={link}>
-              Learn More
-            </Link>
-          </Button>
+        {showSeeMoreButton && (
+          <>
+            {/* Mobile: show as small link (span if card is a link), Desktop: show as button */}
+            <span className="block md:hidden mt-1">
+              <span className="text-[#E6B325] underline text-xs cursor-pointer">See More Events</span>
+            </span>
+            <span className="hidden md:block mt-2 w-full max-w-[160px] md:max-w-none">
+              <Link href="/events" className="inline-block rounded bg-[#E6B325] text-black font-bold text-xs md:text-sm hover:bg-[#FFD966] transition-colors self-center px-3 py-1 md:px-4 md:py-2 w-full">See More Events</Link>
+            </span>
+          </>
         )}
       </div>
+      {/* Date Section */}
+      <div className="flex flex-col items-center justify-center w-16 md:w-20 flex-shrink-0 flex-grow-0 text-center">
+        <span className="text-lg md:text-xl font-bold text-[#E6B325] tracking-wide uppercase">{month}</span>
+        <span className="text-3xl md:text-4xl font-extrabold text-[#E6B325] leading-none">{day}</span>
+      </div>
+    </>
+  );
+
+  if (showSeeMoreButton) {
+    // On mobile, make the whole card clickable if the see more link is present
+    return (
+      <>
+        {/* Mobile: clickable card with hint */}
+        <Link
+          href="/events"
+          className={`block md:hidden w-full h-full ${baseShadow} ${baseBorder} ${className} min-h-[140px]`}
+          tabIndex={0}
+        >
+          <div className="flex flex-row items-center gap-x-6 p-2 md:p-4 h-full cursor-pointer">
+            {/* Image Section */}
+            <div className="flex items-center justify-center">
+              <div className="relative w-[48px] h-[72px] md:w-[96px] md:h-[144px]">
+                <Image
+                  src={imageSrc}
+                  alt={imageAlt}
+                  fill
+                  className="object-contain"
+                  priority
+                  sizes="(max-width: 640px) 48px, (max-width: 768px) 64px, 96px"
+                />
+              </div>
+            </div>
+            {/* Center: Title, Description, Mobile Link */}
+            <div className="flex-1 min-w-0 flex flex-col items-center justify-center text-center gap-2 px-2 min-h-[80px]">
+              <h2 className="text-base md:text-lg font-bold text-[#E6B325] hover:text-[#FFD966] transition-colors leading-tight break-words whitespace-normal w-full">{title}</h2>
+              <div className="prose prose-invert max-w-none text-xs md:text-sm mb-1 w-full">
+                <p className="line-clamp-2 md:line-clamp-3 break-words">{description}</p>
+              </div>
+              <span className="block mt-1 text-[#E6B325] underline text-xs cursor-pointer">See More Events</span>
+            </div>
+            {/* Date Section */}
+            <div className="flex flex-col items-center justify-center w-16 md:w-20 flex-shrink-0 flex-grow-0 text-center">
+              <span className="text-lg md:text-xl font-bold text-[#E6B325] tracking-wide uppercase">{month}</span>
+              <span className="text-3xl md:text-4xl font-extrabold text-[#E6B325] leading-none">{day}</span>
+            </div>
+          </div>
+        </Link>
+        {/* Desktop: card with button */}
+        <div className={`hidden md:flex w-full overflow-hidden h-full min-h-[140px] flex-row items-center gap-x-6 p-2 md:p-4 transition-all duration-150 ${baseShadow} ${baseBorder} ${className}`}>
+          {/* Image Section */}
+          <div className="flex items-center justify-center">
+            <div className="relative w-[48px] h-[72px] md:w-[96px] md:h-[144px]">
+              <Image
+                src={imageSrc}
+                alt={imageAlt}
+                fill
+                className="object-contain"
+                priority
+                sizes="(max-width: 640px) 48px, (max-width: 768px) 64px, 96px"
+              />
+            </div>
+          </div>
+          {/* Center: Title, Description, Desktop Button */}
+          <div className="flex-1 min-w-0 flex flex-col items-center justify-center text-center gap-2 px-2 min-h-[80px]">
+            <h2 className="text-base md:text-lg font-bold text-[#E6B325] hover:text-[#FFD966] transition-colors leading-tight break-words whitespace-normal w-full">{title}</h2>
+            <div className="prose prose-invert max-w-none text-xs md:text-sm mb-1 w-full">
+              <p className="line-clamp-2 md:line-clamp-3 break-words">{description}</p>
+            </div>
+            <span className="hidden md:block mt-2 w-full max-w-[160px] md:max-w-none">
+              <Link href="/events" className="inline-block rounded bg-[#E6B325] text-black font-bold text-xs md:text-sm hover:bg-[#FFD966] transition-colors self-center px-3 py-1 md:px-4 md:py-2 w-full">See More Events</Link>
+            </span>
+          </div>
+          {/* Date Section */}
+          <div className="flex flex-col items-center justify-center w-16 md:w-20 flex-shrink-0 flex-grow-0 text-center">
+            <span className="text-lg md:text-xl font-bold text-[#E6B325] tracking-wide uppercase">{month}</span>
+            <span className="text-3xl md:text-4xl font-extrabold text-[#E6B325] leading-none">{day}</span>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className={`w-full overflow-hidden h-full min-h-[140px] flex flex-row items-center gap-x-6 p-2 md:p-4 transition-all duration-150 ${baseShadow} ${baseBorder} ${className}`}>
+      {cardContent}
     </div>
   );
 };

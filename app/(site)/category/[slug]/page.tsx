@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useQueryState } from "nuqs";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ProductFilters } from "@components/ui/ProductFilters";
@@ -10,6 +10,7 @@ import {
   COLLECTIBLES_MAPPING,
   SUPPLIES_MAPPING,
 } from "@const/categories";
+import { useInfiniteCatalogItemsBySlug } from "@hooks/useSquareServices";
 
 const ALL_CATEGORIES = {
   ...CATEGORY_MAPPING,
@@ -32,6 +33,41 @@ export default function CategoryPage() {
 
   const category = ALL_CATEGORIES[slug];
 
+  // Initialize the data fetching
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch
+  } = useInfiniteCatalogItemsBySlug(
+    slug,
+    search || "",
+    stock || "IN_STOCK",
+    sort || "name_asc"
+  );
+
+  // Memoize the fetch function
+  const fetchData = useCallback(() => {
+    if (slug) {
+      refetch();
+    }
+  }, [slug, search, stock, sort, refetch]);
+
+  // Force refetch on mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Force refetch when parameters change
+  useEffect(() => {
+    if (slug) {
+      fetchData();
+    }
+  }, [slug, search, stock, sort, fetchData]);
+
   // whenever we navigate to a new category, clear any free-text search
   useEffect(() => {
     if (search) {
@@ -46,6 +82,23 @@ export default function CategoryPage() {
     }
   }, [category, slug, router]);
 
+  // Reset scroll position on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
+  // Defensive: ensure all variables are always defined
+  const safeData = data || null;
+  const safeHasNextPage = typeof hasNextPage === 'boolean' ? hasNextPage : false;
+  const safeIsFetchingNextPage = typeof isFetchingNextPage === 'boolean' ? isFetchingNextPage : false;
+  const safeIsLoading = typeof isLoading === 'boolean' ? isLoading : false;
+  const safeIsError = typeof isError === 'boolean' ? isError : false;
+
+  // Log data updates
+  useEffect(() => {
+    // (logs removed)
+  }, [safeData, safeHasNextPage, safeIsFetchingNextPage, safeIsLoading, safeIsError]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-[#E6B325] mb-6">
@@ -53,11 +106,12 @@ export default function CategoryPage() {
       </h1>
       <ProductFilters />
       <InfiniteCardGrid
-        key={`${slug}-${stock}-${sort}-${search}-${searchParams.toString()}`}
-        slug={slug}
-        search={search || ""}
-        stock={stock || "IN_STOCK"}
-        sort={sort || "name_asc"}
+        data={data}
+        isLoading={isLoading}
+        isError={isError}
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
       />
     </div>
   );

@@ -155,38 +155,40 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
             onChange={(e) => handleChange("title", e.target.value)}
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="date">Date</Label>
-          <DatePicker
-            id="date"
-            selected={formData.date ? new Date(formData.date) : null}
-            onChange={(date: Date | null) => {
-              if (date instanceof Date && !isNaN(date.getTime())) {
-                handleChange("date", date.toISOString().split("T")[0]);
-              } else {
-                handleChange("date", "");
-              }
-            }}
-            dateFormat="MMMM d, yyyy"
-            placeholderText="Select date"
-            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
-            autoComplete="off"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="time">Time</Label>
-          <select
-            id="time"
-            value={selectedTime}
-            onChange={e => setSelectedTime(e.target.value)}
-            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
-            autoComplete="off"
-          >
-            <option value="">Select time</option>
-            {TIME_OPTIONS.map(time => (
-              <option key={time} value={time}>{time}</option>
-            ))}
-          </select>
+        <div className="flex flex-row gap-2">
+          <div className="flex-1 flex flex-col gap-2">
+            <Label htmlFor="date">Date</Label>
+            <DatePicker
+              id="date"
+              selected={formData.date ? new Date(formData.date) : null}
+              onChange={(date: Date | null) => {
+                if (date instanceof Date && !isNaN(date.getTime())) {
+                  handleChange("date", date.toISOString().split("T")[0]);
+                } else {
+                  handleChange("date", "");
+                }
+              }}
+              dateFormat="MMMM d, yyyy"
+              placeholderText="Select date"
+              className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+              autoComplete="off"
+            />
+          </div>
+          <div className="flex-1 flex flex-col gap-2">
+            <Label htmlFor="time">Time</Label>
+            <select
+              id="time"
+              value={selectedTime}
+              onChange={e => setSelectedTime(e.target.value)}
+              className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+              autoComplete="off"
+            >
+              <option value="">Select time</option>
+              {TIME_OPTIONS.map(time => (
+                <option key={time} value={time}>{time}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
       

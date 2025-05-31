@@ -4,10 +4,11 @@ import React, { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ProductCard } from "./ProductCard";
 import { SkeletonProductCard } from "./SkeletonProductCard";
-import { useInfiniteCatalogItemsBySlug } from "@hooks/useSquareServices";
-import type { NormalizedCatalogItem } from "@interfaces";
+import type { NormalizedCatalogItem, NormalizedCatalogResponse } from "@interfaces";
 import { toast } from "react-hot-toast";
 import { EndOfListMessage } from "./EndOfListMessage";
+import { EmptyStateMessage } from "./EmptyStateMessage";
+import { InfiniteData } from "@tanstack/react-query";
 
 // Enhanced loading indicator component
 const LoadingSpinner = () => (
@@ -18,17 +19,21 @@ const LoadingSpinner = () => (
 );
 
 interface InfiniteCardGridProps {
-  slug: string;
-  search?: string;
-  stock?: string;
-  sort?: string;
+  data?: InfiniteData<NormalizedCatalogResponse>;
+  isLoading: boolean;
+  isError: boolean;
+  fetchNextPage: () => Promise<unknown>;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
 }
 
 export function InfiniteCardGrid({
-  slug,
-  search = "",
-  stock = "IN_STOCK",
-  sort = "name_asc",
+  data,
+  isLoading,
+  isError,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
 }: InfiniteCardGridProps) {
   const [mounted, setMounted] = useState(false);
   const [previousItemCount, setPreviousItemCount] = useState(0);
@@ -36,19 +41,7 @@ export function InfiniteCardGrid({
   
   useEffect(() => setMounted(true), []);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useInfiniteCatalogItemsBySlug(slug, search, stock, sort);
-
-  const items: NormalizedCatalogItem[] =
-    data?.pages.flatMap((p) => p.items) ?? [];
+  const items: NormalizedCatalogItem[] = data?.pages.flatMap((p) => p.items) ?? [];
 
   // Show toast notification when items are added in the background
   useEffect(() => {
@@ -69,24 +62,6 @@ export function InfiniteCardGrid({
     setPreviousItemCount(items.length);
   }, [items.length, previousItemCount, isInitialLoad]);
 
-  useEffect(() => {
-    if (isError && error) {
-      toast.error("Failed to load products. Please try again.", {
-        duration: 5000,
-        position: "top-right",
-      });
-    }
-  }, [isError, error]);
-
-  // Force refetch when key parameters change
-  useEffect(() => {
-    if (mounted) {
-      // Reset initial load state when parameters change
-      setIsInitialLoad(true);
-      refetch();
-    }
-  }, [slug, search, stock, sort, mounted, refetch]);
-
   // Show loading state for initial load
   if (!mounted || isLoading) {
     return (
@@ -101,28 +76,20 @@ export function InfiniteCardGrid({
   // Show error state
   if (isError) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-500 mb-4">Failed to load products</p>
-        <button
-          onClick={() => {
-            setIsInitialLoad(true);
-            refetch();
-          }}
-          className="px-4 py-2 bg-[#E6B325] text-black rounded-lg hover:bg-[#FFD966] transition-colors"
-        >
-          Try Again
-        </button>
-      </div>
+      <EmptyStateMessage 
+        title="Failed to load products"
+        buttonText="Try Again"
+        onButtonClick={() => {
+          setIsInitialLoad(true);
+          fetchNextPage();
+        }}
+      />
     );
   }
 
   // Show empty state
   if (items.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-400">No products found</p>
-      </div>
-    );
+    return <EmptyStateMessage />;
   }
 
   return (

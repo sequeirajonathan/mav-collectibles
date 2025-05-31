@@ -76,26 +76,26 @@ const SakuraEventBoard: React.FC<SakuraEventBoardProps> = ({ events, loading }) 
         ) : (
           upcomingEvents.map((event, idx) => (
             <React.Fragment key={event.id}>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/90 rounded-2xl shadow-lg border-2 border-pink-200 px-2 sm:px-4 py-3 gap-2 sm:gap-0">
+              <div className="flex flex-row items-center bg-white/90 rounded-lg sm:rounded-2xl shadow border border-pink-200 sm:shadow-lg sm:border-2 px-1.5 sm:px-4 py-2 sm:py-3 gap-2 sm:gap-6">
                 {/* Event image */}
-                <div className="flex-shrink-0 w-full sm:w-32 h-36 sm:h-32 relative mb-2 sm:mb-0 sm:mr-6 mx-auto">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-32 sm:h-32 relative mr-2 sm:mr-0 mx-auto flex items-center justify-center sm:flex-1">
                   <Image
                     src={event.image}
                     alt={event.title}
                     fill
                     className="object-contain object-center rounded-xl border border-pink-100 bg-white"
-                    sizes="(max-width: 640px) 100vw, 80px"
+                    sizes="(max-width: 640px) 64px, 80px"
                   />
                 </div>
 
                 {/* Event details */}
-                <div className="flex-1 flex flex-col justify-center text-center sm:text-left">
+                <div className="flex-1 sm:flex-[2] flex flex-col justify-center text-left sm:items-center sm:justify-center sm:text-center">
                   {event.highlight && (
                     <span className="text-xs font-bold text-red-600 border-2 border-red-500 rounded px-2 py-0.5 mb-1 bg-white mx-auto sm:mx-0">
                       {event.highlight}
                     </span>
                   )}
-                  <h2 className="text-base sm:text-lg font-extrabold text-pink-700 mb-0.5 sakura-font drop-shadow">
+                  <h2 className="text-sm sm:text-lg font-extrabold text-pink-700 mb-0.5 sakura-font drop-shadow">
                     {event.title}
                   </h2>
                   <p className="text-xs sm:text-sm text-gray-700 leading-tight">
@@ -104,17 +104,17 @@ const SakuraEventBoard: React.FC<SakuraEventBoardProps> = ({ events, loading }) 
                 </div>
 
                 {/* Event date */}
-                <div className="flex flex-col items-center justify-center mt-2 sm:mt-0 sm:ml-6">
+                <div className="flex flex-col items-center justify-center ml-2 sm:ml-0 sm:flex-1">
                   {(() => {
                     const dateObj = new Date(event.date);
                     const day = dateObj.getDate();
                     const monthAbbr = dateObj.toLocaleString('en-US', { month: 'short' });
                     return (
                       <>
-                        <span className={`${luckiestGuy.className} text-base sm:text-lg text-black tracking-wide mb-1`} style={{ letterSpacing: '0.05em' }}>
+                        <span className={`${luckiestGuy.className} text-sm sm:text-lg text-black tracking-wide mb-1`} style={{ letterSpacing: '0.05em' }}>
                           {monthAbbr.toUpperCase()}
                         </span>
-                        <span className={`${luckiestGuy.className} text-5xl sm:text-6xl font-extrabold text-black leading-none`}>
+                        <span className={`${luckiestGuy.className} text-4xl sm:text-6xl font-extrabold text-black leading-none`}>
                           {day}
                         </span>
                       </>
@@ -125,8 +125,8 @@ const SakuraEventBoard: React.FC<SakuraEventBoardProps> = ({ events, loading }) 
 
               {/* Dotted divider */}
               {idx < upcomingEvents.length - 1 && (
-                <div className="w-full h-2 flex items-center justify-center">
-                  <div className="w-3/4 border-t-2 border-dotted border-pink-200" />
+                <div className="w-full h-1 flex items-center justify-center">
+                  <div className="w-3/4 border-t border-dotted border-pink-200" />
                 </div>
               )}
             </React.Fragment>
