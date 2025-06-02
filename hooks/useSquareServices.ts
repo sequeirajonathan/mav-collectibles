@@ -12,11 +12,9 @@ import {
 const DEFAULT_QUERY_CONFIG = {
   staleTime: 0,
   refetchOnWindowFocus: true,
-  retry: 3,
-  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  refetchOnMount: true,
-  refetchOnReconnect: true,
-  cacheTime: 10 * 60 * 1000, // 10 minutes
+  refetchOnMount:       true,
+  refetchOnReconnect:   true,
+  retry:                3,
 };
 
 export function useInfiniteCatalogItemsBySlug(

@@ -50,6 +50,12 @@ export default function CartPage() {
       ["rgba(239, 68, 68, 0.2)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]
     );
 
+    const handleDragEnd = (event: any, info: any) => {
+      if (info.offset.x < -100 && info.velocity.x < 0) {
+        removeItem(item.id);
+      }
+    };
+
     return (
       <motion.div
         layout
@@ -61,12 +67,13 @@ export default function CartPage() {
         <motion.div
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.7}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
           style={{ x, background }}
           className="p-3 sm:p-4 relative"
         >
           <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-3 sm:gap-4">
-            <div className="w-20 h-20 flex-shrink-0 relative">
+            <Link href={`/product/${item.id}`} className="w-20 h-20 flex-shrink-0 relative block pointer-events-none">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
@@ -78,13 +85,13 @@ export default function CartPage() {
               ) : (
                 <ImagePlaceholder />
               )}
-            </div>
+            </Link>
             <div className="flex-1 flex flex-col justify-between w-full">
-              <div>
-                <h3 className="text-base font-medium text-white line-clamp-2 break-words mb-1">{item.name}</h3>
+              <Link href={`/product/${item.id}`} className="block pointer-events-none">
+                <h3 className="text-base font-medium text-white line-clamp-2 break-words mb-1 hover:text-[#E6B325] transition-colors">{item.name}</h3>
                 <p className="text-[#E6B325] font-semibold text-sm">${(item.price / 100).toFixed(2)}</p>
-              </div>
-              <div className="flex items-center gap-2 mt-2 w-full">
+              </Link>
+              <div className="flex items-center gap-2 mt-2 w-full pointer-events-auto">
                 <Button
                   onClick={() => handleQuantityChange(item.id, item.quantity, item.quantity - 1)}
                   variant="secondary"
@@ -164,7 +171,7 @@ export default function CartPage() {
               <h2 className="text-xl font-semibold text-white mb-4">Cart Summary</h2>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-gray-300">
-                  <span>Items ({(totalItems / 100).toFixed(2)})</span>
+                  <span>Items ({totalItems})</span>
                   <span>${(totalPrice / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">

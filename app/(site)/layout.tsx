@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Navbar from "@components/ui/Navbar";
 import Footer from "@components/ui/Footer";
 import AlertBanner from "@components/ui/AlertBanner";
-import { QueryProvider } from "@providers/QueryProvider";
-import { AppProvider } from "@contexts/AppContext";
 import "@styles/globals.css";
 import "@styles/video-player.css";
 import ScrollToTop from "@components/ui/ScrollToTop";
@@ -11,8 +9,6 @@ import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
 import CookieConsent from "@components/ui/CookieConsent";
 import { fetchAlertBanner } from "@services/alertBannerService";
-import { CartProvider } from "@contexts/CartContext";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export const metadata: Metadata = {
   title: "MAV Collectables - Trading Card Game Shop",
@@ -31,7 +27,7 @@ async function preloadAlertBanner() {
   }
 }
 
-export default async function RootLayout({
+export default async function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -40,28 +36,20 @@ export default async function RootLayout({
   const alertBannerData = await preloadAlertBanner();
 
   return (
-    <QueryProvider initialAlertBanner={alertBannerData}>
-      <AppProvider>
-        <CartProvider>
-          <NuqsAdapter>
-            <Suspense fallback={
-              <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
-              </div>
-            }>
-              <AlertBanner />
-              <Navbar />
-              <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-                {children}
-              </main>
-              <Footer />
-              <ScrollToTop />
-              <Toaster position="top-right" />
-              <CookieConsent />
-            </Suspense>
-          </NuqsAdapter>
-        </CartProvider>
-      </AppProvider>
-    </QueryProvider>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div>
+      </div>
+    }>
+      <AlertBanner />
+      <Navbar />
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+        {children}
+      </main>
+      <Footer />
+      <ScrollToTop />
+      <Toaster position="top-right" />
+      <CookieConsent />
+    </Suspense>
   );
 }

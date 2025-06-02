@@ -31,17 +31,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased min-h-screen bg-black text-white font-sans flex flex-col">
-          <QueryProvider>
-            <AuthProvider>
-              <AppProvider>
-                <CartProvider>
-                  <NuqsAdapter>
-                    {children}
-                  </NuqsAdapter>
-                </CartProvider>
-              </AppProvider>
-            </AuthProvider>
-          </QueryProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <AppProvider>
+              <CartProvider>
+                <NuqsAdapter>
+                  {children}
+                </NuqsAdapter>
+              </CartProvider>
+            </AppProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

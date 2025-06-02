@@ -175,7 +175,7 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    <div className="bg-black shadow-md">
+    <div className="bg-black shadow-md" key={`navbar-${hasAdminAccess}`}>
       <nav className="w-full bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-2 md:py-3">
