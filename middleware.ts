@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@utils/supabase/middleware'
 
 // Debug logging function
@@ -10,7 +10,59 @@ const debug = (...args: any[]) => {
 
 export async function middleware(request: NextRequest) {
   debug('🔍 Root Middleware - Request path:', request.nextUrl.pathname)
-  return await updateSession(request)
+
+  // Maintenance mode logic
+  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+  const path = request.nextUrl.pathname;
+  const isAuthPath = path.startsWith('/auth') || path === '/login' || path === '/signup' || path.startsWith('/api/v1/auth') || path === '/api/v1/user-profile';
+  const isMaintenancePage = path === '/maintenance';
+
+  if (isMaintenanceMode && !isAuthPath && !isMaintenancePage) {
+    // Check if user is admin
+    // Use the same logic as in utils/supabase/middleware.ts
+    const { createServerClient } = await import('@supabase/ssr');
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+          },
+        },
+      }
+    );
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (token) {
+        const response = await fetch(`${request.nextUrl.origin}/api/v1/user-profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const userProfile = await response.json();
+          const isAdmin = userProfile.role === 'ADMIN' || userProfile.role === 'STAFF' || userProfile.role === 'MANAGER' || userProfile.role === 'OWNER';
+          if (isAdmin) {
+            // Allow admin through
+            return await updateSession(request);
+          }
+        }
+      }
+    }
+    // Not admin, redirect to /maintenance
+    const url = request.nextUrl.clone();
+    url.pathname = '/maintenance';
+    return NextResponse.redirect(url);
+  }
+
+  // Default: update session and continue
+  return await updateSession(request);
 }
 
 export const config = {
