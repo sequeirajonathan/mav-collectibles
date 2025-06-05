@@ -1,34 +1,36 @@
 "use client";
 import React, { useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs"; // ← import useQueryState
 import { useInfiniteCatalogItemsBySlug } from "@hooks/useInfiniteCatalogItemsBySlug";
 import { InfiniteCardGrid } from "@components/ui/InfiniteCardGrid";
+import { ProductFilters } from "@components/ui/ProductFilters";
 
 export default function CategoryPage() {
   // 1) Grab the raw `slug` from useParams:
   const params = useParams(); // params.slug: string | string[] | undefined
 
   // 2) Narrow it to a string (or default to an empty string)
-  const slug =
-    typeof params.slug === "string" 
-      ? params.slug 
-      : "";
+  const slug = typeof params.slug === "string" ? params.slug : "";
 
-  // 3) Grab `group` from ?group=… (useSearchParams().get returns string|null)
+  // 3) Grab `group` from ?group=…
   const rawGroup = useSearchParams().get("group");
-  const group = rawGroup ?? "TCG"; // now `group` is definitely a string
+  const group = rawGroup ?? "TCG";
 
-  // Store last visited category
+  // 4) Grab `stock` and `sort` out of the URL querystring
+  //    (these match exactly the keys used by <ProductFilters />)
+  const [stockQuery] = useQueryState("stock"); // e.g. "IN_STOCK" or "IN_STOCK,SOLD_OUT"
+  const [sortQuery] = useQueryState("sort");   // e.g. "name_asc" or "name_desc"
+
+  // Store last visited category in localStorage (unchanged)
   useEffect(() => {
     if (slug) {
-      const categoryUrl = `/category/${slug}${group ? `?group=${group}` : ''}`;
+      const categoryUrl = `/category/${slug}${group ? `?group=${group}` : ""}`;
       localStorage.setItem("lastCategoryUrl", categoryUrl);
     }
   }, [slug, group]);
 
-  // 4) Only call the SWR hook when `slug` is non-empty.
-  //    If slug === "", we pass an empty string anyway; the hook will
-  //    immediately return no data because `getKey` returns null.
+  // 5) Pass slug, group, stockQuery, and sortQuery into the hook
   const {
     data,
     isLoading,
@@ -36,13 +38,20 @@ export default function CategoryPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteCatalogItemsBySlug(slug, group);
+  } = useInfiniteCatalogItemsBySlug(
+    slug,
+    group,
+    stockQuery || undefined,
+    sortQuery || undefined
+  );
 
   return (
     <section className="px-4 md:px-8 lg:px-12">
       <h1 className="text-2xl font-bold mb-6">
-        {slug ? `Category: ${slug} (Group: ${group})` : "Loading…"}
+        {slug ? `Category: ${slug}` : "Loading…"}
       </h1>
+
+      <ProductFilters />
 
       <InfiniteCardGrid
         data={data ?? []}

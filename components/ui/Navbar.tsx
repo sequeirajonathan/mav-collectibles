@@ -141,20 +141,6 @@ const Navbar = () => {
   const toggleGroup = (g: string) =>
     setExpandedGroup((cur) => (cur === g ? null : g));
 
-  const getTopTCGCategories = (cats: SquareCategory[]) => {
-    const top = [
-      "pokemon",
-      "pokemonsingles",
-      "yugioh",
-      "magic",
-      "dragonball",
-      "onepiece",
-      "starwars",
-      "lorcana"
-    ];
-    return cats.filter((c) => top.includes(c.slug));
-  };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -205,71 +191,65 @@ const Navbar = () => {
 
             {/* Desktop nav + search (hidden on mobile) */}
             <div className="hidden min-[1110px]:flex min-[1110px]:flex-1 items-center space-x-4 justify-center">
-              {CATEGORY_GROUPS.filter(group => group.name !== "Events").map((group) => {
-                const isTCG = group.name === "TCG";
-                const cats = isTCG
-                  ? getTopTCGCategories(group.categories)
-                  : group.categories;
-                return (
-                    <div
-                    key={group.name}
-                    className="relative"
-                    ref={(el) => {
-                      if (el) dropdownRefs.current[group.name] = el;
-                    }}
+              {CATEGORY_GROUPS.filter(group => group.name !== "Events").map((group) => (
+                <div
+                  key={group.name}
+                  className="relative"
+                  ref={(el) => {
+                    if (el) dropdownRefs.current[group.name] = el;
+                  }}
+                >
+                  <Button
+                    onClick={() =>
+                      setActiveDropdown((cur) =>
+                        cur === group.name ? null : group.name
+                      )
+                    }
+                    className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 flex items-center hover:text-[#FFD966]"
                   >
-                    <Button
-                      onClick={() =>
-                        setActiveDropdown((cur) =>
-                          cur === group.name ? null : group.name
-                        )
-                      }
-                      className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 flex items-center hover:text-[#FFD966]"
-                    >
-                      {group.name}
-                      <ChevronDown
-                        size={16}
-                        className={`ml-1 transition-transform ${
-                          activeDropdown === group.name ? "rotate-180" : ""
-                        }`}
-                      />
-                    </Button>
-                    <AnimatePresence>
+                    {group.name}
+                    <ChevronDown
+                      size={16}
+                      className={`ml-1 transition-transform ${
+                        activeDropdown === group.name ? "rotate-180" : ""
+                      }`}
+                    />
+                  </Button>
+                  <AnimatePresence>
                     {activeDropdown === group.name && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 z-50"
-                        >
-                          {cats.map((cat) => (
-                            <Button
-                              key={cat.slug}
-                              onClick={() =>
-                                handleCategoryClick(group.name, cat)
-                              }
-                              className="w-full text-left justify-start px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
-                            >
-                              {cat.displayName}
-                            </Button>
-                          ))}
-                          {isTCG && (
-                            <Button
-                              onClick={() =>
-                                handleCategoryClick("TCG")
-                              }
-                              className="w-full text-left justify-start px-4 py-2 text-sm text-[#E6B325]/80 hover:bg-[#E6B325]/10"
-                            >
-                              View All TCG
-                            </Button>
-                          )}
-                        </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-full left-0 mt-2 w-48 bg-black border border-[#E6B325]/30 rounded-lg shadow-lg py-1 z-50"
+                      >
+                        {group.categories.map((cat) => (
+                          <Button
+                            key={cat.slug}
+                            onClick={() =>
+                              handleCategoryClick(group.name, cat)
+                            }
+                            className="w-full text-left justify-start px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                          >
+                            {cat.displayName}
+                          </Button>
+                        ))}
+                        {group.name === "TCG" && (
+                          <Button
+                            onClick={() =>
+                              handleCategoryClick("TCG")
+                            }
+                            className="w-full text-left justify-start px-4 py-2 text-sm text-[#E6B325]/80 hover:bg-[#E6B325]/10"
+                          >
+                            View All TCG
+                          </Button>
+                        )}
+                      </motion.div>
                     )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+                  </AnimatePresence>
+                </div>
+              ))}
 
               <Link
                 href="/events"
@@ -437,59 +417,53 @@ const Navbar = () => {
                 </form>
 
                 {/* Category groups */}
-                {CATEGORY_GROUPS.filter(group => group.name !== "Events").map((group) => {
-                  const isTCG = group.name === "TCG";
-                  return (
-                    <div key={group.name} className="space-y-1">
-                      <Button
-                        onClick={() => toggleGroup(group.name)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
-                      >
-                        {group.name}
-                        <ChevronDown
-                          size={20}
-                          className={`transition-transform ${
-                            expandedGroup === group.name ? "rotate-180" : ""
-                          }`}
-                        />
-                      </Button>
-                      <AnimatePresence>
-                        {expandedGroup === group.name && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="pl-4"
-                          >
-                            {(isTCG
-                              ? getTopTCGCategories(group.categories)
-                              : group.categories
-                            ).map((cat) => (
-                              <Button
-                                key={cat.slug}
-                                type="button"
-                                className="block w-full text-left justify-start px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
-                                onClick={() => handleCategoryClick(group.name, cat)}
-                              >
-                                {cat.displayName}
-                              </Button>
-                            ))}
-                            {isTCG && (
-                              <Button
-                                type="button"
-                                className="block w-full text-left justify-start px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
-                                onClick={() => handleCategoryClick(group.name)}
-                              >
-                                View All TCG
-                              </Button>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
+                {CATEGORY_GROUPS.filter(group => group.name !== "Events").map((group) => (
+                  <div key={group.name} className="space-y-1">
+                    <Button
+                      onClick={() => toggleGroup(group.name)}
+                      className="w-full flex items-center justify-between px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
+                    >
+                      {group.name}
+                      <ChevronDown
+                        size={20}
+                        className={`transition-transform ${
+                          expandedGroup === group.name ? "rotate-180" : ""
+                        }`}
+                      />
+                    </Button>
+                    <AnimatePresence>
+                      {expandedGroup === group.name && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="pl-4"
+                        >
+                          {group.categories.map((cat) => (
+                            <Button
+                              key={cat.slug}
+                              type="button"
+                              className="block w-full text-left justify-start px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
+                              onClick={() => handleCategoryClick(group.name, cat)}
+                            >
+                              {cat.displayName}
+                            </Button>
+                          ))}
+                          {group.name === "TCG" && (
+                            <Button
+                              type="button"
+                              className="block w-full text-left justify-start px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
+                              onClick={() => handleCategoryClick(group.name)}
+                            >
+                              View All TCG
+                            </Button>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
 
                 {/* Events Link (mobile only) */}
                 <Link

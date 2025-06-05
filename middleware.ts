@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/v1/video-settings/current(.*)',
   '/api/v1/google-reviews(.*)',
   '/api/v1/category(.*)',
+  '/api/v1/search(.*)',
   '/',         // Make home page public
   '/events(.*)', // Make events pages public
   '/category(.*)', // Make category pages public

@@ -82,7 +82,8 @@ export function ProductCard({
   };
 
   const renderStockBadge = () => {
-    if (!stockCount || stockCount > 5) return null;
+    // Only show badge for positive stock numbers and not when sold out
+    if (product.soldOut || !stockCount || stockCount <= 0 || stockCount > 5) return null;
     
     return (
       <div className="absolute top-2 right-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">

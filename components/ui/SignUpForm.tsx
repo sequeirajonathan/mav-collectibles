@@ -168,7 +168,16 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
                 variant="outline"
                 className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
               >
-                Sign up with Google
+                Google
+              </Button>
+            </Clerk.Connection>
+
+            <Clerk.Connection name="facebook" asChild>
+              <Button
+                variant="outline"
+                className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+              >
+                Facebook
               </Button>
             </Clerk.Connection>
           </div>

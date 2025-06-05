@@ -28,7 +28,9 @@ async function retryWithBackoff<T>(
     return await fn();
   } catch (error) {
     if (retries === 0) throw error;
-    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries + 1)));
+    await new Promise((resolve) =>
+      setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries + 1))
+    );
     return retryWithBackoff(fn, retries - 1);
   }
 }
@@ -40,24 +42,33 @@ export async function GET(
   try {
     const { slug } = await params;
     const { searchParams } = new URL(request.url);
-    
-    const initialCursor = searchParams.get('cursor');
-    const sort = searchParams.get('sort') || "name_asc";
-    const stock = searchParams.get('stock') || "IN_STOCK";
-    const limit = parseInt(searchParams.get('limit') || "100", 10);
-    const group = searchParams.get('group');
 
-    // Determine category IDs from slug and group
+    // Read query parameters
+    const initialCursor = searchParams.get("cursor");
+    const sort = searchParams.get("sort") || "name_asc";
+    const stock = searchParams.get("stock") || "IN_STOCK";
+    const limit = parseInt(searchParams.get("limit") || "100", 10);
+    const group = searchParams.get("group");
+
+    // Determine categoryIds[] based on slug & group
     let categoryIds: string[] = [];
     if (slug === "tcg") {
-      categoryIds = Object.values(CATEGORY_MAPPING).map(cat => cat.squareCategoryId);
+      categoryIds = Object.values(CATEGORY_MAPPING).map(
+        (cat) => cat.squareCategoryId
+      );
     } else if (CATEGORY_GROUP_SLUGS[slug]) {
       categoryIds = CATEGORY_GROUP_SLUGS[slug];
     } else if (group === "TCG" && CATEGORY_MAPPING[slug]) {
       categoryIds = [CATEGORY_MAPPING[slug].squareCategoryId];
-    } else if (group === "COLLECTIBLES" && COLLECTIBLES_MAPPING[slug]) {
+    } else if (
+      group === "COLLECTIBLES" &&
+      COLLECTIBLES_MAPPING[slug]
+    ) {
       categoryIds = [COLLECTIBLES_MAPPING[slug].squareCategoryId];
-    } else if (group === "SUPPLIES" && SUPPLIES_MAPPING[slug]) {
+    } else if (
+      group === "SUPPLIES" &&
+      SUPPLIES_MAPPING[slug]
+    ) {
       categoryIds = [SUPPLIES_MAPPING[slug].squareCategoryId];
     } else {
       const match = ALL_MAPPINGS.find((c) => c.slug === slug);
@@ -74,14 +85,16 @@ export async function GET(
     const client = createSquareClient();
     const sortOrder: "ASC" | "DESC" = sort === "name_desc" ? "DESC" : "ASC";
 
-    const collectedItems: Array<ReturnType<typeof normalizeItemsWithInventory>[0]> = [];
+    const collectedItems: Array<ReturnType<
+      typeof normalizeItemsWithInventory
+    >[0]> = [];
     let cursor: string | null = initialCursor;
     let keepPaging = true;
 
-    // Keep fetching until we've got `limit` valid items or run out of pages
+    // Keep paginating until we have at least `limit` items or run out of pages
     while (collectedItems.length < limit && keepPaging) {
       const searchResponse = await retryWithBackoff(async () => {
-        const response = await client.catalog.search({
+        return await client.catalog.search({
           objectTypes: ["ITEM"],
           includeRelatedObjects: true,
           query: {
@@ -97,37 +110,40 @@ export async function GET(
           limit: 100,
           ...(cursor ? { cursor } : {}),
         });
-        return response;
       });
 
-      // Build variation ID list
+      // Build a flat list of all variation IDs in this page
       const variationIds = (searchResponse.objects ?? [])
         .filter(isCatalogItem)
         .flatMap((item) => item.itemData?.variations?.map((v) => v.id) ?? []);
 
-      // Fetch inventory counts with retry
+      // Fetch inventory counts for each variation ID
       const inventoryResponse = await retryWithBackoff(async () => {
-        const response = await client.inventory.batchGetCounts({
-          catalogObjectIds: [...variationIds.filter((id): id is string => typeof id === 'string'), ...categoryIds],
+        return await client.inventory.batchGetCounts({
+          catalogObjectIds: [
+            ...variationIds.filter((id): id is string => typeof id === "string"),
+            ...categoryIds, // (though passing categoryIds here is not strictly necessary)
+          ],
           locationIds: ACTIVE_LOCATION_IDS,
         });
-        return response;
       });
 
-      // Build inventory map
-      const inventoryMap = (inventoryResponse.data ?? []).reduce<Record<string, number>>(
-        (acc, c) => {
-          if (c.catalogObjectId && c.state === "IN_STOCK") {
-            acc[c.catalogObjectId] = (acc[c.catalogObjectId] || 0) + parseFloat(c.quantity ?? "0");
-          }
-          return acc;
-        },
-        {}
-      );
+      // Build a { variationId → totalInStock } map
+      const inventoryMap = (inventoryResponse.data ?? []).reduce<
+        Record<string, number>
+      >((acc, c) => {
+        if (c.catalogObjectId && c.state === "IN_STOCK") {
+          acc[c.catalogObjectId] =
+            (acc[c.catalogObjectId] || 0) + parseFloat(c.quantity ?? "0");
+        }
+        return acc;
+      }, {});
 
-      // Attach inventory to items
+      // Attach inventory numbers to each variation in each item
       const itemsWithInventory = (searchResponse.objects ?? [])
-        .filter((obj): obj is CatalogObject & { type: "ITEM" } => isCatalogItem(obj))
+        .filter((obj): obj is CatalogObject & { type: "ITEM" } =>
+          isCatalogItem(obj)
+        )
         .map((item) => ({
           ...item,
           itemData: {
@@ -139,9 +155,19 @@ export async function GET(
           },
         }));
 
-      // Normalize and filter by stock
-      const normalized = normalizeItemsWithInventory(itemsWithInventory, searchResponse.relatedObjects);
-      const stockArray = stock.split(",").map((s: string) => s.trim()).filter(Boolean);
+      // Normalize items (this merges in price, images, etc. from relatedObjects)
+      const normalized = normalizeItemsWithInventory(
+        itemsWithInventory,
+        searchResponse.relatedObjects
+      );
+
+      // Split `stock` into an array: e.g. ["IN_STOCK"] or ["IN_STOCK","SOLD_OUT"]
+      const stockArray = stock
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+
+      // Filter‐by‐stock:
       const filtered =
         stockArray.length === 1
           ? stockArray[0] === "IN_STOCK"
@@ -155,10 +181,12 @@ export async function GET(
       keepPaging = Boolean(cursor);
     }
 
-    // Slice to exactly `limit`
+    // Take exactly `limit` items
     const itemsToReturn = collectedItems.slice(0, limit);
-    // Only return cursor if more valid items may exist
-    const returnCursor = (cursor && itemsToReturn.length === limit) ? cursor : null;
+
+    // Only return a `cursor` if there might be more valid items
+    const returnCursor =
+      cursor && itemsToReturn.length === limit ? cursor : null;
 
     return NextResponse.json({
       items: itemsToReturn,
@@ -167,7 +195,10 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching catalog:", error);
     return NextResponse.json(
-      { error: "Failed to fetch catalog", details: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Failed to fetch catalog",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

@@ -1,5 +1,5 @@
 import useSWRInfinite from "swr/infinite";
-import { fetcher } from '@lib/swr';
+import { fetcherPost } from '@lib/swr';
 import type {
   NormalizedCatalogItem,
   NormalizedCatalogResponse,
@@ -14,11 +14,17 @@ export function useInfiniteCatalogItemsBySearch(
     pageIndex: number,
     previousPageData: NormalizedCatalogResponse | null
   ) => {
+    if (!search) return null;
     if (previousPageData && previousPageData.cursor === null) return null;
-    const cursorSegment = previousPageData?.cursor
-      ? `&cursor=${encodeURIComponent(previousPageData.cursor)}`
-      : "";
-    return `/search?search=${encodeURIComponent(search)}&stock=${encodeURIComponent(stock)}&sort=${encodeURIComponent(sort)}${cursorSegment}`;
+    return [
+      "/search",
+      {
+        search,
+        stock,
+        sort,
+        cursor: previousPageData?.cursor ?? null,
+      },
+    ];
   };
 
   const {
@@ -27,7 +33,7 @@ export function useInfiniteCatalogItemsBySearch(
     size,
     setSize,
     isValidating,
-  } = useSWRInfinite<NormalizedCatalogResponse>(getKey, fetcher, {
+  } = useSWRInfinite<NormalizedCatalogResponse>(getKey, ([url, body]) => fetcherPost(url, body), {
     revalidateFirstPage: false,
   });
 

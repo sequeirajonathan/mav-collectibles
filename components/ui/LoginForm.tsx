@@ -126,19 +126,22 @@ export function LoginForm({
             </span>
             <hr className="flex-1 border-[#E6B325] opacity-40" />
           </div>
-
-          <div className="flex items-center gap-4">
-            <hr className="flex-1 border-[#E6B325] opacity-40" />
-            <span className="text-[#E6B325] text-sm font-semibold">or</span>
-            <hr className="flex-1 border-[#E6B325] opacity-40" />
-          </div>
-
+          
           <Clerk.Connection name="google" asChild>
             <Button
               variant="outline"
               className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
             >
-              Sign in with Google
+              Google
+            </Button>
+          </Clerk.Connection>
+
+          <Clerk.Connection name="facebook" asChild>
+            <Button
+              variant="outline"
+              className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white mt-2"
+            >
+              Facebook
             </Button>
           </Clerk.Connection>
 

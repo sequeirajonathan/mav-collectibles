@@ -103,13 +103,15 @@ export default function Home() {
 
   const router = useRouter();
 
-  function handleCardGameClick(squareCategory: string) {
-    const mapping = CATEGORY_MAPPING[squareCategory];
+  function handleCardGameClick(displayName: string) {
+    // Find the mapping by displayName (case-insensitive)
+    const mapping = Object.values(CATEGORY_MAPPING).find(
+      (cat) => cat.displayName.toLowerCase() === displayName.toLowerCase()
+    );
     if (!mapping) return;
     const params = new URLSearchParams();
     params.set("group", "TCG");
-    params.set("categoryId", mapping.squareCategoryId);
-    router.push(`/products?${params.toString()}`);
+    router.push(`/category/${mapping.slug}?${params.toString()}`);
   }
 
   return (
@@ -146,7 +148,7 @@ export default function Home() {
             key={game.href}
             variants={item}
             className="group relative flex flex-col cursor-pointer"
-            onClick={() => handleCardGameClick(game.squareCategory)}
+            onClick={() => handleCardGameClick(game.title)}
           >
             <div className="relative w-full aspect-square overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
               <Image
@@ -187,14 +189,14 @@ export default function Home() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="flex-shrink-0 w-full md:w-1/3 h-[340px]"
+          className="flex-shrink-0 w-full md:w-1/3 md:h-[340px]"
         >
           <motion.div
             variants={item}
             className="cursor-pointer h-full"
             onClick={() => window.open("https://discord.gg/szgNfjR8", "_blank")}
           >
-            <div className="relative w-full h-full overflow-hidden rounded-xl bg-gradient-to-br from-[#5865F2]/80 to-black border border-brand-blue/20 hover:border-brand-blue/40 flex flex-col items-center justify-center p-6 transition-transform hover:scale-[1.02]">
+            <div className="relative w-full h-full md:h-full bg-gradient-to-br from-[#5865F2]/80 to-black border border-brand-blue/20 hover:border-brand-blue/40 flex flex-col items-center justify-center rounded-lg shadow-xl px-8 md:px-12 pt-3 pb-6 md:pt-4 md:pb-8 transition-transform hover:scale-[1.02]">
               <div className="flex flex-col items-center justify-center flex-grow w-full">
                 <div className="relative w-32 h-32 mb-4 md:w-36 md:h-36 flex items-center justify-center mx-auto">
                   <Image

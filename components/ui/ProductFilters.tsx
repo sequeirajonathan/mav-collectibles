@@ -5,6 +5,7 @@ import { SortOption, StockOption } from "@interfaces/square";
 import type { DropdownOption } from "./CustomDropdown";
 import { useQueryState } from "nuqs";
 import React from "react";
+import { AnimatedSearchBar } from "@app/components/ui/AnimatedSearchBar";
 
 const sortOptions: DropdownOption<SortOption>[] = [
   { label: "Name: A-Z", value: "name_asc" },
@@ -41,7 +42,8 @@ export function ProductFilters() {
 
   return (
     <div className="sticky top-0 z-20 -mx-4 px-2 sm:px-4 py-3 bg-black/80 backdrop-blur-sm border-b border-[#E6B325]/10 mb-8">
-      <div className="max-w-7xl mx-auto">
+      <AnimatedSearchBar />
+      <div className="max-w-7xl mx-auto mt-12">
         <div className="flex flex-row gap-4 w-full sm:w-auto mt-2 sm:mt-0 justify-end items-center">
           <div className="flex gap-2 items-center">
             {stockCheckboxOptions.map((opt) => (

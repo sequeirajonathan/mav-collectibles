@@ -116,7 +116,6 @@ export function InfiniteCardGrid({
       dataLength={items.length}
       next={() => {
         if (!isFetchingNextPage && hasNextPage) {
-          console.log('InfiniteScroll: Fetching next page');
           fetchNextPage();
         }
       }}

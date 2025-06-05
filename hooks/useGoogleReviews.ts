@@ -7,6 +7,7 @@ interface GoogleReview {
   text: string;
   time: number;
   profile_photo_url: string;
+  response?: string | { text: string };
 }
 
 interface GoogleReviewsResponse {

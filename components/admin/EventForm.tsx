@@ -132,7 +132,6 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
       return;
     }
     try {
-      console.log("Submitting event:", formData);
       toast.loading("Submitting event...");
       await onSave(formData);
       toast.dismiss();

@@ -1,9 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Star, StarHalf } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, StarHalf, X } from "lucide-react";
 import { useGoogleReviews } from "@hooks/useGoogleReviews";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Carousel, { CarouselItem } from "./Carousel";
+import { Button } from "./button";
+
+const REVIEW_CHAR_LIMIT = 150;
 
 function renderStars(rating: number) {
   // Google returns float, e.g. 4.7, 3.5
@@ -34,13 +38,142 @@ function renderStars(rating: number) {
   return stars;
 }
 
+// Helper to get initials from a name
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+// Add a helper React component for the profile image with fallback and retry logic
+function ProfileImage({ src, alt, size = 40, initials }: { src?: string; alt: string; size?: number; initials: string }) {
+  const [errorCount, setErrorCount] = useState(0);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  if (!src || errorCount >= 2) {
+    return (
+      <div
+        className={`rounded-full bg-[#232b3a] text-white flex items-center justify-center font-bold select-none`}
+        style={{ width: size, height: size, fontSize: size * 0.45 }}
+      >
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      ref={imgRef}
+      src={src}
+      alt={alt}
+      className="rounded-full object-cover border border-gray-700 bg-[#232b3a] text-white"
+      style={{ width: size, height: size }}
+      loading="lazy"
+      onError={() => {
+        if (errorCount < 1) {
+          // Retry loading once
+          setErrorCount((c) => c + 1);
+          if (imgRef.current) {
+            imgRef.current.src = src;
+          }
+        } else {
+          setErrorCount((c) => c + 1);
+        }
+      }}
+    />
+  );
+}
+
+function ReviewModal({ review, isOpen, onClose }: { review: any; isOpen: boolean; onClose: () => void }) {
+  if (!review) return null;
+  // Extract owner's response if present
+  let ownerResponse = '';
+  if (review.response) {
+    if (typeof review.response === 'string') {
+      ownerResponse = review.response;
+    } else if (typeof review.response === 'object' && review.response.text) {
+      ownerResponse = review.response.text;
+    }
+  }
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/80 z-50"
+          />
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg px-4"
+          >
+            <div className="relative bg-[#181f2a] border border-[#E6B325]/30 rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="absolute top-2 right-2 rounded-full bg-black border border-[#E6B325]/30 text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                aria-label="Close review modal"
+              >
+                <X size={20} />
+              </Button>
+              <div className="flex items-center gap-3 mb-2">
+                <ProfileImage
+                  src={review.profile_photo_url}
+                  alt={review.author_name + " profile"}
+                  size={40}
+                  initials={getInitials(review.author_name)}
+                />
+                <div>
+                  <h3 className="font-semibold text-white mb-1">{review.author_name}</h3>
+                  <div className="flex items-center">{renderStars(review.rating)}</div>
+                </div>
+              </div>
+              <p className="text-gray-200 text-base whitespace-pre-line break-words">{review.text}</p>
+              <p className="text-gray-400 text-xs mt-4">{new Date(review.time * 1000).toLocaleDateString()}</p>
+              <div className="mt-6 pt-4 border-t border-gray-700/50">
+                <h4 className="font-semibold text-[#E6B325] text-sm mb-1">Owner's Response</h4>
+                <p className="text-gray-300 text-sm whitespace-pre-line">
+                  {ownerResponse ? ownerResponse : 'No response from owner.'}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function GoogleReviews() {
   const { reviews, isLoading, error } = useGoogleReviews();
+  const [modalReview, setModalReview] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemsPerSlide, setItemsPerSlide] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Sort by time descending and take top 3
-  const latestReviews = [...reviews]
-    .sort((a, b) => b.time - a.time)
-    .slice(0, 3);
+  // Responsive itemsPerSlide and mobile detection
+  useEffect(() => {
+    function handleResize() {
+      const width = window.innerWidth;
+      setItemsPerSlide(width >= 1024 ? 3 : 1);
+      setIsMobile(width < 640); // Tailwind's sm breakpoint
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   if (isLoading) {
     return (
@@ -60,34 +193,44 @@ export default function GoogleReviews() {
     );
   }
 
-  if (error || latestReviews.length === 0) {
+  if (error || reviews.length === 0) {
     return null;
   }
 
-  return (
-    <div className="w-full px-4 md:px-8">
-      <div className="space-y-6">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold text-center mb-8 text-[#E6B325]"
-        >
-          Customer Reviews
-        </motion.h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {latestReviews.map((review, index) => (
-            <motion.div
-              key={review.time}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-gray-900/80 shadow-lg rounded-xl p-6 border border-gray-800/70 hover:border-[#E6B325]/60 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] cursor-pointer"
-              whileHover={{ y: -6, scale: 1.04 }}
-            >
-              <div className="flex items-center space-x-4 mb-4">
-                <div>
-                  <h3 className="font-semibold text-white mb-1">
+  // Prepare carousel items for all reviews
+  const carouselItems: CarouselItem[] = [...reviews]
+    .sort((a, b) => b.time - a.time)
+    .map((review) => {
+      // Adjust character limit for mobile
+      const charLimit = isMobile ? 100 : REVIEW_CHAR_LIMIT;
+      const isLong = review.text.length > charLimit;
+      const displayText = isLong
+        ? review.text.slice(0, charLimit) + "..."
+        : review.text;
+      return {
+        id: String(review.time),
+        content: (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#181f2a] shadow-lg rounded-xl p-4 sm:p-6 border border-gray-800/70 cursor-pointer w-full h-full"
+            onClick={() => {
+              setModalReview(review);
+              setIsModalOpen(true);
+            }}
+            title={isLong ? 'Click to read full review' : undefined}
+          >
+            <div className="h-full flex flex-col">
+              {/* Header section - fixed height */}
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <ProfileImage
+                  src={review.profile_photo_url}
+                  alt={review.author_name + " profile"}
+                  size={32}
+                  initials={getInitials(review.author_name)}
+                />
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-white text-sm sm:text-base truncate mb-1">
                     {review.author_name}
                   </h3>
                   <div className="flex items-center">
@@ -95,13 +238,51 @@ export default function GoogleReviews() {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-200 text-base mb-2">{review.text}</p>
-              <p className="text-gray-400 text-xs mt-4">
-                {new Date(review.time * 1000).toLocaleDateString()}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+              {/* Review text - flexible middle section */}
+              <div className="flex-1 min-h-0 mb-3">
+                <p className="text-gray-200 text-sm sm:text-base leading-relaxed line-clamp-3 sm:line-clamp-4">
+                  {displayText}
+                </p>
+                {isLong && (
+                  <span className="text-[#E6B325] text-xs mt-1 inline-block">
+                    Tap to read more
+                  </span>
+                )}
+              </div>
+              {/* Date - always at bottom */}
+              <div className="pt-2 border-t border-gray-700/50 mt-auto">
+                <p className="text-gray-400 text-xs">
+                  {new Date(review.time * 1000).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ),
+      };
+    });
+
+  return (
+    <div className="w-full px-4 md:px-8">
+      <div className="space-y-6">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-[#E6B325]"
+        >
+          Customer Reviews
+        </motion.h2>
+        <Carousel
+          key={itemsPerSlide}
+          items={carouselItems}
+          className="h-[280px] sm:h-[300px]"
+          autoPlayInterval={7000}
+          itemsPerSlide={itemsPerSlide}
+        />
+        <ReviewModal
+          review={modalReview}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </div>
     </div>
   );

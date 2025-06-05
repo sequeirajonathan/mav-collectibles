@@ -59,8 +59,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      // Store price as-is (assume it's in cents)
-      console.log('[CartContext] Adding item:', item.name, 'Price (cents):', item.price);
       return [...prevItems, { ...item, quantity: 1 }];
     });
   };
@@ -88,8 +86,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  console.log('[CartContext] Cart items:', items);
-  console.log('[CartContext] Cart totalPrice (cents):', totalPrice);
 
   return (
     <CartContext.Provider

@@ -14,26 +14,31 @@ interface CarouselProps {
   items: CarouselItem[];
   autoPlayInterval?: number; // in milliseconds
   className?: string;
+  itemsPerSlide?: number; // NEW: number of items to show per slide
 }
 
 const Carousel: React.FC<CarouselProps> = ({
   items,
   autoPlayInterval = 5000,
   className = '',
+  itemsPerSlide = 1, // NEW: default to 1
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
 
+  // Calculate total slides
+  const totalSlides = Math.ceil(items.length / itemsPerSlide);
+
   const nextSlide = useCallback(() => {
     setDirection(1);
-    setActiveIndex((current) => (current === items.length - 1 ? 0 : current + 1));
-  }, [items.length]);
+    setActiveIndex((current) => (current === totalSlides - 1 ? 0 : current + 1));
+  }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
     setDirection(-1);
-    setActiveIndex((current) => (current === 0 ? items.length - 1 : current - 1));
-  }, [items.length]);
+    setActiveIndex((current) => (current === 0 ? totalSlides - 1 : current - 1));
+  }, [totalSlides]);
 
   const goToSlide = (index: number) => {
     setDirection(index > activeIndex ? 1 : -1);
@@ -42,14 +47,12 @@ const Carousel: React.FC<CarouselProps> = ({
 
   // Auto-play functionality
   useEffect(() => {
-    if (isPaused || items.length <= 1) return;
-    
+    if (isPaused || totalSlides <= 1) return;
     const interval = setInterval(() => {
       nextSlide();
     }, autoPlayInterval);
-    
     return () => clearInterval(interval);
-  }, [nextSlide, autoPlayInterval, isPaused, items.length]);
+  }, [nextSlide, autoPlayInterval, isPaused, totalSlides]);
 
   if (items.length === 0) return null;
 
@@ -75,6 +78,11 @@ const Carousel: React.FC<CarouselProps> = ({
     opacity: { duration: 0.2 },
   };
 
+  // Get items for current slide
+  const start = activeIndex * itemsPerSlide;
+  const end = start + itemsPerSlide;
+  const slideItems = items.slice(start, end);
+
   return (
     <div 
       className={`relative w-full overflow-hidden rounded-lg ${className}`}
@@ -92,15 +100,19 @@ const Carousel: React.FC<CarouselProps> = ({
             animate="center"
             exit="exit"
             transition={transition}
-            className="absolute inset-0"
+            className="absolute inset-0 w-full h-full flex items-center justify-center gap-4"
           >
-            {items[activeIndex].content}
+            {slideItems.map((item) => (
+              <div key={item.id} className="flex-1 h-full flex items-center justify-center">
+                {item.content}
+              </div>
+            ))}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Navigation arrows with motion effects */}
-      {items.length > 1 && (
+      {totalSlides > 1 && (
         <>
           <motion.div
             whileHover={{ scale: 1.1 }}
@@ -117,7 +129,6 @@ const Carousel: React.FC<CarouselProps> = ({
               <ChevronLeft className="h-6 w-6" />
             </Button>
           </motion.div>
-          
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -137,9 +148,9 @@ const Carousel: React.FC<CarouselProps> = ({
       )}
 
       {/* Indicators with motion effects */}
-      {items.length > 1 && (
+      {totalSlides > 1 && (
         <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 space-x-2">
-          {items.map((_, index) => (
+          {Array.from({ length: totalSlides }).map((_, index) => (
             <motion.button
               key={index}
               whileHover={{ scale: 1.2 }}

@@ -9,6 +9,11 @@ const fetcher = async (url: string) => {
   return response.data;
 };
 
+const fetcherPost = async (url: string, body: any) => {
+  const response = await axiosClient.post(url, body);
+  return response.data;
+};
+
 const swrConfig: SWRConfiguration = {
   revalidateOnFocus: true,
   revalidateOnReconnect: true,
@@ -94,4 +99,4 @@ export function useResource<T = any>(baseUrl: string, options?: ResourceOptions<
   };
 }
 
-export { fetcher, swrConfig }; 
+export { fetcher, fetcherPost, swrConfig }; 
