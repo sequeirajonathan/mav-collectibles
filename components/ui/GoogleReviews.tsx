@@ -1,9 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Star, StarHalf } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, StarHalf, X } from "lucide-react";
 import { useGoogleReviews } from "@hooks/useGoogleReviews";
 import { useState, useEffect } from "react";
+import Carousel, { CarouselItem } from "./Carousel";
+import { Button } from "./button";
+
+const REVIEW_CHAR_LIMIT = 150; // Reduced from 250 for better mobile display
 
 function renderStars(rating: number) {
   // Google returns float, e.g. 4.7, 3.5
@@ -36,11 +40,78 @@ function renderStars(rating: number) {
 
 export default function GoogleReviews() {
   const { reviews, isLoading, error } = useGoogleReviews();
+  const [modalReview, setModalReview] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemsPerSlide, setItemsPerSlide] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Sort by time descending and take top 3
-  const latestReviews = [...reviews]
+  // Responsive itemsPerSlide and mobile detection
+  useEffect(() => {
+    function handleResize() {
+      const width = window.innerWidth;
+      setItemsPerSlide(width >= 1024 ? 3 : 1);
+      setIsMobile(width < 640); // Tailwind's sm breakpoint
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Prepare carousel items for all reviews
+  const carouselItems: CarouselItem[] = [...reviews]
     .sort((a, b) => b.time - a.time)
-    .slice(0, 3);
+    .map((review) => {
+      const isLong = review.text.length > REVIEW_CHAR_LIMIT;
+      const displayText = isLong
+        ? review.text.slice(0, REVIEW_CHAR_LIMIT) + "..."
+        : review.text;
+      return {
+        id: String(review.time),
+        content: (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#181f2a] shadow-lg rounded-xl p-4 sm:p-6 border border-gray-800/70 hover:border-[#E6B325]/60 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] cursor-pointer w-full h-full"
+            onClick={() => {
+              setModalReview(review);
+              setIsModalOpen(true);
+            }}
+            title={isLong ? 'Click to read full review' : undefined}
+          >
+            <div className="h-full flex flex-col">
+              {/* Header section - fixed height */}
+              <div className="mb-3 sm:mb-4">
+                <h3 className="font-semibold text-white text-sm sm:text-base truncate mb-1">
+                  {review.author_name}
+                </h3>
+                <div className="flex items-center">
+                  {renderStars(review.rating)}
+                </div>
+              </div>
+              
+              {/* Review text - flexible middle section */}
+              <div className="flex-1 min-h-0 mb-3">
+                <p className="text-gray-200 text-sm sm:text-base leading-relaxed line-clamp-3 sm:line-clamp-4">
+                  {displayText}
+                </p>
+                {isLong && (
+                  <span className="text-[#E6B325] text-xs mt-1 inline-block">
+                    Tap to read more
+                  </span>
+                )}
+              </div>
+              
+              {/* Date - always at bottom */}
+              <div className="pt-2 border-t border-gray-700/50 mt-auto">
+                <p className="text-gray-400 text-xs">
+                  {new Date(review.time * 1000).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ),
+      };
+    });
 
   if (isLoading) {
     return (
@@ -60,7 +131,7 @@ export default function GoogleReviews() {
     );
   }
 
-  if (error || latestReviews.length === 0) {
+  if (error || carouselItems.length === 0) {
     return null;
   }
 
@@ -70,38 +141,21 @@ export default function GoogleReviews() {
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold text-center mb-8 text-[#E6B325]"
+          className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-[#E6B325]"
         >
           Customer Reviews
         </motion.h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {latestReviews.map((review, index) => (
-            <motion.div
-              key={review.time}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-gray-900/80 shadow-lg rounded-xl p-6 border border-gray-800/70 hover:border-[#E6B325]/60 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] cursor-pointer"
-              whileHover={{ y: -6, scale: 1.04 }}
-            >
-              <div className="flex items-center space-x-4 mb-4">
-                <div>
-                  <h3 className="font-semibold text-white mb-1">
-                    {review.author_name}
-                  </h3>
-                  <div className="flex items-center">
-                    {renderStars(review.rating)}
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-200 text-base mb-2">{review.text}</p>
-              <p className="text-gray-400 text-xs mt-4">
-                {new Date(review.time * 1000).toLocaleDateString()}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+        <Carousel
+          items={carouselItems}
+          className="h-[280px] sm:h-[300px]"
+          autoPlayInterval={7000}
+          itemsPerSlide={itemsPerSlide}
+        />
+        <ReviewModal
+          review={modalReview}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </div>
     </div>
   );
