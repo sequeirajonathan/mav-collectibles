@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { useAppContext } from '@contexts/AppContext';
+import { useYoutubeSettings } from '@hooks/useYoutubeSettings';
 
 interface YouTubePlayerProps {
   videoId?: string;
@@ -35,12 +35,12 @@ export default function YouTubePlayer({
   useContextSettings = false,
   onError
 }: YouTubePlayerProps) {
-  const { youtubeSettings } = useAppContext();
+  const { data: youtubeSettings } = useYoutubeSettings();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Use settings from context if requested
+  // Use settings from SWR if requested
   const settings = useContextSettings && youtubeSettings ? {
     videoId: youtubeSettings.videoId || '',
     title: youtubeSettings.title || '',

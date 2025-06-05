@@ -1,39 +1,34 @@
 "use client";
-
-import React, { useEffect, useCallback } from "react";
-import { useQueryState } from "nuqs";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ProductFilters } from "@components/ui/ProductFilters";
+import React, { useEffect } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { useInfiniteCatalogItemsBySlug } from "@hooks/useInfiniteCatalogItemsBySlug";
 import { InfiniteCardGrid } from "@components/ui/InfiniteCardGrid";
-import {
-  CATEGORY_MAPPING,
-  COLLECTIBLES_MAPPING,
-  SUPPLIES_MAPPING,
-} from "@const/categories";
-import { useInfiniteCatalogItemsBySlug } from "@hooks/useSquareServices";
-
-const ALL_CATEGORIES = {
-  ...CATEGORY_MAPPING,
-  ...COLLECTIBLES_MAPPING,
-  ...SUPPLIES_MAPPING,
-};
 
 export default function CategoryPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // read filter & sort query params
-  const [stock] = useQueryState("stock");
-  const [sort] = useQueryState("sort");
-  const [search, setSearch] = useQueryState("q");
+  // 1) Grab the raw `slug` from useParams:
+  const params = useParams(); // params.slug: string | string[] | undefined
 
-  // grab the slug from the URL
-  const params = useParams();
-  const slug = typeof params.slug === "string" ? params.slug : "";
+  // 2) Narrow it to a string (or default to an empty string)
+  const slug =
+    typeof params.slug === "string" 
+      ? params.slug 
+      : "";
 
-  const category = ALL_CATEGORIES[slug];
+  // 3) Grab `group` from ?group=… (useSearchParams().get returns string|null)
+  const rawGroup = useSearchParams().get("group");
+  const group = rawGroup ?? "TCG"; // now `group` is definitely a string
 
-  // Initialize the data fetching
+  // Store last visited category
+  useEffect(() => {
+    if (slug) {
+      const categoryUrl = `/category/${slug}${group ? `?group=${group}` : ''}`;
+      localStorage.setItem("lastCategoryUrl", categoryUrl);
+    }
+  }, [slug, group]);
+
+  // 4) Only call the SWR hook when `slug` is non-empty.
+  //    If slug === "", we pass an empty string anyway; the hook will
+  //    immediately return no data because `getKey` returns null.
   const {
     data,
     isLoading,
@@ -41,78 +36,22 @@ export default function CategoryPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch
-  } = useInfiniteCatalogItemsBySlug(
-    slug,
-    search || "",
-    stock || "IN_STOCK",
-    sort || "name_asc"
-  );
-
-  // Memoize the fetch function
-  const fetchData = useCallback(() => {
-    if (slug) {
-      refetch();
-    }
-  }, [slug, search, stock, sort, refetch]);
-
-  // Force refetch on mount
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Force refetch when parameters change
-  useEffect(() => {
-    if (slug) {
-      fetchData();
-    }
-  }, [slug, search, stock, sort, fetchData]);
-
-  // whenever we navigate to a new category, clear any free-text search
-  useEffect(() => {
-    if (search) {
-      setSearch(null);
-    }
-  }, [slug, search, setSearch]);
-
-  // Redirect if category doesn't exist
-  useEffect(() => {
-    if (!category && slug && slug.toLowerCase() !== "tcg") {
-      router.replace('/category/tcg');
-    }
-  }, [category, slug, router]);
-
-  // Reset scroll position on navigation
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [slug]);
-
-  // Defensive: ensure all variables are always defined
-  const safeData = data || null;
-  const safeHasNextPage = typeof hasNextPage === 'boolean' ? hasNextPage : false;
-  const safeIsFetchingNextPage = typeof isFetchingNextPage === 'boolean' ? isFetchingNextPage : false;
-  const safeIsLoading = typeof isLoading === 'boolean' ? isLoading : false;
-  const safeIsError = typeof isError === 'boolean' ? isError : false;
-
-  // Log data updates
-  useEffect(() => {
-    // (logs removed)
-  }, [safeData, safeHasNextPage, safeIsFetchingNextPage, safeIsLoading, safeIsError]);
+  } = useInfiniteCatalogItemsBySlug(slug, group);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-[#E6B325] mb-6">
-        {category?.displayName || "All TCG"}
+    <section className="px-4 md:px-8 lg:px-12">
+      <h1 className="text-2xl font-bold mb-6">
+        {slug ? `Category: ${slug} (Group: ${group})` : "Loading…"}
       </h1>
-      <ProductFilters />
+
       <InfiniteCardGrid
-        data={data}
+        data={data ?? []}
         isLoading={isLoading}
         isError={isError}
         fetchNextPage={fetchNextPage}
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
       />
-    </div>
+    </section>
   );
 }

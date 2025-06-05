@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { QueryProvider } from "@providers/QueryProvider";
+import { SWRConfig } from 'swr';
+import { swrConfig } from '@lib/swr';
 import { AppProvider } from "@contexts/AppContext";
 import "@styles/globals.css";
 import { CartProvider } from "@contexts/CartContext";
-import { AuthProvider } from "@contexts/AuthContext";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ClerkProvider } from '@clerk/nextjs';
+import { Suspense } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,20 +31,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased min-h-screen bg-black text-white font-sans flex flex-col">
-        <QueryProvider>
-          <AuthProvider>
-            <AppProvider>
-              <CartProvider>
-                <NuqsAdapter>
-                  {children}
-                </NuqsAdapter>
-              </CartProvider>
-            </AppProvider>
-          </AuthProvider>
-        </QueryProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+        <body className="antialiased min-h-screen bg-black text-white font-sans flex flex-col">
+          <SWRConfig value={swrConfig}>
+              <AppProvider>
+                <CartProvider>
+                  <NuqsAdapter>
+                    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div></div>}>
+                      {children}
+                    </Suspense>
+                  </NuqsAdapter>
+                </CartProvider>
+              </AppProvider>
+          </SWRConfig>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

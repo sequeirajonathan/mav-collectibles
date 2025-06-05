@@ -1,79 +1,53 @@
-import { useState, useEffect } from 'react';
 import { AlertBanner } from '@validations/alert-banner';
 import { alertBannerSchema } from '@validations/alert-banner';
-import { fetchAlertBanner, updateAlertBanner, createAlertBanner } from '@services/alertBannerService';
+import { useResource } from '@lib/swr';
+import { useCallback } from 'react';
 
 export function useAlertBanner() {
-  const [alertBanner, setAlertBanner] = useState<AlertBanner | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const {
+    data: alertBanner,
+    error,
+    isLoading,
+    create,
+    update,
+    refresh,
+  } = useResource<AlertBanner>('/alert-banner', {
+    onError: (error) => {
+      console.error('Alert banner operation failed:', error);
+    },
+  });
 
-  useEffect(() => {
-    loadAlertBanner();
-  }, []);
-
-  const loadAlertBanner = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const banner = await fetchAlertBanner();
-      setAlertBanner(banner);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to load alert banner');
-      setError(error);
-      setAlertBanner(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateBanner = async (id: string, data: Partial<AlertBanner>) => {
+  const handleUpdate = useCallback(async (id: string, data: Partial<AlertBanner>) => {
     if (!id) {
-      const error = new Error('Alert banner ID is required for update');
-      setError(error);
-      throw error;
+      throw new Error('Alert banner ID is required for update');
     }
 
     try {
-      setLoading(true);
-      setError(null);
       const validatedData = alertBannerSchema.partial().parse(data);
-      const updatedBanner = await updateAlertBanner(id, validatedData);
-      setAlertBanner(updatedBanner);
-      return updatedBanner;
+      return await update(id, validatedData);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to update alert banner');
-      setError(error);
       throw error;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [update]);
 
-  const createBanner = async (data: AlertBanner) => {
+  const handleCreate = useCallback(async (data: AlertBanner) => {
     try {
-      setLoading(true);
-      setError(null);
       const validatedData = alertBannerSchema.parse(data);
-      const newBanner = await createAlertBanner(validatedData);
-      setAlertBanner(newBanner);
-      return newBanner;
+      return await create(validatedData);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to create alert banner');
-      setError(error);
       throw error;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [create]);
 
   return {
     alertBanner,
-    loading,
+    isLoading,
     error,
-    updateBanner,
-    createBanner,
-    refresh: loadAlertBanner,
+    updateBanner: handleUpdate,
+    createBanner: handleCreate,
+    refresh,
   };
 }
 

@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getGoogleReviews } from '@services/googleReviewsService';
+import { useResource } from '@lib/swr';
+import { toast } from 'react-hot-toast';
 
 interface GoogleReview {
   author_name: string;
@@ -7,6 +7,11 @@ interface GoogleReview {
   text: string;
   time: number;
   profile_photo_url: string;
+}
+
+interface GoogleReviewsResponse {
+  reviews: GoogleReview[];
+  error?: string;
 }
 
 interface UseGoogleReviewsResult {
@@ -17,26 +22,11 @@ interface UseGoogleReviewsResult {
 }
 
 export function useGoogleReviews(): UseGoogleReviewsResult {
-  const { data, isLoading, error, isError } = useQuery({
-    queryKey: ['googleReviews'],
-    queryFn: async () => {
-      try {
-        const result = await getGoogleReviews();
-        if (!result) {
-          throw new Error('No data received from Google Reviews API');
-        }
-        return result;
-      } catch (err) {
-        console.error('Error fetching Google reviews:', err);
-        throw err;
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  const { data, isLoading, error } = useResource<GoogleReviewsResponse>('/google-reviews', {
+    onError: (error) => {
+      console.error('Error fetching Google reviews:', error);
+      toast.error('Failed to load reviews');
+    }
   });
 
   // Handle API error response
@@ -49,6 +39,6 @@ export function useGoogleReviews(): UseGoogleReviewsResult {
     reviews: data?.reviews || [],
     isLoading,
     error: errorMessage,
-    isError: isError || !!apiError,
+    isError: !!error || !!apiError,
   };
 } 

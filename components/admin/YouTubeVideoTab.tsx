@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, memo } from "react";
-import { useAppContext } from "@contexts/AppContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
 import { Label } from "@components/ui/label";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Checkbox } from "@components/ui/checkbox";
 import { toast } from "react-hot-toast";
+import { useFeatureFlags } from "@hooks/useFeatureFlag";
+import { useYoutubeSettings, useUpdateYoutubeSettings } from "@hooks/useYoutubeSettings";
+import { Loader2 } from "lucide-react";
 
 // Define the props type for YouTubePreview
 interface YouTubePreviewProps {
@@ -39,13 +41,11 @@ const YouTubePreview = memo(({ settings }: YouTubePreviewProps) => (
 YouTubePreview.displayName = 'YouTubePreview';
 
 export default function YouTubeVideoTab() {
-  const {
-    getFeatureFlag,
-    youtubeSettings,
-    updateYoutubeSettings,
-  } = useAppContext();
+  const { data: featureFlags } = useFeatureFlags();
+  const { data: youtubeSettings, isLoading } = useYoutubeSettings();
+  const { mutate: updateSettings } = useUpdateYoutubeSettings();
 
-  const showYouTubeVideo = getFeatureFlag('showYouTubeVideo');
+  const showYouTubeVideo = featureFlags?.find(f => f.name === 'showYouTubeVideo')?.enabled;
 
   const [localYoutubeSettings, setLocalYoutubeSettings] = useState({
     videoId: '',
@@ -63,6 +63,14 @@ export default function YouTubeVideoTab() {
       });
     }
   }, [youtubeSettings]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin w-6 h-6" />
+      </div>
+    );
+  }
 
   return (
     <Card>
@@ -142,8 +150,7 @@ export default function YouTubeVideoTab() {
         <Button 
           onClick={async () => {
             try {
-              await updateYoutubeSettings(localYoutubeSettings);
-              toast.success("YouTube settings saved");
+              await updateSettings(localYoutubeSettings);
             } catch (error) {
               const errorMessage = error instanceof Error ? error.message : 'Unknown error';
               toast.error(`Failed to save YouTube settings: ${errorMessage}`);

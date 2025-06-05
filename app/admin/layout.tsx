@@ -10,9 +10,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div></div>}>
       <Navbar />
-      <main className="w-full min-h-screen bg-black text-white">
+      <main className="w-full min-h-screen bg-black text-white pb-12">
         {children}
         <DebugInfo />
         <AdminSettingsUpdater />

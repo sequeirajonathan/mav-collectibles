@@ -1,36 +1,44 @@
-import { useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import { fetchFeatureFlags, updateFeatureFlag, seedFeatureFlags } from '@services/featureFlagService';
+import { useResource } from '@lib/swr';
 import { FeatureFlag } from '@interfaces';
+import { axiosClient } from '@lib/axios';
 
 export function useFeatureFlags() {
-  return useQuery<FeatureFlag[]>({
-    queryKey: ['featureFlags'],
-    queryFn: fetchFeatureFlags,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+  return useResource<FeatureFlag[]>('/feature-flags', {
+    onError: (error) => {
+      console.error('Failed to fetch feature flags:', error);
+    }
   });
 }
 
 export function useUpdateFeatureFlag() {
-  const queryClient = useQueryClient();
+  const { update, refresh } = useResource<FeatureFlag>('/feature-flags');
 
-  return useMutation({
-    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => updateFeatureFlag(id, enabled),
-    onSuccess: async () => {
-      // Invalidate and refetch immediately
-      await queryClient.invalidateQueries({ queryKey: ['featureFlags'] });
-      await queryClient.refetchQueries({ queryKey: ['featureFlags'] });
+  return {
+    mutate: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      try {
+        const result = await update(id, { enabled });
+        await refresh();
+        return result;
+      } catch (error) {
+        console.error('Failed to update feature flag:', error);
+        throw error;
+      }
     }
-  });
+  };
 }
 
 export function useSeedFeatureFlags() {
-  const queryClient = useQueryClient();
+  const { refresh } = useResource<FeatureFlag[]>('/feature-flags');
 
-  return useMutation({
-    mutationFn: seedFeatureFlags,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['featureFlags'] });
+  return {
+    mutate: async () => {
+      try {
+        await axiosClient.post('/feature-flags/seed');
+        await refresh();
+      } catch (error) {
+        console.error('Failed to seed feature flags:', error);
+        throw error;
+      }
     }
-  });
+  };
 }

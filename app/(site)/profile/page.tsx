@@ -2,22 +2,40 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@contexts/AuthContext";
+import { useUser } from "@clerk/nextjs";
 
 export default function ProfilePage() {
-  const { user, userProfile } = useAuth();
+  const { user, isLoaded } = useUser();
   const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
-    if (userProfile) {
-      setDisplayName(userProfile.username || "");
+    if (user) {
+      setDisplayName(user.username || "");
     }
-  }, [userProfile]);
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle profile update logic here
+    if (!user) return;
+    
+    try {
+      await user.update({
+        username: displayName,
+      });
+      // You might want to show a success toast here
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // You might want to show an error toast here
+    }
   };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-black text-[#E6B325] flex items-center justify-center">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -46,7 +64,7 @@ export default function ProfilePage() {
                 </label>
                 <input
                   type="email"
-                  value={user.email || ""}
+                  value={user.primaryEmailAddress?.emailAddress || ""}
                   disabled
                   className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] disabled:opacity-50"
                 />
@@ -59,7 +77,7 @@ export default function ProfilePage() {
                 </label>
                 <input
                   type="text"
-                  value={userProfile?.role || "USER"}
+                  value={(user.publicMetadata.role as string) || "USER"}
                   disabled
                   className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] disabled:opacity-50"
                 />

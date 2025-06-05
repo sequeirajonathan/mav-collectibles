@@ -6,12 +6,14 @@ import { Label } from "@components/ui/label";
 import { Input } from "@components/ui/input";
 import { Switch } from "@components/ui/switch";
 import { Button } from "@components/ui/button";
-import { useAppContext } from "@contexts/AppContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { toast } from "react-hot-toast";
+import { useYoutubeSettings, useUpdateYoutubeSettings } from "@hooks/useYoutubeSettings";
+import { Loader2 } from "lucide-react";
 
 export default function YouTubeSettingsTab() {
-  const { youtubeSettings, updateYoutubeSettings, refreshData } = useAppContext();
+  const { data: youtubeSettings, isLoading } = useYoutubeSettings();
+  const { mutate: updateSettings } = useUpdateYoutubeSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [settings, setSettings] = useState({
     videoId: youtubeSettings?.videoId || "",
@@ -38,13 +40,7 @@ export default function YouTubeSettingsTab() {
     setIsSubmitting(true);
     
     try {
-      await updateYoutubeSettings(settings);
-      toast.success("YouTube settings saved successfully!");
-      
-      // Refresh data after saving
-      setTimeout(() => {
-        refreshData();
-      }, 500);
+      await updateSettings(settings);
     } catch (error) {
       console.error("Error saving YouTube settings:", error);
       toast.error("Failed to save YouTube settings. Please try again.");
@@ -52,6 +48,14 @@ export default function YouTubeSettingsTab() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin w-6 h-6" />
+      </div>
+    );
+  }
 
   return (
     <Card>

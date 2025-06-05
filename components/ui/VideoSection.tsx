@@ -22,7 +22,7 @@ const VIDEO_CDN = {
  * - Loading states
  */
 export default function VideoSection() {
-  const { youtubeSettings, videoSettings, getFeatureFlag } = useAppContext();
+  const { videoSettings, getFeatureFlag } = useAppContext();
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -41,11 +41,7 @@ export default function VideoSection() {
   const isYouTubeEnabled = getFeatureFlag('showYouTubeVideo');
   const isDirectStreamingEnabled = getFeatureFlag('showDirectStreaming');
 
-  const hasYouTubeVideo = mounted && isVideoSectionEnabled && isYouTubeEnabled && youtubeSettings && (
-    youtubeSettings.videoId || 
-    (youtubeSettings.isLiveStream && youtubeSettings.liveStreamId) ||
-    youtubeSettings.playlistId
-  );
+  const hasYouTubeVideo = mounted && isVideoSectionEnabled && isYouTubeEnabled && !!videoSettings;
 
   const hasDirectVideo = mounted && isVideoSectionEnabled && isDirectStreamingEnabled && videoSettings && videoSettings.src;
   const hasVideo = hasYouTubeVideo || hasDirectVideo;

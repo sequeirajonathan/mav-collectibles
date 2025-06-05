@@ -1,20 +1,31 @@
-import { createClient } from '@utils/supabase/server'
-import { redirect } from 'next/navigation'
-import { prisma } from '@lib/prisma'
-import DashboardClient from './DashboardClient'
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
+import DashboardClient from './DashboardClient';
+import { ClerkUser, UserProfile } from '@interfaces/userProfile';
+import { UserRole } from '@interfaces/roles';
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect('/sign-in');
   }
 
-  // Get the user's profile from our database
-  const userProfile = await prisma.userProfile.findUnique({
-    where: { email: user.email! },
-  })
+  const user = await currentUser();
+  if (!user) {
+    redirect('/sign-in');
+  }
 
-  return <DashboardClient user={user} userProfile={userProfile} />
+  const userData: UserProfile = {
+    id: user.id,
+    email: user.emailAddresses[0]?.emailAddress,
+    role: (user.publicMetadata.role as UserRole) || UserRole.USER,
+    createdAt: user.createdAt,
+    lastSignInAt: user.lastSignInAt || undefined,
+    firstName: user.firstName || undefined,
+    lastName: user.lastName || undefined,
+    imageUrl: user.imageUrl,
+  };
+
+  return <DashboardClient user={userData} />;
 } 

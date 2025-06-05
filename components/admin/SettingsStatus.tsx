@@ -34,8 +34,8 @@ export default function SettingsStatus() {
         <div>
           <p className="text-gray-400">YouTube Settings</p>
           <p className="text-white">
-            {lastUpdated.youtubeSettings 
-              ? `Last updated: ${new Date(lastUpdated.youtubeSettings).toLocaleTimeString()}`
+            {lastUpdated.videoSettings 
+              ? `Last updated: ${new Date(lastUpdated.videoSettings).toLocaleTimeString()}`
               : 'Not yet loaded'}
           </p>
         </div>

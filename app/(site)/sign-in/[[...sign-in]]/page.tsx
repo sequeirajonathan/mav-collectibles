@@ -3,19 +3,19 @@
 import { LoginForm } from "@components/ui/LoginForm";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuth } from "@contexts/AuthContext";
+import { useAuth } from "@clerk/nextjs";
 
 export default function Login() {
-  const { user, isLoading } = useAuth();
+  const { isLoaded, userId } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (isLoaded && userId) {
       router.replace("/dashboard");
     }
-  }, [user, isLoading, router]);
+  }, [userId, isLoaded, router]);
 
-  if (!isLoading && user) return null;
+  if (isLoaded && userId) return null;
 
   return <LoginForm />;
 }

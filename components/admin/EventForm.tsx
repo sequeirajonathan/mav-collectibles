@@ -248,7 +248,18 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
         />
       </div>
       
-      <div className="flex justify-end space-x-2 pt-4">
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="enabled"
+          checked={formData.enabled !== false}
+          onChange={(e) => handleChange("enabled", e.target.checked)}
+          className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-brand-gold focus:ring-brand-gold"
+        />
+        <Label htmlFor="enabled">Enabled</Label>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
         {onCancel && (
           <Button variant="outline" onClick={onCancel}>
             Cancel

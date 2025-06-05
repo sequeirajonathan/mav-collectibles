@@ -45,13 +45,20 @@ export async function GET(
     const sort = searchParams.get('sort') || "name_asc";
     const stock = searchParams.get('stock') || "IN_STOCK";
     const limit = parseInt(searchParams.get('limit') || "100", 10);
+    const group = searchParams.get('group');
 
-    // Determine category IDs from slug
+    // Determine category IDs from slug and group
     let categoryIds: string[] = [];
     if (slug === "tcg") {
       categoryIds = Object.values(CATEGORY_MAPPING).map(cat => cat.squareCategoryId);
     } else if (CATEGORY_GROUP_SLUGS[slug]) {
       categoryIds = CATEGORY_GROUP_SLUGS[slug];
+    } else if (group === "TCG" && CATEGORY_MAPPING[slug]) {
+      categoryIds = [CATEGORY_MAPPING[slug].squareCategoryId];
+    } else if (group === "COLLECTIBLES" && COLLECTIBLES_MAPPING[slug]) {
+      categoryIds = [COLLECTIBLES_MAPPING[slug].squareCategoryId];
+    } else if (group === "SUPPLIES" && SUPPLIES_MAPPING[slug]) {
+      categoryIds = [SUPPLIES_MAPPING[slug].squareCategoryId];
     } else {
       const match = ALL_MAPPINGS.find((c) => c.slug === slug);
       if (match) {

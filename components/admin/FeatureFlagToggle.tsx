@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@components/ui/switch";
 import { Label } from "@components/ui/label";
-import { useAppContext } from "@contexts/AppContext";
+import { useFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
 import { toast } from "react-hot-toast";
 
 interface FeatureFlagToggleProps {
@@ -17,11 +17,12 @@ export default function FeatureFlagToggle({
   label, 
   description 
 }: FeatureFlagToggleProps) {
-  const { featureFlags, updateFeatureFlag } = useAppContext();
+  const { data: featureFlags, isLoading } = useFeatureFlags();
+  const { mutate: updateFlag } = useUpdateFeatureFlag();
   const [isUpdating, setIsUpdating] = useState(false);
   const [localChecked, setLocalChecked] = useState(false);
   
-  // Initialize local state from context
+  // Initialize local state from SWR data
   useEffect(() => {
     if (featureFlags) {
       const flag = featureFlags.find(f => f.name === name);
@@ -51,8 +52,14 @@ export default function FeatureFlagToggle({
       // Store in localStorage for persistence
       localStorage.setItem(`featureFlag_${name}`, String(newValue));
       
+      // Find the flag ID
+      const flag = featureFlags?.find(f => f.name === name);
+      if (!flag) {
+        throw new Error(`Feature flag ${name} not found`);
+      }
+      
       // Call API to update in background
-      await updateFeatureFlag(name, newValue);
+      await updateFlag({ id: flag.id, enabled: newValue });
       
       // Show success message
       toast.success(`${label} ${newValue ? 'enabled' : 'disabled'}`);
@@ -81,7 +88,7 @@ export default function FeatureFlagToggle({
         id={name}
         checked={localChecked}
         onCheckedChange={handleToggle}
-        disabled={isUpdating}
+        disabled={isUpdating || isLoading}
       />
     </div>
   );

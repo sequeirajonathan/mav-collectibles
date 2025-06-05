@@ -8,11 +8,6 @@ const DEFAULT_FLAGS = [
     enabled: true,
   },
   {
-    name: 'showFeaturedEvents',
-    description: 'Controls visibility of featured events on the homepage',
-    enabled: true,
-  },
-  {
     name: 'showVideoPlayer',
     description: 'Controls visibility of the video player section',
     enabled: true,
@@ -26,6 +21,11 @@ const DEFAULT_FLAGS = [
     name: 'showDirectStreaming',
     description: 'Controls visibility of direct streaming content',
     enabled: false,
+  },
+  {
+    name: 'showGoogleReviews',
+    description: 'Controls visibility of Google Reviews section on the homepage',
+    enabled: true,
   },
   {
     name: 'maintenanceMode',

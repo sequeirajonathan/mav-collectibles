@@ -1,22 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useAppContext } from "@contexts/AppContext";
 import type { FeaturedEvent as FeaturedEventType } from "@interfaces";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import EventForm from "./EventForm";
 import FeaturedEvent from "@components/ui/FeaturedEvent";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useFeaturedEvents, useCreateFeaturedEvent, useUpdateFeaturedEvent, useDeleteFeaturedEvent } from "@hooks/useFeaturedEvents";
 
 export default function FeaturedEventsTab() {
-  const { 
-    featuredEvents, 
-    addFeaturedEvent, 
-    updateFeaturedEvent, 
-    removeFeaturedEvent 
-  } = useAppContext();
+  const { data: featuredEvents, isLoading, error } = useFeaturedEvents();
+  const { mutate: createEvent } = useCreateFeaturedEvent();
+  const { mutate: updateEvent } = useUpdateFeaturedEvent();
+  const { mutate: deleteEvent } = useDeleteFeaturedEvent();
   
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [showNewEventForm, setShowNewEventForm] = useState(false);
@@ -61,9 +59,8 @@ export default function FeaturedEventsTab() {
         enabled: event.enabled !== undefined ? event.enabled : true,
         order: 1 // Set a default order of 1 to satisfy the validation
       };
-      await addFeaturedEvent(completeEvent);
+      await createEvent(completeEvent);
       setShowNewEventForm(false);
-      toast.success("New event added successfully!");
     } catch (error) {
       console.error('Error adding event:', error);
       toast.error("Failed to add event. Please try again.");
@@ -82,17 +79,34 @@ export default function FeaturedEventsTab() {
       const updatedEvent = {
         ...event,
         date: formattedDate,
-        order: event.order || 1 // Ensure order is at least 1
+        order: event.order || 1, // Ensure order is at least 1
+        enabled: event.enabled !== undefined ? event.enabled : true // Ensure enabled is properly set
       };
 
-      await updateFeaturedEvent(id, updatedEvent);
+      await updateEvent({ id, data: updatedEvent });
+      toast.success('Event updated successfully');
       setEditingEventId(null);
-      toast.success("Event updated successfully!");
     } catch (error) {
       console.error('Error updating event:', error);
-      toast.error("Failed to update event. Please try again.");
+      toast.error(error instanceof Error ? error.message : 'Failed to update event. Please try again.');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin w-6 h-6" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <p className="text-red-500">Failed to load featured events</p>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -135,50 +149,54 @@ export default function FeaturedEventsTab() {
         <p className="text-gray-400">No featured events yet. Add one above!</p>
       ) : (
         featuredEvents.map((event) => (
-          <Card key={event.id} className="mb-4">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{event.title}</CardTitle>
-                  <CardDescription>{event.date}</CardDescription>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setEditingEventId(editingEventId === event.id ? null : event.id)}
-                  >
-                    <Edit size={16} />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => {
-                      if (confirm("Are you sure you want to delete this event?")) {
-                        removeFeaturedEvent(event.id);
-                        toast.success("Event removed successfully");
-                      }
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
+          <Card key={event.id} className="mb-2 rounded-lg bg-[#151a24] border border-[#22283a] shadow-none">
+            <div className="flex flex-row items-center px-3 py-2 gap-3">
+              {/* Image */}
+              <div className="flex-shrink-0 flex items-center justify-center w-12 h-16">
+                <img src={event.imageSrc} alt={event.imageAlt} className="object-contain w-12 h-16 rounded" />
               </div>
-            </CardHeader>
-            
-            {editingEventId === event.id ? (
-              <CardContent>
-                <EventForm 
+              {/* Info */}
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#E6B325] text-base truncate">{event.title}</span>
+                  <span className="text-xs text-[#FFD966] ml-2 whitespace-nowrap">{new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+                <span className="text-xs text-gray-400 truncate">{event.description}</span>
+                <span className="text-xs text-gray-500 mt-1">{event.date && `Starts @ ${new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} CST`}</span>
+              </div>
+              {/* Actions */}
+              <div className="flex flex-col gap-2 ml-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setEditingEventId(editingEventId === event.id ? null : event.id)}
+                >
+                  <Edit size={14} />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to delete this event?")) {
+                      deleteEvent(event.id);
+                    }
+                  }}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
+            </div>
+            {editingEventId === event.id && (
+              <div className="px-3 pb-3">
+                <EventForm
                   event={event}
                   onSave={(updatedEvent) => handleUpdateEvent(event.id, updatedEvent)}
                   onCancel={() => setEditingEventId(null)}
                   buttonText="Save Changes"
                 />
-              </CardContent>
-            ) : (
-              <CardContent>
-                <FeaturedEvent {...event} />
-              </CardContent>
+              </div>
             )}
           </Card>
         ))

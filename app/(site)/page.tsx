@@ -10,12 +10,12 @@ import { useRouter } from "next/navigation";
 import GoogleReviews from "@components/ui/GoogleReviews";
 import Link from "next/link";
 import { Button } from "@components/ui/button";
-import { useFeaturedEvents } from "@hooks/useFeaturedEvents";
 import NearestEventSection from "@components/ui/NearestEventSection";
+import { useFeatureFlags } from "@hooks/useFeatureFlag";
 
 export default function Home() {
+  const { data: featureFlags } = useFeatureFlags();
   const [mounted, setMounted] = useState(false);
-  const { data: events, isLoading, error } = useFeaturedEvents();
 
   useEffect(() => {
     setMounted(true);
@@ -217,12 +217,7 @@ export default function Home() {
 
         {/* Upcoming Event Card */}
         <div className="flex-1 h-[340px]">
-          <NearestEventSection
-            events={events}
-            isLoading={isLoading}
-            hideTitle
-            error={error}
-          />
+          <NearestEventSection hideTitle />
         </div>
       </div>
 
@@ -276,7 +271,7 @@ export default function Home() {
       </motion.div>
 
       {/* Google Reviews & Continue Browsing */}
-      <GoogleReviews />
+      {featureFlags?.find(f => f.name === 'showGoogleReviews')?.enabled && <GoogleReviews />}
       <div className="mt-6 text-center">
         <Link href="/category/tcg">
           <Button variant="gold">CONTINUE BROWSING</Button>

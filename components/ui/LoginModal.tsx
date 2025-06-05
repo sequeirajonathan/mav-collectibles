@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { LoginForm } from './LoginForm';
 import { Button } from '@components/ui/button';
-import { useAuth } from '@contexts/AuthContext';
+import { useUser } from '@clerk/nextjs';
 import { useEffect } from 'react';
 
 interface LoginModalProps {
@@ -13,13 +13,13 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const { user } = useAuth();
+  const { user, isLoaded } = useUser();
 
   // Close modal when user is authenticated
   useEffect(() => {
     if (user && isOpen) {
       if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
-        console.log('🔐 LoginModal - User authenticated:', user.email);
+        console.log('🔐 LoginModal - User authenticated:', user.primaryEmailAddress?.emailAddress);
       }
       onClose();
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -13,7 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@contexts/AuthContext";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useCart } from "@contexts/CartContext";
 import {
   CATEGORY_GROUPS,
@@ -21,6 +21,7 @@ import {
 import { SquareCategory } from "@interfaces/categories";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@components/ui/button";
+import { UserRole, isAdminRole } from "@interfaces/roles";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,25 +33,31 @@ const Navbar = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, userProfile, isAdmin, isStaff, isManager, isOwner, signOut } = useAuth();
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Debug logging for auth state
+  // Memoize auth state to prevent unnecessary re-renders
+  const authState = useMemo(() => {
+    if (!user) return { user: undefined, role: UserRole.USER, isAdmin: false };
+    
+    const role = user.publicMetadata?.role as string || UserRole.USER;
+    return {
+      user: user.primaryEmailAddress?.emailAddress,
+      role,
+      isAdmin: isAdminRole(role)
+    };
+  }, [user]);
+
+  // Debug logging for auth state - only log when auth state actually changes
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
-      console.log('🔐 Navbar Auth State:', {
-        user: user?.email,
-        userProfile,
-        isAdmin,
-        isStaff,
-        isManager,
-        isOwner
-      });
+      console.log('🔐 Navbar Auth State:', authState);
     }
-  }, [user, userProfile, isAdmin, isStaff, isManager, isOwner]);
+  }, [authState]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -79,10 +86,12 @@ const Navbar = () => {
     });
     if (isProfileOpen) setIsProfileOpen(false);
   };
+
   const toggleProfile = () => {
     setIsProfileOpen((o) => !o);
     if (isMenuOpen) setIsMenuOpen(false);
   };
+
   const handleSignOut = async () => {
     try {
       if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
@@ -94,7 +103,7 @@ const Navbar = () => {
       setExpandedGroup(null);
       
       if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
-        console.log('🔐 Navbar - Calling AuthContext signOut');
+        console.log('🔐 Navbar - Calling Clerk signOut');
       }
       
       await signOut();
@@ -108,8 +117,8 @@ const Navbar = () => {
       }
     }
   };
-  const hasAdminAccess = isAdmin || isStaff || isManager || isOwner;
-  const navigationItems = hasAdminAccess
+
+  const navigationItems = authState.isAdmin
     ? [{ href: "/admin", label: "Admin" }]
     : [];
 
@@ -122,6 +131,7 @@ const Navbar = () => {
     },
     exit: { opacity: 0, height: 0, transition: { duration: 0.2 } },
   };
+
   const mobileItemVariants = {
     hidden: { opacity: 0, x: -10 },
     visible: { opacity: 1, x: 0 },
@@ -175,7 +185,7 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    <div className="bg-black shadow-md" key={`navbar-${hasAdminAccess}`}>
+    <div className="bg-black shadow-md" key={`navbar-${authState.isAdmin}`}>
       <nav className="w-full bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-2 md:py-3">
@@ -239,7 +249,7 @@ const Navbar = () => {
                               onClick={() =>
                                 handleCategoryClick(group.name, cat)
                               }
-                              className="w-full text-left px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
+                              className="w-full text-left justify-start px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                             >
                               {cat.displayName}
                             </Button>
@@ -249,7 +259,7 @@ const Navbar = () => {
                               onClick={() =>
                                 handleCategoryClick("TCG")
                               }
-                              className="w-full text-left px-4 py-2 text-sm text-[#E6B325]/80 hover:bg-[#E6B325]/10"
+                              className="w-full text-left justify-start px-4 py-2 text-sm text-[#E6B325]/80 hover:bg-[#E6B325]/10"
                             >
                               View All TCG
                             </Button>
@@ -263,7 +273,7 @@ const Navbar = () => {
 
               <Link
                 href="/events"
-                className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 hover:text-[#FFD966]"
+                className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 hover:text-[#FFD966] text-left"
               >
                 Events
               </Link>
@@ -272,7 +282,7 @@ const Navbar = () => {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 hover:text-[#FFD966]"
+                  className="text-[#E6B325] font-semibold uppercase text-sm px-2 py-1 hover:text-[#FFD966] text-left"
                 >
                   {item.label}
                 </Link>
@@ -331,7 +341,7 @@ const Navbar = () => {
                         <>
                           <div className="px-4 py-2 border-b border-[#E6B325]/10">
                             <p className="text-sm text-[#E6B325] truncate">
-                              {user.email}
+                              {user.primaryEmailAddress?.emailAddress}
                             </p>
                           </div>
                           <Link
@@ -358,7 +368,7 @@ const Navbar = () => {
                         </>
                       ) : (
                         <Link
-                          href="/login"
+                          href="/sign-in"
                           className="block px-4 py-2 text-sm text-[#E6B325] hover:bg-[#E6B325]/10"
                           onClick={() => setIsProfileOpen(false)}
                         >
@@ -459,7 +469,7 @@ const Navbar = () => {
                               <Button
                                 key={cat.slug}
                                 type="button"
-                                className="block w-full text-left px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
+                                className="block w-full text-left justify-start px-3 py-2 text-base font-medium text-[#E6B325] hover:bg-[#E6B325]/10"
                                 onClick={() => handleCategoryClick(group.name, cat)}
                               >
                                 {cat.displayName}
@@ -468,7 +478,7 @@ const Navbar = () => {
                             {isTCG && (
                               <Button
                                 type="button"
-                                className="block w-full text-left px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
+                                className="block w-full text-left justify-start px-3 py-2 text-base font-medium text-[#E6B325]/80 hover:text-[#E6B325]"
                                 onClick={() => handleCategoryClick(group.name)}
                               >
                                 View All TCG
@@ -484,7 +494,7 @@ const Navbar = () => {
                 {/* Events Link (mobile only) */}
                 <Link
                   href="/events"
-                  className="block px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
+                  className="block px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10 text-left"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Events
@@ -495,7 +505,7 @@ const Navbar = () => {
                   <motion.div key={item.href} variants={mobileItemVariants}>
                     <Link
                       href={item.href}
-                      className="block px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10"
+                      className="block px-3 py-2 text-base font-semibold uppercase text-[#E6B325] hover:bg-[#E6B325]/10 text-left"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.label}

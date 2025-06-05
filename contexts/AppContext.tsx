@@ -4,14 +4,12 @@ import React, { createContext, useContext, useState } from "react";
 import { useFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
 import { useAlertBanner, useUpdateAlertBanner } from "@hooks/useAlertBanner";
 import { useFeaturedEvents } from "@hooks/useFeaturedEvents";
-import { useYoutubeSettings, useUpdateYoutubeSettings } from "@hooks/useYoutubeSettings";
 import { useVideoSettings, useUpdateVideoSettings } from "@hooks/useVideoSettings";
 import { useCreateFeaturedEvent, useUpdateFeaturedEvent, useDeleteFeaturedEvent } from "@hooks/useFeaturedEvents";
 
 import {
   FeatureFlag,
   VideoSettings,
-  YouTubeSettings,
   FeaturedEvent,
   AlertBanner,
 } from "@interfaces";
@@ -21,7 +19,6 @@ interface AppContextType {
   alertBanner: AlertBanner | null | undefined;
   featuredEvents: FeaturedEvent[] | undefined;
   dismissAlertBanner: () => void;
-  youtubeSettings: YouTubeSettings | undefined;
   videoSettings: VideoSettings | undefined;
   isLoading: boolean;
   refreshData: () => Promise<void>;
@@ -32,11 +29,9 @@ interface AppContextType {
   removeFeaturedEvent: (id: string) => Promise<void>;
   updateFeatureFlag: (name: string, enabled: boolean) => Promise<void>;
   lastUpdated: {
-    youtubeSettings?: Date;
     videoSettings?: Date;
   };
   updateVideoSettings: (settings: Partial<VideoSettings>) => Promise<void>;
-  updateYoutubeSettings: (settings: Partial<YouTubeSettings>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -44,22 +39,19 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { data: featureFlags, isLoading: featureFlagsLoading, refetch: refetchFeatureFlags } =
+  const { data: featureFlags, isLoading: featureFlagsLoading, refresh: refreshFeatureFlags } =
     useFeatureFlags();
-  const { alertBanner, loading: alertBannerLoading, refresh: refetchAlertBanner } = useAlertBanner();
+  const { alertBanner, isLoading: alertBannerLoading, refresh: refreshAlertBanner } = useAlertBanner();
   const updateAlertBannerMutation = useUpdateAlertBanner();
-  const { data: featuredEvents, isLoading: featuredEventsLoading, refetch: refetchFeaturedEvents } =
+  const { data: featuredEvents, isLoading: featuredEventsLoading, refresh: refreshFeaturedEvents } =
     useFeaturedEvents();
-  const { mutateAsync: createFeaturedEvent } = useCreateFeaturedEvent();
-  const { mutateAsync: updateFeaturedEventMutation } = useUpdateFeaturedEvent();
-  const { mutateAsync: deleteFeaturedEvent } = useDeleteFeaturedEvent();
-  const { data: youtubeSettings, isLoading: youtubeSettingsLoading, refetch: refetchYoutubeSettings } =
-    useYoutubeSettings();
-  const { mutateAsync: updateYoutubeSettingsMutation } = useUpdateYoutubeSettings();
-  const { data: videoSettings, isLoading: videoSettingsLoading, refetch: refetchVideoSettings } =
+  const { mutate: createFeaturedEvent } = useCreateFeaturedEvent();
+  const { mutate: updateFeaturedEventMutation } = useUpdateFeaturedEvent();
+  const { mutate: deleteFeaturedEvent } = useDeleteFeaturedEvent();
+  const { data: videoSettings, isLoading: videoSettingsLoading, refresh: refreshVideoSettings } =
     useVideoSettings();
-  const { mutateAsync: updateFeatureFlagMutation } = useUpdateFeatureFlag();
-  const { mutateAsync: updateVideoSettingsMutation } = useUpdateVideoSettings();
+  const { mutate: updateFeatureFlagMutation } = useUpdateFeatureFlag();
+  const { mutate: updateVideoSettingsMutation } = useUpdateVideoSettings();
 
   const [alertBannerDismissed, setAlertBannerDismissed] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<AppContextType['lastUpdated']>({});
@@ -70,14 +62,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const refreshData = async () => {
     await Promise.all([
-      refetchFeatureFlags(),
-      refetchAlertBanner(),
-      refetchFeaturedEvents(),
-      refetchYoutubeSettings(),
-      refetchVideoSettings()
+      refreshFeatureFlags(),
+      refreshAlertBanner(),
+      refreshFeaturedEvents(),
+      refreshVideoSettings()
     ]);
     setLastUpdated({
-      youtubeSettings: new Date(),
       videoSettings: new Date()
     });
   };
@@ -86,7 +76,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     featureFlagsLoading ||
     alertBannerLoading ||
     featuredEventsLoading ||
-    youtubeSettingsLoading ||
     videoSettingsLoading;
 
   const updateAlertBanner = async (data: Partial<AlertBanner>) => {
@@ -135,10 +124,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     await updateVideoSettingsMutation(settings);
   };
 
-  const updateYoutubeSettings = async (settings: Partial<YouTubeSettings>) => {
-    await updateYoutubeSettingsMutation(settings);
-  };
-
   return (
     <AppContext.Provider
       value={{
@@ -146,7 +131,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         alertBanner: alertBannerDismissed ? null : alertBanner,
         featuredEvents,
         dismissAlertBanner,
-        youtubeSettings,
         videoSettings,
         isLoading,
         refreshData,
@@ -158,7 +142,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         updateFeatureFlag,
         lastUpdated,
         updateVideoSettings,
-        updateYoutubeSettings,
       }}
     >
       {children}

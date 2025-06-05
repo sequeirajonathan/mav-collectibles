@@ -8,6 +8,7 @@ import { useCart } from "@contexts/CartContext";
 import toast from "react-hot-toast";
 import { NormalizedCatalogItem } from "@interfaces";
 import React, { useState, useEffect } from 'react';
+import { formatMoney } from '@utils/formatMoney';
 
 interface ProductCardProps {
   product: NormalizedCatalogItem;
@@ -62,7 +63,7 @@ export function ProductCard({
       const itemToAdd = {
         id: product.variationId,
         name: product.name,
-        price: product.priceAmount / 100,
+        price: product.priceAmount,
         imageUrl,
       };
 
@@ -165,7 +166,7 @@ export function ProductCard({
             </p>
             <div className="flex items-center justify-between mt-auto pt-1 md:pt-2 border-t border-gray-800/50">
               <span className="text-[#E6B325] font-semibold text-sm md:text-base">
-                ${(product.priceAmount / 100).toFixed(2)}
+                {formatMoney(product.priceAmount, product.priceCurrency)}
               </span>
               {!product.soldOut && (
                 <motion.button

@@ -5,8 +5,9 @@ import Image from "next/image";
 import { Minus, Plus, Trash2, ImageIcon } from "lucide-react";
 import { useCart } from "@contexts/CartContext";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@components/ui/button";
+import { formatMoney } from '@utils/formatMoney';
 
 interface CartItemType {
   id: string;
@@ -35,6 +36,14 @@ const ImagePlaceholder = () => {
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart();
+  const [continueShoppingUrl, setContinueShoppingUrl] = useState("/category/tcg");
+
+  useEffect(() => {
+    const lastCategory = localStorage.getItem("lastCategoryUrl");
+    if (lastCategory) {
+      setContinueShoppingUrl(lastCategory);
+    }
+  }, []);
 
   const handleQuantityChange = (itemId: string, currentQuantity: number, newQuantity: number) => {
     if (newQuantity >= 1) {
@@ -89,7 +98,7 @@ export default function CartPage() {
             <div className="flex-1 flex flex-col justify-between w-full">
               <Link href={`/product/${item.id}`} className="block pointer-events-none">
                 <h3 className="text-base font-medium text-white line-clamp-2 break-words mb-1 hover:text-[#E6B325] transition-colors">{item.name}</h3>
-                <p className="text-[#E6B325] font-semibold text-sm">${(item.price / 100).toFixed(2)}</p>
+                <p className="text-[#E6B325] font-semibold text-sm">{formatMoney(item.price, 'USD')}</p>
               </Link>
               <div className="flex items-center gap-2 mt-2 w-full pointer-events-auto">
                 <Button
@@ -133,7 +142,7 @@ export default function CartPage() {
         <div className="text-center">
           <p className="text-xl mb-8 text-white">Your cart is currently empty.</p>
           <Link 
-            href="/products" 
+            href={continueShoppingUrl}
             className="inline-block"
           >
             <Button variant="gold">
@@ -172,7 +181,7 @@ export default function CartPage() {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-gray-300">
                   <span>Items ({totalItems})</span>
-                  <span>${(totalPrice / 100).toFixed(2)}</span>
+                  <span>{formatMoney(totalPrice, 'USD')}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
@@ -181,7 +190,7 @@ export default function CartPage() {
                 <div className="border-t border-gray-800 pt-2 mt-2">
                   <div className="flex justify-between text-white font-semibold">
                     <span>Total</span>
-                    <span>${(totalPrice / 100).toFixed(2)}</span>
+                    <span>{formatMoney(totalPrice, 'USD')}</span>
                   </div>
                 </div>
               </div>
@@ -192,7 +201,7 @@ export default function CartPage() {
                 Proceed to Checkout
               </Button>
               <Link
-                href="/products"
+                href={continueShoppingUrl}
                 className="block text-center mt-4 text-[#E6B325] hover:text-[#FFD966] transition-colors"
               >
                 Continue Shopping

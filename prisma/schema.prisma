@@ -74,34 +74,3 @@ model VideoSettings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-enum UserRole {
-  CUSTOMER
-  STAFF
-  MANAGER
-  ADMIN
-  OWNER
-}
-
-model UserProfile {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  username      String?   @unique
-  firstName     String?
-  lastName      String?
-  phoneNumber   String?
-  role          UserRole  @default(CUSTOMER)
-  address       String?
-  city          String?
-  state         String?
-  zipCode       String?
-  country       String?   @default("US")
-  preferredLanguage String? @default("en")
-  emailVerified Boolean   @default(false)
-  phoneVerified Boolean   @default(false)
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@map("user_profiles")
-}

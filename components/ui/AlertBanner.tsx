@@ -3,9 +3,21 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useAppContext } from '@contexts/AppContext';
+import { useAlertBanner } from '@hooks/useAlertBanner';
+import { useResource } from '@lib/swr';
 
-export default function AlertBanner() {
-  const { alertBanner, getFeatureFlag } = useAppContext();
+// Add the prop type
+interface AlertBannerProps {
+  initialData?: any; // Replace 'any' with your AlertBanner type if available
+}
+
+export default function AlertBanner({ initialData }: AlertBannerProps) {
+  const { getFeatureFlag } = useAppContext();
+  const {
+    data: alertBanner,
+    isLoading,
+    error,
+  } = useAlertBannerWithFallback(initialData);
   const [isVisible, setIsVisible] = useState(true);
   const showAlertBanner = getFeatureFlag('showAlertBanner');
   const isMaintenanceMode = getFeatureFlag('maintenanceMode');
@@ -16,10 +28,12 @@ export default function AlertBanner() {
     }
   }, [alertBanner]);
 
-  // Always render the placeholder to prevent layout shift, but hide during maintenance
-  if (!showAlertBanner || !alertBanner || isMaintenanceMode) {
+  // Always render the placeholder to prevent layout shift
+  if (!showAlertBanner || !alertBanner || isMaintenanceMode || isLoading) {
     return <div className="h-[48px]" />;
   }
+
+  if (!isVisible || !alertBanner.enabled) return null;
 
   return (
     <div
@@ -49,4 +63,14 @@ export default function AlertBanner() {
       </div>
     </div>
   );
+}
+
+// Custom hook to inject fallbackData into SWR
+function useAlertBannerWithFallback(fallbackData?: any) {
+  return useResource('/alert-banner', {
+    onError: (error) => {
+      console.error('Alert banner operation failed:', error);
+    },
+    fallbackData,
+  });
 }

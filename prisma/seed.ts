@@ -15,16 +15,6 @@ async function main() {
     },
   });
 
-  await prisma.featureFlag.upsert({
-    where: { name: 'showFeaturedEvents' },
-    update: {},
-    create: {
-      name: 'showFeaturedEvents',
-      description: 'Controls visibility of featured events on the homepage',
-      enabled: true,
-    },
-  });
-
   // Create default alert banner
   await prisma.alertBanner.upsert({
     where: { id: '1' },
@@ -96,6 +86,32 @@ async function main() {
       name: 'showDirectStreaming',
       description: 'Controls visibility of direct streaming video on the homepage',
       enabled: false,
+    },
+  });
+
+  await prisma.featureFlag.upsert({
+    where: { name: 'showGoogleReviews' },
+    update: {},
+    create: {
+      name: 'showGoogleReviews',
+      description: 'Controls visibility of Google Reviews section on the homepage',
+      enabled: true,
+    },
+  });
+
+  // Create default video settings
+  await prisma.videoSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      src: 'https://example.com/stream.m3u8',
+      type: 'application/x-mpegURL',
+      isLive: false,
+      poster: '/images/video-poster.jpg',
+      title: 'Featured Video',
+      autoplay: true,
+      muted: true,
     },
   });
 }

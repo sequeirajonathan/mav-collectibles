@@ -3,7 +3,7 @@
 import { useAppContext } from '@contexts/AppContext';
 
 export default function DebugInfo() {
-  const { videoSettings, youtubeSettings, getFeatureFlag } = useAppContext();
+  const { videoSettings, getFeatureFlag } = useAppContext();
   const showVideoPlayer = getFeatureFlag('showVideoPlayer');
   const showYouTubeVideo = getFeatureFlag('showYouTubeVideo');
   
@@ -16,7 +16,6 @@ export default function DebugInfo() {
       <h4 className="font-bold mb-2">Current Settings</h4>
       <p>Live Stream: {videoSettings?.isLive ? 'On' : 'Off'}</p>
       <p>Twitch Channel: {videoSettings?.twitchChannel || 'none'}</p>
-      <p>YouTube ID: {youtubeSettings?.videoId || 'none'}</p>
       <p>Show Video Player: {showVideoPlayer ? 'Yes' : 'No'}</p>
       <p>Show YouTube: {showYouTubeVideo ? 'Yes' : 'No'}</p>
     </div>

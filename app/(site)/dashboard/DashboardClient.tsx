@@ -1,15 +1,16 @@
 'use client'
 
-import { User } from '@supabase/supabase-js'
-import { UserProfile } from '@prisma/client'
 import Image from 'next/image'
+import { UserRole } from '@interfaces/roles';
+import { UserProfile } from '@interfaces/userProfile';
 
 interface DashboardClientProps {
-  user: User
-  userProfile: UserProfile | null
+  user: UserProfile;
 }
 
-export default function DashboardClient({ user, userProfile }: DashboardClientProps) {
+export default function DashboardClient({ user }: DashboardClientProps) {
+  const userRole = user.role || UserRole.USER;
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-8">
@@ -30,28 +31,29 @@ export default function DashboardClient({ user, userProfile }: DashboardClientPr
           {/* Account Information Section */}
           <div className="border border-[#E6B325]/30 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-[#E6B325] mb-6">Account Information</h2>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <div className="text-[#E6B325]/70 text-sm">Email</div>
-                <div className="text-white">{user.email}</div>
+                <div className="text-white">{user.email || ''}</div>
               </div>
               
               <div className="space-y-2">
                 <div className="text-[#E6B325]/70 text-sm">Role</div>
-                <div className="text-white">{userProfile?.role || 'CUSTOMER'}</div>
+                <div className="text-white">{userRole}</div>
               </div>
               
               <div className="space-y-2">
                 <div className="text-[#E6B325]/70 text-sm">Account Created</div>
                 <div className="text-white">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {new Date(user.createdAt).toLocaleDateString()}
                 </div>
               </div>
               
               <div className="space-y-2">
                 <div className="text-[#E6B325]/70 text-sm">Last Sign In</div>
                 <div className="text-white">
-                  {new Date(user.last_sign_in_at!).toLocaleDateString()}
+                  {user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>

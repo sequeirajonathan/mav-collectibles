@@ -8,7 +8,6 @@ import type { NormalizedCatalogItem, NormalizedCatalogResponse } from "@interfac
 import { toast } from "react-hot-toast";
 import { EndOfListMessage } from "./EndOfListMessage";
 import { EmptyStateMessage } from "./EmptyStateMessage";
-import { InfiniteData } from "@tanstack/react-query";
 
 // Enhanced loading indicator component
 const LoadingSpinner = () => (
@@ -19,7 +18,7 @@ const LoadingSpinner = () => (
 );
 
 interface InfiniteCardGridProps {
-  data?: InfiniteData<NormalizedCatalogResponse>;
+  data?: NormalizedCatalogResponse[];
   isLoading: boolean;
   isError: boolean;
   fetchNextPage: () => Promise<unknown>;
@@ -38,10 +37,30 @@ export function InfiniteCardGrid({
   const [mounted, setMounted] = useState(false);
   const [previousItemCount, setPreviousItemCount] = useState(0);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [currentSlug, setCurrentSlug] = useState<string | null>(null);
   
   useEffect(() => setMounted(true), []);
 
-  const items: NormalizedCatalogItem[] = data?.pages.flatMap((p) => p.items) ?? [];
+  // Process items from data pages
+  const items: NormalizedCatalogItem[] = React.useMemo(() => {
+    if (!Array.isArray(data)) return [];
+    return data.flatMap((page) => {
+      if (!page?.items) return [];
+      return page.items;
+    });
+  }, [data]);
+
+  // Reset state when data changes significantly
+  useEffect(() => {
+    if (Array.isArray(data) && data[0]?.items?.[0]?.categoryId) {
+      const newSlug = data[0].items[0].categoryId;
+      if (newSlug !== currentSlug) {
+        setCurrentSlug(newSlug);
+        setPreviousItemCount(0);
+        setIsInitialLoad(true);
+      }
+    }
+  }, [data, currentSlug]);
 
   // Show toast notification when items are added in the background
   useEffect(() => {
@@ -97,15 +116,18 @@ export function InfiniteCardGrid({
       dataLength={items.length}
       next={() => {
         if (!isFetchingNextPage && hasNextPage) {
+          console.log('InfiniteScroll: Fetching next page');
           fetchNextPage();
         }
       }}
-      hasMore={Boolean(hasNextPage)}
-      loader={hasNextPage && isFetchingNextPage ? <LoadingSpinner /> : null}
+      hasMore={hasNextPage}
+      loader={isFetchingNextPage ? <LoadingSpinner /> : null}
       endMessage={
-        <EndOfListMessage />
+        !hasNextPage && !isFetchingNextPage ? (
+          <EndOfListMessage />
+        ) : null
       }
-      scrollThreshold="10%"
+      scrollThreshold="20%"
       style={{ overflow: "visible" }}
       className="animate-fade-in"
     >

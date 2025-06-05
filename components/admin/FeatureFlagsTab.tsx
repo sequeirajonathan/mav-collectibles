@@ -8,17 +8,17 @@ import { Switch } from "@components/ui/switch";
 import { Button } from "@components/ui/button";
 import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-import { useSeedFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
+import { useFeatureFlags, useSeedFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
 
 type LocalFlags = Record<string, boolean>;
 
 export default function FeatureFlagsTab() {
-  const { featureFlags, refreshData } = useAppContext();
+  const { data: featureFlags, isLoading, error } = useFeatureFlags();
   const [localFlags, setLocalFlags] = useState<LocalFlags>({});
   const [hasChanges, setHasChanges] = useState(false);
 
-  const { mutate: triggerSeed, isPending: isSeeding } = useSeedFeatureFlags();
-  const { mutateAsync: triggerUpdateFlag } = useUpdateFeatureFlag();
+  const { mutate: triggerSeed } = useSeedFeatureFlags();
+  const { mutate: triggerUpdateFlag } = useUpdateFeatureFlag();
 
   useEffect(() => {
     if (featureFlags) {
@@ -31,15 +31,13 @@ export default function FeatureFlagsTab() {
   }, [featureFlags]);
 
   const handleSeedFeatureFlags = async () => {
-    triggerSeed(undefined, {
-      onSuccess: () => {
-        toast.success('Feature flags initialized successfully');
-        window.location.reload();
-      },
-      onError: () => {
-        toast.error('Failed to initialize feature flags');
-      },
-    });
+    try {
+      await triggerSeed();
+      toast.success('Feature flags initialized successfully');
+      window.location.reload();
+    } catch {
+      toast.error('Failed to initialize feature flags');
+    }
   };
 
   const handleFlagChange = (flagName: string, checked: boolean) => {
@@ -73,8 +71,6 @@ export default function FeatureFlagsTab() {
         }
       }
 
-      // Force a refresh of all data
-      await refreshData();
       toast.success("Feature flags updated successfully");
       setHasChanges(false);
     } catch {
@@ -83,12 +79,24 @@ export default function FeatureFlagsTab() {
     }
   };
 
-  if (!featureFlags) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <Loader2 className="animate-spin w-6 h-6" />
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <p className="text-red-500">Failed to load feature flags</p>
+      </div>
+    );
+  }
+
+  if (!featureFlags) {
+    return null;
   }
 
   return (
@@ -99,22 +107,13 @@ export default function FeatureFlagsTab() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-
         {featureFlags.length === 0 && (
           <div className="flex justify-center mb-4">
             <Button
               onClick={handleSeedFeatureFlags}
-              disabled={isSeeding}
               className="bg-[#E6B325] text-black hover:bg-[#FFD966]"
             >
-              {isSeeding ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Initializing...
-                </>
-              ) : (
-                'Initialize Feature Flags'
-              )}
+              Initialize Feature Flags
             </Button>
           </div>
         )}
@@ -134,13 +133,13 @@ export default function FeatureFlagsTab() {
 
         <div className="flex items-center justify-between">
           <div>
-            <Label htmlFor="showFeaturedEvents" className="text-lg">Featured Events</Label>
-            <p className="text-sm text-gray-400">Show featured events on the homepage</p>
+            <Label htmlFor="showGoogleReviews" className="text-lg">Google Reviews</Label>
+            <p className="text-sm text-gray-400">Show Google Reviews section on the homepage</p>
           </div>
           <Switch
-            id="showFeaturedEvents"
-            checked={localFlags.showFeaturedEvents || false}
-            onCheckedChange={(checked) => handleFlagChange("showFeaturedEvents", checked)}
+            id="showGoogleReviews"
+            checked={localFlags.showGoogleReviews || false}
+            onCheckedChange={(checked) => handleFlagChange("showGoogleReviews", checked)}
           />
         </div>
 
