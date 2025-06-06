@@ -274,7 +274,7 @@ export default function Home() {
 
       {/* Google Reviews & Continue Browsing */}
       {featureFlags?.find(f => f.name === 'showGoogleReviews')?.enabled && <GoogleReviews />}
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <Link href="/category/tcg">
           <Button variant="gold">CONTINUE BROWSING</Button>
         </Link>

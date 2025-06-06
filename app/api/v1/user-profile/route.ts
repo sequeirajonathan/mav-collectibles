@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
-import { UserRole, isAdminRole } from '@interfaces/roles'
+import { UserRole, isAdminRole, UserRoleType } from '@interfaces/roles'
 
 export async function GET(_request: Request) {
   try {
@@ -14,7 +14,7 @@ export async function GET(_request: Request) {
     }
 
     // Check if user is admin/staff/event
-    const role = (user.publicMetadata.role as string) || UserRole.USER
+    const role = (user.publicMetadata.role as UserRoleType) || UserRole.USER
     const isAdmin = isAdminRole(role)
 
     // If maintenance mode is enabled and user is not admin, return 503

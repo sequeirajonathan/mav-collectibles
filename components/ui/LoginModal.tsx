@@ -35,7 +35,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 z-50"
+            className="fixed inset-0 bg-black/80 z-[100]"
           />
           
           {/* Modal */}
@@ -44,20 +44,23 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm md:max-w-md px-4 md:px-0"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[calc(100%-2rem)] max-w-md md:max-w-lg lg:max-w-xl"
+            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
           >
-            <div className="relative bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-4 md:p-6">
+            <div className="relative bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-3 md:p-6">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="absolute -right-2 -top-2 p-2 rounded-full bg-black border border-[#E6B325]/30 text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors"
+                className="absolute -right-2 -top-2 p-1.5 md:p-2 rounded-full bg-black border border-[#E6B325]/30 text-[#E6B325] hover:bg-[#E6B325]/10 transition-colors touch-manipulation"
                 style={{ touchAction: 'manipulation' }}
                 aria-label="Close login modal"
               >
-                <X size={20} />
+                <X size={18} className="w-4 h-4 md:w-5 md:h-5" />
               </Button>
-              <LoginForm redirectTo="/admin" hideSignupLink={true} />
+              <div className="mt-1 md:mt-0">
+                <LoginForm redirectTo="/admin" hideSignupLink={true} />
+              </div>
             </div>
           </motion.div>
         </>

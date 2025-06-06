@@ -23,17 +23,17 @@ export function LoginForm({
 
   return (
     <div className="max-w-md mx-auto">
-      <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-4 md:mb-6">
         <Image
           src="/mav_collectibles.png"
           alt="MAV Collectibles Logo"
           width={200}
           height={80}
-          className="w-auto h-auto"
+          className="w-[150px] md:w-[200px] h-auto"
         />
       </div>
 
-      <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
+      <h1 className="text-2xl font-bold mb-4 md:mb-6 text-center text-[#E6B325]">
         Login
       </h1>
 

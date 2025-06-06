@@ -21,7 +21,7 @@ import {
 import { SquareCategory } from "@interfaces/categories";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@components/ui/button";
-import { UserRole, isAdminRole } from "@interfaces/roles";
+import { UserRole, isAdminRole, UserRoleType } from "@interfaces/roles";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,11 +44,11 @@ const Navbar = () => {
   const authState = useMemo(() => {
     if (!user) return { user: undefined, role: UserRole.USER, isAdmin: false };
     
-    const role = user.publicMetadata?.role as string || UserRole.USER;
+    const role = (user.publicMetadata?.role as UserRoleType) || UserRole.USER;
     return {
       user: user.primaryEmailAddress?.emailAddress,
-      role,
-      isAdmin: isAdminRole(role)
+      role: role as UserRoleType,
+      isAdmin: isAdminRole(role as UserRoleType)
     };
   }, [user]);
 

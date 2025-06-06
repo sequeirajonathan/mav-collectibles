@@ -30,7 +30,8 @@ const eslintConfig = [
           "**/app/**/layout.tsx",
           "**/app/**/route.ts",
           "**/components/**/*.tsx",
-          "middleware.ts"
+          "middleware.ts",
+          "next.config.ts"
         ]
       }]
     },

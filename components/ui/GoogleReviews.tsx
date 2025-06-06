@@ -98,6 +98,18 @@ function ProfileImage({ src, alt, size = 40, initials }: { src?: string; alt: st
 }
 
 function ReviewModal({ review, isOpen, onClose }: { review: GoogleReview | null; isOpen: boolean; onClose: () => void }) {
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!review) return null;
   // Extract owner's response if present
   let ownerResponse = '';
@@ -108,6 +120,7 @@ function ReviewModal({ review, isOpen, onClose }: { review: GoogleReview | null;
       ownerResponse = review.response.text;
     }
   }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -119,6 +132,7 @@ function ReviewModal({ review, isOpen, onClose }: { review: GoogleReview | null;
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/80 z-50"
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
           />
           {/* Modal */}
           <motion.div
@@ -127,6 +141,7 @@ function ReviewModal({ review, isOpen, onClose }: { review: GoogleReview | null;
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg px-4"
+            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
           >
             <div className="relative bg-[#181f2a] border border-[#E6B325]/30 rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
               <Button

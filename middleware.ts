@@ -1,5 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { isAdminRole, UserRoleType } from '@interfaces/roles'
+
+// Define the type for user metadata
+type UserMetadata = {
+  role?: UserRoleType;
+}
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)', 
@@ -20,19 +26,21 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+  // Get session claims
   const { sessionClaims } = await auth()
-  const metadata = sessionClaims?.metadata as { role?: string }
-  const isAdmin = metadata?.role === 'ADMIN'
+  const metadata = sessionClaims?.metadata as UserMetadata | undefined
+  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
+  const isAdmin = metadata?.role ? isAdminRole(metadata.role) : false
+  const isMaintenancePage = req.nextUrl.pathname.startsWith('/maintenance')
 
-  // If maintenance mode is enabled and the user is not an admin, redirect to maintenance page
-  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true' && !isAdmin) {
-    const maintenanceUrl = new URL('/maintenance', req.url)
-    return NextResponse.redirect(maintenanceUrl)
+  // If maintenance mode is active and user is not admin
+  if (isMaintenanceMode && !isAdmin && !isMaintenancePage) {
+    return NextResponse.redirect(new URL('/maintenance', req.url))
   }
 
-  // If the request is for the maintenance page, allow it
-  if (req.nextUrl.pathname.startsWith('/maintenance')) {
-    return
+  // If maintenance mode is active and user is admin, allow access to all routes
+  if (isMaintenanceMode && isAdmin) {
+    return NextResponse.next()
   }
 
   // If the request is not for a public route, protect it
