@@ -16,9 +16,8 @@ export async function POST(request: Request) {
     }
 
     const client = await clerkClient();
-    let user;
     try {
-      user = await client.users.getUser(userId);
+      await client.users.getUser(userId);
     } catch {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

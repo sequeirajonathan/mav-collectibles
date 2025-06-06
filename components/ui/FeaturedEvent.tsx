@@ -1,7 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from "@components/ui/button";
 
 export interface FeaturedEventProps {
   title: string;
@@ -29,15 +28,13 @@ const FeaturedEvent: React.FC<FeaturedEventProps> = ({
   description,
   imageSrc,
   imageAlt,
-  link,
+  link: _link,
   className = "",
   showSeeMoreButton = false,
   seeMoreLink
 }) => {
   const hasNoShadow = className.includes('shadow-none');
-  const hasNoBorder = className.includes('border-0');
   const baseShadow = hasNoShadow ? '' : 'shadow hover:shadow-md hover:shadow-brand-blue/10';
-  const baseBorder = '';
   const { month, day } = getMonthAndDay(date);
 
   // If showSeeMoreButton, make the card clickable on mobile only

@@ -1,5 +1,4 @@
 import "@styles/globals.css";
-import { Toaster } from "react-hot-toast";
 import { Suspense } from 'react';
 
 export const metadata = {

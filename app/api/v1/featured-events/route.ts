@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { z } from 'zod';
 import { createFeaturedEventSchema } from "@validations/featured-events";
+import { FeaturedEvent } from '@prisma/client';
 
 // Helper function to convert Prisma event to API response
-const convertPrismaEventToResponse = (event: any) => ({
+const convertPrismaEventToResponse = (event: FeaturedEvent) => ({
   ...event,
   date: event.date.toISOString(),
   createdAt: event.createdAt.toISOString(),

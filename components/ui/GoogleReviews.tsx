@@ -3,9 +3,21 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, StarHalf, X } from "lucide-react";
 import { useGoogleReviews } from "@hooks/useGoogleReviews";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Carousel, { CarouselItem } from "./Carousel";
 import { Button } from "./button";
+import Image from "next/image";
+
+interface GoogleReview {
+  author_name: string;
+  profile_photo_url?: string;
+  rating: number;
+  text: string;
+  time: number;
+  response?: {
+    text: string;
+  } | string;
+}
 
 const REVIEW_CHAR_LIMIT = 150;
 
@@ -51,7 +63,6 @@ function getInitials(name: string) {
 // Add a helper React component for the profile image with fallback and retry logic
 function ProfileImage({ src, alt, size = 40, initials }: { src?: string; alt: string; size?: number; initials: string }) {
   const [errorCount, setErrorCount] = useState(0);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   if (!src || errorCount >= 2) {
     return (
@@ -65,29 +76,28 @@ function ProfileImage({ src, alt, size = 40, initials }: { src?: string; alt: st
   }
 
   return (
-    <img
-      ref={imgRef}
-      src={src}
-      alt={alt}
-      className="rounded-full object-cover border border-gray-700 bg-[#232b3a] text-white"
-      style={{ width: size, height: size }}
-      loading="lazy"
-      onError={() => {
-        if (errorCount < 1) {
-          // Retry loading once
-          setErrorCount((c) => c + 1);
-          if (imgRef.current) {
-            imgRef.current.src = src;
+    <div className="relative" style={{ width: size, height: size }}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="rounded-full object-cover border border-gray-700 bg-[#232b3a] text-white"
+        sizes={`${size}px`}
+        loading="lazy"
+        onError={() => {
+          if (errorCount < 1) {
+            // Retry loading once
+            setErrorCount((c) => c + 1);
+          } else {
+            setErrorCount((c) => c + 1);
           }
-        } else {
-          setErrorCount((c) => c + 1);
-        }
-      }}
-    />
+        }}
+      />
+    </div>
   );
 }
 
-function ReviewModal({ review, isOpen, onClose }: { review: any; isOpen: boolean; onClose: () => void }) {
+function ReviewModal({ review, isOpen, onClose }: { review: GoogleReview | null; isOpen: boolean; onClose: () => void }) {
   if (!review) return null;
   // Extract owner's response if present
   let ownerResponse = '';
@@ -143,7 +153,7 @@ function ReviewModal({ review, isOpen, onClose }: { review: any; isOpen: boolean
               <p className="text-gray-200 text-base whitespace-pre-line break-words">{review.text}</p>
               <p className="text-gray-400 text-xs mt-4">{new Date(review.time * 1000).toLocaleDateString()}</p>
               <div className="mt-6 pt-4 border-t border-gray-700/50">
-                <h4 className="font-semibold text-[#E6B325] text-sm mb-1">Owner's Response</h4>
+                <h4 className="font-semibold text-[#E6B325] text-sm mb-1">Owner&apos;s Response</h4>
                 <p className="text-gray-300 text-sm whitespace-pre-line">
                   {ownerResponse ? ownerResponse : 'No response from owner.'}
                 </p>
@@ -158,7 +168,7 @@ function ReviewModal({ review, isOpen, onClose }: { review: any; isOpen: boolean
 
 export default function GoogleReviews() {
   const { reviews, isLoading, error } = useGoogleReviews();
-  const [modalReview, setModalReview] = useState<any>(null);
+  const [modalReview, setModalReview] = useState<GoogleReview | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemsPerSlide, setItemsPerSlide] = useState(1);
   const [isMobile, setIsMobile] = useState(false);

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Minus, Plus, Trash2, ImageIcon } from "lucide-react";
 import { useCart } from "@contexts/CartContext";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import React, { useEffect, useState } from 'react';
 import { Button } from "@components/ui/button";
 import { formatMoney } from '@utils/formatMoney';
@@ -59,7 +59,7 @@ export default function CartPage() {
       ["rgba(239, 68, 68, 0.2)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]
     );
 
-    const handleDragEnd = (event: any, info: any) => {
+    const handleDragEnd = (_event: PointerEvent, info: PanInfo) => {
       if (info.offset.x < -100 && info.velocity.x < 0) {
         removeItem(item.id);
       }

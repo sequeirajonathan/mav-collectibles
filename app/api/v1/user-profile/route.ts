@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 import { UserRole, isAdminRole } from '@interfaces/roles'
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const user = await currentUser()
     

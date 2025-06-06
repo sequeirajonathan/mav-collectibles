@@ -21,10 +21,6 @@ export function LoginForm({
   const message = searchParams.get("message");
   const error = searchParams.get("error");
 
-  if (signUpLoaded && signUp?.status === 'complete' && !(user?.unsafeMetadata as Record<string, unknown>)?.role) {
-    // Handle the case where the user is signed up but doesn't have a role
-  }
-
   return (
     <div className="max-w-md mx-auto">
       <div className="flex justify-center mb-6">

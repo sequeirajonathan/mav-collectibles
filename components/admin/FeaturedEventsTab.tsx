@@ -5,10 +5,10 @@ import type { FeaturedEvent as FeaturedEventType } from "@interfaces";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import EventForm from "./EventForm";
-import FeaturedEvent from "@components/ui/FeaturedEvent";
 import { Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useFeaturedEvents, useCreateFeaturedEvent, useUpdateFeaturedEvent, useDeleteFeaturedEvent } from "@hooks/useFeaturedEvents";
+import Image from "next/image";
 
 export default function FeaturedEventsTab() {
   const { data: featuredEvents, isLoading, error } = useFeaturedEvents();
@@ -152,8 +152,14 @@ export default function FeaturedEventsTab() {
           <Card key={event.id} className="mb-2 rounded-lg bg-[#151a24] border border-[#22283a] shadow-none">
             <div className="flex flex-row items-center px-3 py-2 gap-3">
               {/* Image */}
-              <div className="flex-shrink-0 flex items-center justify-center w-12 h-16">
-                <img src={event.imageSrc} alt={event.imageAlt} className="object-contain w-12 h-16 rounded" />
+              <div className="flex-shrink-0 flex items-center justify-center w-12 h-16 relative">
+                <Image 
+                  src={event.imageSrc} 
+                  alt={event.imageAlt} 
+                  fill
+                  className="object-contain rounded"
+                  sizes="48px"
+                />
               </div>
               {/* Info */}
               <div className="flex-1 min-w-0 flex flex-col justify-center">

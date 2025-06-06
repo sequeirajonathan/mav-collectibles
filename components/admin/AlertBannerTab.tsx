@@ -112,7 +112,7 @@ export default function AlertBannerTab() {
       try {
         await updateBanner(alertBanner.id, alertBannerState);
         toast.success("Alert banner updated successfully");
-      } catch (error) {
+      } catch (_error) {
         toast.error("Failed to update alert banner");
       }
     } else {

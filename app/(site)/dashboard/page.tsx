@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
-import { ClerkUser, UserProfile } from '@interfaces/userProfile';
+import { UserProfile } from '@interfaces/userProfile';
 import { UserRole } from '@interfaces/roles';
 
 export default async function DashboardPage() {

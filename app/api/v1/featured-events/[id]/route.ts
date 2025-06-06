@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { z } from 'zod';
 import { optionalUrlSchema } from '@validations/base';
+import { FeaturedEvent } from '@prisma/client';
 
 const featuredEventPatchSchema = z.object({
   title: z.string().optional(),
@@ -16,7 +17,7 @@ const featuredEventPatchSchema = z.object({
 });
 
 // Helper function to convert Prisma event to API response
-const convertPrismaEventToResponse = (event: any) => ({
+const convertPrismaEventToResponse = (event: FeaturedEvent) => ({
   ...event,
   date: event.date.toISOString(),
   createdAt: event.createdAt.toISOString(),

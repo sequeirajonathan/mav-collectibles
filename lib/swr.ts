@@ -99,4 +99,4 @@ export function useResource<T = unknown>(baseUrl: string, options?: ResourceOpti
   };
 }
 
-export { fetcher, fetcherPost, swrConfig }; 
+export { fetcherPost, swrConfig }; 

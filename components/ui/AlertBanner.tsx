@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useAppContext } from '@contexts/AppContext';
-import { useAlertBanner } from '@hooks/useAlertBanner';
 import { useResource } from '@lib/swr';
 
-// Add the prop type
+interface AlertBannerData {
+  message: string;
+  code?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  enabled: boolean;
+}
+
 interface AlertBannerProps {
-  initialData?: any; // Replace 'any' with your AlertBanner type if available
+  initialData?: AlertBannerData;
 }
 
 export default function AlertBanner({ initialData }: AlertBannerProps) {
@@ -16,7 +22,7 @@ export default function AlertBanner({ initialData }: AlertBannerProps) {
   const {
     data: alertBanner,
     isLoading,
-    error,
+    error: _error,
   } = useAlertBannerWithFallback(initialData);
   const [isVisible, setIsVisible] = useState(true);
   const showAlertBanner = getFeatureFlag('showAlertBanner');
@@ -66,7 +72,7 @@ export default function AlertBanner({ initialData }: AlertBannerProps) {
 }
 
 // Custom hook to inject fallbackData into SWR
-function useAlertBannerWithFallback(fallbackData?: any) {
+function useAlertBannerWithFallback(fallbackData?: AlertBannerData) {
   return useResource('/alert-banner', {
     onError: (error) => {
       console.error('Alert banner operation failed:', error);
