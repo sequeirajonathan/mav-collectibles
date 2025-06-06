@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAppContext } from "@contexts/AppContext";
 import { Button } from "@components/ui/button";
 import Image from "next/image";
 import { LoginModal } from "@components/ui/LoginModal";
@@ -11,17 +10,21 @@ import { useAuth } from "@clerk/nextjs";
 
 export default function MaintenancePage() {  
   const router = useRouter();
-  const { featureFlags } = useAppContext();
   const { userId } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
-
   useEffect(() => {
+    console.log('Maintenance Page Debug:', {
+      userId,
+      maintenanceMode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE
+    });
+
     // If maintenance mode is disabled or user is authenticated, redirect to home
-    if (!featureFlags?.find(f => f.name === "maintenanceMode")?.enabled || userId) {
+    if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== 'true' || userId) {
+      console.log('Redirecting to home page');
       router.push("/");
     }
-  }, [featureFlags, userId, router]);
+  }, [userId, router]);
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-black overflow-hidden">

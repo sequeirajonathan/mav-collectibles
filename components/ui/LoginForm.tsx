@@ -21,6 +21,10 @@ export function LoginForm({
   const message = searchParams.get("message");
   const error = searchParams.get("error");
 
+  if (signUpLoaded && signUp?.status === 'complete' && !(user?.unsafeMetadata as Record<string, unknown>)?.role) {
+    // Handle the case where the user is signed up but doesn't have a role
+  }
+
   return (
     <div className="max-w-md mx-auto">
       <div className="flex justify-center mb-6">
@@ -111,7 +115,7 @@ export function LoginForm({
 
             {!hideSignupLink && (
               <p className="text-center text-sm text-gray-500 mt-4">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/sign-up" className="text-[#E6B325] hover:underline">
                   Sign up
                 </Link>

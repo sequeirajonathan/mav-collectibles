@@ -33,7 +33,7 @@ const Navbar = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   const { signOut } = useClerk();
   const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);

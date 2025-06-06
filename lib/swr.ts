@@ -9,7 +9,7 @@ const fetcher = async (url: string) => {
   return response.data;
 };
 
-const fetcherPost = async (url: string, body: any) => {
+const fetcherPost = async <T = unknown>(url: string, body: T) => {
   const response = await axiosClient.post(url, body);
   return response.data;
 };
@@ -30,7 +30,7 @@ type ResourceOptions<T> = {
   fallbackData?: T;
 };
 
-export function useResource<T = any>(baseUrl: string, options?: ResourceOptions<T>) {
+export function useResource<T = unknown>(baseUrl: string, options?: ResourceOptions<T>) {
   const { data, error, isLoading, mutate: refresh } = useSWR<T>(
     baseUrl,
     fetcher,

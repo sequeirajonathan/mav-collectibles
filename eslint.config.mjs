@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
@@ -29,6 +30,7 @@ const eslintConfig = [
           "**/app/**/layout.tsx",
           "**/app/**/route.ts",
           "**/components/**/*.tsx",
+          "middleware.ts"
         ]
       }]
     },

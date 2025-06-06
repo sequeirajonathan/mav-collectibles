@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)', 
@@ -19,6 +20,22 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+  const { sessionClaims } = await auth()
+  const metadata = sessionClaims?.metadata as { role?: string }
+  const isAdmin = metadata?.role === 'ADMIN'
+
+  // If maintenance mode is enabled and the user is not an admin, redirect to maintenance page
+  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true' && !isAdmin) {
+    const maintenanceUrl = new URL('/maintenance', req.url)
+    return NextResponse.redirect(maintenanceUrl)
+  }
+
+  // If the request is for the maintenance page, allow it
+  if (req.nextUrl.pathname.startsWith('/maintenance')) {
+    return
+  }
+
+  // If the request is not for a public route, protect it
   if (!isPublicRoute(req)) {
     await auth.protect()
   }

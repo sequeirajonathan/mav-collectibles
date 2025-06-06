@@ -13,7 +13,7 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
 
   // Close modal when user is authenticated
   useEffect(() => {

@@ -34,7 +34,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
   // Set user role after successful verification
   useEffect(() => {
     const setRole = async () => {
-      if (signUpLoaded && signUp?.status === 'complete' && !(user?.unsafeMetadata as any)?.role) {
+      if (signUpLoaded && signUp?.status === 'complete' && !(user?.unsafeMetadata as Record<string, unknown>)?.role) {
         try {
           const result = await setUserRole(UserRole.USER);
           if (!result.success) {
@@ -199,7 +199,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
             </h1>
 
             <p className="text-center mb-4 text-gray-400">
-              We've sent a verification code to{" "}
+              We&apos;ve sent a verification code to{" "}
               <span className="text-[#E6B325] font-medium">
                 {signUp?.emailAddress}
               </span>
@@ -232,7 +232,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
                   </button>
                 )}
               >
-                Didn't receive the code? Resend
+                Didn&apos;t receive the code? Resend
               </SignUp.Action>
 
               <SignUp.Action
