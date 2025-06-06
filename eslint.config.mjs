@@ -29,7 +29,6 @@ const eslintConfig = [
           "**/app/**/layout.tsx",
           "**/app/**/route.ts",
           "**/components/**/*.tsx",
-          "**/lib/auth-actions.ts"
         ]
       }]
     },
