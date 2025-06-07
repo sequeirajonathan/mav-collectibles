@@ -54,7 +54,7 @@ export function LoginForm({
           <div className="space-y-4">
             <Clerk.Field name="identifier">
               <Clerk.Label asChild>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email or Username</Label>
               </Clerk.Label>
               <Clerk.Input
                 asChild
@@ -62,8 +62,8 @@ export function LoginForm({
               >
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="Enter your email"
+                  type="text"
+                  placeholder="Enter your email or username"
                   required
                 />
               </Clerk.Input>

@@ -63,13 +63,13 @@ export default function ProductPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative aspect-square"
+          className="relative aspect-square max-w-[500px] mx-auto"
         >
           <Image
             src={product.imageUrls?.[0] || '/images/placeholder.png'}
             alt={product.name}
             fill
-            className="object-cover rounded-lg"
+            className="object-contain rounded-lg"
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />
@@ -85,7 +85,7 @@ export default function ProductPage() {
           <p className="text-2xl font-semibold text-[#E6B325] mb-6">
             {formatMoney(product.variations?.[0]?.priceAmount, product.variations?.[0]?.priceCurrency)}
           </p>
-          <p className="text-gray-600 mb-8">{product.description}</p>
+          <p className="text-gray-300 mb-8">{product.description}</p>
 
           <Button
             onClick={handleAddToCart}

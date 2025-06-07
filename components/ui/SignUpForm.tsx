@@ -5,6 +5,7 @@ import * as SignUp from "@clerk/elements/sign-up";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
+import { PhoneInput } from "@components/ui/PhoneInput";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -12,6 +13,7 @@ import { useSignUp, useUser } from "@clerk/nextjs";
 import { UserRole } from "@interfaces/roles";
 import { useUserMetadata } from "@hooks/useUserMetadata";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 
 interface SignupFormProps {
   hideLoginLink?: boolean;
@@ -19,6 +21,7 @@ interface SignupFormProps {
 
 export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
   const { signUp, isLoaded: signUpLoaded } = useSignUp();
+  const [phoneValue, setPhoneValue] = useState("");
   const { user } = useUser();
   const { setUserRole } = useUserMetadata();
   const [cooldown, setCooldown] = useState(0);
@@ -31,24 +34,69 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  // Set user role after successful verification
+  // Check for existing Square customer and handle role setting
   useEffect(() => {
-    const setRole = async () => {
-      if (signUpLoaded && signUp?.status === 'complete' && !(user?.unsafeMetadata as Record<string, unknown>)?.role) {
+    const handleSquareCustomer = async () => {
+      if (
+        signUpLoaded &&
+        signUp?.status === "complete" &&
+        !(user?.unsafeMetadata as Record<string, unknown>)?.role
+      ) {
         try {
+          const phoneNumber = signUp.phoneNumber;
+          if (!phoneNumber) {
+            toast.error("Phone number is required");
+            return;
+          }
+
+          // Search for existing Square customer
+          const searchResponse = await axios.post(
+            "/api/v1/search-square-customer",
+            {
+              phoneNumber: phoneNumber.replace(/\D/g, "").slice(-10), // Remove non-digits and get last 10 digits
+            }
+          );
+
+          if (searchResponse.data.customers?.length > 0) {
+            // Customer exists, update their information
+            const customer = searchResponse.data.customers[0];
+            await axios.put(`/api/v1/update-square-customer/${customer.id}`, {
+              emailAddress: signUp.emailAddress,
+              givenName: signUp.firstName || "",
+              familyName: signUp.lastName || "",
+            });
+          } else {
+            // Create new Square customer
+            await axios.post("/api/v1/create-square-customer", {
+              emailAddress: signUp.emailAddress,
+              givenName: signUp.firstName || "",
+              familyName: signUp.lastName || "",
+              phoneNumber: phoneNumber.replace(/\D/g, "").slice(-10),
+              address: {
+                country: "US",
+                firstName: signUp.firstName || "",
+                lastName: signUp.lastName || "",
+                addressLine1: "Pending",
+                locality: "Pending",
+                postalCode: "00000",
+              },
+            });
+          }
+
+          // Set user role
           const result = await setUserRole(UserRole.USER);
           if (!result.success) {
-            toast.error(result.error || 'Failed to set user role');
+            toast.error(result.error || "Failed to set user role");
           }
         } catch (error) {
-          console.error('Error setting user role:', error);
-          toast.error('Failed to set user role');
+          console.error("Error handling Square customer:", error);
+          toast.error("Failed to process customer information");
         }
       }
     };
 
-    setRole();
-  }, [signUpLoaded, signUp?.status, user, setUserRole]);
+    handleSquareCustomer();
+  }, [signUp, user, setUserRole]);
 
   return (
     <div className="max-w-md mx-auto">
@@ -98,6 +146,36 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
                   type="email"
                   placeholder="Enter your email"
                   required
+                />
+              </Clerk.Input>
+              <Clerk.FieldError />
+            </Clerk.Field>
+
+            <Clerk.Field name="phoneNumber">
+              <Clerk.Label asChild>
+                <Label htmlFor="phoneNumber">Phone Number (US Only)</Label>
+              </Clerk.Label>
+              <Clerk.Input
+                asChild
+                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
+              >
+                <PhoneInput
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  required
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setPhoneValue(value);
+                    
+                    // Format the value for Clerk (E.164 format)
+                    const digits = value.replace(/\D/g, '');
+                    const e164Value = `+1${digits}`;
+                    
+                    // Update the input value directly
+                    e.target.value = e164Value;
+                  }}
                 />
               </Clerk.Input>
               <Clerk.FieldError />
@@ -193,6 +271,63 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
         </SignUp.Step>
 
         <SignUp.Step name="verifications">
+          <SignUp.Strategy name="phone_code">
+            <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
+              Verify your phone
+            </h1>
+
+            <p className="text-center mb-4 text-gray-400">
+              We&apos;ve sent a verification code to{" "}
+              <span className="text-[#E6B325] font-medium">
+                {signUp?.phoneNumber}
+              </span>
+            </p>
+
+            <Clerk.Field name="code">
+              <Clerk.Label asChild>
+                <Label>Phone verification code</Label>
+              </Clerk.Label>
+              <Clerk.Input
+                asChild
+                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
+              >
+                <Input placeholder="Enter code" />
+              </Clerk.Input>
+              <Clerk.FieldError />
+            </Clerk.Field>
+
+            <div className="mt-4 space-y-4">
+              <SignUp.Action
+                resend
+                className="w-full text-[#E6B325] hover:text-[#FFD966] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                fallback={({ resendableAfter }) => (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full text-[#E6B325]/50 text-sm cursor-not-allowed"
+                  >
+                    Resend code in {resendableAfter} seconds
+                  </button>
+                )}
+              >
+                Didn&apos;t receive the code? Resend
+              </SignUp.Action>
+
+              <SignUp.Action
+                navigate={signUp?.createdSessionId ? "previous" : "start"}
+                className="w-full text-gray-400 hover:text-white text-sm"
+              >
+                Need to change your phone number?
+              </SignUp.Action>
+            </div>
+
+            <SignUp.Action submit asChild>
+              <Button type="submit" className="w-full mt-4" variant="gold">
+                Verify Phone
+              </Button>
+            </SignUp.Action>
+          </SignUp.Strategy>
+
           <SignUp.Strategy name="email_code">
             <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
               Confirm your email
@@ -273,12 +408,39 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
               </Clerk.Input>
               <Clerk.FieldError />
             </Clerk.Field>
-            <SignUp.Action submit asChild>
-              <Button 
-                type="submit" 
-                className="w-full mt-4" 
-                variant="gold"
+
+            <Clerk.Field name="phoneNumber">
+              <Clerk.Label asChild>
+                <Label htmlFor="phoneNumber">Phone Number (US Only)</Label>
+              </Clerk.Label>
+              <Clerk.Input
+                asChild
+                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
               >
+                <PhoneInput
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  required
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setPhoneValue(value);
+                    
+                    // Format the value for Clerk (E.164 format)
+                    const digits = value.replace(/\D/g, '');
+                    const e164Value = `+1${digits}`;
+                    
+                    // Update the input value directly
+                    e.target.value = e164Value;
+                  }}
+                />
+              </Clerk.Input>
+              <Clerk.FieldError />
+            </Clerk.Field>
+
+            <SignUp.Action submit asChild>
+              <Button type="submit" className="w-full mt-4" variant="gold">
                 Continue
               </Button>
             </SignUp.Action>

@@ -3,6 +3,8 @@
 import Image from 'next/image'
 import { UserRole } from '@interfaces/roles';
 import { UserProfile } from '@interfaces/userProfile';
+import { useRouter } from 'next/navigation';
+import { useSquareCustomer } from '@hooks/useSquareCustomer';
 
 interface DashboardClientProps {
   user: UserProfile;
@@ -10,6 +12,12 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ user }: DashboardClientProps) {
   const userRole = user.role || UserRole.USER;
+  const router = useRouter();
+  const { customer, isLoading } = useSquareCustomer(user.phoneNumber);
+
+  const handleEditProfile = () => {
+    router.push('/profile');
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -59,6 +67,48 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             </div>
           </div>
 
+          {/* Customer Information Section */}
+          {isLoading ? (
+            <div className="border border-[#E6B325]/30 rounded-lg p-6">
+              <div className="text-[#E6B325]">Loading customer information...</div>
+            </div>
+          ) : customer ? (
+            <div className="border border-[#E6B325]/30 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-[#E6B325] mb-6">Customer Information</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="text-[#E6B325]/70 text-sm">Name</div>
+                  <div className="text-white">{`${customer.givenName} ${customer.familyName}`}</div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-[#E6B325]/70 text-sm">Phone</div>
+                  <div className="text-white">{customer.phoneNumber}</div>
+                </div>
+                
+                {customer.address && (
+                  <>
+                    <div className="space-y-2">
+                      <div className="text-[#E6B325]/70 text-sm">Address</div>
+                      <div className="text-white">
+                        {customer.address.addressLine1}
+                        {customer.address.addressLine2 && <br />}
+                        {customer.address.addressLine2}
+                        <br />
+                        {customer.address.locality}, {customer.address.postalCode}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="border border-[#E6B325]/30 rounded-lg p-6">
+              <div className="text-[#E6B325]">No customer information found</div>
+            </div>
+          )}
+
           {/* Quick Actions Section */}
           <div className="border border-[#E6B325]/30 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-[#E6B325] mb-6">Quick Actions</h2>
@@ -66,7 +116,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
               <button className="w-full py-2 px-4 bg-[#E6B325] hover:bg-[#FFD966] text-black font-medium rounded-md transition-colors">
                 View Orders
               </button>
-              <button className="w-full py-2 px-4 border border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325]/10 font-medium rounded-md transition-colors">
+              <button 
+                onClick={handleEditProfile}
+                className="w-full py-2 px-4 border border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325]/10 font-medium rounded-md transition-colors"
+              >
                 Edit Profile
               </button>
             </div>

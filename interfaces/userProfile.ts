@@ -15,11 +15,11 @@ export interface ClerkUser {
 
 export interface UserProfile {
   id: string;
-  email?: string;
-  role: UserRole;
-  createdAt: number;
-  lastSignInAt?: number;
+  email: string;
+  role?: string;
+  createdAt: string;
+  lastSignInAt?: string;
+  phoneNumber?: string;
   firstName?: string;
   lastName?: string;
-  imageUrl: string;
 }
