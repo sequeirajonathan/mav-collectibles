@@ -5,7 +5,7 @@ import { SortOption, StockOption } from "@interfaces/square";
 import type { DropdownOption } from "./CustomDropdown";
 import { useQueryState } from "nuqs";
 import React from "react";
-import { AnimatedSearchBar } from "@app/components/ui/AnimatedSearchBar";
+import AnimatedSearchBar from "@components/ui/AnimatedSearchBar";
 
 const sortOptions: DropdownOption<SortOption>[] = [
   { label: "Name: A-Z", value: "name_asc" },
@@ -47,7 +47,10 @@ export function ProductFilters() {
         <div className="flex flex-row gap-4 w-full sm:w-auto mt-2 sm:mt-0 justify-end items-center">
           <div className="flex gap-2 items-center">
             {stockCheckboxOptions.map((opt) => (
-              <label key={opt.value} className="flex items-center gap-1 text-[#E6B325] text-sm font-medium cursor-pointer">
+              <label
+                key={opt.value}
+                className="flex items-center gap-1 text-[#E6B325] text-sm font-medium cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={selectedStock.includes(opt.value)}

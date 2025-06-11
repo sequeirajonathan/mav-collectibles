@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { useRouter } from "next/navigation";
 
-export function AnimatedSearchBar() {
+export default function AnimatedSearchBar() {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const { scrollY } = useScroll();
