@@ -1,21 +1,31 @@
 import { useCallback } from 'react';
 import { UserRole } from '@interfaces/roles';
+import { useResource } from '@lib/swr';
+
+interface UpdateUserRoleResponse {
+  success: boolean;
+  username: string;
+  role: UserRole;
+  error?: string;
+}
+
+interface UpdateUserRoleRequest {
+  userId: string;
+  role: UserRole;
+}
 
 export function useUserRoles() {
-  const updateUserRole = useCallback(async (userId: string, role: UserRole): Promise<any> => {
+  const { create } = useResource<UpdateUserRoleResponse, UpdateUserRoleRequest>('user/metadata');
+
+  const updateUserRole = useCallback(async (userId: string, role: UserRole): Promise<UpdateUserRoleResponse> => {
     try {
-      const response = await fetch('/api/v1/user/metadata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, role }),
-      });
-      const data = await response.json();
+      const data = await create({ userId, role });
       return data;
     } catch (error) {
       console.error('Error updating user role:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      throw error;
     }
-  }, []);
+  }, [create]);
 
   return { updateUserRole, isLoading: false };
 } 

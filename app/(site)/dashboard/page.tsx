@@ -4,28 +4,18 @@ import DashboardClient from "@components/ui/DashboardClient";
 import { UserProfile } from "@interfaces/userProfile";
 import { UserRole } from "@interfaces/roles";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { source?: string };
-}) {
+export default async function DashboardPage() {
   const { userId } = await auth();
   const user = await currentUser();
   
   console.log('Raw User Data from Backend:', {
     userId,
     user,
-    metadata: user?.unsafeMetadata,
     publicMetadata: user?.publicMetadata
   });
 
   if (!userId || !user) {
     redirect("/sign-in");
-  }
-
-  // If coming from print-agent, redirect to print-agent dashboard
-  if (searchParams.source === 'print-agent') {
-    redirect('/dashboard/print-agent');
   }
 
   const phoneNumber = user.phoneNumbers[0]?.phoneNumber?.replace(/^\+1/, '') || '';
@@ -39,7 +29,7 @@ export default async function DashboardPage({
     phoneNumber,
     firstName: user.firstName || '',
     lastName: user.lastName || '',
-    publicMetadata: user.publicMetadata
+    source: (user.publicMetadata?.source as string) || '',
   };
 
   console.log('Constructed User Data:', userData);

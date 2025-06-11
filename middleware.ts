@@ -5,6 +5,7 @@ import { isAdminRole, UserRoleType } from '@interfaces/roles'
 // Define the type for user metadata
 type UserMetadata = {
   role?: UserRoleType;
+  source?: string;
 }
 
 const isPublicRoute = createRouteMatcher([
@@ -37,15 +38,16 @@ export default clerkMiddleware(async (auth, req) => {
   const metadata = sessionClaims?.metadata as UserMetadata | undefined
   const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
   const isAdmin = metadata?.role ? isAdminRole(metadata.role) : false
+  const isPrintAgent = metadata?.source === 'print-agent'
   const isMaintenancePage = req.nextUrl.pathname.startsWith('/maintenance')
 
-  // If maintenance mode is active and user is not admin
-  if (isMaintenanceMode && !isAdmin && !isMaintenancePage) {
+  // If maintenance mode is active and user is not admin or print agent
+  if (isMaintenanceMode && !isAdmin && !isPrintAgent && !isMaintenancePage) {
     return NextResponse.redirect(new URL('/maintenance', req.url))
   }
 
-  // If maintenance mode is active and user is admin, allow access to all routes
-  if (isMaintenanceMode && isAdmin) {
+  // If maintenance mode is active and user is admin or print agent, allow access to all routes
+  if (isMaintenanceMode && (isAdmin || isPrintAgent)) {
     return NextResponse.next()
   }
 

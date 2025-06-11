@@ -1,38 +1,30 @@
 import { useCallback } from 'react';
-import { useResource } from '@lib/swr';
 import { UserRole } from '@interfaces/roles';
+import { useResource } from '@lib/swr';
 
 interface SetUserMetadataResponse {
   success: boolean;
+  username: string;
+  role: UserRole;
   error?: string;
 }
 
+interface SetUserMetadataRequest {
+  role: UserRole;
+}
+
 export function useUserMetadata() {
+  const { create } = useResource<SetUserMetadataResponse, SetUserMetadataRequest>('user/metadata');
+
   const setUserRole = useCallback(async (role: UserRole): Promise<SetUserMetadataResponse> => {
     try {
-      const response = await fetch('/api/v1/user/metadata', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update user role');
-      }
-
-      return { success: true };
+      const data = await create({ role });
+      return data;
     } catch (error) {
       console.error('Error setting user role:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update user role' 
-      };
+      throw error;
     }
-  }, []);
+  }, [create]);
 
   return {
     setUserRole,

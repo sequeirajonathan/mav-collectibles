@@ -2,7 +2,7 @@
 
 import { LoginForm } from "@components/ui/LoginForm";
 
-export function ElectronLoginForm() {
+export function PrintAgentLoginForm() {
   return (
     <LoginForm 
       hideSignupLink 

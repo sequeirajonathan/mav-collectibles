@@ -9,8 +9,5 @@ export interface UserProfile {
   phoneNumber: string;
   firstName: string;
   lastName: string;
-  publicMetadata?: {
-    source?: 'print-agent' | 'web';
-    [key: string]: unknown;
-  };
+  source?: string;
 }

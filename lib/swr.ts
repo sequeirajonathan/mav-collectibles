@@ -48,8 +48,8 @@ type ResourceOptions<T> = {
   fallbackData?: T;
 };
 
-export function useResource<T = unknown>(baseUrl: string, options?: ResourceOptions<T>) {
-  const { data, error, isLoading, mutate: refresh } = useSWR<T>(
+export function useResource<TResponse = unknown, TRequest = unknown>(baseUrl: string, options?: ResourceOptions<TResponse>) {
+  const { data, error, isLoading, mutate: refresh } = useSWR<TResponse>(
     baseUrl,
     fetcher,
     { 
@@ -62,9 +62,9 @@ export function useResource<T = unknown>(baseUrl: string, options?: ResourceOpti
     }
   );
 
-  const create = async (data: Partial<T>) => {
+  const create = async (data: TRequest) => {
     try {
-      const response = await axiosClient.post(baseUrl, data);
+      const response = await axiosClient.post<TResponse>(baseUrl, data);
       await mutate(baseUrl);
       options?.onSuccess?.(response.data);
       return response.data;
@@ -75,9 +75,9 @@ export function useResource<T = unknown>(baseUrl: string, options?: ResourceOpti
     }
   };
 
-  const update = async (id: string, data: Partial<T>) => {
+  const update = async (id: string, data: Partial<TRequest>) => {
     try {
-      const response = await axiosClient.patch(`${baseUrl}/${id}`, data);
+      const response = await axiosClient.patch<TResponse>(`${baseUrl}/${id}`, data);
       await mutate(baseUrl);
       options?.onSuccess?.(response.data);
       return response.data;
@@ -90,7 +90,7 @@ export function useResource<T = unknown>(baseUrl: string, options?: ResourceOpti
 
   const remove = async (id: string) => {
     try {
-      const response = await axiosClient.delete(`${baseUrl}/${id}`);
+      const response = await axiosClient.delete<TResponse>(`${baseUrl}/${id}`);
       await mutate(baseUrl);
       options?.onSuccess?.(response.data);
       return response.data;
@@ -103,7 +103,7 @@ export function useResource<T = unknown>(baseUrl: string, options?: ResourceOpti
 
   const getOne = async (id: string) => {
     try {
-      const response = await axiosClient.get(`${baseUrl}/${id}`);
+      const response = await axiosClient.get<TResponse>(`${baseUrl}/${id}`);
       return response.data;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch resource');

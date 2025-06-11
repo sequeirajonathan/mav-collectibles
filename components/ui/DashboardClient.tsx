@@ -16,11 +16,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   
   console.log('DashboardClient - User:', {
     user,
-    publicMetadata: user.publicMetadata,
-    source: user.publicMetadata?.source
+    source: user?.source
   });
   
-  const isPrintAgent = user.publicMetadata?.source === 'print-agent';
+  const isPrintAgent = user?.source === 'print-agent';
   
   console.log('DashboardClient - isPrintAgent:', isPrintAgent);
 
