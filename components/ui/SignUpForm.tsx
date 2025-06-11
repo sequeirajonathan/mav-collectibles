@@ -96,7 +96,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
     };
 
     handleSquareCustomer();
-  }, [signUp, user, setUserRole]);
+  }, [signUp, user, setUserRole, signUpLoaded]);
 
   return (
     <div className="max-w-md mx-auto">

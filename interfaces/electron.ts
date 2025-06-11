@@ -1,4 +1,7 @@
-export interface IpcRendererEvent {
+import type { PrintCommand, PrintResponse } from './printAgent';
+import type { PrintJob } from './printJob';
+
+interface IpcRendererEvent {
   sender: {
     id: number;
     send: (channel: string, ...args: unknown[]) => void;
@@ -7,18 +10,15 @@ export interface IpcRendererEvent {
   ports: MessagePort[];
 }
 
-export interface ElectronAPI {
+interface ElectronAPI {
   sendPrintCommand: (command: PrintCommand) => void;
   onPrintResponse: (callback: (event: IpcRendererEvent, response: PrintResponse) => void) => void;
   onPrintJobUpdate: (callback: (event: IpcRendererEvent, payload: { new: PrintJob; old: PrintJob; eventType: string }) => void) => void;
   print: (options: {
-    type: string;
-    orderId: string;
     printerName: string;
-    copies: number;
-    paperSize: string;
-    orientation: string;
-  }) => Promise<void>;
+    labelUrl: string;
+    silent?: boolean;
+  }) => void;
   agentId?: string;
 }
 
