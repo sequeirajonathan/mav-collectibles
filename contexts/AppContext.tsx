@@ -86,7 +86,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const getFeatureFlag = (name: string): boolean => {
     const flags: FeatureFlag[] = Array.isArray(featureFlags)
       ? featureFlags
-      : (featureFlags as { data?: FeatureFlag[] })?.data ?? [];
+      : (featureFlags && (featureFlags as { data?: FeatureFlag[] })?.data) ?? [];
 
     return flags.find(flag => flag.name === name)?.enabled ?? false;
   };
