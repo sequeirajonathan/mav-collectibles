@@ -127,6 +127,13 @@ export default function VideoSection() {
 
   const showBanner = !hasVideo || !videoReady || !showVideo;
 
+  // Force-hide overlay if video is loaded but overlay is still showing
+  useEffect(() => {
+    if (videoLoaded && !videoError && !showVideo) {
+      setShowVideo(true);
+    }
+  }, [videoLoaded, videoError, showVideo]);
+
   const handlePlayerError = () => {
     setVideoError(true);
     setShowVideo(false);

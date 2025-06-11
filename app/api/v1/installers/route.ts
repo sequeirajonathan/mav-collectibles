@@ -5,10 +5,7 @@ import { isAdminRole, UserRoleType } from '@interfaces/roles';
 
 export async function GET() {
   try {
-    const { userId, sessionClaims } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { sessionClaims } = await auth();
 
     // Check if user is admin
     const metadata = sessionClaims?.metadata as { role?: UserRoleType } | undefined;
@@ -36,11 +33,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { userId, sessionClaims } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const { sessionClaims } = await auth();
+    
     // Check if user is admin
     const metadata = sessionClaims?.metadata as { role?: UserRoleType } | undefined;
     if (!metadata?.role || !isAdminRole(metadata.role)) {

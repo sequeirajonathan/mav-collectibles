@@ -1,15 +1,9 @@
 import { createAdminClient } from "@utils/supabase/admin";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    
     const formData = await request.formData();
     const file = formData.get("file") as File;
 

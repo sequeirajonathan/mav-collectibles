@@ -12,8 +12,9 @@ import { useFeatureFlags, useSeedFeatureFlags, useUpdateFeatureFlag } from "@hoo
 type LocalFlags = Record<string, boolean>;
 
 export default function FeatureFlagsTab() {
-  const { data: featureFlags, isLoading, error } = useFeatureFlags();
+  const { data: featureFlags = [], isLoading, error } = useFeatureFlags();
   const [localFlags, setLocalFlags] = useState<LocalFlags>({});
+  const [originalFlags, setOriginalFlags] = useState<LocalFlags>({});
   const [hasChanges, setHasChanges] = useState(false);
 
   const { mutate: triggerSeed } = useSeedFeatureFlags();
@@ -26,26 +27,11 @@ export default function FeatureFlagsTab() {
         return acc;
       }, {} as LocalFlags);
       
-      // Only update if the values are different
-      const hasChanges = Object.keys(flagsObject).some(
-        key => flagsObject[key] !== localFlags[key]
-      );
-      
-      if (hasChanges) {
-        setLocalFlags(flagsObject);
-      }
+      setLocalFlags(flagsObject);
+      setOriginalFlags(flagsObject);
+      setHasChanges(false);
     }
   }, [featureFlags, isLoading]);
-
-  const handleSeedFeatureFlags = async () => {
-    try {
-      await triggerSeed();
-      toast.success('Feature flags initialized successfully');
-      window.location.reload();
-    } catch {
-      toast.error('Failed to initialize feature flags');
-    }
-  };
 
   const handleFlagChange = (flagName: string, checked: boolean) => {
     const updatedFlags = { ...localFlags, [flagName]: checked };
@@ -59,7 +45,22 @@ export default function FeatureFlagsTab() {
     }
 
     setLocalFlags(updatedFlags);
-    setHasChanges(true);
+    
+    // Check if the updated state matches the original state
+    const hasDifferentValues = Object.keys(updatedFlags).some(
+      key => updatedFlags[key] !== originalFlags[key]
+    );
+    setHasChanges(hasDifferentValues);
+  };
+
+  const handleSeedFeatureFlags = async () => {
+    try {
+      await triggerSeed();
+      toast.success('Feature flags initialized successfully');
+      window.location.reload();
+    } catch {
+      toast.error('Failed to initialize feature flags');
+    }
   };
 
   const saveChanges = async () => {
@@ -80,6 +81,8 @@ export default function FeatureFlagsTab() {
 
       toast.success("Feature flags updated successfully");
       setHasChanges(false);
+      // Update original flags to match the new state
+      setOriginalFlags(localFlags);
     } catch {
       toast.error('Feature flag update failed. Trying to reinitialize...');
       await handleSeedFeatureFlags();
@@ -114,17 +117,6 @@ export default function FeatureFlagsTab() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {featureFlags.length === 0 && (
-          <div className="flex justify-center mb-4">
-            <Button
-              onClick={handleSeedFeatureFlags}
-              className="bg-[#E6B325] text-black hover:bg-[#FFD966]"
-            >
-              Initialize Feature Flags
-            </Button>
-          </div>
-        )}
-
         {/* ---- Basic Flags Section ---- */}
         <div className="flex items-center justify-between">
           <div>
@@ -206,13 +198,7 @@ export default function FeatureFlagsTab() {
             <Button 
               variant="outline" 
               onClick={() => {
-                if (featureFlags) {
-                  const flagsObject: LocalFlags = featureFlags.reduce((acc, flag) => {
-                    acc[flag.name] = flag.enabled;
-                    return acc;
-                  }, {} as LocalFlags);
-                  setLocalFlags(flagsObject);
-                }
+                setLocalFlags(originalFlags);
                 setHasChanges(false);
               }}
             >

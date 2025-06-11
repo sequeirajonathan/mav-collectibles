@@ -3,6 +3,7 @@ import { prisma } from '@lib/prisma';
 
 export async function GET() {
   try {
+
     const videoSettings = await prisma.videoSettings.findFirst({
       where: { id: 1 }, // Assuming we're using the first record
     });

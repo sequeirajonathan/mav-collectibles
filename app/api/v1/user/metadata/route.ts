@@ -1,15 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { UserRole } from '@interfaces/roles';
 import { clerkClient } from '@clerk/nextjs/server';
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { userId, role } = await request.json();
     if (!userId || !role || !Object.values(UserRole).includes(role)) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });

@@ -14,28 +14,17 @@ const convertPrismaEventToResponse = (event: FeaturedEvent) => ({
 
 export async function GET() {
   try {
-    const featuredEvents = await prisma.featuredEvent.findMany({
+    const events = await prisma.featuredEvent.findMany({
+      where: { enabled: true },
       orderBy: { order: 'asc' },
-      where: {
-        enabled: true // Only fetch enabled events
-      }
     });
-    
-    return NextResponse.json(featuredEvents.map(convertPrismaEventToResponse), {
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-      },
-    });
+
+    return NextResponse.json(events);
   } catch (error) {
     console.error('Error fetching featured events:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to fetch featured events' },
-      { 
-        status: 500,
-        headers: {
-          'Cache-Control': 'no-store',
-        },
-      }
+      { error: 'Failed to fetch featured events' },
+      { status: 500 }
     );
   }
 }

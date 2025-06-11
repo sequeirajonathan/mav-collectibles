@@ -42,11 +42,22 @@ function combineDateAndTime(date: Date, time: string): Date {
 export default function EventForm({ event, onSave, onCancel, buttonText = "Save" }: EventFormProps) {
   const [formData, setFormData] = useState(event);
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [hasChanges, setHasChanges] = useState(false);
   const supabase = createClient();
   
   const handleChange = (field: keyof FeaturedEvent, value: string | string[] | boolean | Date) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasChanges(true);
   };
+  
+  // Check for changes when formData changes
+  useEffect(() => {
+    const hasFormChanges = Object.keys(formData).some(key => {
+      const field = key as keyof FeaturedEvent;
+      return formData[field] !== event[field];
+    });
+    setHasChanges(hasFormChanges);
+  }, [formData, event]);
   
   // Dynamically update description with selected time
   useEffect(() => {
@@ -267,6 +278,7 @@ export default function EventForm({ event, onSave, onCancel, buttonText = "Save"
         <Button 
           onClick={handleSubmit}
           variant="gold"
+          disabled={!hasChanges}
         >
           {buttonText}
         </Button>

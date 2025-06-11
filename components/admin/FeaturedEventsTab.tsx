@@ -11,7 +11,7 @@ import { useFeaturedEvents, useCreateFeaturedEvent, useUpdateFeaturedEvent, useD
 import Image from "next/image";
 
 export default function FeaturedEventsTab() {
-  const { data: featuredEvents, isLoading, error } = useFeaturedEvents();
+  const { data: featuredEvents = [], isLoading, error } = useFeaturedEvents();
   const { mutate: createEvent } = useCreateFeaturedEvent();
   const { mutate: updateEvent } = useUpdateFeaturedEvent();
   const { mutate: deleteEvent } = useDeleteFeaturedEvent();

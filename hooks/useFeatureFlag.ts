@@ -2,32 +2,24 @@ import { useResource } from '@lib/swr';
 import { FeatureFlag } from '@interfaces';
 import { axiosClient } from '@lib/axios';
 
-type FeatureFlagApiResponse = { data: FeatureFlag[] };
-
 export function useFeatureFlags() {
-  const resource = useResource<FeatureFlagApiResponse>('/feature-flags', {
+  return useResource<FeatureFlag[]>('/feature-flags', {
     onError: (error) => {
       console.error('Failed to fetch feature flags:', error);
     },
-    fallbackData: { data: [] }
+    fallbackData: []
   });
-
-  // Return the array directly
-  return {
-    ...resource,
-    data: resource.data?.data ?? []
-  };
 }
 
 export function useUpdateFeatureFlag() {
-  const { update, refresh } = useResource<FeatureFlag>('/feature-flags');
+  const { refresh } = useResource<FeatureFlag[]>('/feature-flags');
 
   return {
     mutate: async ({ id, enabled }: { id: string; enabled: boolean }) => {
       try {
-        const result = await update(id, { enabled });
+        await axiosClient.patch(`/feature-flags/${id}`, { enabled });
         await refresh();
-        return result;
+        return true;
       } catch (error) {
         console.error('Failed to update feature flag:', error);
         throw error;

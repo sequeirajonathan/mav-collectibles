@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
-import { featureFlagSchema } from '@validations/feature-flags';
+import { featureFlagSchema } from '@validations/feature-flags'
 
 // GET all feature flags
 export async function GET() {

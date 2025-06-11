@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { UserProfile } from '@interfaces';
 import { PrintJob, PrintCommand } from '@interfaces';
 import { usePrintJobs } from '@hooks/usePrintJobs';
+import { ChevronDown } from 'lucide-react';
 
 interface PrintAgentClientProps {
-  user: UserProfile;
+  agentId: string;
 }
 
 interface JobDetailsModalProps {
@@ -83,23 +83,11 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
   );
 };
 
-export default function PrintAgentClient({ user: _user }: PrintAgentClientProps) {
+export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [message, setMessage] = useState('');
-  const [agentId, setAgentId] = useState<string | undefined>(undefined);
   const { printJobs, error, isLoading } = usePrintJobs();
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.electron?.agentId) {
-      setAgentId(window.electron.agentId);
-      console.log('Electron agentId:', window.electron.agentId);
-    }
-  }, []);
-
-  useEffect(() => {
-    console.log('Current agentId in state:', agentId);
-  }, [agentId]);
 
   useEffect(() => {
     const isElectron = typeof window !== 'undefined' && window.electron !== undefined;
@@ -184,15 +172,15 @@ export default function PrintAgentClient({ user: _user }: PrintAgentClientProps)
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
-      <div className="bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-4 sm:p-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#E6B325] mb-6 sm:mb-8 text-center">Print Agent</h1>
-        <div className="space-y-6 sm:space-y-8">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-4">
+      <div className="bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-4 sm:p-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#E6B325] mb-4 sm:mb-6 text-center">Print Agent</h1>
+        <div className="space-y-4 sm:space-y-6">
           {/* Test Print Button */}
           <div className="flex justify-end">
             <button
               type="button"
-              className="px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors mb-4"
+              className="px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors"
               onClick={handleTestPrint}
             >
               Test Print
@@ -200,9 +188,9 @@ export default function PrintAgentClient({ user: _user }: PrintAgentClientProps)
           </div>
 
           {/* Connection Status Section */}
-          <div className="border border-[#E6B325]/30 rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-4 sm:mb-6">Connection Status</h2>
-            <div className="space-y-3 sm:space-y-4">
+          <div className="border border-[#E6B325]/30 rounded-lg p-3 sm:p-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-3 sm:mb-4">Connection Status</h2>
+            <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center space-x-2">
                 <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 <span className="text-white text-sm sm:text-base">
@@ -218,19 +206,35 @@ export default function PrintAgentClient({ user: _user }: PrintAgentClientProps)
           </div>
 
           {/* Print Jobs Section */}
-          <div className="border border-[#E6B325]/30 rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-4 sm:mb-6">Print Jobs</h2>
-            <div className="space-y-4">
+          <div className="border border-[#E6B325]/30 rounded-lg p-3 sm:p-4">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325]">Print Jobs</h2>
+              {jobs.length > 0 && (
+                <button
+                  onClick={() => {
+                    const table = document.getElementById('print-jobs-table');
+                    if (table) {
+                      table.scrollTo({ top: table.scrollHeight, behavior: 'smooth' });
+                    }
+                  }}
+                  className="flex items-center gap-1 px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors text-sm"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                  Latest Jobs
+                </button>
+              )}
+            </div>
+            <div className="space-y-3">
               {jobs.length === 0 ? (
-                <div className="text-white text-center py-8 border border-[#E6B325]/30 rounded-lg">
+                <div className="text-white text-center py-6 border border-[#E6B325]/30 rounded-lg">
                   <p className="text-lg text-[#E6B325]/70">No print jobs available</p>
                   <p className="text-sm text-white/70 mt-2">New print jobs will appear here when they are created</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <div className="min-w-full">
+                <div className="overflow-hidden">
+                  <div id="print-jobs-table" className="max-h-[calc(100vh-300px)] overflow-y-auto">
                     <table className="w-full divide-y divide-[#E6B325]/30">
-                      <thead>
+                      <thead className="sticky top-0 bg-black">
                         <tr>
                           <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Order ID</th>
                           <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Status</th>
@@ -241,7 +245,7 @@ export default function PrintAgentClient({ user: _user }: PrintAgentClientProps)
                       <tbody className="divide-y divide-[#E6B325]/30">
                         {jobs.map((job: PrintJob) => (
                           <tr key={job.id} className="text-white text-sm hover:bg-[#E6B325]/5 transition-colors">
-                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
                               <button
                                 onClick={() => setSelectedJob(job)}
                                 className="text-white hover:text-[#E6B325] transition-colors"
@@ -249,15 +253,15 @@ export default function PrintAgentClient({ user: _user }: PrintAgentClientProps)
                                 {formatOrderId(job.order_id)}
                               </button>
                             </td>
-                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
                               <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(job.status)}`}>
                                 {job.status}
                               </span>
                             </td>
-                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
                               {new Date(job.created_at).toLocaleString()}
                             </td>
-                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
                               <div className="flex flex-wrap gap-2">
                                 {job.status === 'pending' && (
                                   <button
@@ -300,7 +304,7 @@ export default function PrintAgentClient({ user: _user }: PrintAgentClientProps)
 
       {/* Debug Panel */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-black border border-red-500 rounded text-red-400 text-xs">
+        <div className="mt-4 p-4 bg-black border border-red-500 rounded text-red-400 text-xs">
           <div><b>Debug Info</b></div>
           <div>agentId: {String(agentId)}</div>
           <div>isConnected: {String(isConnected)}</div>

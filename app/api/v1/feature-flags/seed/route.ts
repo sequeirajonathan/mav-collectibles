@@ -41,7 +41,7 @@ export async function POST() {
       DEFAULT_FLAGS.map(flag =>
         prisma.featureFlag.upsert({
           where: { name: flag.name },
-          update: {},
+          update: { enabled: flag.enabled },
           create: flag,
         })
       )

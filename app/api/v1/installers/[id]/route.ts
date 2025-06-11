@@ -8,11 +8,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { userId, sessionClaims } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const { sessionClaims } = await auth();
     // Check if user is admin
     const metadata = sessionClaims?.metadata as { role?: UserRoleType } | undefined;
     if (!metadata?.role || !isAdminRole(metadata.role)) {
