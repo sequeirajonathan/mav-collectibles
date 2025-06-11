@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { UserRole } from '@interfaces/roles';
 import { UserProfile } from '@interfaces/userProfile';
 import { useSquareCustomer } from '@hooks/useSquareCustomer';
-import PrintAgentClient from '@components/ui/PrintAgentClient';
+import { PrintAgentClient } from '@components/ui/PrintAgentClient';
 
 interface DashboardClientProps {
   user: UserProfile;
@@ -26,7 +26,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
   // If user is a print agent, render the print agent dashboard
   if (isPrintAgent) {
-    return <PrintAgentClient user={user} />;
+    return <PrintAgentClient agentId={user.id} />;
   }
 
   return (
