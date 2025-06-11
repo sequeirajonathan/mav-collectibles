@@ -29,17 +29,13 @@ export default function UploadForm() {
     }
 
     try {
-      const result = await uploadInstaller({
+      await uploadInstaller({
         githubUrl,
       });
 
-      if (result.success) {
-        toast.success('Installer added successfully');
-        // Reset form
-        setGithubUrl('');
-      } else {
-        toast.error(result.error || 'Failed to add installer');
-      }
+      toast.success('Installer added successfully');
+      // Reset form
+      setGithubUrl('');
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to add installer');
