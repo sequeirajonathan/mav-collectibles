@@ -20,14 +20,22 @@ export default function FeatureFlagsTab() {
   const { mutate: triggerUpdateFlag } = useUpdateFeatureFlag();
 
   useEffect(() => {
-    if (featureFlags) {
+    if (featureFlags && !isLoading) {
       const flagsObject: LocalFlags = featureFlags.reduce((acc, flag) => {
         acc[flag.name] = flag.enabled;
         return acc;
       }, {} as LocalFlags);
-      setLocalFlags(flagsObject);
+      
+      // Only update if the values are different
+      const hasChanges = Object.keys(flagsObject).some(
+        key => flagsObject[key] !== localFlags[key]
+      );
+      
+      if (hasChanges) {
+        setLocalFlags(flagsObject);
+      }
     }
-  }, [featureFlags]);
+  }, [featureFlags, isLoading]);
 
   const handleSeedFeatureFlags = async () => {
     try {
