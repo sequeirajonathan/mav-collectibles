@@ -13,82 +13,76 @@ export default function MaintenancePage() {
   const { userId } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Track an offset value: 48px for ≥1024px (lg and up), 0 for <1024px (md and below)
-  const [tapeOffset, setTapeOffset] = useState(0);
+  /** -----------------------------------------------------------
+   *  DESKTOP-ONLY GAP BELOW THE BOTTOM STRIPE
+   *  -----------------------------------------------------------
+   *  • topOffset is always 0 → upper tape sits flush with the viewport
+   *  • bottomOffset is 48 px on ≥ 1024 px, else 0 px
+   */
+  const [bottomOffset, setBottomOffset] = useState(0);
 
   useEffect(() => {
-    // Function to update offset based on window.innerWidth
-    const updateOffset = () => {
-      if (window.innerWidth >= 1024) {
-        setTapeOffset(48);
-      } else {
-        setTapeOffset(0);
-      }
+    const handleResize = () => {
+      setBottomOffset(window.innerWidth >= 1024 ? 48 : 0);
     };
-
-    // Run once on mount:
-    updateOffset();
-    // Then update on resize:
-    window.addEventListener("resize", updateOffset);
-
-    return () => {
-      window.removeEventListener("resize", updateOffset);
-    };
+    handleResize(); // run once
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // If maintenance mode is off or user is logged in, redirect away
+  // bypass the page if maintenance mode is off or admin is logged in
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "true" || userId) {
       router.push("/");
     }
   }, [userId, router]);
 
-  // Each tape is 4rem (64px) tall. We'll still use 4rem for height.
-  const tapeHeightPx = 64;
+  /* -----------------------------------------------------------
+   *  STRIPE & CONTENT DIMENSIONS
+   *  -----------------------------------------------------------
+   *  – every stripe is 4 rem (64 px) tall
+   *  – we reserve:
+   *      • 64 px   for the top stripe
+   *      • 64 px + bottomOffset for the bottom stripe
+   *  – the wrapper then fills the remaining space and centres its
+   *    children with flexbox
+   */
+  const tapeHeight = 64; // px
+
+  const reservedVerticalSpace = tapeHeight * 2 + bottomOffset;
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-black overflow-hidden">
-      {/** TOP TAPE: offset={tapeOffset} → 48px only on lg+ */}
+      {/* ---------- TOP STRIPE (flush) ---------- */}
       <CautionTape
         text="UNDER CONSTRUCTION"
         position="top"
-        offset={tapeOffset}
+        offset={0} // sits flush
         height="4rem"
       />
 
-      {/** BOTTOM TAPE: same logic */}
+      {/* ---------- BOTTOM STRIPE (48 px gap on desktop) ---------- */}
       <CautionTape
         text="UNDER CONSTRUCTION"
         position="bottom"
-        offset={tapeOffset}
+        offset={bottomOffset}
         height="4rem"
       />
 
-      {/**
-        Content wrapper:
-        - marginTop / marginBottom = 64px + whatever tapeOffset is on that side.
-        - But since offset only pushes the tape itself farther in from the edge on desktop,
-          we still need to reserve exactly 64px + tapeOffset so content never overlaps.
-        - On md and below, tapeOffset === 0 → content's top is 64px from viewport top.
-        - On lg+, tapeOffset === 48px → content's top is 112px from viewport top.
-      */}
+      {/* ---------- MAIN CONTENT ---------- */}
       <div
         className="flex flex-col justify-center items-center w-full relative z-30 px-4"
         style={{
-          height: `calc(100vh - ${tapeHeightPx * 2 + tapeOffset * 2}px)`,
-          marginTop: `${tapeHeightPx + tapeOffset}px`,
-          marginBottom: `${tapeHeightPx + tapeOffset}px`,
+          // fill the viewport minus both stripes + desktop gap
+          height: `calc(100vh - ${reservedVerticalSpace}px)`,
+          marginTop: `${tapeHeight}px`,
+          marginBottom: `${tapeHeight + bottomOffset}px`,
           overflowY: "auto",
         }}
       >
-        {/** Pikachu + Heading */}
+        {/* Pikachu + Heading */}
         <div className="flex flex-col items-center w-full max-w-md text-center">
-          {/** Pikachu image: 
-              - w-32 h-32 on base
-              - md:w-56 h-56 on ≥768px
-              - lg:w-80 h-80 on ≥1024px
-          */}
-          <div className="relative w-32 h-32 md:w-56 md:h-56 lg:w-80 lg:h-80 mb-4 md:mb-6">
+          <div className="relative w-40 h-40 md:w-56 md:h-56 lg:w-80 lg:h-80 mb-4 md:mb-6">
             <Image
               src="/images/pikachu_construction.gif"
               alt="Pikachu Construction"
@@ -104,25 +98,25 @@ export default function MaintenancePage() {
           </h1>
 
           <p className="text-gray-300 text-sm md:text-lg mb-6 max-w-xs md:max-w-lg">
-            We&apos;re building something special for all card game enthusiasts! Our
-            team is hard at work creating the ultimate trading card game experience.
-            Stay tuned for the grand opening of MAV Collectibles!
+            We&apos;re building something special for all card game enthusiasts!
+            Our team is hard at work creating the ultimate trading-card
+            experience. Stay tuned for the grand opening of MAV Collectibles!
           </p>
         </div>
 
-        {/** Buttons: centered single button */}
+        {/* Admin button */}
         <div className="flex justify-center w-full max-w-sm mb-4">
           <Button
             variant="gold"
             onClick={() => setIsLoginModalOpen(true)}
             className="w-full sm:w-auto px-6 py-3 text-base md:text-lg"
           >
-            Admin Login
+            Admin&nbsp;Login
           </Button>
         </div>
       </div>
 
-      {/** Login Modal */}
+      {/* Login modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
