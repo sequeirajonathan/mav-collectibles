@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { UserRole } from '@interfaces/roles';
 import { UserProfile } from '@interfaces/userProfile';
 import { useSquareCustomer } from '@hooks/useSquareCustomer';
-import { PrintAgentClient } from '@components/ui/PrintAgentClient';
 
 interface DashboardClientProps {
   user: UserProfile;
@@ -13,20 +12,6 @@ interface DashboardClientProps {
 export default function DashboardClient({ user }: DashboardClientProps) {
   const userRole = user.role || UserRole.USER;
   const { customer, isLoading } = useSquareCustomer(user.phoneNumber);
-  
-  console.log('DashboardClient - User:', {
-    user,
-    source: user?.source
-  });
-  
-  const isPrintAgent = user?.source === 'print-agent';
-  
-  console.log('DashboardClient - isPrintAgent:', isPrintAgent);
-
-  // If user is a print agent, render the print agent dashboard
-  if (isPrintAgent) {
-    return <PrintAgentClient agentId={user.id} />;
-  }
 
   return (
     <div className="max-w-4xl mx-auto">

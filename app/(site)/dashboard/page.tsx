@@ -18,6 +18,11 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
+  const source = (user.publicMetadata?.source as string) || '';
+  if (source === 'print-agent') {
+    redirect('/print-agent');
+  }
+
   const phoneNumber = user.phoneNumbers[0]?.phoneNumber?.replace(/^\+1/, '') || '';
 
   const userData: UserProfile = {
