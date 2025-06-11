@@ -1,5 +1,5 @@
-import type { PrintCommand, PrintResponse } from './printAgent';
-import type { PrintJob } from './printJob';
+import { PrintCommand, PrintResponse } from './printAgent';
+import { PrintJob } from './printJob';
 
 interface IpcRendererEvent {
   sender: {
@@ -14,6 +14,8 @@ interface ElectronAPI {
   sendPrintCommand: (command: PrintCommand) => void;
   onPrintResponse: (callback: (event: IpcRendererEvent, response: PrintResponse) => void) => void;
   onPrintJobUpdate: (callback: (event: IpcRendererEvent, payload: { new: PrintJob; old: PrintJob; eventType: string }) => void) => void;
+  onSignOut: (callback: () => void) => void;
+  removeListener: (channel: string, callback: (...args: unknown[]) => void) => void;
   print: (options: {
     printerName: string;
     labelUrl: string;

@@ -17,14 +17,14 @@ export default function FeatureFlagToggle({
   label, 
   description 
 }: FeatureFlagToggleProps) {
-  const { data: featureFlags, isLoading } = useFeatureFlags();
+  const { data: featureFlags = [], isLoading } = useFeatureFlags();
   const { mutate: updateFlag } = useUpdateFeatureFlag();
   const [isUpdating, setIsUpdating] = useState(false);
   const [localChecked, setLocalChecked] = useState(false);
   
   // Initialize local state from SWR data
   useEffect(() => {
-    if (featureFlags) {
+    if (featureFlags?.length > 0) {
       const flag = featureFlags.find(f => f.name === name);
       if (flag) {
         setLocalChecked(flag.enabled);

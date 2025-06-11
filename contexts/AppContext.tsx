@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useFeatureFlags, useUpdateFeatureFlag } from "@hooks/useFeatureFlag";
 import { useAlertBanner, useUpdateAlertBanner } from "@hooks/useAlertBanner";
 import { useFeaturedEvents } from "@hooks/useFeaturedEvents";
@@ -21,6 +21,7 @@ interface AppContextType {
   dismissAlertBanner: () => void;
   videoSettings: VideoSettings | undefined;
   isLoading: boolean;
+  isElectron: boolean;
   refreshData: () => Promise<void>;
   updateAlertBanner: (data: Partial<AlertBanner>) => Promise<void>;
   getFeatureFlag: (name: string) => boolean;
@@ -55,6 +56,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [alertBannerDismissed, setAlertBannerDismissed] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<AppContextType['lastUpdated']>({});
+  const [isElectron, setIsElectron] = useState(false);
 
   const dismissAlertBanner = () => {
     setAlertBannerDismissed(true);
@@ -128,6 +130,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     await updateVideoSettingsMutation(settings);
   };
 
+  useEffect(() => {
+    const isElectronApp = typeof window !== 'undefined' && window.electron !== undefined;
+    setIsElectron(isElectronApp);
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -137,6 +144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         dismissAlertBanner,
         videoSettings,
         isLoading,
+        isElectron,
         refreshData,
         updateAlertBanner,
         getFeatureFlag,

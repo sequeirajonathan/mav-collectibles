@@ -29,7 +29,6 @@ const isPublicRoute = createRouteMatcher([
   '/search(.*)', // Make search pages public
   '/cart(.*)', // Make cart pages public
   '/maintenance(.*)', // Make maintenance page public
-  '/print-agent(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -40,21 +39,124 @@ export default clerkMiddleware(async (auth, req) => {
   const isAdmin = metadata?.role ? isAdminRole(metadata.role) : false
   const isPrintAgent = metadata?.source === 'print-agent'
   const isMaintenancePage = req.nextUrl.pathname.startsWith('/maintenance')
+  
+  // Check if request is from Electron app
+  const electronHeader = req.headers.get('x-electron-app')
+  const referer = req.headers.get('referer')
+  const userAgent = req.headers.get('user-agent') || ''
+  const isElectron = electronHeader === 'true' || 
+                    (referer && referer.includes('electron-app')) ||
+                    userAgent.includes('mav-print') ||
+                    userAgent.includes('Electron')
+  const isPrintAgentRoute = req.nextUrl.pathname.startsWith('/print-agent')
+  const isHomePage = req.nextUrl.pathname === '/'
+  const isLoginPage = req.nextUrl.pathname === '/print-agent/login'
+  const isApiRequest = req.nextUrl.pathname.startsWith('/api/')
 
-  // If maintenance mode is active and user is not admin or print agent
-  if (isMaintenanceMode && !isAdmin && !isPrintAgent && !isMaintenancePage) {
+  // Detailed debug logging
+  console.log('=== Middleware Request Details ===')
+  console.log('Path:', req.nextUrl.pathname)
+  console.log('Method:', req.method)
+  console.log('Headers:', {
+    electronHeader,
+    referer,
+    userAgent,
+    accept: req.headers.get('accept'),
+    contentType: req.headers.get('content-type'),
+  })
+  console.log('Auth State:', {
+    hasSession: !!sessionClaims,
+    isPrintAgent,
+    isAdmin,
+    metadata,
+  })
+  console.log('Route State:', {
+    isElectron,
+    isPrintAgentRoute,
+    isHomePage,
+    isLoginPage,
+    isMaintenancePage,
+    isApiRequest,
+    isMaintenanceMode,
+  })
+
+  // Handle Electron app requests first
+  if (isElectron) {
+    console.log('=== Electron App Request Handling ===')
+    
+    // Allow all API requests from Electron apps
+    if (isApiRequest) {
+      console.log('Electron: Allowing API request')
+      return NextResponse.next()
+    }
+
+    // If on login page and not logged in, allow access
+    if (isLoginPage && !sessionClaims) {
+      console.log('Electron: Allowing access to login page')
+      return NextResponse.next()
+    }
+
+    // If not logged in, always redirect to login page
+    if (!sessionClaims) {
+      console.log('Electron: Not logged in, redirecting to login')
+      return NextResponse.redirect(new URL('/print-agent/login', req.url))
+    }
+
+    // If logged in but not a print agent, redirect to login
+    if (!isPrintAgent) {
+      console.log('Electron: Not a print agent, redirecting to login')
+      return NextResponse.redirect(new URL('/print-agent/login', req.url))
+    }
+
+    // If on home page, redirect to print-agent
+    if (isHomePage) {
+      console.log('Electron: On home page, redirecting to print-agent')
+      return NextResponse.redirect(new URL('/print-agent', req.url))
+    }
+
+    // If on print-agent route but not logged in, redirect to login
+    if (isPrintAgentRoute && !sessionClaims) {
+      console.log('Electron: On print-agent route but not logged in, redirecting to login')
+      return NextResponse.redirect(new URL('/print-agent/login', req.url))
+    }
+
+    // If on print-agent route but not a print agent, redirect to login
+    if (isPrintAgentRoute && !isPrintAgent) {
+      console.log('Electron: On print-agent route but not a print agent, redirecting to login')
+      return NextResponse.redirect(new URL('/print-agent/login', req.url))
+    }
+
+    // If not on a print-agent route, redirect to print-agent
+    if (!isPrintAgentRoute) {
+      console.log('Electron: Not on print-agent route, redirecting to print-agent')
+      return NextResponse.redirect(new URL('/print-agent', req.url))
+    }
+
+    // Allow access to print-agent routes if logged in and is print agent
+    console.log('Electron: Allowing access to print-agent route')
+    return NextResponse.next()
+  }
+
+  // If maintenance mode is active and user is not admin, print agent, or electron app
+  if (isMaintenanceMode && !isAdmin && !isPrintAgent && !isElectron && !isMaintenancePage) {
+    console.log('Maintenance mode: Redirecting to maintenance page')
     return NextResponse.redirect(new URL('/maintenance', req.url))
   }
 
-  // If maintenance mode is active and user is admin or print agent, allow access to all routes
-  if (isMaintenanceMode && (isAdmin || isPrintAgent)) {
+  // If maintenance mode is active and user is admin, print agent, or electron app, allow access to all routes
+  if (isMaintenanceMode && (isAdmin || isPrintAgent || isElectron)) {
+    console.log('Maintenance mode: Allowing access (admin/print-agent/electron)')
     return NextResponse.next()
   }
 
   // If the request is not for a public route, protect it
   if (!isPublicRoute(req)) {
+    console.log('Protecting non-public route')
     await auth.protect()
   }
+
+  console.log('Allowing access to route')
+  return NextResponse.next()
 })
 
 export const config = {

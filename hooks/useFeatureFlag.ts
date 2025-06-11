@@ -3,12 +3,19 @@ import { FeatureFlag } from '@interfaces';
 import { axiosClient } from '@lib/axios';
 
 export function useFeatureFlags() {
-  return useResource<FeatureFlag[]>('/feature-flags', {
+  const { data, error, isLoading, refresh } = useResource<FeatureFlag[]>('/feature-flags', {
     onError: (error) => {
       console.error('Failed to fetch feature flags:', error);
     },
     fallbackData: []
   });
+
+  return {
+    data: data || [],
+    error,
+    isLoading,
+    refresh
+  };
 }
 
 export function useUpdateFeatureFlag() {

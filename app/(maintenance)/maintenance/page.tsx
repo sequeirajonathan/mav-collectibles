@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@components/ui/button";
 import Image from "next/image";
@@ -12,6 +12,7 @@ export default function MaintenancePage() {
   const router = useRouter();
   const { userId } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const isElectronRef = useRef(false);
 
   /** -----------------------------------------------------------
    *  DESKTOP-ONLY GAP BELOW THE BOTTOM STRIPE
@@ -30,10 +31,19 @@ export default function MaintenancePage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // bypass the page if maintenance mode is off or admin is logged in
+  // Check if request is from Electron app
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "true" || userId) {
-      router.push("/");
+    isElectronRef.current = typeof window !== 'undefined' && window.navigator.userAgent.includes('Electron');
+  }, []);
+
+  // bypass the page if maintenance mode is off, admin is logged in, or it's an Electron app
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "true" || userId || isElectronRef.current) {
+      if (isElectronRef.current) {
+        router.push("/print-agent/login");
+      } else {
+        router.push("/");
+      }
     }
   }, [userId, router]);
 
@@ -50,6 +60,11 @@ export default function MaintenancePage() {
   const tapeHeight = 64; // px
 
   const reservedVerticalSpace = tapeHeight * 2 + bottomOffset;
+
+  // If it's an Electron app, don't render the maintenance page
+  if (isElectronRef.current) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-black overflow-hidden">

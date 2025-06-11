@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { PrintJob, PrintCommand } from '@interfaces';
 import { usePrintJobs } from '@hooks/usePrintJobs';
 import { ChevronDown } from 'lucide-react';
+import { useAppContext } from '../../contexts/AppContext';
+import { useClerk } from '@clerk/nextjs';
 
 interface PrintAgentClientProps {
   agentId: string;
@@ -15,19 +17,22 @@ interface JobDetailsModalProps {
   onClose: () => void;
 }
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: string | undefined) => {
+  if (!status) return 'bg-gray-500 text-white';
+  
   switch (status.toLowerCase()) {
-    case 'printed':
-    case 'completed':
-      return 'bg-green-500/20 text-green-400';
-    case 'printing':
-      return 'bg-yellow-500/20 text-yellow-400';
-    case 'error':
-      return 'bg-red-500/20 text-red-400';
     case 'pending':
-      return 'bg-blue-500/20 text-blue-400';
+      return 'bg-yellow-500 text-black';
+    case 'claimed':
+      return 'bg-blue-500 text-white';
+    case 'printing':
+      return 'bg-purple-500 text-white';
+    case 'completed':
+      return 'bg-green-500 text-white';
+    case 'failed':
+      return 'bg-red-500 text-white';
     default:
-      return 'bg-gray-500/20 text-gray-400';
+      return 'bg-gray-500 text-white';
   }
 };
 
@@ -47,32 +52,32 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
           </button>
         </div>
         <div className="space-y-3 sm:space-y-4 text-white text-sm sm:text-base">
-          <div>
+          <div key="order-id">
             <span className="text-[#E6B325]">Order ID:</span> {job.order_id}
           </div>
-          <div>
+          <div key="status">
             <span className="text-[#E6B325]">Status:</span>{' '}
             <span className={`px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(job.status)}`}>
               {job.status}
             </span>
           </div>
-          <div>
+          <div key="created">
             <span className="text-[#E6B325]">Created:</span>{' '}
             {new Date(job.created_at).toLocaleString()}
           </div>
           {job.claimed_by && (
-            <div>
+            <div key="claimed-by">
               <span className="text-[#E6B325]">Claimed by:</span> {job.claimed_by}
             </div>
           )}
           {job.claimed_at && (
-            <div>
+            <div key="claimed-at">
               <span className="text-[#E6B325]">Claimed at:</span>{' '}
               {new Date(job.claimed_at).toLocaleString()}
             </div>
           )}
           {job.printed_at && (
-            <div>
+            <div key="printed-at">
               <span className="text-[#E6B325]">Printed at:</span>{' '}
               {new Date(job.printed_at).toLocaleString()}
             </div>
@@ -84,26 +89,46 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
 };
 
 export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
-  const [isConnected, setIsConnected] = useState(false);
+  const { isElectron } = useAppContext();
   const [message, setMessage] = useState('');
   const { printJobs, error, isLoading } = usePrintJobs();
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
+  const { signOut } = useClerk();
 
   useEffect(() => {
-    const isElectron = typeof window !== 'undefined' && window.electron !== undefined;
-    setIsConnected(isElectron);
-  }, []);
-
-  useEffect(() => {
-    if (isConnected) {
+    if (isElectron) {
       window.electron?.onPrintResponse((event, response) => {
         setMessage(response.message);
       });
       window.electron?.onPrintJobUpdate((event, payload) => {
         console.log('Print job update:', payload);
       });
+
+      // Add sign out listener
+      const handleSignOut = async () => {
+        console.log('🔐 PrintAgentClient - Received electron-sign-out signal');
+        try {
+          if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+            console.log('🔐 PrintAgentClient - Starting sign out process');
+          }
+          await signOut();
+          if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+            console.log('🔐 PrintAgentClient - Sign out completed successfully');
+          }
+        } catch (error) {
+          console.error('🔐 PrintAgentClient - Sign out error:', error);
+        }
+      };
+
+      console.log('🔐 PrintAgentClient - Setting up electron-sign-out listener');
+      window.electron?.onSignOut(handleSignOut);
+
+      return () => {
+        console.log('🔐 PrintAgentClient - Cleaning up electron-sign-out listener');
+        window.electron?.removeListener?.('electron-sign-out', handleSignOut);
+      };
     }
-  }, [isConnected]);
+  }, [isElectron, signOut]);
 
   if (!agentId) {
     return <div className="text-white text-center py-8">Loading agent info...</div>;
@@ -158,7 +183,8 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
     }
   };
 
-  const formatOrderId = (orderId: string) => {
+  const formatOrderId = (orderId: string | undefined) => {
+    if (!orderId) return 'N/A';
     if (orderId.length <= 10) return orderId;
     return `${orderId.substring(0, 10)}...`;
   };
@@ -192,9 +218,9 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
             <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-3 sm:mb-4">Connection Status</h2>
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${isElectron ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 <span className="text-white text-sm sm:text-base">
-                  {isConnected ? 'Connected to Electron' : 'Disconnected'}
+                  {isElectron ? 'Connected to Electron' : 'Disconnected'}
                 </span>
               </div>
               {message && (
@@ -242,7 +268,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
                           <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#E6B325]/30">
+                      <tbody>
                         {jobs.map((job: PrintJob) => (
                           <tr key={job.id} className="text-white text-sm hover:bg-[#E6B325]/5 transition-colors">
                             <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
@@ -262,21 +288,29 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
                               {new Date(job.created_at).toLocaleString()}
                             </td>
                             <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
-                              <div className="flex flex-wrap gap-2">
+                              <div className="flex items-center space-x-2">
                                 {job.status === 'pending' && (
                                   <button
                                     onClick={() => handlePrint(job.id)}
-                                    className="px-2 sm:px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors text-xs sm:text-sm"
+                                    className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                                   >
                                     Print
                                   </button>
                                 )}
-                                {job.label_url && (
+                                {job.status === 'claimed' && job.claimed_by === agentId && (
                                   <button
-                                    onClick={() => window.open(job.label_url, '_blank', 'noopener,noreferrer')}
-                                    className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors text-xs sm:text-sm"
+                                    onClick={() => handlePrint(job.id)}
+                                    className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
                                   >
-                                    View PDF
+                                    Print
+                                  </button>
+                                )}
+                                {job.status === 'claimed' && job.claimed_by === agentId && (
+                                  <button
+                                    onClick={() => handlePrint(job.id)}
+                                    className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                  >
+                                    Unclaim
                                   </button>
                                 )}
                               </div>
@@ -296,6 +330,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
       {/* Job Details Modal */}
       {selectedJob && (
         <JobDetailsModal
+          key={`modal-${selectedJob.id}`}
           job={selectedJob}
           isOpen={!!selectedJob}
           onClose={() => setSelectedJob(null)}
@@ -307,7 +342,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
         <div className="mt-4 p-4 bg-black border border-red-500 rounded text-red-400 text-xs">
           <div><b>Debug Info</b></div>
           <div>agentId: {String(agentId)}</div>
-          <div>isConnected: {String(isConnected)}</div>
+          <div>isElectron: {String(isElectron)}</div>
         </div>
       )}
     </div>

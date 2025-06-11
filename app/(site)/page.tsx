@@ -14,12 +14,21 @@ import NearestEventSection from "@components/ui/NearestEventSection";
 import { useFeatureFlags } from "@hooks/useFeatureFlag";
 
 export default function Home() {
-  const { data: featureFlags } = useFeatureFlags();
+  const { data: featureFlags = [] } = useFeatureFlags();
   const [mounted, setMounted] = useState(false);
+  const [isElectron, setIsElectron] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
+    // Check if running in Electron
+    setIsElectron(window.navigator.userAgent.includes('Electron'));
   }, []);
+
+  // If running in Electron, don't render the home page
+  if (isElectron) {
+    return null;
+  }
 
   const announcements = [
     {
@@ -101,8 +110,6 @@ export default function Home() {
   };
   const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
-  const router = useRouter();
-
   function handleCardGameClick(displayName: string) {
     // Find the mapping by displayName (case-insensitive)
     const mapping = Object.values(CATEGORY_MAPPING).find(
@@ -113,6 +120,10 @@ export default function Home() {
     params.set("group", "TCG");
     router.push(`/category/${mapping.slug}?${params.toString()}`);
   }
+
+  // Show Google Reviews only if the feature flag is enabled and we have feature flags data
+  const showGoogleReviews = featureFlags?.length > 0 && 
+    featureFlags.find((f) => f.name === "showGoogleReviews")?.enabled;
 
   return (
     <div className="flex flex-col w-full min-h-screen space-y-12 pt-2">
@@ -273,7 +284,7 @@ export default function Home() {
       </motion.div>
 
       {/* Google Reviews & Continue Browsing */}
-      {featureFlags?.find(f => f.name === 'showGoogleReviews')?.enabled && <GoogleReviews />}
+      {showGoogleReviews && <GoogleReviews />}
       <div className="mt-8 text-center">
         <Link href="/category/tcg">
           <Button variant="gold">CONTINUE BROWSING</Button>

@@ -21,7 +21,7 @@ export default function FeatureFlagsTab() {
   const { mutate: triggerUpdateFlag } = useUpdateFeatureFlag();
 
   useEffect(() => {
-    if (featureFlags && !isLoading) {
+    if (featureFlags?.length > 0 && !isLoading) {
       const flagsObject: LocalFlags = featureFlags.reduce((acc, flag) => {
         acc[flag.name] = flag.enabled;
         return acc;
@@ -64,7 +64,7 @@ export default function FeatureFlagsTab() {
   };
 
   const saveChanges = async () => {
-    if (!featureFlags) return;
+    if (!featureFlags?.length) return;
 
     const changedFlags = Object.entries(localFlags).filter(([key, value]) => {
       const original = featureFlags.find(flag => flag.name === key);
@@ -105,7 +105,7 @@ export default function FeatureFlagsTab() {
     );
   }
 
-  if (!featureFlags) {
+  if (!featureFlags?.length) {
     return null;
   }
 
