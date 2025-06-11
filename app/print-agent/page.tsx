@@ -1,31 +1,15 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import DashboardClient from "@components/ui/DashboardClient";
+import PrintAgentClient from "@components/ui/PrintAgentClient";
 import { UserProfile } from "@interfaces/userProfile";
 import { UserRole } from "@interfaces/roles";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { source?: string };
-}) {
+export default async function PrintAgentPage() {
   const { userId } = await auth();
   const user = await currentUser();
-  
-  console.log('Raw User Data from Backend:', {
-    userId,
-    user,
-    metadata: user?.unsafeMetadata,
-    publicMetadata: user?.publicMetadata
-  });
 
   if (!userId || !user) {
     redirect("/sign-in");
-  }
-
-  // If coming from print-agent, redirect to print-agent dashboard
-  if (searchParams.source === 'print-agent') {
-    redirect('/dashboard/print-agent');
   }
 
   const phoneNumber = user.phoneNumbers[0]?.phoneNumber?.replace(/^\+1/, '') || '';
@@ -42,7 +26,5 @@ export default async function DashboardPage({
     publicMetadata: user.publicMetadata
   };
 
-  console.log('Constructed User Data:', userData);
-
-  return <DashboardClient user={userData} />;
+  return <PrintAgentClient user={userData} />;
 } 

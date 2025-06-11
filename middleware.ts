@@ -20,12 +20,15 @@ const isPublicRoute = createRouteMatcher([
   '/api/v1/search-square-customer(.*)',
   '/api/v1/create-square-customer(.*)',
   '/api/v1/update-square-customer(.*)',
+  '/api/v1/print-jobs(.*)',
+  '/api/v1/installers(.*)',
   '/',         // Make home page public
   '/events(.*)', // Make events pages public
   '/category(.*)', // Make category pages public
   '/search(.*)', // Make search pages public
   '/cart(.*)', // Make cart pages public
   '/maintenance(.*)', // Make maintenance page public
+  '/print-agent(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {

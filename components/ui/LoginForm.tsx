@@ -12,10 +12,16 @@ import { Label } from "@components/ui/label";
 interface LoginFormProps {
   redirectTo?: string;
   hideSignupLink?: boolean;
+  hideTitle?: boolean;
+  hideForgotPassword?: boolean;
+  hideSocialLogins?: boolean;
 }
 
 export function LoginForm({
   hideSignupLink = false,
+  hideTitle = false,
+  hideForgotPassword = false,
+  hideSocialLogins = false,
 }: LoginFormProps) {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
@@ -33,9 +39,11 @@ export function LoginForm({
         />
       </div>
 
-      <h1 className="text-2xl font-bold mb-4 md:mb-6 text-center text-[#E6B325]">
-        Login
-      </h1>
+      {!hideTitle && (
+        <h1 className="text-2xl font-bold mb-4 md:mb-6 text-center text-[#E6B325]">
+          Login
+        </h1>
+      )}
 
       {message && (
         <div className="bg-[#181d29] border-2 border-[#E6B325] text-[#E6B325] px-4 py-3 rounded mb-4 text-center">
@@ -88,16 +96,18 @@ export function LoginForm({
               <Clerk.FieldError />
             </Clerk.Field>
 
-            <div className="flex justify-end">
-              <SignIn.Action navigate="forgot-password" asChild>
-                <Button
-                  variant="link"
-                  className="text-[#E6B325] hover:text-[#FFD966] p-0 h-auto"
-                >
-                  Forgot password?
-                </Button>
-              </SignIn.Action>
-            </div>
+            {!hideForgotPassword && (
+              <div className="flex justify-end">
+                <SignIn.Action navigate="forgot-password" asChild>
+                  <Button
+                    variant="link"
+                    className="text-[#E6B325] hover:text-[#FFD966] p-0 h-auto"
+                  >
+                    Forgot password?
+                  </Button>
+                </SignIn.Action>
+              </div>
+            )}
 
             <SignIn.Action submit asChild>
               <Button
@@ -119,31 +129,35 @@ export function LoginForm({
             )}
           </div>
 
-          <div className="my-6 flex items-center gap-4">
-            <hr className="flex-1 border-[#E6B325] opacity-40" />
-            <span className="text-[#E6B325] text-sm font-semibold">
-              Or continue with
-            </span>
-            <hr className="flex-1 border-[#E6B325] opacity-40" />
-          </div>
-          
-          <Clerk.Connection name="google" asChild>
-            <Button
-              variant="outline"
-              className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
-            >
-              Google
-            </Button>
-          </Clerk.Connection>
+          {!hideSocialLogins && (
+            <>
+              <div className="my-6 flex items-center gap-4">
+                <hr className="flex-1 border-[#E6B325] opacity-40" />
+                <span className="text-[#E6B325] text-sm font-semibold">
+                  Or continue with
+                </span>
+                <hr className="flex-1 border-[#E6B325] opacity-40" />
+              </div>
+              
+              <Clerk.Connection name="google" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+                >
+                  Google
+                </Button>
+              </Clerk.Connection>
 
-          <Clerk.Connection name="facebook" asChild>
-            <Button
-              variant="outline"
-              className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white mt-2"
-            >
-              Facebook
-            </Button>
-          </Clerk.Connection>
+              <Clerk.Connection name="facebook" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white mt-2"
+                >
+                  Facebook
+                </Button>
+              </Clerk.Connection>
+            </>
+          )}
 
           <div id="clerk-captcha" className="mt-4" />
         </SignIn.Step>

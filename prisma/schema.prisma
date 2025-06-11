@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -7,57 +8,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Feature Flag Management
 model FeatureFlag {
-  id          String    @id @default(uuid())
-  name        String    @unique
+  id          String   @id @default(uuid())
+  name        String   @unique
   description String?
-  enabled     Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  enabled     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("feature_flags")
 }
 
-// Content Management
 model AlertBanner {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   message         String
   code            String?
-  backgroundColor String    @default("#E6B325")
-  textColor       String    @default("#000000")
-  enabled         Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  backgroundColor String   @default("#E6B325")
+  textColor       String   @default("#000000")
+  enabled         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("alert_banners")
 }
 
 model FeaturedEvent {
-  id           String    @id @default(uuid())
-  title        String
-  date         DateTime
-  description  String
-  imageSrc     String
-  imageAlt     String
-  link         String?
-  enabled      Boolean   @default(true)
-  order        Int       @default(0)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String   @id @default(uuid())
+  title       String
+  date        DateTime
+  description String
+  imageSrc    String
+  imageAlt    String
+  link        String?
+  enabled     Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("featured_events")
 }
 
 model YouTubeSettings {
-  id          String   @id @default("1")
-  videoId     String
-  title       String
-  autoplay    Boolean  @default(true)
-  muted       Boolean  @default(true)
-  playlistId  String   @default("")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default("1")
+  videoId    String
+  title      String
+  autoplay   Boolean  @default(true)
+  muted      Boolean  @default(true)
+  playlistId String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("youtube_settings")
 }
@@ -73,4 +72,32 @@ model VideoSettings {
   muted     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PrintJob {
+  id            String    @id @default(uuid())
+  order_id      String
+  label_url     String
+  status        String    @default("pending")
+  claimed_by    String?
+  claimed_at    DateTime?
+  printed_at    DateTime?
+  retries       Int       @default(0)
+  last_tried_at DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  copies        Int?      @default(1)
+
+  @@map("print_jobs")
+}
+
+model Installer {
+  id        String   @id @default(uuid())
+  name      String
+  url       String
+  type      String   @default("github_release")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("installers")
 }

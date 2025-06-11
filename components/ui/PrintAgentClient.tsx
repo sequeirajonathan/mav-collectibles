@@ -1,0 +1,311 @@
+'use client'
+
+import { useState, useEffect } from 'react';
+import { UserProfile } from '@interfaces';
+import { PrintJob, PrintCommand } from '@interfaces';
+import { usePrintJobs } from '@hooks/usePrintJobs';
+
+interface PrintAgentClientProps {
+  user: UserProfile;
+}
+
+interface JobDetailsModalProps {
+  job: PrintJob;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'printed':
+    case 'completed':
+      return 'bg-green-500/20 text-green-400';
+    case 'printing':
+      return 'bg-yellow-500/20 text-yellow-400';
+    case 'error':
+      return 'bg-red-500/20 text-red-400';
+    case 'pending':
+      return 'bg-blue-500/20 text-blue-400';
+    default:
+      return 'bg-gray-500/20 text-gray-400';
+  }
+};
+
+const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-black border border-[#E6B325]/30 rounded-lg p-4 sm:p-6 max-w-lg w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg sm:text-xl font-semibold text-[#E6B325]">Print Job Details</h3>
+          <button
+            onClick={onClose}
+            className="text-white hover:text-[#E6B325] transition-colors p-2"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="space-y-3 sm:space-y-4 text-white text-sm sm:text-base">
+          <div>
+            <span className="text-[#E6B325]">Order ID:</span> {job.order_id}
+          </div>
+          <div>
+            <span className="text-[#E6B325]">Status:</span>{' '}
+            <span className={`px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(job.status)}`}>
+              {job.status}
+            </span>
+          </div>
+          <div>
+            <span className="text-[#E6B325]">Created:</span>{' '}
+            {new Date(job.created_at).toLocaleString()}
+          </div>
+          {job.claimed_by && (
+            <div>
+              <span className="text-[#E6B325]">Claimed by:</span> {job.claimed_by}
+            </div>
+          )}
+          {job.claimed_at && (
+            <div>
+              <span className="text-[#E6B325]">Claimed at:</span>{' '}
+              {new Date(job.claimed_at).toLocaleString()}
+            </div>
+          )}
+          {job.printed_at && (
+            <div>
+              <span className="text-[#E6B325]">Printed at:</span>{' '}
+              {new Date(job.printed_at).toLocaleString()}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function PrintAgentClient({ user: _user }: PrintAgentClientProps) {
+  const [isConnected, setIsConnected] = useState(false);
+  const [message, setMessage] = useState('');
+  const [agentId, setAgentId] = useState<string | undefined>(undefined);
+  const { printJobs, error, isLoading } = usePrintJobs();
+  const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electron?.agentId) {
+      setAgentId(window.electron.agentId);
+      console.log('Electron agentId:', window.electron.agentId);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('Current agentId in state:', agentId);
+  }, [agentId]);
+
+  useEffect(() => {
+    const isElectron = typeof window !== 'undefined' && window.electron !== undefined;
+    setIsConnected(isElectron);
+  }, []);
+
+  useEffect(() => {
+    if (isConnected) {
+      window.electron?.onPrintResponse((event, response) => {
+        setMessage(response.message);
+      });
+      window.electron?.onPrintJobUpdate((event, payload) => {
+        console.log('Print job update:', payload);
+      });
+    }
+  }, [isConnected]);
+
+  if (!agentId) {
+    return <div className="text-white text-center py-8">Loading agent info...</div>;
+  }
+
+  const jobs = Array.isArray(printJobs) ? printJobs : (printJobs ? [printJobs] : []);
+
+  const handlePrint = async (jobId: string) => {
+    try {
+      if (!window.electron) {
+        throw new Error('Not running in Electron');
+      }
+
+      const job = jobs.find(j => j.id === jobId);
+      const command: PrintCommand = {
+        type: 'PRINT',
+        orderId: jobId,
+        settings: {
+          printerName: job?.printer_name || '',
+          labelUrl: job?.label_url,
+          silent: true,
+        }
+      };
+
+      window.electron.sendPrintCommand(command);
+      setMessage('Print command sent to Electron app');
+    } catch (error) {
+      setMessage('Failed to send print command');
+      console.error('Print command error:', error);
+    }
+  };
+
+  const handleTestPrint = async () => {
+    try {
+      if (!window.electron) {
+        throw new Error('Not running in Electron');
+      }
+      const testLabelUrl = 'https://rollo-main.b-cdn.net/wp-content/uploads/2017/01/Labels-Sample.pdf';
+      const command: PrintCommand = {
+        type: 'PRINT',
+        orderId: 'TEST-PRINT',
+        settings: {
+          labelUrl: testLabelUrl,
+          silent: true,
+        },
+      };
+      window.electron.sendPrintCommand(command);
+      setMessage('Test print command sent to Electron app');
+    } catch (error) {
+      setMessage('Failed to send test print command');
+      console.error('Test print command error:', error);
+    }
+  };
+
+  const formatOrderId = (orderId: string) => {
+    if (orderId.length <= 10) return orderId;
+    return `${orderId.substring(0, 10)}...`;
+  };
+
+  if (isLoading) {
+    return <div className="text-white text-center py-4">Loading print jobs...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center py-4">Error loading print jobs</div>;
+  }
+
+  return (
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-4 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#E6B325] mb-6 sm:mb-8 text-center">Print Agent</h1>
+        <div className="space-y-6 sm:space-y-8">
+          {/* Test Print Button */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors mb-4"
+              onClick={handleTestPrint}
+            >
+              Test Print
+            </button>
+          </div>
+
+          {/* Connection Status Section */}
+          <div className="border border-[#E6B325]/30 rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-4 sm:mb-6">Connection Status</h2>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-white text-sm sm:text-base">
+                  {isConnected ? 'Connected to Electron' : 'Disconnected'}
+                </span>
+              </div>
+              {message && (
+                <div className="text-[#E6B325] mt-2 text-sm sm:text-base">
+                  {message}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Print Jobs Section */}
+          <div className="border border-[#E6B325]/30 rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-4 sm:mb-6">Print Jobs</h2>
+            <div className="space-y-4">
+              {jobs.length === 0 ? (
+                <div className="text-white text-center py-8 border border-[#E6B325]/30 rounded-lg">
+                  <p className="text-lg text-[#E6B325]/70">No print jobs available</p>
+                  <p className="text-sm text-white/70 mt-2">New print jobs will appear here when they are created</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="min-w-full">
+                    <table className="w-full divide-y divide-[#E6B325]/30">
+                      <thead>
+                        <tr>
+                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Order ID</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Status</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Created</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E6B325]/30">
+                        {jobs.map((job: PrintJob) => (
+                          <tr key={job.id} className="text-white text-sm hover:bg-[#E6B325]/5 transition-colors">
+                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                              <button
+                                onClick={() => setSelectedJob(job)}
+                                className="text-white hover:text-[#E6B325] transition-colors"
+                              >
+                                {formatOrderId(job.order_id)}
+                              </button>
+                            </td>
+                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(job.status)}`}>
+                                {job.status}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                              {new Date(job.created_at).toLocaleString()}
+                            </td>
+                            <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                              <div className="flex flex-wrap gap-2">
+                                {job.status === 'pending' && (
+                                  <button
+                                    onClick={() => handlePrint(job.id)}
+                                    className="px-2 sm:px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors text-xs sm:text-sm"
+                                  >
+                                    Print
+                                  </button>
+                                )}
+                                {job.label_url && (
+                                  <button
+                                    onClick={() => window.open(job.label_url, '_blank', 'noopener,noreferrer')}
+                                    className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors text-xs sm:text-sm"
+                                  >
+                                    View PDF
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Job Details Modal */}
+      {selectedJob && (
+        <JobDetailsModal
+          job={selectedJob}
+          isOpen={!!selectedJob}
+          onClose={() => setSelectedJob(null)}
+        />
+      )}
+
+      {/* Debug Panel */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 p-4 bg-black border border-red-500 rounded text-red-400 text-xs">
+          <div><b>Debug Info</b></div>
+          <div>agentId: {String(agentId)}</div>
+          <div>isConnected: {String(isConnected)}</div>
+        </div>
+      )}
+    </div>
+  );
+} 

@@ -119,7 +119,9 @@ const Navbar = () => {
   };
 
   const navigationItems = authState.isAdmin
-    ? [{ href: "/admin", label: "Admin" }]
+    ? [
+        { href: "/admin", label: "Admin" }
+      ]
     : [];
 
   const mobileMenuVariants = {

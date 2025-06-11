@@ -4,8 +4,8 @@ import { SWRConfiguration } from 'swr';
 import useSWR, { mutate } from 'swr';
 import { axiosClient } from './axios';
 
-const fetcher = async (url: string) => {
-  const response = await axiosClient.get(url);
+const fetcher = async <T = unknown>(url: string): Promise<T> => {
+  const response = await axiosClient.get<T>(url);
   return response.data;
 };
 

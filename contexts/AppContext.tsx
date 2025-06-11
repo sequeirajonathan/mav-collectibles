@@ -83,8 +83,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     await updateAlertBannerMutation(alertBanner.id, data);
   };
 
-  const getFeatureFlag = (name: string) => {
-    return featureFlags?.find(flag => flag.name === name)?.enabled ?? false;
+  const getFeatureFlag = (name: string): boolean => {
+    const flags: FeatureFlag[] = Array.isArray(featureFlags)
+      ? featureFlags
+      : (featureFlags as { data?: FeatureFlag[] })?.data ?? [];
+
+    return flags.find(flag => flag.name === name)?.enabled ?? false;
   };
 
   const addFeaturedEvent = async (event: Omit<FeaturedEvent, 'id' | 'createdAt' | 'updatedAt'>) => {

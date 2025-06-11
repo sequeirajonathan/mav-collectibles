@@ -1,25 +1,16 @@
-import { UserRole } from '@interfaces/roles';
-
-export interface ClerkUser {
-  id: string;
-  emailAddresses: Array<{
-    emailAddress: string;
-  }>;
-  firstName: string | null;
-  lastName: string | null;
-  imageUrl: string;
-  createdAt: number;
-  lastSignInAt: number;
-  publicMetadata: Record<string, unknown>;
-}
+import { UserRole } from './roles';
 
 export interface UserProfile {
   id: string;
   email: string;
-  role?: string;
+  role: UserRole;
   createdAt: string;
   lastSignInAt?: string;
-  phoneNumber?: string;
-  firstName?: string;
-  lastName?: string;
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
+  publicMetadata?: {
+    source?: 'print-agent' | 'web';
+    [key: string]: unknown;
+  };
 }

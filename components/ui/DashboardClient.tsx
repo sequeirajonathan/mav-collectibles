@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import { UserRole } from '@interfaces/roles';
 import { UserProfile } from '@interfaces/userProfile';
-import { useRouter } from 'next/navigation';
 import { useSquareCustomer } from '@hooks/useSquareCustomer';
+import PrintAgentClient from '@components/ui/PrintAgentClient';
 
 interface DashboardClientProps {
   user: UserProfile;
@@ -12,12 +12,22 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ user }: DashboardClientProps) {
   const userRole = user.role || UserRole.USER;
-  const router = useRouter();
   const { customer, isLoading } = useSquareCustomer(user.phoneNumber);
+  
+  console.log('DashboardClient - User:', {
+    user,
+    publicMetadata: user.publicMetadata,
+    source: user.publicMetadata?.source
+  });
+  
+  const isPrintAgent = user.publicMetadata?.source === 'print-agent';
+  
+  console.log('DashboardClient - isPrintAgent:', isPrintAgent);
 
-  const handleEditProfile = () => {
-    router.push('/profile');
-  };
+  // If user is a print agent, render the print agent dashboard
+  if (isPrintAgent) {
+    return <PrintAgentClient user={user} />;
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -115,12 +125,6 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button className="w-full py-2 px-4 bg-[#E6B325] hover:bg-[#FFD966] text-black font-medium rounded-md transition-colors">
                 View Orders
-              </button>
-              <button 
-                onClick={handleEditProfile}
-                className="w-full py-2 px-4 border border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325]/10 font-medium rounded-md transition-colors"
-              >
-                Edit Profile
               </button>
             </div>
           </div>

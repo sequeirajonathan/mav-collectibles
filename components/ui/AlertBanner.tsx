@@ -21,7 +21,7 @@ export default function AlertBanner({ initialData }: AlertBannerProps) {
   const { getFeatureFlag } = useAppContext();
   const {
     data: alertBanner,
-    isLoading,
+    isLoading: alertBannerLoading,
     error: _error,
   } = useAlertBannerWithFallback(initialData);
   const [isVisible, setIsVisible] = useState(true);
@@ -35,7 +35,7 @@ export default function AlertBanner({ initialData }: AlertBannerProps) {
   }, [alertBanner]);
 
   // Always render the placeholder to prevent layout shift
-  if (!showAlertBanner || !alertBanner || isMaintenanceMode || isLoading) {
+  if (!showAlertBanner || !alertBanner || isMaintenanceMode || alertBannerLoading) {
     return <div className="h-[48px]" />;
   }
 
