@@ -15,9 +15,9 @@ const fetcher = async <T = unknown>(url: string): Promise<T> => {
   }
 };
 
-const fetcherPost = async <T = unknown>(url: string, body: T) => {
+const fetcherPost = async <TResponse = unknown, TRequest = unknown>(url: string, body: TRequest): Promise<TResponse> => {
   try {
-    const response = await axiosClient.post(url, body);
+    const response = await axiosClient.post<TResponse>(url, body);
     return response.data;
   } catch (error) {
     console.error(`Failed to POST to ${url}:`, error);

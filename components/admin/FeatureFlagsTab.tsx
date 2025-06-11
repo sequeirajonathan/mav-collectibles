@@ -12,7 +12,7 @@ import { useFeatureFlags, useSeedFeatureFlags, useUpdateFeatureFlag } from "@hoo
 type LocalFlags = Record<string, boolean>;
 
 export default function FeatureFlagsTab() {
-  const { data: featureFlags = [], isLoading, error } = useFeatureFlags();
+  const { data: featureFlags, isLoading, error } = useFeatureFlags();
   const [localFlags, setLocalFlags] = useState<LocalFlags>({});
   const [originalFlags, setOriginalFlags] = useState<LocalFlags>({});
   const [hasChanges, setHasChanges] = useState(false);
@@ -21,7 +21,7 @@ export default function FeatureFlagsTab() {
   const { mutate: triggerUpdateFlag } = useUpdateFeatureFlag();
 
   useEffect(() => {
-    if (featureFlags?.length > 0 && !isLoading) {
+    if (Array.isArray(featureFlags) && featureFlags.length > 0 && !isLoading) {
       const flagsObject: LocalFlags = featureFlags.reduce((acc, flag) => {
         acc[flag.name] = flag.enabled;
         return acc;
