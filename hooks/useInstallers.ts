@@ -20,7 +20,23 @@ export function useInstallers() {
   } = useResource<Installer[]>('/installers', {
     onError: (error) => {
       console.error('Failed to fetch installers:', error);
-      toast.error('Failed to load installers');
+      if (error instanceof Error) {
+        if (error.status === 404) {
+          toast.error('No installers found');
+        } else if (error.status === 500) {
+          toast.error('Server error while loading installers');
+        } else if (error.code === 'TIMEOUT') {
+          toast.error('Request timed out while loading installers');
+        } else if (error.code === 'NO_RESPONSE') {
+          toast.error('Unable to connect to the server');
+        } else if (error.code === 'INVALID_FORMAT') {
+          toast.error('Invalid data format received from server');
+        } else {
+          toast.error(error.message || 'Failed to load installers');
+        }
+      } else {
+        toast.error('Failed to load installers');
+      }
     },
   });
 
@@ -31,7 +47,11 @@ export function useInstallers() {
       toast.success('Installer deleted successfully');
     } catch (error) {
       console.error('Error deleting installer:', error);
-      toast.error('Failed to delete installer');
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to delete installer');
+      } else {
+        toast.error('Failed to delete installer');
+      }
       throw error;
     }
   };

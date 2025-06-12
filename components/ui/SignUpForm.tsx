@@ -80,6 +80,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
                 locality: "Pending",
                 postalCode: "00000",
               },
+              referenceId: user?.id,
             });
           }
 

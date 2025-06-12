@@ -23,12 +23,12 @@ const isPublicRoute = createRouteMatcher([
   '/api/v1/update-square-customer(.*)',
   '/api/v1/print-jobs(.*)',
   '/api/v1/installers(.*)',
-  '/',         // Make home page public
-  '/events(.*)', // Make events pages public
-  '/category(.*)', // Make category pages public
-  '/search(.*)', // Make search pages public
-  '/cart(.*)', // Make cart pages public
-  '/maintenance(.*)', // Make maintenance page public
+  '/',         
+  '/events(.*)', 
+  '/category(.*)',
+  '/search(.*)', 
+  '/cart(.*)',
+  '/maintenance(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -53,32 +53,6 @@ export default clerkMiddleware(async (auth, req) => {
   const isLoginPage = req.nextUrl.pathname === '/print-agent/login'
   const isApiRequest = req.nextUrl.pathname.startsWith('/api/')
 
-  // Detailed debug logging
-  console.log('=== Middleware Request Details ===')
-  console.log('Path:', req.nextUrl.pathname)
-  console.log('Method:', req.method)
-  console.log('Headers:', {
-    electronHeader,
-    referer,
-    userAgent,
-    accept: req.headers.get('accept'),
-    contentType: req.headers.get('content-type'),
-  })
-  console.log('Auth State:', {
-    hasSession: !!sessionClaims,
-    isPrintAgent,
-    isAdmin,
-    metadata,
-  })
-  console.log('Route State:', {
-    isElectron,
-    isPrintAgentRoute,
-    isHomePage,
-    isLoginPage,
-    isMaintenancePage,
-    isApiRequest,
-    isMaintenanceMode,
-  })
 
   // Handle Electron app requests first
   if (isElectron) {

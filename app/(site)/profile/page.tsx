@@ -2,40 +2,234 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useReverification } from "@clerk/nextjs";
+import { useSearchSquareCustomer } from '@hooks/useSearchSquareCustomer';
+import { useUpdateSquareCustomer } from '@hooks/useUpdateSquareCustomer';
+import { toast } from 'react-hot-toast';
+import { SquareCustomer, SquareCustomerAddress, UpdateSquareCustomerData } from '@interfaces/square';
+import { AddressSelectionDialog } from "@components/ui/AddressSelectionDialog";
+import { Copy } from 'lucide-react';
+
+interface CustomerFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  zipCode: string;
+}
+
+interface AddressSuggestionResponse {
+  status: 'address_suggestion';
+  originalAddress: SquareCustomerAddress;
+  suggestedAddress: SquareCustomerAddress;
+  messages: Array<{
+    code: string;
+    source: string;
+    text: string;
+    type: string;
+  }>;
+}
+
+type CustomerUpdateResponse = SquareCustomer | AddressSuggestionResponse;
 
 export default function ProfilePage() {
-  const { user, isLoaded } = useUser();
-  const [displayName, setDisplayName] = useState("");
+  const { user } = useUser();
+  const phoneNumber = user?.phoneNumbers?.[0]?.phoneNumber?.replace(/\D/g, '').slice(-10);
+  const { customer } = useSearchSquareCustomer(phoneNumber);
+  const { updateCustomer, isUpdating } = useUpdateSquareCustomer();
+  const [formData, setFormData] = useState<CustomerFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    zipCode: "",
+  });
+  const [originalFormData, setOriginalFormData] = useState<CustomerFormData | null>(null);
+  const [referenceId, setReferenceId] = useState<string | undefined>(undefined);
+  const [addressSuggestion, setAddressSuggestion] = useState<AddressSuggestionResponse | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const updatePhoneNumber = useReverification(async (newPhone: string) => {
+    await user?.createPhoneNumber({ phoneNumber: newPhone });
+  });
 
   useEffect(() => {
-    if (user) {
-      setDisplayName(user.username || "");
+    if (customer) {
+      console.log('Square Customer Phone:', customer.phoneNumber);
+      console.log('Clerk User Phone:', user?.phoneNumbers?.[0]?.phoneNumber);
+      console.log('Square Customer ReferenceId:', customer.referenceId);
+      const loadedData = {
+        firstName: customer.givenName || "",
+        lastName: customer.familyName || "",
+        email: customer.emailAddress || "",
+        phoneNumber: customer.phoneNumber || "",
+        address: customer.address?.addressLine1 || "",
+        city: customer.address?.locality || "",
+        zipCode: customer.address?.postalCode || "",
+      };
+      setFormData(prev => ({ ...prev, ...loadedData }));
+      setOriginalFormData(loadedData);
+      setReferenceId(customer.referenceId);
     }
-  }, [user]);
+  }, [customer, user]);
+
+  // Ensure Square customer has referenceId set to Clerk user ID
+  useEffect(() => {
+    if (
+      user?.id &&
+      customer?.id &&
+      customer.referenceId !== user.id && // Only if referenceId is missing or different
+      customer.referenceId !== undefined // Only if referenceId is not undefined
+    ) {
+      const updatePayload: UpdateSquareCustomerData = {
+        customerId: customer.id,
+        referenceId: user.id,
+      };
+      if (customer.givenName) {
+        updatePayload.givenName = customer.givenName;
+      } else if (customer.emailAddress) {
+        updatePayload.emailAddress = customer.emailAddress;
+      } else if (customer.familyName) {
+        updatePayload.familyName = customer.familyName;
+      }
+      console.log('[Square RefID Update] Sending payload:', updatePayload);
+      updateCustomer(updatePayload)
+        .then((response) => {
+          console.log('[Square RefID Update] Response:', response);
+          // Optionally, you could refetch customer data here if needed
+          console.log('Added Clerk user ID as referenceId to Square customer');
+        })
+        .catch((err) => {
+          console.error('[Square RefID Update] Failed to update Square customer referenceId:', err);
+        });
+    }
+  }, [
+    user?.id,
+    customer?.id,
+    customer?.referenceId,
+    updateCustomer,
+    customer?.givenName,
+    customer?.familyName,
+    customer?.emailAddress,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-    
+    if (!customer) return;
+
     try {
-      await user.update({
-        username: displayName,
-      });
-      // You might want to show a success toast here
+      // Format phone number to exactly 10 digits, removing country code
+      const digitsOnly = formData.phoneNumber.replace(/\D/g, '');
+      const formattedPhone = digitsOnly.startsWith('1') ? digitsOnly.slice(1) : digitsOnly;
+      
+      console.log('Form Phone Number:', formData.phoneNumber);
+      console.log('Digits Only:', digitsOnly);
+      console.log('Formatted Phone:', formattedPhone);
+      
+      if (formattedPhone.length !== 10) {
+        toast.error('Phone number must be 10 digits');
+        return;
+      }
+
+      // Update Clerk phone number if it has changed
+      const currentClerkPhone = user?.phoneNumbers?.[0]?.phoneNumber;
+      const newClerkPhone = `+1${formattedPhone}`;
+      
+      if (currentClerkPhone !== newClerkPhone) {
+        try {
+          await updatePhoneNumber(newClerkPhone);
+          console.log('Clerk phone number updated successfully');
+        } catch (error) {
+          console.error('Error updating Clerk phone number:', error);
+          toast.error('Failed to update phone number in account');
+          return;
+        }
+      }
+
+      // Update Square customer using the hook
+      const updateData = {
+        customerId: customer.id,
+        emailAddress: formData.email,
+        givenName: formData.firstName,
+        familyName: formData.lastName,
+        phoneNumber: `+1${formattedPhone}`,
+        address: {
+          country: "US",
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          addressLine1: formData.address,
+          locality: formData.city,
+          postalCode: formData.zipCode,
+          administrativeDistrictLevel1: "FL", // Required by Square
+        },
+      };
+
+      const response = await updateCustomer(updateData) as CustomerUpdateResponse;
+
+      if ('status' in response && response.status === 'address_suggestion') {
+        setAddressSuggestion(response as AddressSuggestionResponse);
+        setIsDialogOpen(true);
+      } else {
+        toast.success("Profile updated successfully");
+      }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      // You might want to show an error toast here
+      console.error("Error updating profile:", error);
+      toast.error("An error occurred while updating your profile");
     }
   };
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-black text-[#E6B325] flex items-center justify-center">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
-  }
+  const handleAddressSelection = async (address: SquareCustomerAddress) => {
+    if (!customer) return;
+
+    try {
+      const updateData = {
+        customerId: customer.id,
+        givenName: formData.firstName,
+        familyName: formData.lastName,
+        emailAddress: formData.email,
+        phoneNumber: `+1${formData.phoneNumber.replace(/\D/g, '').slice(-10)}`,
+        address,
+      };
+
+      const response = await updateCustomer(updateData) as CustomerUpdateResponse;
+
+      if ('status' in response && response.status === 'address_suggestion') {
+        setAddressSuggestion(response);
+      } else {
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const [parent, child] = name.split(".");
+
+    if (child) {
+      if (parent === 'address') {
+        setFormData(prev => ({
+          ...prev,
+          address: value
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  // Compare form data to original
+  const isFormUnchanged = !originalFormData || Object.keys(formData).every(
+    (key) => formData[key as keyof CustomerFormData] === originalFormData[key as keyof CustomerFormData]
+  );
 
   if (!user) {
     return (
@@ -46,71 +240,146 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-black text-[#E6B325] py-12">
+      <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="bg-black/50 backdrop-blur-sm border border-[#E6B325]/30 rounded-lg p-8"
         >
-          <h1 className="text-4xl font-bold text-[#E6B325] mb-8">Your Profile</h1>
-
-          <div className="bg-zinc-900 rounded-lg shadow-xl p-6 border border-[#E6B325]/30">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Field */}
+          <h1 className="text-3xl font-bold mb-8 text-center">Edit Profile</h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-[#E6B325] mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={user.primaryEmailAddress?.emailAddress || ""}
-                  disabled
-                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] disabled:opacity-50"
-                />
-              </div>
-
-              {/* Account Type Field */}
-              <div>
-                <label className="block text-sm font-medium text-[#E6B325] mb-2">
-                  Account Type
-                </label>
+                <label className="block text-sm font-medium mb-2">First Name</label>
                 <input
                   type="text"
-                  value={(user.publicMetadata.role as string) || "USER"}
-                  disabled
-                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] disabled:opacity-50"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
                 />
               </div>
-
-              {/* Display Name Field */}
               <div>
-                <label htmlFor="displayName" className="block text-sm font-medium text-[#E6B325] mb-2">
-                  Display Name
-                </label>
+                <label className="block text-sm font-medium mb-2">Last Name</label>
                 <input
-                  id="displayName"
                   type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0 transition-all"
-                  placeholder="Enter your display name"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
                 />
               </div>
+            </div>
 
-              {/* Save Button */}
-              <div>
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto px-6 py-2 bg-[#E6B325] text-black font-semibold rounded-md hover:bg-[#FFD966] transition-colors duration-200 flex items-center justify-center"
-                >
-                  Save Changes
-                </button>
+            <div>
+              <label className="block text-sm font-medium mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Phone Number</label>
+              <input
+                type="tel"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Reference ID</label>
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  name="referenceId"
+                  value={referenceId || ''}
+                  readOnly
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] opacity-60 focus:border-[#E6B325] focus:ring-0 select-all pr-10"
+                  style={{ cursor: 'default' }}
+                  tabIndex={-1}
+                  aria-readonly="true"
+                />
+                {referenceId && (
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#E6B325] hover:text-white focus:outline-none"
+                    aria-label="Copy Reference ID"
+                    onClick={() => {
+                      navigator.clipboard.writeText(referenceId);
+                    }}
+                  >
+                    <Copy size={18} />
+                  </button>
+                )}
               </div>
-            </form>
-          </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Address</h2>
+              <div>
+                <label className="block text-sm font-medium mb-2">Street Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">ZIP Code</label>
+                <input
+                  type="text"
+                  name="zipCode"
+                  value={formData.zipCode}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-md bg-black border border-[#E6B325]/30 text-[#E6B325] focus:border-[#E6B325] focus:ring-0"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-[#E6B325] text-black font-medium rounded-md hover:bg-[#E6B325]/90 focus:outline-none focus:ring-2 focus:ring-[#E6B325] focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isUpdating || isFormUnchanged}
+              >
+                {isUpdating ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         </motion.div>
       </div>
+
+      {addressSuggestion && (
+        <AddressSelectionDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          onSelect={handleAddressSelection}
+          originalAddress={addressSuggestion.originalAddress}
+          recommendedAddress={addressSuggestion.suggestedAddress}
+          messages={addressSuggestion.messages}
+        />
+      )}
     </div>
   );
 } 

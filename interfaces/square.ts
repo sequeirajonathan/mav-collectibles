@@ -101,3 +101,39 @@ export interface NormalizedProductResponse {
   ecomVisibility: string;
   updatedAt: string;
 }
+
+export interface SquareCustomerAddress {
+  addressLine1: string;
+  addressLine2?: string;
+  locality: string;
+  administrativeDistrictLevel1: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface SquareCustomer {
+  id: string;
+  createdAt?: string;
+  updatedAt?: string;
+  givenName?: string;
+  familyName?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  address?: SquareCustomerAddress;
+  referenceId?: string;
+  preferences?: {
+    emailUnsubscribed?: boolean;
+  };
+  creationSource?: string;
+}
+
+export interface UpdateSquareCustomerData {
+  customerId: string;
+  givenName?: string;
+  familyName?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  address?: SquareCustomerAddress;
+  note?: string;
+  referenceId?: string;
+}

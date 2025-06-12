@@ -3,7 +3,9 @@
 import Image from 'next/image'
 import { UserRole } from '@interfaces/roles';
 import { UserProfile } from '@interfaces/userProfile';
-import { useSquareCustomer } from '@hooks/useSquareCustomer';
+import { useSearchSquareCustomer } from '@hooks/useSearchSquareCustomer';
+import { Crown } from 'lucide-react';
+import Link from 'next/link';
 
 interface DashboardClientProps {
   user: UserProfile;
@@ -11,7 +13,9 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ user }: DashboardClientProps) {
   const userRole = user.role || UserRole.USER;
-  const { customer, isLoading } = useSquareCustomer(user.phoneNumber);
+  const { customer, isLoading } = useSearchSquareCustomer(
+    user.phoneNumber?.replace(/\D/g, '').slice(-10)
+  );
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -68,7 +72,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             </div>
           ) : customer ? (
             <div className="border border-[#E6B325]/30 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-[#E6B325] mb-6">Customer Information</h2>
+              <div className="flex items-center gap-2 mb-6">
+                <h2 className="text-xl font-semibold text-[#E6B325]">Customer Information</h2>
+                <Crown className="w-6 h-6 text-[#E6B325]" />
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -110,6 +117,12 @@ export default function DashboardClient({ user }: DashboardClientProps) {
               <button className="w-full py-2 px-4 bg-[#E6B325] hover:bg-[#FFD966] text-black font-medium rounded-md transition-colors">
                 View Orders
               </button>
+              <Link 
+                href="/profile" 
+                className="w-full py-2 px-4 bg-[#E6B325] hover:bg-[#FFD966] text-black font-medium rounded-md transition-colors text-center"
+              >
+                Edit Profile
+              </Link>
             </div>
           </div>
         </div>

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { createSquareClient } from "@lib/square";
 import { updateCustomerSchema } from "@validations/square-customer";
 import { z } from "zod";
+import { Square } from "square";
+
+type UpdateCustomer = z.infer<typeof updateCustomerSchema>;
 
 export async function PUT(
   request: Request,
@@ -20,9 +23,21 @@ export async function PUT(
     const validatedData = updateCustomerSchema.parse(body);
 
     const client = createSquareClient();
+    // Prepare update payload
+    const updatePayload: UpdateCustomer & { customerId: string } = { ...validatedData, customerId };
+    if (updatePayload.address && updatePayload.address.country) {
+      // Square expects country as enum
+      updatePayload.address.country = updatePayload.address.country as Square.Country;
+    }
+    if (validatedData.referenceId) {
+      updatePayload.referenceId = validatedData.referenceId;
+    }
+    // Ensure correct type for address.country before sending
     const customer = await client.customers.update({
-      customerId,
-      ...validatedData,
+      ...updatePayload,
+      address: updatePayload.address
+        ? { ...updatePayload.address, country: updatePayload.address.country as Square.Country }
+        : undefined,
     });
 
     return NextResponse.json({

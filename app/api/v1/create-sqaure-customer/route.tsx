@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const customer = await client.customers.create({
       ...validatedData,
       phoneNumber: validatedData.phoneNumber, // This will already have the "1" prefix from the transform
+      ...(validatedData.referenceId && { referenceId: validatedData.referenceId }),
     });
 
     return NextResponse.json({

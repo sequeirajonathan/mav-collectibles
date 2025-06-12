@@ -3,12 +3,38 @@ import { FeaturedEvent } from '@interfaces';
 import { toast } from 'react-hot-toast';
 
 export function useFeaturedEvents() {
-  return useResource<FeaturedEvent[]>('/featured-events', {
+  const result = useResource<FeaturedEvent[]>('/featured-events', {
     onError: (error) => {
-      console.error('Failed to fetch featured events:', error);
-      toast.error('Failed to load featured events');
-    }
+      console.error('Featured events error:', error);
+      
+      // Enhanced error handling with more specific cases
+      if (error instanceof Error) {
+        if (error.status === 404) {
+          toast.error('No featured events found');
+        } else if (error.status === 500) {
+          toast.error('Server error while loading featured events');
+        } else if (error.code === 'TIMEOUT') {
+          toast.error('Request timed out while loading featured events');
+        } else if (error.code === 'NO_RESPONSE') {
+          toast.error('Unable to connect to the server');
+        } else if (error.code === 'INVALID_FORMAT') {
+          toast.error('Invalid data format received from server');
+        } else if (error.code === 'UNKNOWN_ERROR') {
+          toast.error('An unexpected error occurred. Please try again later.');
+        } else {
+          toast.error(error.message || 'Failed to load featured events. Please try again later.');
+        }
+      } else {
+        toast.error('An unexpected error occurred. Please try again later.');
+      }
+    },
+    fallbackData: [],
+    retryCount: 3,
+    retryInterval: 5000,
+    timeout: 10000
   });
+
+  return result;
 }
 
 export function useCreateFeaturedEvent() {
@@ -23,7 +49,11 @@ export function useCreateFeaturedEvent() {
         return result;
       } catch (error) {
         console.error('Error creating event:', error);
-        toast.error('Failed to create event');
+        if (error instanceof Error) {
+          toast.error(error.message || 'Failed to create event');
+        } else {
+          toast.error('Failed to create event');
+        }
         throw error;
       }
     }
@@ -42,7 +72,11 @@ export function useUpdateFeaturedEvent() {
         return result;
       } catch (error) {
         console.error('Error updating event:', error);
-        toast.error('Failed to update event');
+        if (error instanceof Error) {
+          toast.error(error.message || 'Failed to update event');
+        } else {
+          toast.error('Failed to update event');
+        }
         throw error;
       }
     }
@@ -60,7 +94,11 @@ export function useDeleteFeaturedEvent() {
         toast.success('Event deleted successfully');
       } catch (error) {
         console.error('Error deleting event:', error);
-        toast.error('Failed to delete event');
+        if (error instanceof Error) {
+          toast.error(error.message || 'Failed to delete event');
+        } else {
+          toast.error('Failed to delete event');
+        }
         throw error;
       }
     }

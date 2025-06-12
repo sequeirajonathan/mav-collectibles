@@ -3,6 +3,7 @@ import { createSquareClient } from "@lib/square";
 import { searchCustomerSchema } from "@validations/square-customer";
 import { z } from "zod";
 import { serializeBigIntValues } from "@utils/serialization";
+import { Square } from "square";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +14,8 @@ export async function POST(request: Request) {
     console.log('Validated data:', validatedData);
 
     // Format phone number to E164 format (e.g., +19545405276)
-    const formattedPhoneNumber = `+1${validatedData.phoneNumber}`;
+    // Remove any existing +1 prefix and non-digit characters, then add +1
+    const formattedPhoneNumber = `+1${validatedData.phoneNumber.replace(/^\+1|\D/g, '')}`;
     console.log('Formatted phone number for Square:', formattedPhoneNumber);
 
     const client = createSquareClient();
@@ -36,8 +38,8 @@ export async function POST(request: Request) {
           }),
         },
         sort: {
-          field: validatedData.sortField || "DEFAULT",
-          order: validatedData.sortOrder || "ASC",
+          field: (validatedData.sortField || "DEFAULT") as Square.CustomerSortField,
+          order: (validatedData.sortOrder || "ASC") as Square.SortOrder,
         },
       },
     };
@@ -59,6 +61,8 @@ export async function POST(request: Request) {
         addressLine2: customer.address.addressLine2,
         locality: customer.address.locality,
         postalCode: customer.address.postalCode,
+        administrativeDistrictLevel1: customer.address.administrativeDistrictLevel1,
+        country: customer.address.country,
       } : undefined,
     }));
 

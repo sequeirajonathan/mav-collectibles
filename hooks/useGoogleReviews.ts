@@ -26,7 +26,23 @@ export function useGoogleReviews(): UseGoogleReviewsResult {
   const { data, isLoading, error } = useResource<GoogleReviewsResponse>('/google-reviews', {
     onError: (error) => {
       console.error('Error fetching Google reviews:', error);
-      toast.error('Failed to load reviews');
+      if (error instanceof Error) {
+        if (error.status === 404) {
+          toast.error('No reviews found');
+        } else if (error.status === 500) {
+          toast.error('Server error while loading reviews');
+        } else if (error.code === 'TIMEOUT') {
+          toast.error('Request timed out while loading reviews');
+        } else if (error.code === 'NO_RESPONSE') {
+          toast.error('Unable to connect to the server');
+        } else if (error.code === 'INVALID_FORMAT') {
+          toast.error('Invalid data format received from server');
+        } else {
+          toast.error(error.message || 'Failed to load reviews');
+        }
+      } else {
+        toast.error('Failed to load reviews');
+      }
     }
   });
 

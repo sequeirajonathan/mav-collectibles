@@ -5,6 +5,7 @@ import { Label } from "@components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { useUserRoles } from "@hooks/useUserRoles";
 import { UserRole } from "@interfaces/roles";
+import { AxiosError } from "axios";
 
 export default function RolesTab() {
   const [userId, setUserId] = useState("");
@@ -29,10 +30,17 @@ export default function RolesTab() {
         throw new Error("Failed to update role");
       }
     } catch (error) {
-      setStatus({
-        type: "error",
-        message: error instanceof Error ? error.message : "An error occurred",
-      });
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        setStatus({
+          type: "error",
+          message: "User not found",
+        });
+      } else {
+        setStatus({
+          type: "error",
+          message: error instanceof Error ? error.message : "An error occurred",
+        });
+      }
     }
   };
 
