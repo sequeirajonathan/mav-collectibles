@@ -23,9 +23,8 @@ export async function POST(req: Request) {
     });
 
     // Set as primary email
-    await client.emailAddresses.setPrimaryEmailAddress({
-      userId: session.userId,
-      emailAddressId: emailAddressResource.id,
+    await client.emailAddresses.updateEmailAddress(emailAddressResource.id, {
+      primary: true,
     });
 
     return NextResponse.json({ success: true });
