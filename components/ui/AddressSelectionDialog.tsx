@@ -39,10 +39,13 @@ export function AddressSelectionDialog({
   };
 
   const getMessageText = (msg: ValidationMessage): string => {
-    if ('text' in msg) {
+    if ('text' in msg && typeof msg.text === 'string') {
       return msg.text;
     }
-    return msg.message || '';
+    if (!('code' in msg) && 'message' in msg && typeof msg.message === 'string') {
+      return msg.message;
+    }
+    return '';
   };
 
   return (
