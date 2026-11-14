@@ -26,7 +26,7 @@ cp .env.example .env.local # fill in the keys printed by db:start
 npm run dev
 ```
 
-- Test accounts (password `password123`): `admin@mav.local`, `staff@mav.local`,
+- Test accounts (password `password123`): `admin@mav.local`, `staff@mav.local`, `events@mav.local` (EVENT role),
   `printer@mav.local` (print agent), `customer@mav.local`.
 - Emails (sign-up confirmation, password reset) appear in Mailpit at
   http://127.0.0.1:54324.

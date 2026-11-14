@@ -3,7 +3,17 @@ import type { Square } from "square";
 import { createSquareClient, squareLocationIds } from "@lib/square";
 import { isCatalogItem, normalizeItemsWithInventory, normalizeProductResponse } from "@utils/square";
 import { catalogItemSchema, type CatalogItem, type CatalogPage, type Product } from "@lib/contracts/catalog";
+import { serverEnv } from "@lib/env.server";
+import sandboxMap from "@const/square-sandbox-map.json";
 import { matchesStock, type CatalogSource, type ListOptions } from "./source";
+
+/**
+ * The app's category IDs (const/categories.ts) are production IDs. A sandbox
+ * cloned with scripts/square/clone-catalog.ts has new IDs; translate both ways.
+ */
+const toSandbox = new Map(Object.entries(sandboxMap.categories as Record<string, string>));
+const fromSandbox = new Map([...toSandbox].map(([prod, sandbox]) => [sandbox, prod]));
+const sandboxIdsActive = () => serverEnv().SQUARE_ENVIRONMENT === "sandbox" && toSandbox.size > 0;
 
 async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
   let lastError: unknown;
@@ -63,7 +73,11 @@ async function collect(query: Square.CatalogQuery, options: ListOptions): Promis
     }));
 
     for (const normalized of normalizeItemsWithInventory(withInventory, page.relatedObjects)) {
-      const item = catalogItemSchema.parse(normalized);
+      const item = catalogItemSchema.parse(
+        sandboxIdsActive() && normalized.categoryId
+          ? { ...normalized, categoryId: fromSandbox.get(normalized.categoryId) ?? normalized.categoryId }
+          : normalized
+      );
       if (matchesStock(item, options.stock)) items.push(item);
     }
     cursor = page.cursor ?? undefined;
@@ -75,7 +89,8 @@ async function collect(query: Square.CatalogQuery, options: ListOptions): Promis
 
 export const squareCatalogSource: CatalogSource = {
   listByCategories(categoryIds, options) {
-    return collect({ setQuery: { attributeName: "category_id", attributeValues: categoryIds } }, options);
+    const ids = sandboxIdsActive() ? categoryIds.map((id) => toSandbox.get(id) ?? id) : categoryIds;
+    return collect({ setQuery: { attributeName: "category_id", attributeValues: ids } }, options);
   },
 
   search(query, options) {

@@ -123,7 +123,7 @@ export async function signUpAction(
   // With email confirmation on (the default), no session exists yet; the
   // Square customer is linked when the confirmation link is opened.
   if (data.session && data.user) {
-    await ensureSquareCustomer({ id: data.user.id, email: data.user.email ?? null }).catch((e) =>
+    await ensureSquareCustomer({ id: data.user.id }).catch((e) =>
       console.error("Square customer link failed:", e)
     );
   }
@@ -158,7 +158,7 @@ export async function completeProfileAction(input: {
     where: { id: user.id },
     data: { username: parsed.data.username, phone: parsed.data.phone },
   });
-  await ensureSquareCustomer({ id: user.id, email: user.email }).catch((e) =>
+  await ensureSquareCustomer({ id: user.id }).catch((e) =>
     console.error("Square customer link failed:", e)
   );
   return { ok: true };

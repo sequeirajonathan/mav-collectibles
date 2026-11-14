@@ -2,7 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { unstable_rethrow } from "next/navigation";
 import type { ActionResult } from "@lib/contracts/common";
-import { getCurrentUser, type CurrentUser } from "@lib/auth/server";
+import { currentRole, getCurrentUser, type CurrentUser } from "@lib/auth/server";
 import type { UserRole } from "@interfaces/roles";
 
 /** Throw inside an action to return a user-facing error. */
@@ -31,11 +31,16 @@ export function createAction<S extends z.ZodType, T, const A extends Access>(
   handler: (input: z.infer<S>, user: HandlerUser<A>) => Promise<T>
 ): (input: z.input<S>) => Promise<ActionResult<T>> {
   return async (rawInput) => {
-    const user = await getCurrentUser();
+    let user = await getCurrentUser();
     if (config.access !== "public") {
       if (!user) return { ok: false, error: "Please sign in first." };
-      if (config.access !== "user" && !(config.access as readonly UserRole[]).includes(user.role)) {
-        return { ok: false, error: "You don't have permission to do that." };
+      if (config.access !== "user") {
+        // Privileged actions check the role as stored now, not the token's copy.
+        const role = await currentRole(user.id);
+        if (!role || !(config.access as readonly UserRole[]).includes(role)) {
+          return { ok: false, error: "You don't have permission to do that." };
+        }
+        user = { ...user, role };
       }
     }
 

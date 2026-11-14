@@ -37,6 +37,7 @@ begin
     select * from (values
       ('admin@mav.local', 'admin', 'ADMIN'),
       ('staff@mav.local', 'staff', 'STAFF'),
+      ('events@mav.local', 'events', 'EVENT'),
       ('printer@mav.local', 'printer', 'PRINT_AGENT'),
       ('customer@mav.local', 'customer', 'USER')
     ) as t(email, username, role)

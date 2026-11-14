@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isoDateTime, optionalText } from "./common";
+import { httpUrl, isoDateTime, optionalText } from "./common";
 
 /** Every feature flag the app knows about. Unknown rows in the table are ignored. */
 export const FLAG_NAMES = [
@@ -67,7 +67,7 @@ export const videoSettingsSchema = z.object({
 export type VideoSettings = z.infer<typeof videoSettingsSchema>;
 
 export const videoSettingsInput = videoSettingsSchema.extend({
-  src: z.url("Enter the stream URL"),
+  src: httpUrl("Enter the stream URL"),
   title: z.string().trim().min(1).max(120),
   poster: z.string().trim().max(500),
 });
@@ -75,7 +75,7 @@ export const videoSettingsInput = videoSettingsSchema.extend({
 export const installerSchema = z.object({
   id: z.string(),
   name: z.string(),
-  url: z.url(),
+  url: httpUrl(),
   type: z.string(),
   createdAt: isoDateTime,
 });
@@ -83,7 +83,7 @@ export type Installer = z.infer<typeof installerSchema>;
 
 export const installerInput = z.object({
   name: z.string().trim().min(1).max(120),
-  url: z.url("Paste the GitHub release URL"),
+  url: httpUrl("Paste the GitHub release URL"),
 });
 
 export const googleReviewSchema = z.object({

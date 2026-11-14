@@ -33,7 +33,7 @@ export const updateMyCustomer = createAction(
   { input: updateCustomerInput.extend({ acceptSuggestion: z.boolean().default(false) }), access: "user" },
   async ({ acceptSuggestion, ...input }, user): Promise<UpdateCustomerResponse> => {
     const customer = await findCustomerForUser(user.id);
-    if (!customer?.id) throw new ActionError("We couldn't find your store account yet. Add your phone number first.");
+    if (!customer?.id) throw new ActionError("We couldn't find your store account yet. Try signing out and back in.");
 
     let address = input.address;
     if (address && serverEnv().SHIPPO_API_KEY && !acceptSuggestion) {
@@ -83,6 +83,8 @@ export const setUserRole = createAction({ input: roleChangeInput, access: [UserR
   if (userId === admin.id && input.role !== UserRole.ADMIN) throw new ActionError("You can't remove your own admin role.");
   const { data, error } = await createAdminClient().auth.admin.updateUserById(userId, { app_metadata: { role: input.role } });
   if (error || !data.user) throw new ActionError("Couldn't update that user's role.");
+  // End their sessions so no device keeps a token with the old role.
+  if (userId !== admin.id) await prisma.$executeRaw`delete from auth.sessions where user_id = ${userId}::uuid`;
   const profile = await prisma.profile.findUnique({ where: { id: userId }, select: { username: true } });
   return { username: profile?.username ?? data.user.email ?? userId, role: input.role };
 });

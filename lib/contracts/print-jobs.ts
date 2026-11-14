@@ -23,7 +23,8 @@ export const printJobListSchema = z.array(printJobSchema);
 
 export const createPrintJobInput = z.object({
   order_id: z.string().min(1),
-  label_url: z.url(),
+  // The agent prints this silently, so only https URLs are accepted.
+  label_url: z.url({ protocol: /^https$/, message: "Label URL must start with https://" }),
   copies: z.number().int().min(1).max(20).default(1),
 });
 

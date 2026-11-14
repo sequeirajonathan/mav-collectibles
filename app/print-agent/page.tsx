@@ -1,11 +1,14 @@
 import { Suspense } from "react";
 import { PrintAgentClient } from "@components/ui/PrintAgentClient";
-import { getCurrentUser } from "@lib/auth/server";
+import { redirect } from "next/navigation";
+import { getUserWithRole } from "@lib/auth/server";
+import { PRINT_ROLES } from "@interfaces/roles";
 
 async function Agent() {
-  // The proxy only lets print-capable roles reach this page.
-  const user = await getCurrentUser();
-  return user ? <PrintAgentClient agentId={user.id} /> : null;
+  // The proxy checks the token's role; this checks the role as stored now.
+  const { user, allowed } = await getUserWithRole(PRINT_ROLES);
+  if (!allowed || !user) redirect("/print-agent/login?error=not_print_agent");
+  return <PrintAgentClient agentId={user.id} />;
 }
 
 export default function PrintAgentPage() {

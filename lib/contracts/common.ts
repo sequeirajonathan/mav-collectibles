@@ -21,9 +21,16 @@ export const optionalText = (max: number) =>
     z.string().trim().max(max).nullable()
   );
 
+/** An http(s) URL. Plain `z.url()` also accepts javascript:, data: and file: URLs. */
+export const httpUrl = (message = "Enter a web address starting with https://") =>
+  z.url({ protocol: /^https?$/, message });
+
+/** A site-relative path such as "/images/x.png" (not "//host" or "/\\host", which browsers treat as another site). */
+const sitePath = z.string().regex(/^\/(?![/\\])[^\s\\]*$/, "Must be a URL or a site path");
+
 export const optionalUrl = z.preprocess(
   (v) => (typeof v === "string" && v.trim() === "" ? null : v),
-  z.union([z.url(), z.string().regex(/^\/[^/]/, "Must be a URL or a site path")]).nullable()
+  z.union([httpUrl(), sitePath]).nullable()
 );
 
 /** Body of every error response from the API. */

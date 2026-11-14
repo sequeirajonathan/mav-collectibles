@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     if (!profile?.username || !profile.phone) {
       return NextResponse.redirect(`${origin}/sign-up/complete?next=${encodeURIComponent(next)}`);
     }
-    await ensureSquareCustomer({ id: user.id, email: user.email ?? null }).catch((e) =>
+    await ensureSquareCustomer({ id: user.id }).catch((e) =>
       console.error("Square customer link failed:", e)
     );
   }

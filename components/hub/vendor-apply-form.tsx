@@ -68,7 +68,8 @@ export function VendorApplyForm({
     <form onSubmit={submit} className="space-y-5">
       {existingStatus && (
         <p className="rounded-lg border border-line bg-panel px-4 py-3 text-sm">
-          Your vendor profile is <strong className="capitalize text-gold">{existingStatus}</strong>. Saving updates it.
+          Your vendor profile is <strong className="capitalize text-gold">{existingStatus}</strong>.
+          {existingStatus === "approved" ? " Changes go to the MAV team for a quick review before they show publicly." : " Saving updates it."}
         </p>
       )}
       <Field label="Shop or vendor name" error={errors.name}>

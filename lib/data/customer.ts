@@ -2,7 +2,7 @@ import "server-only";
 import { findCustomerForUser } from "@lib/square-customer";
 import { customerSchema, type Customer } from "@lib/contracts/customer";
 
-/** The signed-in user's Square customer (linked on first lookup), or null. */
+/** The signed-in user's linked Square customer, or null. Staff notes are never returned. */
 export async function getMyCustomer(userId: string): Promise<Customer | null> {
   const c = await findCustomerForUser(userId);
   if (!c?.id) return null;
@@ -12,7 +12,6 @@ export async function getMyCustomer(userId: string): Promise<Customer | null> {
     familyName: c.familyName ?? undefined,
     emailAddress: c.emailAddress ?? undefined,
     phoneNumber: c.phoneNumber ?? undefined,
-    note: c.note ?? undefined,
     referenceId: c.referenceId ?? undefined,
     address: c.address
       ? {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isoDateTime, optionalText, optionalUrl, slug, uuid } from "./common";
+import { httpUrl, isoDateTime, optionalText, optionalUrl, slug, uuid } from "./common";
 
 // ---------------------------------------------------------------------------
 // Games
@@ -202,7 +202,7 @@ export const vendorApplicationInput = z.object({
   specialties: z.string().trim().max(300),
   games: z.array(z.string()).max(12),
   instagram: instagramHandle,
-  website: z.preprocess((v) => (v === "" ? null : v), z.url().nullable()),
+  website: z.preprocess((v) => (v === "" ? null : v), httpUrl().nullable()),
   contactEmail: z.email("Where should we reach you?"),
   /** Optional vendor day to request a table at. */
   eventId: z.preprocess((v) => (v === "" ? null : v), uuid.nullable()),

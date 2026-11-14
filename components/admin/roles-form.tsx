@@ -25,7 +25,7 @@ export function RolesForm() {
         startTransition(async () => {
           const result = await setUserRole({ user, role });
           if (!result.ok) return void toast.error(result.error);
-          toast.success(`${result.data.username} is now ${ROLES.find((r) => r.value === result.data.role)?.label}`);
+          toast.success(`${result.data.username} is now ${ROLES.find((r) => r.value === result.data.role)?.label}. They'll need to sign in again.`);
           setUser("");
         });
       }}

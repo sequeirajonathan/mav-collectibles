@@ -64,9 +64,15 @@ export const cancelRegistration = createAction(
 // ---------------------------------------------------------------------------
 // Players: posts
 // ---------------------------------------------------------------------------
+async function requirePublishedPost(postId: string) {
+  const post = await prisma.post.findFirst({ where: { id: postId, status: "published" }, select: { id: true } });
+  if (!post) throw new ActionError("That post is no longer available.");
+}
+
 export const toggleLike = createAction(
   { input: z.object({ postId: uuid, liked: z.boolean() }), access: "user" },
   async ({ postId, liked }, user) => {
+    await requirePublishedPost(postId);
     if (liked) {
       await prisma.postLike.upsert({
         where: { post_id_user_id: { post_id: postId, user_id: user.id } },
@@ -85,6 +91,7 @@ export const toggleLike = createAction(
 export const toggleSave = createAction(
   { input: z.object({ postId: uuid, saved: z.boolean() }), access: "user" },
   async ({ postId, saved }, user) => {
+    await requirePublishedPost(postId);
     if (saved) {
       await prisma.postSave.upsert({
         where: { post_id_user_id: { post_id: postId, user_id: user.id } },
@@ -99,8 +106,7 @@ export const toggleSave = createAction(
 );
 
 export const addComment = createAction({ input: commentInput, access: "user" }, async ({ postId, body }, user) => {
-  const post = await prisma.post.findFirst({ where: { id: postId, status: "published" }, select: { id: true } });
-  if (!post) throw new ActionError("That post is no longer available.");
+  await requirePublishedPost(postId);
   const recent = await prisma.postComment.count({
     where: { user_id: user.id, created_at: { gte: new Date(Date.now() - 60_000) } },
   });
@@ -157,7 +163,11 @@ export const applyAsVendor = createAction({ input: vendorApplicationInput, acces
   let vendorId: string;
   if (existing) {
     vendorId = existing.id;
-    await prisma.vendor.update({ where: { id: existing.id }, data });
+    // Edits to an approved profile go back to staff before they're public again.
+    await prisma.vendor.update({
+      where: { id: existing.id },
+      data: { ...data, status: existing.status === "approved" ? "pending" : existing.status },
+    });
   } else {
     let slug = slugify(input.name);
     if (await prisma.vendor.findUnique({ where: { slug } })) slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
@@ -172,7 +182,7 @@ export const applyAsVendor = createAction({ input: vendorApplicationInput, acces
     });
   }
   updateTag(tags.vendors);
-  return { vendorId, status: existing?.status ?? "pending" };
+  return { vendorId, status: existing?.status === "rejected" ? "rejected" : "pending" };
 });
 
 // ---------------------------------------------------------------------------
