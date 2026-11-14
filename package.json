@@ -8,10 +8,16 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:unused": "eslint . --max-warnings 0",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:migration": "supabase migration new",
+    "db:check-prisma": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "node tests/e2e/auth.mjs"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.10.0",
     "@headlessui/react": "^2.2.10",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
@@ -46,6 +52,7 @@
     "react-hot-toast": "^2.6.1",
     "react-icons": "^5.7.0",
     "react-infinite-scroll-component": "^7.2.1",
+    "server-only": "^0.0.1",
     "shippo": "^2.19.1",
     "square": "^46.0.0",
     "swr": "^2.5.1",
@@ -65,6 +72,8 @@
     "dotenv": "^18.0.10",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.6",
+    "playwright": "^1.65.1",
+    "supabase": "^3.1.0",
     "tailwindcss": "^4.3.5",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"

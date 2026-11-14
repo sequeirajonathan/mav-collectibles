@@ -5,7 +5,8 @@ import { PrintJob, PrintCommand } from '@interfaces';
 import { usePrintJobs } from '@hooks/usePrintJobs';
 import { ChevronDown } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext';
-import { useClerk } from '@clerk/nextjs';
+import { useAuth } from '@contexts/AuthContext';
+import { publicEnv } from '@lib/env';
 
 interface PrintAgentClientProps {
   agentId: string;
@@ -93,7 +94,23 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
   const [message, setMessage] = useState('');
   const { printJobs, error, isLoading } = usePrintJobs();
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
-  const { signOut } = useClerk();
+  const { signOut, session } = useAuth();
+
+  // Keep the desktop app's Supabase client authenticated as this agent.
+  useEffect(() => {
+    if (!isElectron) return;
+    window.electron?.setAuthSession?.(
+      session
+        ? {
+            accessToken: session.access_token,
+            expiresAt: session.expires_at ?? 0,
+            userId: session.user.id,
+            supabaseUrl: publicEnv().NEXT_PUBLIC_SUPABASE_URL,
+            supabasePublishableKey: publicEnv().NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+          }
+        : null
+    );
+  }, [isElectron, session]);
 
   useEffect(() => {
     if (isElectron) {
@@ -112,6 +129,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
             console.log('🔐 PrintAgentClient - Starting sign out process');
           }
           await signOut();
+          window.location.assign('/print-agent/login');
           if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
             console.log('🔐 PrintAgentClient - Sign out completed successfully');
           }

@@ -1,33 +1,26 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { UserRole } from '@interfaces/roles';
 import { fetcherPost } from '@lib/swr';
-import useSWR from 'swr';
 
-interface UserMetadataResponse {
+interface UpdateRoleResponse {
   success: boolean;
   username: string;
   role: UserRole;
   error?: string;
 }
 
-interface UserMetadataRequest {
-  userId: string;
-  role: UserRole;
-}
-
 export function useUserRoles() {
-  const { mutate } = useSWR<UserMetadataResponse>('user/metadata');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const updateUserRole = useCallback(async (userId: string, role: UserRole): Promise<UserMetadataResponse> => {
+  /** `user` may be an email address, username or user id. */
+  const updateUserRole = useCallback(async (user: string, role: UserRole): Promise<UpdateRoleResponse> => {
+    setIsLoading(true);
     try {
-      const response = await fetcherPost<UserMetadataResponse, UserMetadataRequest>('user/metadata', { userId, role });
-      await mutate();
-      return response;
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      throw error;
+      return await fetcherPost<UpdateRoleResponse, { user: string; role: UserRole }>('users/role', { user, role });
+    } finally {
+      setIsLoading(false);
     }
-  }, [mutate]);
+  }, []);
 
-  return { updateUserRole, isLoading: false };
-} 
+  return { updateUserRole, isLoading };
+}

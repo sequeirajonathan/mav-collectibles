@@ -51,12 +51,12 @@ export default function RolesTab() {
         
         <form onSubmit={handleUpdateRole} className="max-w-md space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="userId">User ID</Label>
+            <Label htmlFor="userId">Email, username or user ID</Label>
             <Input
               id="userId"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              placeholder="Enter user ID"
+              placeholder="customer@example.com"
               required
               className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
             />

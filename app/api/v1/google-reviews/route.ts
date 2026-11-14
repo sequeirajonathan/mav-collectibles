@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
+import { serverEnv } from '@lib/env.server';
 
 export async function GET() {
   const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID;
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  // Server-side Places key: never sent to the browser.
+  const apiKey = serverEnv().GOOGLE_PLACES_API_KEY;
 
   if (!placeId) {
     return NextResponse.json(
@@ -14,7 +16,7 @@ export async function GET() {
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'Google Maps API key is not configured' },
+      { error: 'Google Places API key is not configured' },
       { status: 500 }
     );
   }

@@ -22,6 +22,21 @@ interface ElectronAPI {
     silent?: boolean;
   }) => void;
   agentId?: string;
+  /**
+   * Hands the signed-in print agent's short-lived access token to the desktop
+   * app (re-sent on every refresh; null on sign-out). The desktop app stores no
+   * credentials of its own. Optional: older agents don't expose it.
+   */
+  setAuthSession?: (
+    session: {
+      accessToken: string;
+      expiresAt: number;
+      userId: string;
+      /** Public values: lets the agent reach this environment's Supabase project. */
+      supabaseUrl: string;
+      supabasePublishableKey: string;
+    } | null
+  ) => void;
 }
 
 declare global {

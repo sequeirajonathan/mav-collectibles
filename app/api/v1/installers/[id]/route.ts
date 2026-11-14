@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@lib/auth/server';
 import { prisma } from '@lib/prisma';
-import { isAdminRole, UserRoleType } from '@interfaces/roles';
+import { UserRole } from '@interfaces/roles';
 
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { sessionClaims } = await auth();
-    // Check if user is admin
-    const metadata = sessionClaims?.metadata as { role?: UserRoleType } | undefined;
-    if (!metadata?.role || !isAdminRole(metadata.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { response: denied } = await requireUser([UserRole.ADMIN]);
+    if (denied) return denied;
 
     const { id } = params;
 

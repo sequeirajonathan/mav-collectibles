@@ -6,7 +6,7 @@ import { AppProvider } from "@contexts/AppContext";
 import "@styles/globals.css";
 import { CartProvider } from "@contexts/CartContext";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { ClerkProvider } from '@clerk/nextjs';
+import { AuthProvider } from '@contexts/AuthContext';
 import { Suspense } from 'react';
 
 const geistSans = Geist({
@@ -31,9 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <body className="antialiased min-h-screen bg-black text-white font-sans flex flex-col">
+          <AuthProvider>
           <SWRConfig value={swrConfig}>
               <AppProvider>
                 <CartProvider>
@@ -45,8 +45,8 @@ export default function RootLayout({
                 </CartProvider>
               </AppProvider>
           </SWRConfig>
+          </AuthProvider>
         </body>
       </html>
-    </ClerkProvider>
   );
 }

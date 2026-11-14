@@ -74,7 +74,7 @@ model VideoSettings {
 }
 
 model PrintJob {
-  id            String    @id @default(uuid())
+  id            String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   order_id      String
   label_url     String
   status        String    @default("pending")
@@ -84,7 +84,7 @@ model PrintJob {
   retries       Int       @default(0)
   last_tried_at DateTime?
   created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+  updated_at    DateTime  @default(now()) @updatedAt
   copies        Int?      @default(1)
 
   @@map("print_jobs")
@@ -99,4 +99,19 @@ model Installer {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("installers")
+}
+
+// Managed by supabase/migrations (linked 1:1 to auth.users; created by the
+// on_auth_user_created trigger). Read-only from the app's point of view
+// except for the user-editable columns.
+model Profile {
+  id         String   @id @db.Uuid
+  username   String?
+  first_name String?
+  last_name  String?
+  phone      String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("profiles")
 }

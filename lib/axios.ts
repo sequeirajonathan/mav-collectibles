@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const isServer = typeof window === "undefined";
-const isElectron = !isServer && window.electron !== undefined;
 
 const axiosClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL
@@ -15,7 +14,6 @@ const axiosClient = axios.create({
     Pragma: "no-cache",
     "Content-Type": "application/json",
     Accept: "application/json",
-    ...(isElectron && { "x-electron-app": "true" }),
   },
 });
 

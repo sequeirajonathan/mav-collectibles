@@ -56,16 +56,19 @@ mav-i/
 
 ## Getting Started
 
-Requires Node.js 20.9 or newer.
+Requires Node.js 20.9+ and Docker (for the local Supabase stack).
 
-1. Clone the repository
-2. Install dependencies: `npm install` (also generates the Prisma client into `lib/generated/prisma`)
-3. Set up environment variables: copy `.env.example` to `.env` (Prisma CLI) and/or `.env.local` (Next.js)
-4. Apply database migrations: `npx prisma migrate deploy` (optionally seed with `npx prisma db seed`)
-5. Run the development server: `npm run dev`
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+1. Install dependencies: `npm install`
+2. Start the local database, auth and storage: `npm run db:start`
+3. Copy `.env.example` to `.env.local` and fill in the keys printed by `db:start`
+4. Run the development server: `npm run dev` and open [http://localhost:3000](http://localhost:3000)
 
-Other scripts: `npm run build`, `npm run lint`.
+Sign in with the seeded `admin@mav.local` / `password123`. Environments, the
+release pipeline, variables and one-time production setup are documented in
+[ENVIRONMENTS.md](ENVIRONMENTS.md).
+
+Scripts: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run db:reset`,
+`npm run db:migration <name>`, `npm run db:check-prisma`, `npm run test:e2e`.
 
 ## Features
 

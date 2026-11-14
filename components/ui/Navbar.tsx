@@ -13,7 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useAuth } from "@contexts/AuthContext";
 import { useCart } from "@contexts/CartContext";
 import {
   CATEGORY_GROUPS,
@@ -21,7 +21,7 @@ import {
 import { SquareCategory } from "@interfaces/categories";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@components/ui/button";
-import { UserRole, isAdminRole, UserRoleType } from "@interfaces/roles";
+import { UserRole, UserRoleType } from "@interfaces/roles";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,8 +33,7 @@ const Navbar = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useUser();
-  const { signOut } = useClerk();
+  const { user, role: currentRole, signOut } = useAuth();
   const { totalItems } = useCart();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
@@ -44,11 +43,11 @@ const Navbar = () => {
   const authState = useMemo(() => {
     if (!user) return { user: undefined, role: UserRole.USER, isAdmin: false };
     
-    const role = (user.publicMetadata?.role as UserRoleType) || UserRole.USER;
+    const role = (currentRole ?? UserRole.USER) as UserRoleType;
     return {
-      user: user.primaryEmailAddress?.emailAddress,
+      user: user.email,
       role: role as UserRoleType,
-      isAdmin: isAdminRole(role as UserRoleType)
+      isAdmin: role === UserRole.ADMIN
     };
   }, [user]);
 
@@ -103,10 +102,11 @@ const Navbar = () => {
       setExpandedGroup(null);
       
       if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
-        console.log('🔐 Navbar - Calling Clerk signOut');
+        console.log('🔐 Navbar - Calling signOut');
       }
       
       await signOut();
+      window.location.assign('/');
       
       if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
         console.log('🔐 Navbar - Sign out completed successfully');
@@ -323,7 +323,7 @@ const Navbar = () => {
                         <>
                           <div className="px-4 py-2 border-b border-[#E6B325]/10">
                             <p className="text-sm text-[#E6B325] truncate">
-                              {user.primaryEmailAddress?.emailAddress}
+                              {user.email}
                             </p>
                           </div>
                           <Link

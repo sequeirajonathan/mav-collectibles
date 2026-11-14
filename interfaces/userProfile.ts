@@ -9,5 +9,4 @@ export interface UserProfile {
   phoneNumber: string;
   firstName: string;
   lastName: string;
-  source?: string;
 }

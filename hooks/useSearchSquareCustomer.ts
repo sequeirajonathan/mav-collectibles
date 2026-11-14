@@ -3,15 +3,15 @@ import { fetcherPost } from '@lib/swr';
 import { SquareCustomer } from '@interfaces/square';
 import { toast } from 'react-hot-toast';
 
-export function useSearchSquareCustomer(phoneNumber?: string) {
-  // Convert to E.164 if it's a 10-digit US number
-  const e164Phone = phoneNumber && phoneNumber.length === 10
-    ? `+1${phoneNumber}`
-    : phoneNumber;
-
-  const { data, error, isLoading } = useSWR<SquareCustomer>(
-    e164Phone ? '/square/customers/search' : null,
-    (url) => fetcherPost(url, { phoneNumber: e164Phone }),
+/**
+ * Loads the signed-in user's own Square customer record. The server decides
+ * which customer that is; pass the user id only so the request waits for sign-in
+ * and refetches when the user changes.
+ */
+export function useSearchSquareCustomer(userId?: string) {
+  const { data, error, isLoading } = useSWR<SquareCustomer | null>(
+    userId ? ['/square/customers/search', userId] : null,
+    ([url]: [string, string]) => fetcherPost(url, {}),
     {
       onError: (error) => {
         console.error('Failed to fetch customer:', error);
@@ -21,8 +21,8 @@ export function useSearchSquareCustomer(phoneNumber?: string) {
   );
 
   return {
-    customer: data,
+    customer: data ?? undefined,
     isLoading,
     error
   };
-} 
+}

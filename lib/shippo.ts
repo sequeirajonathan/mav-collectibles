@@ -1,10 +1,12 @@
+import "server-only";
 import { Shippo } from "shippo";
+import { serverEnv } from "@lib/env.server";
 import { SquareCustomerAddress } from "@interfaces/square";
 
 function createShippoClient() {
-  return new Shippo({
-    apiKeyHeader: process.env.NEXT_PUBLIC_SHIPPO_ACCESS_TOKEN!,
-  });
+  const apiKey = serverEnv().SHIPPO_API_KEY;
+  if (!apiKey) throw new Error("SHIPPO_API_KEY is not configured");
+  return new Shippo({ apiKeyHeader: apiKey });
 }
 
 interface ShippoAddressValidationResult {

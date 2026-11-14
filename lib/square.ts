@@ -1,10 +1,13 @@
+import "server-only";
 import { SquareClient, SquareEnvironment } from 'square';
+import { serverEnv } from '@lib/env.server';
 
 export function createSquareClient() {
+  const env = serverEnv();
   return new SquareClient({
-    environment: process.env.SQUARE_ENVIRONMENT === 'production'
+    environment: env.SQUARE_ENVIRONMENT === 'production'
       ? SquareEnvironment.Production
       : SquareEnvironment.Sandbox,
-    token: process.env.SQUARE_ACCESS_TOKEN || '',
+    token: env.SQUARE_ACCESS_TOKEN,
   });
-} 
+}

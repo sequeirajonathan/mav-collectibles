@@ -1,19 +1,10 @@
 "use client";
 
-interface FieldErrorLike {
-  message: string;
-  longMessage?: string;
-}
-
-interface GlobalErrorLike {
-  message: string;
-}
-
-export function FieldErrorText({ error }: { error: FieldErrorLike | null | undefined }) {
+export function FieldErrorText({ error }: { error: string | null | undefined }) {
   if (!error) return null;
   return (
     <p className="text-sm text-red-400 mt-1" role="alert">
-      {error.longMessage ?? error.message}
+      {error}
     </p>
   );
 }
@@ -22,7 +13,7 @@ export function GlobalErrors({
   errors,
   localError,
 }: {
-  errors: GlobalErrorLike[] | null | undefined;
+  errors: { message: string }[] | null | undefined;
   localError?: string | null;
 }) {
   const messages = [

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useUser, useReverification } from "@clerk/nextjs";
+import { useAuth } from "@contexts/AuthContext";
+import { createClient } from "@utils/supabase/client";
 import { useSearchSquareCustomer } from '@hooks/useSearchSquareCustomer';
 import { useUpdateSquareCustomer } from '@hooks/useUpdateSquareCustomer';
 import { toast } from 'react-hot-toast';
-import { SquareCustomer, SquareCustomerAddress, UpdateSquareCustomerData } from '@interfaces/square';
+import { SquareCustomer, SquareCustomerAddress } from '@interfaces/square';
 import { AddressSelectionDialog } from "@components/ui/AddressSelectionDialog";
 import { Copy } from 'lucide-react';
 
@@ -35,9 +36,9 @@ interface AddressSuggestionResponse {
 type CustomerUpdateResponse = SquareCustomer | AddressSuggestionResponse;
 
 export default function ProfilePage() {
-  const { user } = useUser();
-  const phoneNumber = user?.phoneNumbers?.[0]?.phoneNumber?.replace(/\D/g, '').slice(-10);
-  const { customer } = useSearchSquareCustomer(phoneNumber);
+  const { user, profile, refreshProfile } = useAuth();
+  // The server finds the caller's own Square customer (and links it on first use).
+  const { customer } = useSearchSquareCustomer(user?.id);
   const { updateCustomer, isUpdating } = useUpdateSquareCustomer();
   const [formData, setFormData] = useState<CustomerFormData>({
     firstName: "",
@@ -53,14 +54,16 @@ export default function ProfilePage() {
   const [addressSuggestion, setAddressSuggestion] = useState<AddressSuggestionResponse | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const updatePhoneNumber = useReverification(async (newPhone: string) => {
-    await user?.createPhoneNumber({ phoneNumber: newPhone });
-  });
+  const updatePhoneNumber = async (newPhone: string) => {
+    if (!user) return;
+    const { error } = await createClient().from("profiles").update({ phone: newPhone }).eq("id", user.id);
+    if (error) throw error;
+    await refreshProfile();
+  };
 
   useEffect(() => {
     if (customer) {
       console.log('Square Customer Phone:', customer.phoneNumber);
-      console.log('Clerk User Phone:', user?.phoneNumbers?.[0]?.phoneNumber);
       console.log('Square Customer ReferenceId:', customer.referenceId);
       const loadedData = {
         firstName: customer.givenName || "",
@@ -75,47 +78,8 @@ export default function ProfilePage() {
       setOriginalFormData(loadedData);
       setReferenceId(customer.referenceId);
     }
-  }, [customer, user]);
+  }, [customer]);
 
-  // Ensure Square customer has referenceId set to Clerk user ID
-  useEffect(() => {
-    if (
-      user?.id &&
-      customer?.id &&
-      customer.referenceId !== user.id && // Only if referenceId is missing or different
-      customer.referenceId !== undefined // Only if referenceId is not undefined
-    ) {
-      const updatePayload: UpdateSquareCustomerData = {
-        customerId: customer.id,
-        referenceId: user.id,
-      };
-      if (customer.givenName) {
-        updatePayload.givenName = customer.givenName;
-      } else if (customer.emailAddress) {
-        updatePayload.emailAddress = customer.emailAddress;
-      } else if (customer.familyName) {
-        updatePayload.familyName = customer.familyName;
-      }
-      console.log('[Square RefID Update] Sending payload:', updatePayload);
-      updateCustomer(updatePayload)
-        .then((response) => {
-          console.log('[Square RefID Update] Response:', response);
-          // Optionally, you could refetch customer data here if needed
-          console.log('Added Clerk user ID as referenceId to Square customer');
-        })
-        .catch((err) => {
-          console.error('[Square RefID Update] Failed to update Square customer referenceId:', err);
-        });
-    }
-  }, [
-    user?.id,
-    customer?.id,
-    customer?.referenceId,
-    updateCustomer,
-    customer?.givenName,
-    customer?.familyName,
-    customer?.emailAddress,
-  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,16 +99,15 @@ export default function ProfilePage() {
         return;
       }
 
-      // Update Clerk phone number if it has changed
-      const currentClerkPhone = user?.phoneNumbers?.[0]?.phoneNumber;
-      const newClerkPhone = `+1${formattedPhone}`;
+      // Update the account phone number if it has changed
+      const currentPhone = profile?.phone;
+      const newPhone = `+1${formattedPhone}`;
       
-      if (currentClerkPhone !== newClerkPhone) {
+      if (currentPhone !== newPhone) {
         try {
-          await updatePhoneNumber(newClerkPhone);
-          console.log('Clerk phone number updated successfully');
+          await updatePhoneNumber(newPhone);
         } catch (error) {
-          console.error('Error updating Clerk phone number:', error);
+          console.error('Error updating phone number:', error);
           toast.error('Failed to update phone number in account');
           return;
         }

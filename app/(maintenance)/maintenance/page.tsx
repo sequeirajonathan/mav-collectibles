@@ -6,11 +6,13 @@ import { Button } from "@components/ui/button";
 import Image from "next/image";
 import { LoginModal } from "@components/ui/LoginModal";
 import CautionTape from "@components/ui/CautionTape";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@contexts/AuthContext";
+import { isMaintenanceMode } from "@lib/env";
 
 export default function MaintenancePage() {
   const router = useRouter();
-  const { userId } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isElectronRef = useRef(false);
 
@@ -38,7 +40,7 @@ export default function MaintenancePage() {
 
   // bypass the page if maintenance mode is off, admin is logged in, or it's an Electron app
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "true" || userId || isElectronRef.current) {
+    if (!isMaintenanceMode() || userId || isElectronRef.current) {
       if (isElectronRef.current) {
         router.push("/print-agent/login");
       } else {

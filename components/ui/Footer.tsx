@@ -31,7 +31,8 @@ const businessInfo = {
 
 const Footer = () => {
   const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID;
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  // Browser key for the Maps Embed API only; restrict it by HTTP referrer in Google Cloud.
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY;
 
   return (
     <footer className="bg-black border-t border-gray-800 pt-10 pb-4 px-4">

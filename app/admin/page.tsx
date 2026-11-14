@@ -9,30 +9,16 @@ import VideoSettingsTab from "@components/admin/VideoSettingsTab";
 import RolesTab from "@components/admin/RolesTab";
 import DownloadsTab from "@components/admin/DownloadsTab";
 import InstallerUploadTab from "@components/admin/InstallerUploadTab";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@contexts/AuthContext";
 import { UserRole } from "@interfaces/roles";
-import { redirect } from "next/navigation";
-import { useEffect } from "react";
 import "@styles/admin.css";
 
 export default function AdminDashboard() {
-  const { user, isLoaded } = useUser();
+  // Access is enforced by the proxy (lib/auth/access.ts); this only avoids
+  // rendering before the session has loaded on the client.
+  const { user, role, isLoaded } = useAuth();
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      const role = user.publicMetadata?.role as string || UserRole.USER;
-      if (role !== UserRole.ADMIN) {
-        redirect('/');
-      }
-    }
-  }, [isLoaded, user]);
-
-  if (!isLoaded || !user) {
-    return null;
-  }
-
-  const role = user.publicMetadata?.role as string || UserRole.USER;
-  if (role !== UserRole.ADMIN) {
+  if (!isLoaded || !user || role !== UserRole.ADMIN) {
     return null;
   }
 

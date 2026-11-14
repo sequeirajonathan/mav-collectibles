@@ -1,0 +1,76 @@
+# Test environment: every PR (and every deploy) runs against a throwaway
+# Supabase stack built from supabase/migrations + supabase/seed.sql.
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, migrate, build, e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Square/Shippo are never called for real in CI.
+      SQUARE_ENVIRONMENT: sandbox
+      SQUARE_ACCESS_TOKEN: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Start local Supabase (applies migrations + seed)
+        run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,postgres-meta
+
+      - name: Export local Supabase settings
+        run: |
+          npx supabase status -o env \
+            --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+            --override-name auth.publishable_key=NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
+            --override-name auth.secret_key=SUPABASE_SECRET_KEY \
+            --override-name db.url=DATABASE_URL \
+            | grep -E '^(NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY|SUPABASE_SECRET_KEY|DATABASE_URL)=' \
+            | sed 's/"//g' >> "$GITHUB_ENV"
+
+      - name: Lint database functions
+        run: npx supabase db lint --level error
+
+      - name: Check Prisma schema matches migrations
+        run: npm run db:check-prisma
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end auth and access-control tests
+        run: |
+          npm run start -- -p 3000 > next.log 2>&1 &
+          npx --yes wait-on@8.0.3 --timeout 60000 http://localhost:3000
+          npm run test:e2e
+
+      - name: Server log on failure
+        if: failure()
+        run: cat next.log || true

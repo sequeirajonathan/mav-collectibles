@@ -1,43 +1,31 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import DashboardClient from "@components/ui/DashboardClient";
 import { UserProfile } from "@interfaces/userProfile";
-import { UserRole } from "@interfaces/roles";
+import { parseRole, UserRole } from "@interfaces/roles";
+import { createClient } from "@utils/supabase/server";
+import { prisma } from "@lib/prisma";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  const user = await currentUser();
-  
-  console.log('Raw User Data from Backend:', {
-    userId,
-    user,
-    publicMetadata: user?.publicMetadata
-  });
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  if (!user) redirect("/sign-in?next=/dashboard");
 
-  if (!userId || !user) {
-    redirect("/sign-in");
-  }
+  const role = parseRole(user.app_metadata?.role);
+  if (role === UserRole.PRINT_AGENT) redirect("/print-agent");
 
-  const source = (user.publicMetadata?.source as string) || '';
-  if (source === 'print-agent') {
-    redirect('/print-agent');
-  }
-
-  const phoneNumber = user.phoneNumbers[0]?.phoneNumber?.replace(/^\+1/, '') || '';
+  const profile = await prisma.profile.findUnique({ where: { id: user.id } });
 
   const userData: UserProfile = {
     id: user.id,
-    email: user.emailAddresses[0]?.emailAddress || '',
-    role: (user.publicMetadata?.role as UserRole) || UserRole.USER,
-    createdAt: new Date(Number(user.createdAt)).toISOString(),
-    lastSignInAt: user.lastSignInAt ? new Date(Number(user.lastSignInAt)).toISOString() : undefined,
-    phoneNumber,
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
-    source: (user.publicMetadata?.source as string) || '',
+    email: user.email ?? "",
+    role,
+    createdAt: user.created_at,
+    lastSignInAt: user.last_sign_in_at ?? undefined,
+    phoneNumber: profile?.phone?.replace(/^\+1/, "") ?? "",
+    firstName: profile?.first_name ?? "",
+    lastName: profile?.last_name ?? "",
   };
 
-  console.log('Constructed User Data:', userData);
-
   return <DashboardClient user={userData} />;
-} 
+}

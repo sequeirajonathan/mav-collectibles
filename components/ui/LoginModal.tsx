@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { LoginForm } from './LoginForm';
 import { Button } from '@components/ui/button';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@contexts/AuthContext';
 import { useEffect } from 'react';
 
 interface LoginModalProps {
@@ -13,13 +13,13 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const { user } = useUser();
+  const { user } = useAuth();
 
   // Close modal when user is authenticated
   useEffect(() => {
     if (user && isOpen) {
       if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
-        console.log('🔐 LoginModal - User authenticated:', user.primaryEmailAddress?.emailAddress);
+        console.log('🔐 LoginModal - User authenticated:', user.email);
       }
       onClose();
     }
@@ -59,7 +59,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <X size={18} className="w-4 h-4 md:w-5 md:h-5" />
               </Button>
               <div className="mt-1 md:mt-0">
-                <LoginForm redirectTo="/admin" hideSignupLink={true} />
+                <LoginForm redirectTo="" hideSignupLink={true} />
               </div>
             </div>
           </motion.div>

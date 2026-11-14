@@ -1,20 +1,28 @@
 import type { NextConfig } from "next";
+import type { RemotePattern } from "next/dist/shared/lib/image-config";
+
+// Storage images are served from whichever Supabase project this environment uses.
+function supabaseImagePattern(): RemotePattern[] {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return [];
+  const { protocol, hostname, port } = new URL(url);
+  return [
+    {
+      protocol: protocol.replace(":", "") as "http" | "https",
+      hostname,
+      port,
+      pathname: "/storage/v1/object/public/**",
+    },
+  ];
+}
 
 const nextConfig: NextConfig = {
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: "https://xuktdxadhwvdpmzscvgg.supabase.co",
-    NEXT_PUBLIC_SUPABASE_ANON_KEY:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1a3RkeGFkaHd2ZHBtenNjdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1ODYyMTcsImV4cCI6MjA2MDE2MjIxN30.OX7_vI_m3V1j_YobAyycZKN03BQEr9HzEEDlIP399vI",
-  },
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [75, 80, 90],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "xuktdxadhwvdpmzscvgg.supabase.co",
-      },
+      ...supabaseImagePattern(),
       {
         protocol: "https",
         hostname: "items-images-production.s3.us-west-2.amazonaws.com",

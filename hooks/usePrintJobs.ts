@@ -3,12 +3,7 @@ import { PrintJob } from '@validations/print-job';
 import { printJobSchema } from '@validations/print-job';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { createClient } from '@utils/supabase/client';
 
 export function usePrintJobs() {
   const {
@@ -26,6 +21,8 @@ export function usePrintJobs() {
   });
 
   useEffect(() => {
+    // Uses the signed-in user's session, so RLS limits this to staff and print agents.
+    const supabase = createClient();
     const channel = supabase
       .channel('print-jobs-ui')
       .on(

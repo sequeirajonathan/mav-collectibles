@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@lib/auth/server';
+import { assertCustomerOwnedBy, CustomerAccessError } from '@lib/square-customer';
 import { createSquareClient } from '@lib/square';
 import { updateCustomerSchema } from '@validations/square-customer';
 import { z } from 'zod';
@@ -9,18 +10,19 @@ import { serializeBigIntValues } from "@utils/serialization";
 
 export async function PUT(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, response: denied } = await requireUser();
+    if (denied) return denied;
 
     const body = await request.json();
-    console.log('Received update request:', body);
 
     const validatedData = updateCustomerSchema.parse(body);
-    console.log('Validated data:', validatedData);
 
     const { customerId, ...updateData } = validatedData;
+
+    // Users may only edit the Square customer linked to their own account.
+    await assertCustomerOwnedBy(customerId, user.id);
+    // The link itself can't be changed from the client.
+    delete (updateData as { referenceId?: string }).referenceId;
 
     // Validate address with Shippo if address is provided
     if (updateData.address) {
@@ -82,6 +84,9 @@ export async function PUT(request: Request) {
     );
   } catch (error) {
     console.error('Error updating Square customer:', error);
+    if (error instanceof CustomerAccessError) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
