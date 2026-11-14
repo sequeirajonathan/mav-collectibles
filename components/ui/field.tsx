@@ -1,7 +1,8 @@
 import { useId, type ReactNode } from "react";
 
+/** Text inputs, selects and textareas in hub/admin forms. */
 export const inputClass =
-  "w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground focus:border-gold disabled:opacity-60";
+  "w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-base text-foreground transition-colors placeholder:text-muted-foreground focus:border-gold disabled:opacity-60 can-hover:hover:border-line-strong";
 
 /** Label + control + hint/error, wired up for screen readers. */
 export function Field({

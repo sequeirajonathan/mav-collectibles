@@ -4,13 +4,15 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { ImageUpload } from "./image-upload";
 import { ConfirmButton } from "./confirm-button";
 import { createEvent, deleteEvent, duplicateEvent, updateEvent } from "@lib/actions/hub";
 import { EVENT_KINDS, EVENT_KIND_LABELS, type Game } from "@lib/contracts/hub";
 import { storeLocalToIso, STORE_TIME_ZONE } from "@lib/format";
 import type { EventFormValues } from "./event-form-values";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 const slugify = (v: string) => v.toLowerCase().normalize("NFKD").replace(/[^\w\s-]/g, "").trim().replace(/[\s_]+/g, "-").replace(/-+/g, "-").slice(0, 70);
 const toIso = (local: string) => (local ? storeLocalToIso(local) : "");
@@ -147,7 +149,7 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
         {(id) => <textarea id={id} rows={8} className={inputClass} value={v.description} onChange={(e) => set("description", e.target.value)} />}
       </Field>
       <ImageUpload label="Cover image" folder="events" value={v.coverImageUrl} onChange={(url) => set("coverImageUrl", url)} />
-      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-panel p-4">
+      <div className={cn(cardVariants({ padding: "md" }), "flex flex-wrap items-center gap-4")}>
         <Field label="Status">
           {(id) => (
             <select id={id} className={inputClass} value={v.status} onChange={(e) => set("status", (["draft", "published", "cancelled", "completed"] as const).find((s) => s === e.target.value) ?? "draft")}>

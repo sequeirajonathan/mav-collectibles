@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
+import { Skeleton } from "@components/ui/skeleton";
 import { BannerForm, CommunityForm, FlagToggles, MediaForms } from "@components/admin/site-settings";
 import { requirePageRole } from "@lib/auth/guard";
 import { UserRole } from "@interfaces/roles";
@@ -29,7 +30,7 @@ export default function AdminSitePage() {
   return (
     <>
       <PageHeader title="Site settings" />
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-96" />}>
         <Settings />
       </Suspense>
     </>

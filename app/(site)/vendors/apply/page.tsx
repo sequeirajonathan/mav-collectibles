@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { VendorApplyForm } from "@components/hub/vendor-apply-form";
 import { getCurrentUser } from "@lib/auth/server";
 import { getMyVendor, listEvents, listGames } from "@lib/data/hub";
+import { Skeleton } from "@components/ui/skeleton";
 
 export const metadata: Metadata = { title: "Apply for a vendor table" };
 
@@ -34,7 +35,7 @@ export default function VendorApplyPage() {
   return (
     <div className="mx-auto max-w-xl">
       <PageHeader eyebrow="Vendors" title="Apply for a table" description="Tell us what you bring. The MAV team reviews every application." />
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-96" />}>
         <ApplyForm />
       </Suspense>
     </div>

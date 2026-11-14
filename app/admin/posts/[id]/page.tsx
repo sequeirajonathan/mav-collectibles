@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { PostForm } from "@components/admin/post-form";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { getPostForEdit, listGames } from "@lib/data/hub";
 import { eventOptions } from "@lib/data/admin-options";
 import { uuid } from "@lib/contracts/common";
+import { Skeleton } from "@components/ui/skeleton";
 
 type Params = Promise<{ id: string }>;
 
@@ -31,7 +32,7 @@ async function Edit({ params }: { params: Params }) {
 
 export default function EditPostPage({ params }: { params: Params }) {
   return (
-    <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+    <Suspense fallback={<Skeleton className="h-96" />}>
       <Edit params={params} />
     </Suspense>
   );

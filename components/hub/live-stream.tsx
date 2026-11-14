@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { VideoSettings } from "@lib/contracts/site";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 /** HLS live stream. video.js (~250 KB) is loaded only when this component mounts. */
 export function LiveStream({ settings }: { settings: VideoSettings }) {
@@ -36,7 +38,7 @@ export function LiveStream({ settings }: { settings: VideoSettings }) {
   }, [settings]);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-panel">
+    <div className={cn(cardVariants(), "overflow-hidden")}>
       <div ref={container} />
       {error && <p className="px-4 py-3 text-sm text-muted-foreground">{error}</p>}
     </div>

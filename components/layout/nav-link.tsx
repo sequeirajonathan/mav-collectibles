@@ -12,8 +12,10 @@ export function NavLink({ href, children }: { href: Route; children: React.React
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-3 py-2 text-sm font-semibold transition-colors",
-        active ? "text-gold" : "text-foreground/80 hover:bg-panel-2 hover:text-foreground"
+        "relative rounded-md px-3 py-2 text-sm font-semibold transition-colors",
+        active
+          ? "text-gold after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gold"
+          : "text-foreground/80 hover:bg-panel-2 hover:text-foreground"
       )}
     >
       {children}

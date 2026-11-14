@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { PageHeader, EmptyState, SectionHeading } from "@components/hub/page-header";
+import { PageHeader, EmptyState, SectionHeading } from "@components/ui/page-header";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { PostCard } from "@components/hub/post-card";
 import { getCurrentUser } from "@lib/auth/server";
 import { listMyEvents, listSavedPosts } from "@lib/data/hub";
 import { withMyReactions } from "@lib/data/viewer";
 import { CONTENT_ROLES, UserRole } from "@interfaces/roles";
+import { Skeleton } from "@components/ui/skeleton";
+import { LinkButton } from "@components/ui/link-button";
 
 export const metadata: Metadata = { title: "My hub" };
 
@@ -23,9 +25,9 @@ async function Greeting() {
       description="Your RSVPs and saved posts, all in one place."
       actions={
         <>
-          <Link href="/profile" className="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-sm font-semibold hover:border-gold/60">Edit profile</Link>
+          <LinkButton href="/profile" variant="outline" size="sm">Edit profile</LinkButton>
           {CONTENT_ROLES.includes(user.role) && (
-            <Link href="/admin" className="inline-flex min-h-10 items-center rounded-md bg-gold px-3 text-sm font-bold text-ink hover:bg-gold-light">Admin</Link>
+            <LinkButton href="/admin" size="sm">Admin</LinkButton>
           )}
         </>
       }
@@ -82,7 +84,7 @@ export default function DashboardPage() {
       </section>
       <section>
         <SectionHeading title="Saved posts" href="/feed" linkLabel="News feed" />
-        <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-panel" />}>
+        <Suspense fallback={<Skeleton className="h-40" />}>
           <SavedPosts />
         </Suspense>
       </section>

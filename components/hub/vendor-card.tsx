@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Vendor } from "@lib/contracts/hub";
 import { formatEventWhen } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 import { GameBadge } from "./badges";
 
 export function VendorAvatar({ vendor, size = 48 }: { vendor: Pick<Vendor, "name" | "logoUrl">; size?: number }) {
@@ -15,11 +17,11 @@ export function VendorAvatar({ vendor, size = 48 }: { vendor: Pick<Vendor, "name
 export function VendorCard({ vendor }: { vendor: Vendor }) {
   const next = vendor.upcomingEvents[0];
   return (
-    <Link href={`/vendors/${vendor.slug}`} className="flex flex-col gap-3 rounded-xl border border-line bg-panel p-4 hover:border-gold/50">
+    <Link href={`/vendors/${vendor.slug}`} className={cn(cardVariants({ variant: "interactive", padding: "md" }), "group flex flex-col gap-3")}>
       <div className="flex items-center gap-3">
         <VendorAvatar vendor={vendor} />
         <div className="min-w-0">
-          <h3 className="truncate font-bold text-foreground">{vendor.name}</h3>
+          <h3 className="truncate font-bold text-foreground can-hover:group-hover:text-gold-light">{vendor.name}</h3>
           {vendor.specialties && <p className="line-clamp-1 text-sm text-muted-foreground">{vendor.specialties}</p>}
         </div>
       </div>

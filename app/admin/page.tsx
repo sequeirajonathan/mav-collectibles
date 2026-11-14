@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { prisma } from "@lib/prisma";
 import { listAllEventsForStaff } from "@lib/data/hub";
 import { capacityLabel, formatEventWhen } from "@lib/format";
 import { requestTime, upcomingOnly } from "@lib/hub-rules";
+import { cardVariants } from "@components/ui/card";
+import { Skeleton } from "@components/ui/skeleton";
+import { LinkButton } from "@components/ui/link-button";
 
 async function Overview() {
   await requirePageRole(CONTENT_ROLES, "/admin");
@@ -18,15 +21,16 @@ async function Overview() {
   ]);
   const upcoming = upcomingOnly(events, requestTime()).reverse().slice(0, 5);
   const drafts = events.filter((e) => e.status === "draft").length;
-  const stat = "rounded-xl border border-line bg-panel p-4";
+  const stat = cardVariants({ padding: "md" });
+  const linkStat = cardVariants({ variant: "interactive", padding: "md" });
   return (
     <>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Link href="/admin/vendors" className={`${stat} hover:border-gold/50`}>
+        <Link href="/admin/vendors" className={linkStat}>
           <p className="text-3xl font-extrabold text-gold">{pendingVendors}</p>
           <p className="text-sm text-muted-foreground">Vendor applications waiting</p>
         </Link>
-        <Link href="/admin/events" className={`${stat} hover:border-gold/50`}>
+        <Link href="/admin/events" className={linkStat}>
           <p className="text-3xl font-extrabold">{drafts}</p>
           <p className="text-sm text-muted-foreground">Draft events</p>
         </Link>
@@ -43,7 +47,7 @@ async function Overview() {
       {upcoming.length === 0 ? (
         <p className="text-muted-foreground">Nothing published coming up.</p>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+        <ul className={cardVariants({ variant: "list" })}>
           {upcoming.map((e) => (
             <li key={e.id} className="flex flex-col gap-2 p-4 fold:flex-row fold:items-center">
               <div className="min-w-0 flex-1">
@@ -51,8 +55,8 @@ async function Overview() {
                 <p className="text-sm text-muted-foreground">{formatEventWhen(e.startsAt)} · {capacityLabel(e.capacity, e.registeredCount, e.waitlistCount)}</p>
               </div>
               <div className="flex gap-2">
-                <Link href={`/admin/events/${e.id}/attendees`} className="inline-flex min-h-10 items-center rounded-md bg-gold px-3 text-sm font-bold text-ink">Check-in</Link>
-                <Link href={`/admin/events/${e.id}`} className="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-sm font-semibold">Edit</Link>
+                <LinkButton href={`/admin/events/${e.id}/attendees`} size="sm">Check-in</LinkButton>
+                <LinkButton href={`/admin/events/${e.id}`} variant="outline" size="sm">Edit</LinkButton>
               </div>
             </li>
           ))}
@@ -69,12 +73,12 @@ export default function AdminHome() {
         title="Dashboard"
         actions={
           <>
-            <Link href="/admin/events/new" className="inline-flex min-h-10 items-center rounded-md bg-gold px-4 text-sm font-bold text-ink hover:bg-gold-light">New event</Link>
-            <Link href="/admin/posts/new" className="inline-flex min-h-10 items-center rounded-md border border-line px-4 text-sm font-semibold hover:border-gold/60">New post</Link>
+            <LinkButton href="/admin/events/new" size="sm">New event</LinkButton>
+            <LinkButton href="/admin/posts/new" variant="outline" size="sm">New post</LinkButton>
           </>
         }
       />
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-64" />}>
         <Overview />
       </Suspense>
     </>

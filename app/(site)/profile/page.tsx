@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { ProfileForm } from "@components/account/profile-form";
 import { AddressForm } from "@components/account/address-form";
 import { getCurrentUser } from "@lib/auth/server";
 import { listGames } from "@lib/data/hub";
 import { getMyCustomer } from "@lib/data/customer";
 import { prisma } from "@lib/prisma";
+import { Skeleton } from "@components/ui/skeleton";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -41,7 +42,7 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Profile" />
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-96" />}>
         <Profile />
       </Suspense>
       <div className="mt-8">

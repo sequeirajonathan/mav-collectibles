@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CalendarDays, Megaphone, Store, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays, Megaphone, Store, Trophy } from "lucide-react";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { PostCard, PostCardSkeleton } from "@components/hub/post-card";
-import { SectionHeading, EmptyState } from "@components/hub/page-header";
+import { SectionHeading, EmptyState } from "@components/ui/page-header";
 import { DiscordCta } from "@components/hub/discord";
 import { GameBadge, KindBadge } from "@components/hub/badges";
 import { GoogleReviews } from "@components/hub/google-reviews";
@@ -14,6 +14,34 @@ import { getLeaderboard, listEvents, listGames, listPosts } from "@lib/data/hub"
 import { withMyReactions } from "@lib/data/viewer";
 import { getFlags, getVideoSettings, getYouTubeSettings } from "@lib/data/site";
 import { capacityLabel, formatEventWhen } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
+import { Skeleton } from "@components/ui/skeleton";
+import { LinkButton } from "@components/ui/link-button";
+import { buttonVariants } from "@components/ui/button";
+import { ChipLink, chipRowClass } from "@components/ui/chip";
+import { Eyebrow } from "@components/ui/page-header";
+import { RankMark } from "@components/hub/badges";
+
+/** Decorative fan of trading cards for the hero on wide screens. Pure CSS, hidden from assistive tech. */
+function HeroCards() {
+  const card = "absolute top-1/2 aspect-[5/7] w-28 rounded-xl border shadow-2xl shadow-black/60 xl:w-32";
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-10 hidden w-72 lg:block xl:right-16">
+      <div className={cn(card, "left-4 -translate-y-1/2 -rotate-12 border-line bg-gradient-to-br from-panel-2 to-ink")} />
+      <div className={cn(card, "left-36 -translate-y-1/2 rotate-12 border-discord/40 bg-gradient-to-br from-discord/30 to-ink")} />
+      <div className={cn(card, "left-20 -translate-y-[55%] border-gold/60 bg-gradient-to-br from-gold-light via-gold to-gold-dark p-2")}>
+        <div className="flex h-full items-center justify-center rounded-lg border border-ink/20">
+          <div className="relative size-12 overflow-hidden rounded-full border-4 border-ink bg-foreground">
+            <div className="absolute inset-x-0 top-0 h-1/2 bg-danger" />
+            <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-ink" />
+            <div className="absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-ink bg-foreground" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 async function Spotlight() {
   const events = await listEvents({ limit: 12 });
@@ -22,13 +50,22 @@ async function Spotlight() {
   return (
     <Link
       href={`/events/${spotlight.slug}`}
-      className="group relative mt-6 block overflow-hidden rounded-2xl border border-gold/40 bg-panel fold:mt-8"
+      className={cn(
+        cardVariants({ variant: "featured", radius: "2xl" }),
+        "group relative mt-4 block overflow-hidden transition-shadow duration-300 can-hover:hover:shadow-glow fold:mt-6"
+      )}
     >
       {spotlight.coverImageUrl && (
-        <Image src={spotlight.coverImageUrl} alt="" fill priority sizes="(min-width: 1280px) 1280px, 100vw" className="object-cover opacity-40 transition-opacity group-hover:opacity-50" />
+        <Image src={spotlight.coverImageUrl} alt="" fill priority sizes="(min-width: 1280px) 1280px, 100vw" className="object-cover opacity-40 transition-[opacity,scale] duration-500 can-hover:group-hover:scale-[1.02] can-hover:group-hover:opacity-50" />
       )}
       <div className="relative bg-gradient-to-r from-black/90 via-black/70 to-transparent p-5 fold:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Next up</p>
+        <Eyebrow className="flex items-center gap-2">
+          <span aria-hidden className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-gold" />
+          </span>
+          Next up
+        </Eyebrow>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {spotlight.game && <GameBadge game={spotlight.game} />}
           <KindBadge kind={spotlight.kind} />
@@ -36,8 +73,9 @@ async function Spotlight() {
         <h2 className="mt-2 max-w-xl text-2xl font-extrabold leading-tight fold:text-3xl">{spotlight.title}</h2>
         <p className="mt-1 text-foreground/80">{formatEventWhen(spotlight.startsAt, spotlight.endsAt)}</p>
         <p className="mt-1 text-sm text-muted-foreground">{capacityLabel(spotlight.capacity, spotlight.registeredCount, spotlight.waitlistCount)}</p>
-        <span className="mt-4 inline-flex min-h-11 items-center rounded-md bg-gold px-5 font-bold text-ink group-hover:bg-gold-light">
+        <span className={cn(buttonVariants(), "mt-4 can-hover:group-hover:bg-gold-light")}>
           Details & RSVP
+          <ArrowRight aria-hidden className="transition-transform can-hover:group-hover:translate-x-0.5" />
         </span>
       </div>
     </Link>
@@ -76,16 +114,11 @@ async function LatestPosts() {
 async function GameStrip() {
   const games = await listGames();
   return (
-    <nav aria-label="Games we play" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:flex-wrap fold:px-0">
+    <nav aria-label="Games we play" className={chipRowClass}>
       {games.map((g) => (
-        <Link
-          key={g.id}
-          href={`/events?game=${g.id}`}
-          className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border border-line bg-panel px-4 text-sm font-semibold hover:border-gold/60"
-        >
-          <span aria-hidden className="size-2 rounded-full" style={{ backgroundColor: g.color }} />
+        <ChipLink key={g.id} href={`/events?game=${g.id}`} dot={g.color} className="px-4 font-semibold text-foreground">
           {g.shortName}
-        </Link>
+        </ChipLink>
       ))}
     </nav>
   );
@@ -97,10 +130,10 @@ async function PokemonStandings() {
   return (
     <section>
       <SectionHeading title="Pokémon standings" href="/leaderboard?game=pokemon" linkLabel="Full leaderboard" />
-      <ol className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+      <ol className={cardVariants({ variant: "list" })}>
         {rows.map((r) => (
           <li key={`${r.rank}-${r.playerName}`} className="flex items-center gap-3 px-4 py-3">
-            <span className="w-6 text-center font-extrabold text-gold">{r.rank}</span>
+            <RankMark rank={r.rank} />
             <span className="min-w-0 flex-1 truncate font-semibold">{r.playerName}</span>
             <span className="font-bold tabular-nums">{r.points} pts</span>
           </li>
@@ -142,21 +175,28 @@ export default function HomePage() {
   return (
     <div className="space-y-12 fold:space-y-14">
       <section>
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Montgomery, TX</p>
-        <h1 className="mt-2 max-w-3xl text-3xl font-extrabold leading-[1.1] tracking-tight fold:text-5xl short:text-3xl">
-          Your home for Pokémon <span className="text-gold">&</span> every TCG.
-        </h1>
-        <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
-          League nights, tournaments, prereleases and vendor days. RSVP, track your season points and never miss a release.
-        </p>
-        <Suspense fallback={<div className="mt-6 h-48 animate-pulse rounded-2xl bg-panel fold:mt-8" />}>
+        <div className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-12 short:py-6">
+          <HeroCards />
+          <div className="relative max-w-3xl lg:max-w-xl xl:max-w-2xl">
+            <Eyebrow>Montgomery, TX</Eyebrow>
+            <h1 className="mt-2 text-3xl font-extrabold leading-[1.1] tracking-tight fold:text-5xl short:text-3xl">
+              Your home for <span className="text-foil">Pokémon</span> <span className="text-gold">&</span> every TCG.
+            </h1>
+            <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
+              League nights, tournaments, prereleases and vendor days. RSVP, track your season points and never miss a release.
+            </p>
+          </div>
+        </div>
+        <Suspense fallback={<Skeleton className="mt-4 h-48 rounded-2xl fold:mt-6" />}>
           <Spotlight />
         </Suspense>
-        <ul className="mt-6 grid grid-cols-2 gap-2 fold:gap-3 lg:grid-cols-4">
+        <ul className="mt-4 grid grid-cols-2 gap-2 fold:mt-6 fold:gap-3 lg:grid-cols-4">
           {QUICK_LINKS.map(({ href, label, description, Icon }) => (
             <li key={href}>
-              <Link href={href} className="flex h-full flex-col gap-1 rounded-xl border border-line bg-panel p-3 hover:border-gold/50 fold:p-4">
-                <Icon className="size-5 text-gold" />
+              <Link href={href} className={cn(cardVariants({ variant: "interactive" }), "group flex h-full flex-col gap-1 p-3 fold:p-4")}>
+                <span className="mb-1 inline-flex size-9 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 transition-colors can-hover:group-hover:bg-gold/20">
+                  <Icon className="size-5 text-gold" />
+                </span>
                 <span className="font-bold">{label}</span>
                 <span className="text-xs text-muted-foreground fold:text-sm">{description}</span>
               </Link>
@@ -167,7 +207,7 @@ export default function HomePage() {
 
       <section>
         <SectionHeading title="Coming up" href="/events" linkLabel="All events" />
-        <Suspense fallback={<div className="h-10" />}>
+        <Suspense fallback={<div className="h-11 can-hover:h-9" />}>
           <GameStrip />
         </Suspense>
         <div className="mt-4">
@@ -185,18 +225,18 @@ export default function HomePage() {
         <Suspense fallback={null}>
           <PokemonStandings />
         </Suspense>
-        <section className="rounded-2xl border border-line bg-gradient-to-br from-panel to-panel-2 p-5 fold:p-6">
+        <section className={cn(cardVariants({ radius: "2xl" }), "bg-gradient-to-br from-panel to-panel-2 p-5 fold:p-6")}>
           <h2 className="text-xl font-bold">Sell or trade at MAV</h2>
           <p className="mt-2 text-foreground/80">
             Vendors set up at the shop on vendor days. Bring your binder, slabs and sealed product and meet the community.
           </p>
           <div className="mt-4 flex flex-col gap-2 fold:flex-row">
-            <Link href="/vendors" className="inline-flex min-h-11 items-center justify-center rounded-md border border-line px-4 font-semibold hover:border-gold/60">
+            <LinkButton href="/vendors" variant="outline">
               Meet the vendors
-            </Link>
-            <Link href="/vendors/apply" className="inline-flex min-h-11 items-center justify-center rounded-md bg-gold px-4 font-bold text-ink hover:bg-gold-light">
+            </LinkButton>
+            <LinkButton href="/vendors/apply">
               Apply for a table
-            </Link>
+            </LinkButton>
           </div>
         </section>
       </div>

@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import type { EventSummary } from "@lib/contracts/hub";
 import { capacityLabel, dateBlock, formatEntryFee, formatEventWhen } from "@lib/format";
+import { Card, cardVariants } from "@components/ui/card";
+import { Skeleton } from "@components/ui/skeleton";
 import { GameBadge, KindBadge } from "./badges";
 import { cn } from "@utils";
 
@@ -10,7 +12,7 @@ function DateBlock({ iso, className }: { iso: string; className?: string }) {
   return (
     <div
       className={cn(
-        "flex w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-gold/40 bg-ink py-1.5 text-center",
+        "flex w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-gold/40 bg-gradient-to-b from-panel-2 to-ink py-1.5 text-center shadow-inner",
         className
       )}
     >
@@ -27,8 +29,14 @@ export function EventCard({ event, priority = false }: { event: EventSummary; pr
   return (
     <Link
       href={`/events/${event.slug}`}
-      className="group flex gap-3 rounded-xl border border-line bg-panel p-3 transition-colors can-hover:hover:border-gold/50 fold:gap-4 fold:p-4"
+      className={cn(cardVariants({ variant: "interactive" }), "group relative flex gap-3 overflow-hidden p-3 pl-4 fold:gap-4 fold:p-4 fold:pl-5")}
     >
+      {/* Game-colour accent along the leading edge. */}
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-1 bg-gold/60"
+        style={event.game ? { backgroundColor: event.game.color } : undefined}
+      />
       {event.coverImageUrl ? (
         <div className="relative hidden aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-lg fold:block">
           <Image src={event.coverImageUrl} alt="" fill sizes="112px" className="object-cover" priority={priority} />
@@ -58,14 +66,14 @@ export function EventCard({ event, priority = false }: { event: EventSummary; pr
 
 export function EventCardSkeleton() {
   return (
-    <div className="flex animate-pulse gap-3 rounded-xl border border-line bg-panel p-3 fold:p-4">
-      <div className="h-16 w-14 rounded-lg bg-panel-2" />
+    <Card className="flex gap-3 p-3 fold:p-4">
+      <Skeleton className="h-16 w-14 rounded-lg bg-panel-2" />
       <div className="flex-1 space-y-2 py-1">
-        <div className="h-3 w-24 rounded bg-panel-2" />
-        <div className="h-4 w-3/4 rounded bg-panel-2" />
-        <div className="h-3 w-1/2 rounded bg-panel-2" />
+        <Skeleton className="h-3 w-24 rounded bg-panel-2" />
+        <Skeleton className="h-4 w-3/4 rounded bg-panel-2" />
+        <Skeleton className="h-3 w-1/2 rounded bg-panel-2" />
       </div>
-    </div>
+    </Card>
   );
 }
 

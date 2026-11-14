@@ -7,6 +7,8 @@ import { apiRequest } from "@lib/api/client";
 import { catalogPageSchema, type CatalogPage } from "@lib/contracts/catalog";
 import { ProductCard, ProductGridSkeleton } from "./product-card";
 import { SORTS, STOCKS } from "./catalog-filters";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 type Source = { kind: "category"; slug: string; group?: string } | { kind: "search"; query: string };
 
@@ -63,7 +65,7 @@ export function CatalogGrid({ source, initialPage }: { source: Source; initialPa
 
   const items = query.data.pages.flatMap((p) => p.items);
   if (items.length === 0) {
-    return <p className="rounded-xl border border-dashed border-line px-6 py-10 text-center text-muted-foreground">No products match these filters.</p>;
+    return <p className={cn(cardVariants({ variant: "dashed" }), "px-6 py-10 text-center text-muted-foreground")}>No products match these filters.</p>;
   }
 
   return (

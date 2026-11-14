@@ -9,7 +9,7 @@ import { NavLink } from "./nav-link";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-background/85 pt-[env(safe-area-inset-top)] backdrop-blur-md [--header-h:4rem]">
+    <header className="sticky top-0 z-40 bg-background/85 pt-[env(safe-area-inset-top)] backdrop-blur-md [--header-h:4rem]">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-safe short:h-12 lg:gap-6">
         <Link href="/" className="flex shrink-0 items-center" aria-label="MAV Collectibles home">
           <Image src="/mav_collectibles.png" alt="" width={120} height={48} priority className="h-10 w-auto short:h-8" />
@@ -23,7 +23,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">
-          <form action="/search" className="hidden items-center gap-2 rounded-full border border-line bg-panel px-3 lg:flex">
+          <form action="/search" className="hidden items-center gap-2 rounded-full border border-line bg-panel px-3 transition-colors focus-within:border-gold lg:flex">
             <Search className="size-4 text-muted-foreground" />
             <label htmlFor="header-search" className="sr-only">Search products</label>
             <input id="header-search" name="q" type="search" placeholder="Search products" className="h-9 w-44 bg-transparent text-sm outline-none" />
@@ -38,6 +38,8 @@ export function SiteHeader() {
           </Suspense>
         </div>
       </div>
+      {/* Gold hairline under the header. */}
+      <div aria-hidden className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
     </header>
   );
 }

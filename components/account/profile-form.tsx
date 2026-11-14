@@ -4,11 +4,13 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
-import { PhoneInput } from "@components/ui/PhoneInput";
+import { Field, inputClass } from "@components/ui/field";
+import { PhoneInput } from "@components/ui/phone-input";
 import { updateMyProfile } from "@lib/actions/account";
 import { getBrowserClient } from "@utils/supabase/client";
 import type { Game } from "@lib/contracts/hub";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 const toDisplayPhone = (e164: string | null) => {
   const d = (e164 ?? "").replace(/\D/g, "").slice(-10);
@@ -61,7 +63,7 @@ export function ProfileForm({
 
   return (
     <div className="space-y-8">
-      <form onSubmit={save} className="space-y-5 rounded-xl border border-line bg-panel p-4 fold:p-6">
+      <form onSubmit={save} className={cn(cardVariants({ padding: "lg" }), "space-y-5")}>
         <h2 className="text-lg font-bold">Your details</h2>
         <p className="text-sm text-muted-foreground">
           Username <strong className="text-foreground">{profile.username ?? "not set"}</strong> is shown on comments and standings.
@@ -90,7 +92,7 @@ export function ProfileForm({
         <Button type="submit" variant="gold" disabled={pending} className="w-full fold:w-auto">Save</Button>
       </form>
 
-      <form onSubmit={changeEmail} className="space-y-4 rounded-xl border border-line bg-panel p-4 fold:p-6">
+      <form onSubmit={changeEmail} className={cn(cardVariants({ padding: "lg" }), "space-y-4")}>
         <h2 className="text-lg font-bold">Email</h2>
         <Field label="Email address" hint="We'll send a confirmation link before it changes">
           {(id) => <input id={id} type="email" className={inputClass} value={newEmail} onChange={(e) => setNewEmail(e.target.value)} autoComplete="email" />}

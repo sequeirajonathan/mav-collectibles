@@ -8,14 +8,14 @@ export function ConfirmButton({ label, confirmLabel = "Yes, do it", onConfirm, d
   const [asking, setAsking] = useState(false);
   if (!asking) {
     return (
-      <Button type="button" variant="outline" className="border-danger/50 text-danger hover:bg-danger/10" onClick={() => setAsking(true)} disabled={disabled}>
+      <Button type="button" variant="destructive" onClick={() => setAsking(true)} disabled={disabled}>
         {label}
       </Button>
     );
   }
   return (
     <span className="inline-flex flex-wrap gap-2">
-      <Button type="button" variant="outline" className="border-danger bg-danger/10 text-danger" onClick={() => { setAsking(false); onConfirm(); }} disabled={disabled}>
+      <Button type="button" variant="destructive" className="border-danger bg-danger/10" onClick={() => { setAsking(false); onConfirm(); }} disabled={disabled}>
         {confirmLabel}
       </Button>
       <Button type="button" variant="ghost" onClick={() => setAsking(false)}>Cancel</Button>

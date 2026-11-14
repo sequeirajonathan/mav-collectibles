@@ -43,44 +43,44 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-black border border-[#E6B325]/30 rounded-lg p-4 sm:p-6 max-w-lg w-full mx-4">
+      <div className="bg-black border border-gold/30 rounded-lg p-4 sm:p-6 max-w-lg w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg sm:text-xl font-semibold text-[#E6B325]">Print Job Details</h3>
+          <h3 className="text-lg sm:text-xl font-semibold text-gold">Print Job Details</h3>
           <button
             onClick={onClose}
-            className="text-white hover:text-[#E6B325] transition-colors p-2"
+            className="text-white hover:text-gold transition-colors p-2"
           >
             ✕
           </button>
         </div>
         <div className="space-y-3 sm:space-y-4 text-white text-sm sm:text-base">
           <div key="order-id">
-            <span className="text-[#E6B325]">Order ID:</span> {job.order_id}
+            <span className="text-gold">Order ID:</span> {job.order_id}
           </div>
           <div key="status">
-            <span className="text-[#E6B325]">Status:</span>{' '}
+            <span className="text-gold">Status:</span>{' '}
             <span className={`px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(job.status)}`}>
               {job.status}
             </span>
           </div>
           <div key="created">
-            <span className="text-[#E6B325]">Created:</span>{' '}
+            <span className="text-gold">Created:</span>{' '}
             {new Date(job.created_at).toLocaleString()}
           </div>
           {job.claimed_by && (
             <div key="claimed-by">
-              <span className="text-[#E6B325]">Claimed by:</span> {job.claimed_by}
+              <span className="text-gold">Claimed by:</span> {job.claimed_by}
             </div>
           )}
           {job.claimed_at && (
             <div key="claimed-at">
-              <span className="text-[#E6B325]">Claimed at:</span>{' '}
+              <span className="text-gold">Claimed at:</span>{' '}
               {new Date(job.claimed_at).toLocaleString()}
             </div>
           )}
           {job.printed_at && (
             <div key="printed-at">
-              <span className="text-[#E6B325]">Printed at:</span>{' '}
+              <span className="text-gold">Printed at:</span>{' '}
               {new Date(job.printed_at).toLocaleString()}
             </div>
           )}
@@ -223,14 +223,14 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-4">
-      <div className="bg-black border border-[#E6B325]/30 rounded-lg shadow-lg p-4 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#E6B325] mb-4 sm:mb-6 text-center">Print Agent</h1>
+      <div className="bg-black border border-gold/30 rounded-lg shadow-lg p-4 sm:p-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gold mb-4 sm:mb-6 text-center">Print Agent</h1>
         <div className="space-y-4 sm:space-y-6">
           {/* Test Print Button */}
           <div className="flex justify-end">
             <button
               type="button"
-              className="px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors"
+              className="px-3 py-1 bg-gold hover:bg-gold-light text-black rounded-md transition-colors"
               onClick={handleTestPrint}
             >
               Test Print
@@ -238,8 +238,8 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
           </div>
 
           {/* Connection Status Section */}
-          <div className="border border-[#E6B325]/30 rounded-lg p-3 sm:p-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325] mb-3 sm:mb-4">Connection Status</h2>
+          <div className="border border-gold/30 rounded-lg p-3 sm:p-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-gold mb-3 sm:mb-4">Connection Status</h2>
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center space-x-2">
                 <div className={`w-3 h-3 rounded-full ${isElectron ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -248,7 +248,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
                 </span>
               </div>
               {message && (
-                <div className="text-[#E6B325] mt-2 text-sm sm:text-base">
+                <div className="text-gold mt-2 text-sm sm:text-base">
                   {message}
                 </div>
               )}
@@ -256,9 +256,9 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
           </div>
 
           {/* Print Jobs Section */}
-          <div className="border border-[#E6B325]/30 rounded-lg p-3 sm:p-4">
+          <div className="border border-gold/30 rounded-lg p-3 sm:p-4">
             <div className="flex justify-between items-center mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-[#E6B325]">Print Jobs</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gold">Print Jobs</h2>
               {jobs.length > 0 && (
                 <button
                   onClick={() => {
@@ -267,7 +267,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
                       table.scrollTo({ top: table.scrollHeight, behavior: 'smooth' });
                     }
                   }}
-                  className="flex items-center gap-1 px-3 py-1 bg-[#E6B325] hover:bg-[#FFD966] text-black rounded-md transition-colors text-sm"
+                  className="flex items-center gap-1 px-3 py-1 bg-gold hover:bg-gold-light text-black rounded-md transition-colors text-sm"
                 >
                   <ChevronDown className="w-4 h-4" />
                   Latest Jobs
@@ -276,29 +276,29 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
             </div>
             <div className="space-y-3">
               {jobs.length === 0 ? (
-                <div className="text-white text-center py-6 border border-[#E6B325]/30 rounded-lg">
-                  <p className="text-lg text-[#E6B325]/70">No print jobs available</p>
+                <div className="text-white text-center py-6 border border-gold/30 rounded-lg">
+                  <p className="text-lg text-gold/70">No print jobs available</p>
                   <p className="text-sm text-white/70 mt-2">New print jobs will appear here when they are created</p>
                 </div>
               ) : (
                 <div className="overflow-hidden">
                   <div id="print-jobs-table" className="max-h-[calc(100vh-300px)] overflow-y-auto">
-                    <table className="w-full divide-y divide-[#E6B325]/30">
+                    <table className="w-full divide-y divide-gold/30">
                       <thead className="sticky top-0 bg-black">
                         <tr>
-                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Order ID</th>
-                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Status</th>
-                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Created</th>
-                          <th className="px-3 sm:px-4 py-2 text-left text-[#E6B325] text-sm w-1/4">Actions</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-gold text-sm w-1/4">Order ID</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-gold text-sm w-1/4">Status</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-gold text-sm w-1/4">Created</th>
+                          <th className="px-3 sm:px-4 py-2 text-left text-gold text-sm w-1/4">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {jobs.map((job: PrintJob) => (
-                          <tr key={job.id} className="text-white text-sm hover:bg-[#E6B325]/5 transition-colors">
+                          <tr key={job.id} className="text-white text-sm hover:bg-gold/5 transition-colors">
                             <td className="px-3 sm:px-4 py-2 whitespace-nowrap">
                               <button
                                 onClick={() => setSelectedJob(job)}
-                                className="text-white hover:text-[#E6B325] transition-colors"
+                                className="text-white hover:text-gold transition-colors"
                               >
                                 {formatOrderId(job.order_id)}
                               </button>

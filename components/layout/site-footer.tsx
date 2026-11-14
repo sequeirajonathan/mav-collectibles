@@ -24,7 +24,8 @@ const SOCIAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-line bg-panel/40 pb-safe">
+    <footer className="mt-16 bg-panel/40 pb-safe">
+      <div aria-hidden className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
       <div className="mx-auto grid max-w-7xl gap-8 px-safe py-10 fold:grid-cols-2 lg:grid-cols-4">
         <div>
           <Image src="/mav_collectibles.png" alt="MAV Collectibles" width={140} height={56} className="h-12 w-auto" />

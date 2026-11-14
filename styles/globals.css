@@ -58,6 +58,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Hover glow for interactive cards (see components/ui/card.tsx). */
+  --shadow-glow: 0 0 0 1px rgb(230 179 37 / 0.12), 0 12px 32px -16px rgb(230 179 37 / 0.45);
 }
 
 :root {
@@ -107,7 +110,40 @@
   }
 }
 
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
 @layer utilities {
+  /* Loading placeholders (components/ui/skeleton.tsx): a soft light sweep. */
+  .skeleton {
+    background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.05) 50%, transparent 70%);
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  /* Home hero: gold and Discord-blue glows over a faint dotted grid. Pure CSS, no images. */
+  .bg-hero {
+    background-color: var(--panel);
+    background-image:
+      radial-gradient(70% 90% at 0% 0%, rgb(230 179 37 / 0.18), transparent 60%),
+      radial-gradient(50% 70% at 100% 100%, rgb(88 101 242 / 0.12), transparent 70%),
+      radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    background-size: auto, auto, 22px 22px;
+  }
+  /* Gold foil text for a word or two in big headings. */
+  .text-foil {
+    background-image: linear-gradient(100deg, var(--gold-light), var(--gold) 45%, var(--gold-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   /* Horizontal page padding that respects notches/fold bars (asymmetric on iPhone Duo). */
   .px-safe {
     padding-left: max(1rem, env(safe-area-inset-left));

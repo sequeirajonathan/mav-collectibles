@@ -3,7 +3,7 @@
 export function FieldErrorText({ error }: { error: string | null | undefined }) {
   if (!error) return null;
   return (
-    <p className="text-sm text-red-400 mt-1" role="alert">
+    <p className="mt-1 text-sm text-danger" role="alert">
       {error}
     </p>
   );
@@ -23,7 +23,7 @@ export function GlobalErrors({
   if (messages.length === 0) return null;
   return (
     <div
-      className="bg-red-950/40 border border-red-500/60 text-red-300 px-4 py-3 rounded mb-4 text-sm"
+      className="mb-4 rounded-lg border border-danger/50 bg-danger/10 px-4 py-3 text-sm text-red-300"
       role="alert"
     >
       {messages.map((m, i) => (

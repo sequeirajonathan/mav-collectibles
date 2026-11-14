@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { VendorCard } from "@components/hub/vendor-card";
 import { EventCard } from "@components/hub/event-card";
 import { listEvents, listVendors } from "@lib/data/hub";
+import { Skeleton } from "@components/ui/skeleton";
+import { LinkButton } from "@components/ui/link-button";
 
 export const metadata: Metadata = {
   title: "Vendors",
@@ -48,16 +49,16 @@ export default function VendorsPage() {
         title="Vendors"
         description="Collectors and shops who set up at MAV to sell and trade. Bring your binder."
         actions={
-          <Link href="/vendors/apply" className="inline-flex min-h-10 items-center rounded-md bg-gold px-4 text-sm font-bold text-ink hover:bg-gold-light">
+          <LinkButton href="/vendors/apply" size="sm">
             Apply for a table
-          </Link>
+          </LinkButton>
         }
       />
       <Suspense fallback={null}>
         <VendorDays />
       </Suspense>
       <h2 className="mb-3 text-lg font-bold">Vendor directory</h2>
-      <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-40" />}>
         <VendorGrid />
       </Suspense>
     </>

@@ -1,10 +1,11 @@
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { PostForm } from "@components/admin/post-form";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { listGames } from "@lib/data/hub";
 import { eventOptions } from "@lib/data/admin-options";
+import { Skeleton } from "@components/ui/skeleton";
 
 async function Form() {
   await requirePageRole(CONTENT_ROLES, "/admin/posts/new");
@@ -16,7 +17,7 @@ export default function NewPostPage() {
   return (
     <>
       <PageHeader title="New post" />
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-96" />}>
         <Form />
       </Suspense>
     </>

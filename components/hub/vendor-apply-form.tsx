@@ -6,7 +6,9 @@ import { Button } from "@components/ui/button";
 import { applyAsVendor } from "@lib/actions/hub";
 import type { Game } from "@lib/contracts/hub";
 import { formatEventWhen } from "@lib/format";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 interface Defaults {
   name: string;
@@ -67,7 +69,7 @@ export function VendorApplyForm({
   return (
     <form onSubmit={submit} className="space-y-5">
       {existingStatus && (
-        <p className="rounded-lg border border-line bg-panel px-4 py-3 text-sm">
+        <p className={cn(cardVariants({ padding: "row", radius: "lg" }), "text-sm")}>
           Your vendor profile is <strong className="capitalize text-gold">{existingStatus}</strong>.
           {existingStatus === "approved" ? " Changes go to the MAV team for a quick review before they show publicly." : " Saving updates it."}
         </p>

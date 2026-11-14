@@ -7,6 +7,7 @@ import { Check, Search, UserMinus } from "lucide-react";
 import { removeAttendee, setCheckIn } from "@lib/actions/hub";
 import type { Attendee } from "@lib/contracts/hub";
 import { cn } from "@utils";
+import { cardVariants } from "@components/ui/card";
 
 /** Door list with one-tap check-in. Big tap targets for using on a phone at the counter. */
 export function AttendeeList({ eventId, attendees }: { eventId: string; attendees: Attendee[] }) {
@@ -42,9 +43,9 @@ export function AttendeeList({ eventId, attendees }: { eventId: string; attendee
         </label>
       </div>
       {filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-line px-4 py-8 text-center text-sm text-muted-foreground">No one here yet.</p>
+        <p className={cn(cardVariants({ variant: "dashed", radius: "lg" }), "px-4 py-8 text-center text-sm text-muted-foreground")}>No one here yet.</p>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+        <ul className={cardVariants({ variant: "list" })}>
           {filtered.map((a) => {
             const isIn = a.status === "checked_in";
             return (

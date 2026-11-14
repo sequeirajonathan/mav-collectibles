@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CATEGORY_GROUPS } from "@const/categories";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 export const metadata: Metadata = { title: "Shop", description: "Browse Pokémon and TCG products on our shelves at MAV Collectibles." };
 
@@ -20,7 +22,7 @@ export default function ShopPage() {
                 <li key={c.slug}>
                   <Link
                     href={`/category/${c.slug}?group=${GROUP_PARAM[group.name] ?? "TCG"}`}
-                    className="flex min-h-14 items-center rounded-xl border border-line bg-panel px-4 py-3 text-sm font-semibold hover:border-gold/50"
+                    className={cn(cardVariants({ variant: "interactive", padding: "row" }), "flex min-h-14 items-center text-sm font-semibold")}
                   >
                     {c.displayName}
                   </Link>

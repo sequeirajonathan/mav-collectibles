@@ -8,6 +8,7 @@ import { setVendorStatus, setVendorTable } from "@lib/actions/hub";
 import { formatEventWhen } from "@lib/format";
 import { VendorAvatar } from "@components/hub/vendor-card";
 import type { Vendor } from "@lib/contracts/hub";
+import { cardVariants } from "@components/ui/card";
 
 type StaffVendor = Vendor & {
   contactEmail: string | null;
@@ -50,7 +51,7 @@ export function VendorReview({ vendor }: { vendor: StaffVendor }) {
       router.refresh();
     });
   return (
-    <article className="rounded-xl border border-line bg-panel p-4">
+    <article className={cardVariants({ padding: "md" })}>
       <div className="flex items-start gap-3">
         <VendorAvatar vendor={vendor} />
         <div className="min-w-0 flex-1">

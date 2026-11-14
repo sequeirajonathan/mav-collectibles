@@ -4,9 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { createSeason } from "@lib/actions/hub";
 import type { Game } from "@lib/contracts/hub";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 export function SeasonForm({ games }: { games: Game[] }) {
   const router = useRouter();
@@ -29,7 +31,7 @@ export function SeasonForm({ games }: { games: Game[] }) {
           router.refresh();
         });
       }}
-      className="grid gap-4 rounded-xl border border-line bg-panel p-4 fold:grid-cols-2 lg:grid-cols-4"
+      className={cn(cardVariants({ padding: "md" }), "grid gap-4 fold:grid-cols-2 lg:grid-cols-4")}
     >
       <Field label="Game" error={errors.gameId}>
         {(id) => (

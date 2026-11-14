@@ -9,8 +9,8 @@ import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
-import { PhoneInput } from "@components/ui/PhoneInput";
-import { FieldErrorText, GlobalErrors } from "@components/ui/AuthFormErrors";
+import { PhoneInput } from "@components/ui/phone-input";
+import { FieldErrorText, GlobalErrors } from "@components/auth/form-errors";
 import { getBrowserClient } from "@utils/supabase/client";
 import { signUpAction, type SignUpFieldErrors } from "@lib/auth/actions";
 
@@ -18,8 +18,6 @@ interface SignupFormProps {
   hideLoginLink?: boolean;
 }
 
-const inputClassName =
-  "border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]";
 
 export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
   const router = useRouter();
@@ -79,12 +77,12 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
     return (
       <div className="max-w-md mx-auto text-center">
         {logo}
-        <h1 className="text-2xl font-bold mb-6 text-[#E6B325]">Confirm your email</h1>
-        <p className="text-gray-300">
+        <h1 className="text-2xl font-bold mb-6 text-gold">Confirm your email</h1>
+        <p className="text-foreground/80">
           We&apos;ve sent a confirmation link to{" "}
-          <span className="text-[#E6B325] font-medium">{sentTo}</span>. Open it to finish creating your account.
+          <span className="text-gold font-medium">{sentTo}</span>. Open it to finish creating your account.
         </p>
-        <Button type="button" variant="link" className="mt-4 text-[#E6B325]" onClick={() => setSentTo(null)}>
+        <Button type="button" variant="link" className="mt-4" onClick={() => setSentTo(null)}>
           Used the wrong email? Go back
         </Button>
       </div>
@@ -94,7 +92,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
   return (
     <div className="max-w-md mx-auto">
       {logo}
-      <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">Sign Up</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center text-gold">Sign Up</h1>
 
       <GlobalErrors errors={null} localError={formError} />
 
@@ -109,7 +107,6 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className={inputClassName}
           />
           <FieldErrorText error={fieldErrors.username} />
         </div>
@@ -124,7 +121,6 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={inputClassName}
           />
           <FieldErrorText error={fieldErrors.email} />
         </div>
@@ -151,7 +147,6 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={inputClassName}
           />
           <FieldErrorText error={fieldErrors.password} />
         </div>
@@ -166,7 +161,6 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className={inputClassName}
           />
           <FieldErrorText error={fieldErrors.confirmPassword} />
         </div>
@@ -177,16 +171,16 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
       </form>
 
       <div className="my-6 flex items-center gap-4">
-        <hr className="flex-1 border-[#E6B325] opacity-40" />
-        <span className="text-[#E6B325] text-sm font-semibold">Or continue with</span>
-        <hr className="flex-1 border-[#E6B325] opacity-40" />
+        <hr className="flex-1 border-gold/30" />
+        <span className="text-gold text-sm font-semibold">Or continue with</span>
+        <hr className="flex-1 border-gold/30" />
       </div>
 
       <div className="flex flex-col gap-2">
         <Button
           type="button"
           variant="outline"
-          className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+          className="w-full"
           onClick={() => handleSocial("google")}
         >
           Google
@@ -194,7 +188,7 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
         <Button
           type="button"
           variant="outline"
-          className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+          className="w-full"
           onClick={() => handleSocial("facebook")}
         >
           Facebook
@@ -202,9 +196,9 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
       </div>
 
       {!hideLoginLink && (
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-muted-foreground mt-4">
           Already have an account?{" "}
-          <Link href="/sign-in" className="text-[#E6B325] hover:underline">
+          <Link href="/sign-in" className="text-gold hover:underline">
             Log in
           </Link>
         </p>

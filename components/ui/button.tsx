@@ -1,88 +1,63 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@utils"
+import { cn } from "@utils";
 
+/**
+ * One source of truth for anything that looks like a button: <Button>, <LinkButton>
+ * and plain <a> tags (`className={buttonVariants({ variant: "outline" })}`).
+ * Colours come from the theme tokens in styles/globals.css; focus uses the global
+ * gold :focus-visible outline.
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-bold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black cursor-pointer",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-semibold transition-[color,background-color,border-color,box-shadow] duration-150 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default:
-          "bg-brand-blue text-white shadow-md hover:bg-brand-blue-light focus-visible:ring-brand-blue/50",
-        
-        primary:
-          "bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white shadow-md hover:from-brand-blue-light hover:to-brand-blue focus-visible:ring-brand-blue/50",
-        
-        gold:
-          "bg-[#E6B325] text-[#000000] shadow-md hover:bg-[#FFD966] border border-[#B38A00] focus-visible:ring-[#E6B325]/50 font-extrabold tracking-wide uppercase",
-        
-        destructive:
-          "bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-red-500/50",
-        
-        outline:
-          "border-2 border-brand-blue bg-black/30 text-white shadow-sm hover:bg-brand-blue/10 hover:text-brand-blue-light focus-visible:ring-brand-blue/50",
-        
-        outlineGold:
-          "border-2 border-[#E6B325] bg-black/30 text-[#E6B325] shadow-sm hover:bg-[#E6B325]/10 hover:text-[#FFD966] focus-visible:ring-[#E6B325]/50",
-        
-        secondary:
-          "bg-gray-800 text-white shadow-md hover:bg-gray-700 focus-visible:ring-gray-500/50",
-        
-        ghost:
-          "hover:bg-brand-blue/10 hover:text-brand-blue-light focus-visible:ring-brand-blue/50",
-        
-        link: 
-          "text-brand-blue underline-offset-4 hover:text-brand-blue-light hover:underline focus-visible:ring-brand-blue/50",
+        /** Primary call to action. One per view, ideally. */
+        gold: "bg-gold font-bold text-ink shadow-sm shadow-gold/10 hover:bg-gold-light hover:shadow-gold/25 active:bg-gold-dark",
+        /** Secondary action next to a gold one. */
+        outline: "border border-line bg-panel/40 text-foreground hover:border-gold/60 hover:bg-panel-2",
+        /** Tertiary/inline action (cancel, share, back). */
+        ghost: "text-foreground/90 hover:bg-panel-2 hover:text-foreground",
+        /** Quiet filled surface. */
+        secondary: "bg-panel-2 text-foreground hover:bg-panel-2/70",
+        /** Irreversible actions. */
+        destructive: "border border-danger/50 text-danger hover:bg-danger/10",
+        /** Looks like a text link but keeps button semantics. */
+        link: "text-gold underline-offset-4 hover:text-gold-light hover:underline",
       },
       size: {
-        default: "h-10 px-5 py-2.5",
-        sm: "h-8 rounded-md px-3 py-1.5 text-xs",
-        lg: "h-12 rounded-md px-6 py-3 text-base",
-        icon: "h-10 w-10 p-0",
+        /** 44px: the default touch target. */
+        default: "min-h-11 px-5 text-sm",
+        /** Compact; still 44px on touch screens, 36px with a mouse. */
+        sm: "min-h-11 px-3 text-sm can-hover:min-h-9",
+        lg: "min-h-12 px-6 text-base",
+        icon: "size-11 p-0",
       },
     },
+    compoundVariants: [{ variant: "link", className: "min-h-0 px-0" }],
     defaultVariants: {
-      variant: "default",
+      variant: "gold",
       size: "default",
     },
   }
-)
+);
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, 
-  VariantProps<typeof buttonVariants> {
-  isLoading?: boolean;
+type ButtonVariantProps = VariantProps<typeof buttonVariants>;
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariantProps {
+  /** Render the child element (e.g. a <Link>) with button styling instead of a <button>. */
   asChild?: boolean;
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, isLoading, asChild = false, children, ...props }, ref) => {
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    
-    return (
-      <Comp
-        className={cn(
-          buttonVariants({ variant, size, className }),
-          isLoading && "opacity-50 cursor-not-allowed"
-        )}
-        ref={ref}
-        disabled={isLoading || props.disabled}
-        {...props}
-      >
-        {isLoading ? (
-          <div className="flex items-center justify-center">
-            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
-            <span>Saving...</span>
-          </div>
-        ) : (
-          children
-        )}
-      </Comp>
-    );
+    return <Comp className={cn(buttonVariants({ variant, size }), className)} ref={ref} {...props} />;
   }
 );
-
 Button.displayName = "Button";
 
-export { buttonVariants }
+export { Button, buttonVariants, type ButtonProps, type ButtonVariantProps };

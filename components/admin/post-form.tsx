@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { ImageUpload } from "./image-upload";
 import { ConfirmButton } from "./confirm-button";
 import { createPost, deletePost, updatePost } from "@lib/actions/hub";

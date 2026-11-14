@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { VendorReview } from "@components/admin/vendor-review";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { listVendorsForStaff } from "@lib/data/hub";
+import { Skeleton } from "@components/ui/skeleton";
 
 async function List() {
   await requirePageRole(CONTENT_ROLES, "/admin/vendors");
@@ -20,7 +21,7 @@ export default function AdminVendorsPage() {
   return (
     <>
       <PageHeader title="Vendors" description="Approve vendor profiles and confirm tables for vendor days." />
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-64" />}>
         <List />
       </Suspense>
     </>

@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Pin } from "lucide-react";
 import type { Post } from "@lib/contracts/hub";
 import { formatEventWhen, formatShortDate } from "@lib/format";
+import { Card, cardVariants } from "@components/ui/card";
+import { Skeleton } from "@components/ui/skeleton";
+import { cn } from "@utils";
 import { GameBadge } from "./badges";
 import { ReactionBar } from "./reaction-bar";
 
@@ -10,10 +13,10 @@ import { ReactionBar } from "./reaction-bar";
 export function PostCard({ post, signedIn, full = false }: { post: Post; signedIn: boolean; full?: boolean }) {
   const href = `/feed/${post.id}`;
   return (
-    <article className="overflow-hidden rounded-xl border border-line bg-panel">
+    <article className={cn(cardVariants(), "overflow-hidden", post.pinned && "border-gold/30")}>
       {post.imageUrl && (
-        <Link href={href} className="relative block aspect-[16/9] bg-panel-2">
-          <Image src={post.imageUrl} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" />
+        <Link href={href} className="group relative block aspect-[16/9] overflow-hidden bg-panel-2">
+          <Image src={post.imageUrl} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover transition-transform duration-500 can-hover:group-hover:scale-[1.03]" />
         </Link>
       )}
       <div className="p-4 fold:p-5">
@@ -40,7 +43,7 @@ export function PostCard({ post, signedIn, full = false }: { post: Post; signedI
         {post.event && (
           <Link
             href={`/events/${post.event.slug}`}
-            className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-sm hover:border-gold/60"
+            className={cn(cardVariants({ variant: "accent", radius: "lg" }), "mt-3 flex min-h-11 items-center justify-between gap-3 px-3 py-2 text-sm transition-colors can-hover:hover:border-gold/60")}
           >
             <span className="min-w-0">
               <span className="block truncate font-semibold text-foreground">{post.event.title}</span>
@@ -65,14 +68,14 @@ export function PostCard({ post, signedIn, full = false }: { post: Post; signedI
 
 export function PostCardSkeleton() {
   return (
-    <div className="animate-pulse overflow-hidden rounded-xl border border-line bg-panel">
-      <div className="aspect-[16/9] bg-panel-2" />
+    <Card className="overflow-hidden">
+      <Skeleton className="aspect-[16/9] rounded-none bg-panel-2" />
       <div className="space-y-3 p-5">
-        <div className="h-3 w-32 rounded bg-panel-2" />
-        <div className="h-5 w-3/4 rounded bg-panel-2" />
-        <div className="h-3 w-full rounded bg-panel-2" />
-        <div className="h-3 w-5/6 rounded bg-panel-2" />
+        <Skeleton className="h-3 w-32 rounded bg-panel-2" />
+        <Skeleton className="h-5 w-3/4 rounded bg-panel-2" />
+        <Skeleton className="h-3 w-full rounded bg-panel-2" />
+        <Skeleton className="h-3 w-5/6 rounded bg-panel-2" />
       </div>
-    </div>
+    </Card>
   );
 }

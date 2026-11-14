@@ -1,5 +1,6 @@
 "use client";
 
+import { LinkButton } from "@components/ui/link-button";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +9,8 @@ import { useAuth } from "@contexts/AuthContext";
 import { useCart } from "@contexts/CartContext";
 import { CONTENT_ROLES, UserRole } from "@interfaces/roles";
 import { useShopMode } from "./shop-mode";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 export function CartLink() {
   const { canPurchase } = useShopMode();
@@ -45,9 +48,9 @@ export function AccountMenu() {
   if (!isLoaded) return <span className="inline-block size-11" aria-hidden />;
   if (!user) {
     return (
-      <Link href="/sign-in" className="inline-flex min-h-10 items-center rounded-md border border-gold/60 px-3 text-sm font-semibold text-gold hover:bg-gold hover:text-ink">
+      <LinkButton href="/sign-in" variant="outline" size="sm" className="border-gold/60 text-gold hover:bg-gold hover:text-ink">
         Sign in
-      </Link>
+      </LinkButton>
     );
   }
 
@@ -65,7 +68,7 @@ export function AccountMenu() {
         <CircleUserRound className="size-6 text-gold" />
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 z-50 mt-2 w-60 rounded-xl border border-line bg-panel p-1 shadow-2xl">
+        <div role="menu" className={cn(cardVariants(), "absolute right-0 z-50 mt-2 w-60 p-1 shadow-2xl")}>
           <p className="truncate px-3 py-2 text-xs text-muted-foreground">
             Signed in as <span className="font-semibold text-foreground">{profile?.username ?? user.email}</span>
           </p>

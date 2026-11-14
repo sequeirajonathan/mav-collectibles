@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { PrintAgentClient } from "@components/ui/PrintAgentClient";
+import { PrintAgentClient } from "@components/print-agent/print-agent-client";
 import { redirect } from "next/navigation";
 import { getUserWithRole } from "@lib/auth/server";
 import { PRINT_ROLES } from "@interfaces/roles";

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { LinkButton } from "@components/ui/link-button";
 
 function CautionTape({ label }: { label: string }) {
   return (
@@ -29,12 +29,9 @@ export default function MaintenancePage() {
               We&apos;re building something special for card players: events, tournaments and more. Stay tuned for the
               grand opening of MAV Collectibles!
             </p>
-            <Link
-              href="/sign-in?next=/admin"
-              className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-md border border-gold/60 px-6 font-semibold text-gold hover:bg-gold hover:text-ink fold:w-auto short:mt-4"
-            >
+            <LinkButton href="/sign-in?next=/admin" variant="outline" className="mt-6 w-full fold:w-auto short:mt-4">
               Staff sign in
-            </Link>
+            </LinkButton>
           </div>
         </div>
       </main>

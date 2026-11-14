@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarPlus, ChevronDown } from "lucide-react";
 import { Button } from "@components/ui/button";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 /** Google / Apple (.ics) / Outlook menu. Apple Calendar on iPhone opens .ics files directly. */
 export function AddToCalendar({ googleUrl, outlookUrl, icsUrl }: { googleUrl: string; outlookUrl: string; icsUrl: string }) {
@@ -32,7 +34,7 @@ export function AddToCalendar({ googleUrl, outlookUrl, icsUrl }: { googleUrl: st
         <ChevronDown className="opacity-60" />
       </Button>
       {open && (
-        <div role="menu" className="absolute left-0 right-0 z-20 mt-2 rounded-lg border border-line bg-panel p-1 shadow-xl fold:left-auto fold:w-56">
+        <div role="menu" className={cn(cardVariants({ radius: "lg" }), "absolute left-0 right-0 z-20 mt-2 p-1 shadow-xl fold:left-auto fold:w-56")}>
           <a role="menuitem" className={item} href={icsUrl}>
             Apple Calendar / iPhone
           </a>

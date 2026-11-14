@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { PostCard, PostCardSkeleton } from "@components/hub/post-card";
 import { listPosts } from "@lib/data/hub";
 import { withMyReactions } from "@lib/data/viewer";
 import { isoDateTime } from "@lib/contracts/common";
+import { LinkButton } from "@components/ui/link-button";
 
 export const metadata: Metadata = {
   title: "News & announcements",
@@ -30,12 +30,11 @@ async function Feed({ searchParams }: { searchParams: SearchParams }) {
       ))}
       {page.nextCursor && (
         <div className="flex justify-center pt-2">
-          <Link
-            href={`/feed?before=${encodeURIComponent(page.nextCursor)}`}
-            className="inline-flex min-h-11 items-center rounded-md border border-line px-5 font-semibold hover:border-gold/60"
+          <LinkButton
+            href={`/feed?before=${encodeURIComponent(page.nextCursor)}`} variant="outline"
           >
             Older posts
-          </Link>
+          </LinkButton>
         </div>
       )}
     </div>

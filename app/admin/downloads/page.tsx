@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { Installers } from "@components/admin/installers";
 import { requirePageRole } from "@lib/auth/guard";
 import { UserRole } from "@interfaces/roles";

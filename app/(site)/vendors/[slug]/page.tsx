@@ -7,6 +7,10 @@ import { getVendor } from "@lib/data/hub";
 import { VendorAvatar } from "@components/hub/vendor-card";
 import { GameBadge } from "@components/hub/badges";
 import { formatEventWhen } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
+import { Skeleton } from "@components/ui/skeleton";
+import { buttonVariants } from "@components/ui/button";
 
 type Params = Promise<{ slug: string }>;
 
@@ -37,12 +41,12 @@ async function VendorContent({ params }: { params: Params }) {
       {vendor.bio && <p className="mt-5 whitespace-pre-line leading-relaxed text-foreground/90">{vendor.bio}</p>}
       <div className="mt-5 flex flex-wrap gap-2">
         {vendor.instagram && (
-          <a href={`https://instagram.com/${vendor.instagram}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-md border border-line px-3 text-sm hover:border-gold/60">
+          <a href={`https://instagram.com/${vendor.instagram}`} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
             <AtSign className="size-4" /> @{vendor.instagram}
           </a>
         )}
         {vendor.website && (
-          <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-md border border-line px-3 text-sm hover:border-gold/60">
+          <a href={vendor.website} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
             <Globe className="size-4" /> Website
           </a>
         )}
@@ -55,7 +59,7 @@ async function VendorContent({ params }: { params: Params }) {
           <ul className="mt-3 space-y-2">
             {vendor.upcomingEvents.map((e) => (
               <li key={e.slug}>
-                <Link href={`/events/${e.slug}`} className="block rounded-lg border border-line bg-panel px-4 py-3 hover:border-gold/50">
+                <Link href={`/events/${e.slug}`} className={cn(cardVariants({ variant: "interactive", padding: "row", radius: "lg" }), "block")}>
                   <span className="block font-semibold">{e.title}</span>
                   <span className="text-sm text-muted-foreground">{formatEventWhen(e.startsAt)}</span>
                 </Link>
@@ -74,7 +78,7 @@ export default function VendorPage({ params }: { params: Params }) {
       <nav className="mb-4 text-sm">
         <Link href="/vendors" className="text-muted-foreground hover:text-gold">← All vendors</Link>
       </nav>
-      <Suspense fallback={<div className="mx-auto h-48 max-w-2xl animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="mx-auto h-48 max-w-2xl" />}>
         <VendorContent params={params} />
       </Suspense>
     </>

@@ -32,7 +32,7 @@ export function PhoneInput({ value, onChange, ...props }: PhoneInputProps) {
   return (
     <div className="flex items-center space-x-2">
       {/* Non-editable prefix */}
-      <span className="select-none text-gray-300">+1</span>
+      <span className="select-none text-muted-foreground">+1</span>
       {/* The masked input */}
       <Input
         {...props}

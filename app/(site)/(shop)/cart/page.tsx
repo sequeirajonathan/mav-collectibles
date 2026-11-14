@@ -6,7 +6,10 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@contexts/CartContext";
 import { useShopMode } from "@components/layout/shop-mode";
 import { formatMoneyCents } from "@lib/format";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
+import { buttonVariants } from "@components/ui/button";
 
 export default function CartPage() {
   const { canPurchase } = useShopMode();
@@ -31,11 +34,11 @@ export default function CartPage() {
     );
   }
 
-  const qtyButton = "inline-flex size-10 items-center justify-center rounded-md border border-line hover:border-gold/60";
+  const qtyButton = buttonVariants({ variant: "outline", size: "icon" });
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Your cart" />
-      <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+      <ul className={cardVariants({ variant: "list" })}>
         {items.map((item) => (
           <li key={item.id} className="flex gap-3 p-3 fold:p-4">
             <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-panel-2">
@@ -54,7 +57,7 @@ export default function CartPage() {
                 <button type="button" className={qtyButton} onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Add one ${item.name}`}>
                   <Plus className="size-4" />
                 </button>
-                <button type="button" className={`${qtyButton} ml-auto text-muted-foreground hover:text-danger`} onClick={() => removeItem(item.id)} aria-label={`Remove ${item.name}`}>
+                <button type="button" className={cn(qtyButton, "ml-auto text-muted-foreground hover:text-danger")} onClick={() => removeItem(item.id)} aria-label={`Remove ${item.name}`}>
                   <Trash2 className="size-4" />
                 </button>
               </div>
@@ -62,7 +65,7 @@ export default function CartPage() {
           </li>
         ))}
       </ul>
-      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-line bg-panel p-4 fold:flex-row fold:items-center fold:justify-between">
+      <div className={cn(cardVariants({ padding: "md" }), "mt-4 flex flex-col gap-3 fold:flex-row fold:items-center fold:justify-between")}>
         <p className="text-lg">
           Subtotal <span className="font-extrabold text-gold">{formatMoneyCents(totalPrice)}</span>
         </p>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { EventTabs } from "@components/admin/event-tabs";
 import { AttendeeList } from "@components/admin/attendee-list";
 import { requirePageRole } from "@lib/auth/guard";
@@ -8,6 +8,7 @@ import { CONTENT_ROLES } from "@interfaces/roles";
 import { getEventForEdit, listAttendees } from "@lib/data/hub";
 import { uuid } from "@lib/contracts/common";
 import { formatEventWhen } from "@lib/format";
+import { Skeleton } from "@components/ui/skeleton";
 
 type Params = Promise<{ id: string }>;
 
@@ -28,7 +29,7 @@ async function Attendees({ params }: { params: Params }) {
 
 export default function AttendeesPage({ params }: { params: Params }) {
   return (
-    <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+    <Suspense fallback={<Skeleton className="h-96" />}>
       <Attendees params={params} />
     </Suspense>
   );

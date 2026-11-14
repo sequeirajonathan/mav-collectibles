@@ -1,10 +1,11 @@
 import { Suspense } from "react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { EventForm } from "@components/admin/event-form";
 import { eventFormDefaults } from "@components/admin/event-form-values";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { listGames } from "@lib/data/hub";
+import { Skeleton } from "@components/ui/skeleton";
 
 async function Form() {
   await requirePageRole(CONTENT_ROLES, "/admin/events/new");
@@ -15,7 +16,7 @@ export default function NewEventPage() {
   return (
     <>
       <PageHeader title="New event" />
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-96" />}>
         <Form />
       </Suspense>
     </>

@@ -16,6 +16,9 @@ import { AddToCalendar } from "@components/hub/add-to-calendar";
 import { ShareButton } from "@components/hub/share-button";
 import { DiscordLink } from "@components/hub/discord";
 import { publicEnv } from "@lib/env";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
+import { Skeleton } from "@components/ui/skeleton";
 
 type Params = Promise<{ slug: string }>;
 
@@ -83,7 +86,7 @@ async function EventContent({ params }: { params: Params }) {
         </p>
       )}
 
-      <dl className="mt-4 grid gap-3 rounded-xl border border-line bg-panel p-4 text-sm fold:grid-cols-2">
+      <dl className={cn(cardVariants({ padding: "md" }), "mt-4 grid gap-3 text-sm fold:grid-cols-2")}>
         <div className="fold:col-span-2">
           <dt className="sr-only">When</dt>
           <dd className="font-semibold text-foreground">{formatEventWhen(event.startsAt, event.endsAt)}</dd>
@@ -106,7 +109,7 @@ async function EventContent({ params }: { params: Params }) {
       </dl>
 
       <div className="mt-4 flex flex-col gap-2 fold:flex-row fold:flex-wrap fold:items-center">
-        <Suspense fallback={<div className="h-10 w-full animate-pulse rounded-md bg-panel-2 fold:w-28" />}>
+        <Suspense fallback={<Skeleton className="h-11 w-full rounded-md bg-panel-2 fold:w-28" />}>
           <Rsvp event={event} />
         </Suspense>
         <AddToCalendar
@@ -133,7 +136,7 @@ async function EventContent({ params }: { params: Params }) {
           <ul className="mt-3 grid gap-2 fold:grid-cols-2">
             {event.vendors.map((v) => (
               <li key={v.slug}>
-                <Link href={`/vendors/${v.slug}`} className="flex items-center gap-3 rounded-lg border border-line bg-panel p-3 hover:border-gold/50">
+                <Link href={`/vendors/${v.slug}`} className={cn(cardVariants({ variant: "interactive", padding: "sm", radius: "lg" }), "flex items-center gap-3")}>
                   <span className="relative size-10 shrink-0 overflow-hidden rounded-full bg-panel-2">
                     {v.logoUrl && <Image src={v.logoUrl} alt="" fill sizes="40px" className="object-cover" />}
                   </span>
@@ -149,7 +152,7 @@ async function EventContent({ params }: { params: Params }) {
       {event.results.length > 0 && (
         <section className="mt-10" aria-labelledby="results-heading">
           <h2 id="results-heading" className="text-lg font-bold">Results</h2>
-          <ol className="mt-3 divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+          <ol className={cn(cardVariants({ variant: "list" }), "mt-3")}>
             {event.results.map((r) => (
               <li key={r.placement + r.playerName} className="flex items-center gap-3 px-4 py-3 text-sm">
                 <span className="w-8 shrink-0 text-center text-base font-extrabold text-gold">{r.placement}</span>
@@ -173,11 +176,11 @@ async function EventContent({ params }: { params: Params }) {
 
 function EventSkeleton() {
   return (
-    <div className="mx-auto max-w-3xl animate-pulse space-y-4">
-      <div className="aspect-[16/9] rounded-xl bg-panel" />
-      <div className="h-4 w-40 rounded bg-panel-2" />
-      <div className="h-8 w-3/4 rounded bg-panel-2" />
-      <div className="h-28 rounded-xl bg-panel" />
+    <div className="mx-auto max-w-3xl space-y-4">
+      <Skeleton className="aspect-[16/9]" />
+      <Skeleton className="h-4 w-40 rounded bg-panel-2" />
+      <Skeleton className="h-8 w-3/4 rounded bg-panel-2" />
+      <Skeleton className="h-28" />
     </div>
   );
 }

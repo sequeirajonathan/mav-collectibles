@@ -9,6 +9,7 @@ import { useShopMode } from "@components/layout/shop-mode";
 import type { Product } from "@lib/contracts/catalog";
 import { formatMoneyCents } from "@lib/format";
 import { cn } from "@utils";
+import { cardVariants } from "@components/ui/card";
 
 export function ProductPurchase({ product }: { product: Product }) {
   const { canPurchase } = useShopMode();
@@ -73,7 +74,7 @@ export function ProductPurchase({ product }: { product: Product }) {
           </Button>
         </div>
       ) : (
-        <div className="rounded-lg border border-gold/30 bg-gold/5 px-4 py-3 text-sm">
+        <div className={cn(cardVariants({ variant: "accent", padding: "row", radius: "lg" }), "text-sm")}>
           <p className="font-semibold text-foreground">Available in store</p>
           <p className="mt-0.5 text-foreground/80">Stop by MAV Collectibles or give us a call to hold it for you.</p>
           <a href="tel:9364491277" className="mt-2 inline-flex min-h-10 items-center font-semibold text-gold">

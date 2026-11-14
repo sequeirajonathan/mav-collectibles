@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 /** Click-to-play YouTube facade: the heavy player loads only when someone presses play. */
 export function YouTubeEmbed({ videoId, title, playlistId }: { videoId: string; title: string; playlistId?: string }) {
@@ -10,7 +12,7 @@ export function YouTubeEmbed({ videoId, title, playlistId }: { videoId: string; 
   const params = new URLSearchParams({ autoplay: "1", rel: "0", playsinline: "1" });
   if (playlistId) params.set("list", playlistId);
   return (
-    <div className="relative aspect-video overflow-hidden rounded-xl border border-line bg-panel">
+    <div className={cn(cardVariants(), "relative aspect-video overflow-hidden")}>
       {playing ? (
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${videoId}?${params}`}

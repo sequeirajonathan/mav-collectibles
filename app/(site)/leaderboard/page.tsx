@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Trophy } from "lucide-react";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { getLeaderboard, listGames, listPastEvents, listSeasons } from "@lib/data/hub";
 import { formatShortDate } from "@lib/format";
 import { cn } from "@utils";
+import { cardVariants } from "@components/ui/card";
+import { Skeleton } from "@components/ui/skeleton";
+import { RankMark } from "@components/hub/badges";
+import { ChipLink, chipRowClass } from "@components/ui/chip";
 
 export const metadata: Metadata = {
   title: "Leaderboard",
@@ -23,27 +26,21 @@ async function Board({ searchParams }: { searchParams: SearchParams }) {
   const season = seasons.find((s) => s.id === params.season) ?? seasons[0];
   const [rows, recent] = await Promise.all([getLeaderboard(game.id, season?.id), listPastEvents(5, game.id)]);
 
-  const chip = (active: boolean) =>
-    cn(
-      "inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 text-sm font-medium",
-      active ? "border-gold bg-gold text-ink" : "border-line bg-panel text-muted-foreground hover:text-foreground"
-    );
-
   return (
     <>
-      <nav aria-label="Game" className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:flex-wrap fold:px-0">
+      <nav aria-label="Game" className={cn(chipRowClass, "mb-3")}>
         {games.map((g) => (
-          <Link key={g.id} href={`/leaderboard?game=${g.id}`} className={chip(g.id === game.id)} aria-current={g.id === game.id ? "page" : undefined}>
+          <ChipLink key={g.id} href={`/leaderboard?game=${g.id}`} active={g.id === game.id} dot={g.id === game.id ? undefined : g.color}>
             {g.shortName}
-          </Link>
+          </ChipLink>
         ))}
       </nav>
       {seasons.length > 0 && (
         <nav aria-label="Season" className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:px-0">
           {seasons.map((s) => (
-            <Link key={s.id} href={`/leaderboard?game=${game.id}&season=${s.id}`} className={chip(s.id === season?.id)}>
+            <ChipLink key={s.id} href={`/leaderboard?game=${game.id}&season=${s.id}`} active={s.id === season?.id}>
               {s.name}
-            </Link>
+            </ChipLink>
           ))}
         </nav>
       )}
@@ -56,10 +53,10 @@ async function Board({ searchParams }: { searchParams: SearchParams }) {
       ) : (
         <>
           {/* Phones: stacked rows */}
-          <ol className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel md:hidden">
+          <ol className={cn(cardVariants({ variant: "list" }), "md:hidden")}>
             {rows.map((r) => (
               <li key={`${r.rank}-${r.playerName}`} className="flex items-center gap-3 px-4 py-3">
-                <span className={cn("w-8 shrink-0 text-center text-lg font-extrabold", r.rank <= 3 ? "text-gold" : "text-muted-foreground")}>{r.rank}</span>
+                <RankMark rank={r.rank} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{r.playerName}</span>
                   <span className="text-xs text-muted-foreground">
@@ -71,7 +68,7 @@ async function Board({ searchParams }: { searchParams: SearchParams }) {
             ))}
           </ol>
           {/* Wider screens: table */}
-          <div className="hidden overflow-hidden rounded-xl border border-line md:block">
+          <div className={cn(cardVariants(), "hidden overflow-hidden md:block")}>
             <table className="w-full text-sm">
               <thead className="bg-panel-2 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
@@ -85,9 +82,9 @@ async function Board({ searchParams }: { searchParams: SearchParams }) {
               </thead>
               <tbody className="divide-y divide-line bg-panel">
                 {rows.map((r) => (
-                  <tr key={`${r.rank}-${r.playerName}`}>
-                    <td className={cn("px-4 py-3 font-extrabold", r.rank <= 3 ? "text-gold" : "text-muted-foreground")}>
-                      {r.rank === 1 ? <Trophy className="inline size-4" aria-label="1st" /> : r.rank}
+                  <tr key={`${r.rank}-${r.playerName}`} className="transition-colors can-hover:hover:bg-panel-2/60">
+                    <td className="px-4 py-2">
+                      <RankMark rank={r.rank} />
                     </td>
                     <td className="px-4 py-3 font-semibold">{r.playerName}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{r.events}</td>
@@ -108,7 +105,7 @@ async function Board({ searchParams }: { searchParams: SearchParams }) {
           <ul className="grid gap-2 fold:grid-cols-2">
             {recent.map((e) => (
               <li key={e.id}>
-                <Link href={`/events/${e.slug}`} className="block rounded-lg border border-line bg-panel px-4 py-3 hover:border-gold/50">
+                <Link href={`/events/${e.slug}`} className={cn(cardVariants({ variant: "interactive", padding: "row", radius: "lg" }), "block")}>
                   <span className="block truncate font-semibold">{e.title}</span>
                   <span className="text-sm text-muted-foreground">{formatShortDate(e.startsAt)}</span>
                 </Link>
@@ -125,7 +122,7 @@ export default function LeaderboardPage({ searchParams }: { searchParams: Search
   return (
     <>
       <PageHeader eyebrow="Compete" title="Leaderboard" description="Season points from every tournament at the shop." />
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-panel" />}>
+      <Suspense fallback={<Skeleton className="h-64" />}>
         <Board searchParams={searchParams} />
       </Suspense>
     </>

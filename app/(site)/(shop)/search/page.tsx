@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Search } from "lucide-react";
-import { PageHeader } from "@components/hub/page-header";
+import { PageHeader } from "@components/ui/page-header";
 import { CatalogGrid } from "@components/shop/catalog-grid";
 import { CatalogFilters } from "@components/shop/catalog-filters";
 import { ProductGridSkeleton } from "@components/shop/product-card";

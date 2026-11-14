@@ -7,8 +7,8 @@ import { useAuth } from "@contexts/AuthContext";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
-import { PhoneInput } from "@components/ui/PhoneInput";
-import { FieldErrorText, GlobalErrors } from "@components/ui/AuthFormErrors";
+import { PhoneInput } from "@components/ui/phone-input";
+import { FieldErrorText, GlobalErrors } from "@components/auth/form-errors";
 import {
   completeProfileAction,
   requestPasswordResetAction,
@@ -17,9 +17,7 @@ import {
 } from "@lib/auth/actions";
 import { safeNext } from "@lib/auth/redirect";
 
-const inputClassName =
-  "border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]";
-const titleClassName = "text-2xl font-bold mb-6 text-center text-[#E6B325]";
+const titleClassName = "text-2xl font-bold mb-6 text-center text-gold";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -40,8 +38,8 @@ export function ForgotPasswordForm() {
     <div className="max-w-md mx-auto">
       <h1 className={titleClassName}>Forgot your password?</h1>
       {sent ? (
-        <p className="text-center text-gray-300">
-          If an account exists for <span className="text-[#E6B325]">{email}</span>, we&apos;ve sent a link to reset
+        <p className="text-center text-foreground/80">
+          If an account exists for <span className="text-gold">{email}</span>, we&apos;ve sent a link to reset
           your password.
         </p>
       ) : (
@@ -56,7 +54,6 @@ export function ForgotPasswordForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={inputClassName}
             />
           </div>
           <Button type="submit" variant="gold" className="w-full" disabled={isBusy}>
@@ -65,7 +62,7 @@ export function ForgotPasswordForm() {
         </form>
       )}
       <p className="text-center text-sm mt-6">
-        <Link href="/sign-in" className="text-[#E6B325] hover:underline">
+        <Link href="/sign-in" className="text-gold hover:underline">
           Back to sign in
         </Link>
       </p>
@@ -102,7 +99,6 @@ export function ResetPasswordForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputClassName}
         />
       </div>
       <div>
@@ -114,7 +110,6 @@ export function ResetPasswordForm() {
           required
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className={inputClassName}
         />
       </div>
       <Button type="submit" variant="gold" className="w-full" disabled={isBusy}>
@@ -163,7 +158,6 @@ export function CompleteProfileForm() {
           required
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className={inputClassName}
         />
         <FieldErrorText error={fieldErrors.username} />
       </div>

@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Download, Trash2 } from "lucide-react";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { addInstaller, deleteInstaller } from "@lib/actions/site";
 import type { Installer } from "@lib/contracts/site";
 import { formatShortDate } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 export function Installers({ installers }: { installers: Installer[] }) {
   const router = useRouter();
@@ -17,7 +19,7 @@ export function Installers({ installers }: { installers: Installer[] }) {
   return (
     <div className="space-y-6">
       <form
-        className="grid gap-4 rounded-xl border border-line bg-panel p-4 fold:grid-cols-[1fr_2fr_auto] fold:items-end"
+        className={cn(cardVariants({ padding: "md" }), "grid gap-4 fold:grid-cols-[1fr_2fr_auto] fold:items-end")}
         onSubmit={(e) => {
           e.preventDefault();
           startTransition(async () => {
@@ -32,7 +34,7 @@ export function Installers({ installers }: { installers: Installer[] }) {
         <Field label="GitHub release URL" hint="Published by the mav-print release workflow">{(id) => <input id={id} type="url" className={inputClass} value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} required />}</Field>
         <Button type="submit" variant="gold" disabled={pending}>Add</Button>
       </form>
-      <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+      <ul className={cardVariants({ variant: "list" })}>
         {installers.length === 0 && <li className="p-4 text-sm text-muted-foreground">No installers yet.</li>}
         {installers.map((i) => (
           <li key={i.id} className="flex items-center gap-3 p-3">

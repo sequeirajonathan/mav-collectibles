@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
 import { Switch } from "@components/ui/switch";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { saveAlertBanner, saveCommunity, saveVideoSettings, saveYouTubeSettings, setFlag } from "@lib/actions/site";
 import type { AlertBanner, Community, FlagName, VideoSettings, YouTubeSettings } from "@lib/contracts/site";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 const FLAG_HELP: Record<FlagName, { label: string; help: string }> = {
   shopLive: { label: "Online shop is live", help: "Off: customers browse the shop as an in-store showcase with no cart. Staff always see the full shop." },
@@ -21,7 +23,7 @@ export function FlagToggles({ flags }: { flags: { name: FlagName; enabled: boole
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+    <ul className={cardVariants({ variant: "list" })}>
       {flags.map((f) => (
         <li key={f.name} className="flex items-center justify-between gap-4 p-4">
           <div>
@@ -68,7 +70,7 @@ export function BannerForm({ banner }: { banner: AlertBanner | null }) {
           else toast.error(result.error);
         });
       }}
-      className="space-y-4 rounded-xl border border-line bg-panel p-4"
+      className={cn(cardVariants({ padding: "md" }), "space-y-4")}
     >
       <div className="rounded-md px-3 py-2 text-center text-sm font-medium" style={{ backgroundColor: v.backgroundColor, color: v.textColor }}>
         {v.message || "Preview"} {v.code && <strong className="ml-1">{v.code}</strong>}
@@ -95,7 +97,7 @@ export function MediaForms({ youtube, video }: { youtube: YouTubeSettings | null
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <form
-        className="space-y-4 rounded-xl border border-line bg-panel p-4"
+        className={cn(cardVariants({ padding: "md" }), "space-y-4")}
         onSubmit={(e) => {
           e.preventDefault();
           startTransition(async () => {
@@ -111,7 +113,7 @@ export function MediaForms({ youtube, video }: { youtube: YouTubeSettings | null
         <Button type="submit" variant="gold" disabled={pending}>Save</Button>
       </form>
       <form
-        className="space-y-4 rounded-xl border border-line bg-panel p-4"
+        className={cn(cardVariants({ padding: "md" }), "space-y-4")}
         onSubmit={(e) => {
           e.preventDefault();
           startTransition(async () => {
@@ -154,7 +156,7 @@ export function CommunityForm({ community, now }: { community: Community; now: n
           }
         });
       }}
-      className="space-y-4 rounded-xl border border-line bg-panel p-4"
+      className={cn(cardVariants({ padding: "md" }), "space-y-4")}
     >
       <Field label="Discord invite link" hint="Shown on the home page, events and the footer. Leave empty to hide." error={error}>
         {(id) => (

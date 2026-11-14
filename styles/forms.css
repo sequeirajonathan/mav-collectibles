@@ -8,13 +8,13 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-  -webkit-text-fill-color: white;
-  caret-color: white;
-  -webkit-box-shadow: 0 0 0px 1000px rgb(17, 24, 39) inset !important;
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0px 1000px var(--panel-2) inset !important;
   transition: background-color 5000s ease-in-out 0s;
-  background-color: rgb(17, 24, 39) !important;
+  background-color: var(--panel-2) !important;
   background-image: none !important;
-  color: white !important;
+  color: var(--foreground) !important;
 }
 
 /* Remove default focus styles */
@@ -24,7 +24,7 @@ input:focus {
 
 /* Custom focus styles */
 input:focus {
-  border-color: #E6B325 !important;
+  border-color: var(--gold) !important;
   border-width: 1px !important;
 }
 
@@ -39,18 +39,18 @@ input:-webkit-autofill {
 
 @keyframes onAutoFillStart {
   from {
-    background-color: rgb(17, 24, 39);
+    background-color: var(--panel-2);
   }
   to {
-    background-color: rgb(17, 24, 39);
+    background-color: var(--panel-2);
   }
 }
 
 @keyframes onAutoFillCancel {
   from {
-    background-color: rgb(17, 24, 39);
+    background-color: var(--panel-2);
   }
   to {
-    background-color: rgb(17, 24, 39);
+    background-color: var(--panel-2);
   }
 } 

@@ -3,10 +3,12 @@
 import { useState, useTransition } from "react";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { updateMyCustomer } from "@lib/actions/account";
 import { useShopMode } from "@components/layout/shop-mode";
 import type { Customer, CustomerAddress } from "@lib/contracts/customer";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 const formatAddress = (a: CustomerAddress) =>
   [a.addressLine1, a.addressLine2, a.locality, a.administrativeDistrictLevel1, a.postalCode].filter(Boolean).join(", ");
@@ -33,7 +35,7 @@ export function AddressForm({ customer }: { customer: Customer }) {
   const set = (key: keyof CustomerAddress) => (e: React.ChangeEvent<HTMLInputElement>) => setAddress((a) => ({ ...a, [key]: e.target.value }));
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); submit(address, false); }} className="space-y-5 rounded-xl border border-line bg-panel p-4 fold:p-6">
+    <form onSubmit={(e) => { e.preventDefault(); submit(address, false); }} className={cn(cardVariants({ padding: "lg" }), "space-y-5")}>
       <h2 className="text-lg font-bold">Shipping address</h2>
       <Field label="Street address">{(id) => <input id={id} className={inputClass} value={address.addressLine1 ?? ""} onChange={set("addressLine1")} autoComplete="address-line1" />}</Field>
       <Field label="Apt, suite (optional)">{(id) => <input id={id} className={inputClass} value={address.addressLine2 ?? ""} onChange={set("addressLine2")} autoComplete="address-line2" />}</Field>

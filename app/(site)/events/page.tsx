@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { CalendarDays } from "lucide-react";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { DiscordCta } from "@components/hub/discord";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { listEvents, listGames } from "@lib/data/hub";
 import { EVENT_KINDS, EVENT_KIND_LABELS, eventKindSchema } from "@lib/contracts/hub";
 import { groupByDay } from "@lib/format";
-import { cn } from "@utils";
+import { buttonVariants } from "@components/ui/button";
+import { ChipLink, chipRowClass } from "@components/ui/chip";
 
 export const metadata: Metadata = {
   title: "Events & tournaments",
@@ -19,17 +20,9 @@ type SearchParams = Promise<{ game?: string; kind?: string }>;
 
 function Chip({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link
-      href={href}
-      scroll={false}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 text-sm font-medium transition-colors",
-        active ? "border-gold bg-gold text-ink" : "border-line bg-panel text-muted-foreground hover:border-gold/50 hover:text-foreground"
-      )}
-    >
+    <ChipLink href={href} scroll={false} active={active}>
       {children}
-    </Link>
+    </ChipLink>
   );
 }
 
@@ -46,7 +39,7 @@ async function Filters({ searchParams }: { searchParams: SearchParams }) {
   };
   return (
     <div className="mb-6 space-y-2">
-      <nav aria-label="Filter by game" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:flex-wrap fold:px-0">
+      <nav aria-label="Filter by game" className={chipRowClass}>
         <Chip href={href({ game: undefined })} active={!game}>All games</Chip>
         {games.map((g) => (
           <Chip key={g.id} href={href({ game: g.id })} active={game === g.id}>
@@ -54,7 +47,7 @@ async function Filters({ searchParams }: { searchParams: SearchParams }) {
           </Chip>
         ))}
       </nav>
-      <nav aria-label="Filter by event type" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:flex-wrap fold:px-0">
+      <nav aria-label="Filter by event type" className={chipRowClass}>
         <Chip href={href({ kind: undefined })} active={!kind}>Everything</Chip>
         {EVENT_KINDS.map((k) => (
           <Chip key={k} href={href({ kind: k })} active={kind === k}>
@@ -107,7 +100,7 @@ export default function EventsPage({ searchParams }: { searchParams: SearchParam
         actions={
           <a
             href="/events/calendar.ics"
-            className="inline-flex min-h-10 items-center gap-2 rounded-md border border-line px-3 text-sm font-semibold text-foreground hover:border-gold/60"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <CalendarDays className="size-4 text-gold" />
             Subscribe to calendar

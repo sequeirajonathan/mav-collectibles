@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getProduct } from "@lib/data/catalog";
 import { ProductPurchase } from "@components/shop/add-to-cart";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
+import { Skeleton } from "@components/ui/skeleton";
 
 type Params = Promise<{ id: string }>;
 
@@ -26,7 +29,7 @@ async function ProductContent({ params }: { params: Params }) {
   return (
     <div className="grid gap-6 md:grid-cols-2 md:gap-10">
       <div>
-        <div className="relative aspect-square overflow-hidden rounded-xl border border-line bg-panel">
+        <div className={cn(cardVariants(), "relative aspect-square overflow-hidden")}>
           {product.imageUrls[0] ? (
             <Image src={product.imageUrls[0]} alt={product.name} fill priority sizes="(min-width: 768px) 50vw, 100vw" className="object-contain p-4" />
           ) : (
@@ -36,7 +39,7 @@ async function ProductContent({ params }: { params: Params }) {
         {product.imageUrls.length > 1 && (
           <ul className="mt-3 flex gap-2 overflow-x-auto scrollbar-none">
             {product.imageUrls.slice(1, 8).map((url) => (
-              <li key={url} className="relative size-20 shrink-0 overflow-hidden rounded-lg border border-line bg-panel">
+              <li key={url} className={cn(cardVariants({ radius: "lg" }), "relative size-20 shrink-0 overflow-hidden")}>
                 <Image src={url} alt="" fill sizes="80px" className="object-contain p-1" />
               </li>
             ))}
@@ -61,7 +64,7 @@ export default function ProductPage({ params }: { params: Params }) {
       <nav className="mb-4 text-sm">
         <Link href="/shop" className="text-muted-foreground hover:text-gold">← Shop</Link>
       </nav>
-      <Suspense fallback={<div className="grid gap-6 md:grid-cols-2"><div className="aspect-square animate-pulse rounded-xl bg-panel" /><div className="h-64 animate-pulse rounded-xl bg-panel" /></div>}>
+      <Suspense fallback={<div className="grid gap-6 md:grid-cols-2"><Skeleton className="aspect-square" /><Skeleton className="h-64" /></div>}>
         <ProductContent params={params} />
       </Suspense>
     </>

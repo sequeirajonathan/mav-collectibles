@@ -18,7 +18,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <SiteFooter />
-      <Toaster position="bottom-center" toastOptions={{ style: { background: "#181d29", color: "#f5f5f4", border: "1px solid rgb(255 255 255 / 0.08)" } }} />
+      <Toaster position="bottom-center" toastOptions={{ style: { background: "var(--panel-2)", color: "var(--foreground)", border: "1px solid var(--line)" } }} />
     </ShopModeProvider>
   );
 }

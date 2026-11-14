@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@components/ui/button";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { ImagePlus, Loader2, X } from "lucide-react";
@@ -32,18 +35,18 @@ export function ImageUpload({ value, onChange, folder, label = "Image" }: { valu
     <div>
       <p className="text-sm font-semibold">{label}</p>
       <div className="mt-1.5 flex items-center gap-3">
-        <div className="relative aspect-[16/9] w-40 shrink-0 overflow-hidden rounded-lg border border-line bg-panel-2">
+        <div className={cn(cardVariants({ variant: "inset", radius: "lg" }), "relative aspect-[16/9] w-40 shrink-0 overflow-hidden")}>
           {value ? <Image src={value} alt="" fill sizes="160px" className="object-cover" /> : <span className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">No image</span>}
         </div>
         <div className="flex flex-col gap-2">
-          <button type="button" onClick={() => input.current?.click()} disabled={busy} className="inline-flex min-h-10 items-center gap-2 rounded-md border border-line px-3 text-sm font-semibold hover:border-gold/60">
+          <Button type="button" variant="outline" size="sm" onClick={() => input.current?.click()} disabled={busy}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
             {value ? "Replace" : "Upload"}
-          </button>
+          </Button>
           {value && (
-            <button type="button" onClick={() => onChange(null)} className="inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm text-muted-foreground hover:text-danger">
+            <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)} className="font-normal text-muted-foreground hover:text-danger">
               <X className="size-4" /> Remove
-            </button>
+            </Button>
           )}
         </div>
       </div>

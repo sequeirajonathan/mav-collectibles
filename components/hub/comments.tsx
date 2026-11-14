@@ -1,5 +1,6 @@
 "use client";
 
+import { inputClass } from "@components/ui/field";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +10,8 @@ import { Button } from "@components/ui/button";
 import { addComment, deleteComment } from "@lib/actions/hub";
 import type { Comment } from "@lib/contracts/hub";
 import { formatShortDate } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 export function Comments({
   postId,
@@ -67,7 +70,7 @@ export function Comments({
             maxLength={2000}
             rows={3}
             placeholder="Say something nice…"
-            className="w-full resize-y rounded-lg border border-line bg-panel-2 px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:border-gold"
+            className={cn(inputClass, "resize-y py-2")}
           />
           {error && (
             <p role="alert" className="mt-1 text-sm text-danger">
@@ -81,7 +84,7 @@ export function Comments({
           </div>
         </form>
       ) : (
-        <p className="mt-4 rounded-lg border border-line bg-panel px-4 py-3 text-sm text-muted-foreground">
+        <p className={cn(cardVariants({ padding: "row", radius: "lg" }), "mt-4 text-sm text-muted-foreground")}>
           <Link href="/sign-in" className="font-semibold text-gold hover:text-gold-light">
             Sign in
           </Link>{" "}
@@ -91,7 +94,7 @@ export function Comments({
 
       <ul className="mt-6 space-y-4">
         {comments.map((c) => (
-          <li key={c.id} className="rounded-lg border border-line bg-panel px-4 py-3">
+          <li key={c.id} className={cardVariants({ padding: "row", radius: "lg" })}>
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm">
                 <span className="font-semibold text-foreground">{c.authorName}</span>{" "}

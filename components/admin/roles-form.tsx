@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
-import { Field, inputClass } from "@components/hub/form";
+import { Field, inputClass } from "@components/ui/field";
 import { setUserRole } from "@lib/actions/account";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
 
 const ROLES = [
   { value: "USER", label: "Customer", help: "Default for everyone" },
@@ -29,7 +31,7 @@ export function RolesForm() {
           setUser("");
         });
       }}
-      className="max-w-lg space-y-5 rounded-xl border border-line bg-panel p-4"
+      className={cn(cardVariants({ padding: "md" }), "max-w-lg space-y-5")}
     >
       <Field label="Email, username or user ID">{(id) => <input id={id} className={inputClass} value={user} onChange={(e) => setUser(e.target.value)} required autoCapitalize="none" />}</Field>
       <fieldset>

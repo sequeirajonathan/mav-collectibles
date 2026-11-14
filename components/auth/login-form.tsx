@@ -9,7 +9,7 @@ import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
-import { GlobalErrors } from "@components/ui/AuthFormErrors";
+import { GlobalErrors } from "@components/auth/form-errors";
 import { getBrowserClient } from "@utils/supabase/client";
 import { signInAction } from "@lib/auth/actions";
 import { safeNext } from "@lib/auth/redirect";
@@ -23,8 +23,6 @@ interface LoginFormProps {
   hideSocialLogins?: boolean;
 }
 
-const inputClassName =
-  "border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]";
 
 export function LoginForm({
   redirectTo,
@@ -83,16 +81,16 @@ export function LoginForm({
       </div>
 
       {!hideTitle && (
-        <h1 className="text-2xl font-bold mb-4 md:mb-6 text-center text-[#E6B325]">
+        <h1 className="text-2xl font-bold mb-4 md:mb-6 text-center text-gold">
           Login
         </h1>
       )}
 
       {message && (
-        <div className="bg-[#181d29] border-2 border-[#E6B325] text-[#E6B325] px-4 py-3 rounded mb-4 text-center">
+        <div className="mb-4 rounded-lg border border-gold/40 bg-gold/5 px-4 py-3 text-center text-gold">
           <p className="font-medium">{decodeURIComponent(message)}</p>
           {error === "token_expired" && (
-            <p className="text-sm mt-2 text-gray-400">
+            <p className="text-sm mt-2 text-muted-foreground">
               Please check your email for a new verification link or contact
               support if you need assistance.
             </p>
@@ -116,7 +114,6 @@ export function LoginForm({
             required
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            className={inputClassName}
           />
         </div>
 
@@ -130,13 +127,12 @@ export function LoginForm({
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={inputClassName}
           />
         </div>
 
         {!hideForgotPassword && (
           <div className="flex justify-end">
-            <Link href="/forgot-password" className="text-sm font-medium text-[#E6B325] hover:text-[#FFD966]">
+            <Link href="/forgot-password" className="text-sm font-medium text-gold hover:text-gold-light">
               Forgot password?
             </Link>
           </div>
@@ -147,9 +143,9 @@ export function LoginForm({
         </Button>
 
         {!hideSignupLink && (
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-muted-foreground mt-4">
             Don&apos;t have an account?{" "}
-            <Link href="/sign-up" className="text-[#E6B325] hover:underline">
+            <Link href="/sign-up" className="text-gold hover:underline">
               Sign up
             </Link>
           </p>
@@ -159,17 +155,17 @@ export function LoginForm({
       {!hideSocialLogins && (
         <>
           <div className="my-6 flex items-center gap-4">
-            <hr className="flex-1 border-[#E6B325] opacity-40" />
-            <span className="text-[#E6B325] text-sm font-semibold">
+            <hr className="flex-1 border-gold/30" />
+            <span className="text-gold text-sm font-semibold">
               Or continue with
             </span>
-            <hr className="flex-1 border-[#E6B325] opacity-40" />
+            <hr className="flex-1 border-gold/30" />
           </div>
 
           <Button
             type="button"
             variant="outline"
-            className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+            className="w-full"
             onClick={() => handleSocial("google")}
           >
             Google
@@ -178,7 +174,7 @@ export function LoginForm({
           <Button
             type="button"
             variant="outline"
-            className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white mt-2"
+            className="w-full mt-2"
             onClick={() => handleSocial("facebook")}
           >
             Facebook

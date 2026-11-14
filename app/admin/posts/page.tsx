@@ -1,18 +1,21 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Pin } from "lucide-react";
-import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { listAllPostsForStaff } from "@lib/data/hub";
 import { formatShortDate } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { Skeleton } from "@components/ui/skeleton";
+import { LinkButton } from "@components/ui/link-button";
 
 async function List() {
   await requirePageRole(CONTENT_ROLES, "/admin/posts");
   const posts = await listAllPostsForStaff();
   if (posts.length === 0) return <EmptyState title="No posts yet" action={<Link href="/admin/posts/new" className="font-semibold text-gold">Write the first one →</Link>} />;
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+    <ul className={cardVariants({ variant: "list" })}>
       {posts.map((p) => (
         <li key={p.id}>
           <Link href={`/admin/posts/${p.id}`} className="flex items-center gap-3 p-4 hover:bg-panel-2">
@@ -32,8 +35,8 @@ async function List() {
 export default function AdminPostsPage() {
   return (
     <>
-      <PageHeader title="Posts" actions={<Link href="/admin/posts/new" className="inline-flex min-h-10 items-center rounded-md bg-gold px-4 text-sm font-bold text-ink">New post</Link>} />
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-panel" />}>
+      <PageHeader title="Posts" actions={<LinkButton href="/admin/posts/new" size="sm">New post</LinkButton>} />
+      <Suspense fallback={<Skeleton className="h-64" />}>
         <List />
       </Suspense>
     </>
