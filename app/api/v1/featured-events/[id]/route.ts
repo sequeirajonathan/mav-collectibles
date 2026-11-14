@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { z } from 'zod';
 import { optionalUrlSchema } from '@validations/base';
-import { FeaturedEvent } from '@prisma/client';
+import type { FeaturedEvent } from '@lib/generated/prisma/client';
 
 const featuredEventPatchSchema = z.object({
   title: z.string().optional(),

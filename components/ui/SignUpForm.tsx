@@ -1,14 +1,13 @@
 "use client";
 
-import * as Clerk from "@clerk/elements/common";
-import * as SignUp from "@clerk/elements/sign-up";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { PhoneInput } from "@components/ui/PhoneInput";
+import { FieldErrorText, GlobalErrors } from "@components/ui/AuthFormErrors";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useSignUp, useUser } from "@clerk/nextjs";
 import { UserRole } from "@interfaces/roles";
 import { useUserMetadata } from "@hooks/useUserMetadata";
@@ -19,27 +18,55 @@ interface SignupFormProps {
   hideLoginLink?: boolean;
 }
 
+type Step = "start" | "verify-phone" | "verify-email" | "continue";
+
+const inputClassName =
+  "border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]";
+const RESEND_COOLDOWN_SECONDS = 30;
+const SSO_CALLBACK_URL = "/sign-in/sso-callback";
+const AFTER_SIGN_UP_URL = "/dashboard";
+
+/** Converts the masked "(555) 123-4567" value into E.164 for Clerk. */
+const toE164 = (formatted: string) => `+1${formatted.replace(/\D/g, "")}`;
+
 export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
-  const { signUp, isLoaded: signUpLoaded } = useSignUp();
-  const [phoneValue, setPhoneValue] = useState("");
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const isBusy = fetchStatus === "fetching";
   const { user } = useUser();
   const { setUserRole } = useUserMetadata();
+
+  const [selectedStep, setStep] = useState<Step>("start");
+  const [username, setUsername] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
-    }
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [cooldown]);
+
+  // Returning from an OAuth sign-up that still needs a username/phone
+  // (Clerk redirects to /sign-up/continue): resume at the "continue" step.
+  const needsContinue =
+    signUp.status === "missing_requirements" &&
+    (signUp.missingFields.includes("username") ||
+      signUp.missingFields.includes("phone_number"));
+  const step: Step =
+    selectedStep === "start" && needsContinue && !signUp.hasPassword
+      ? "continue"
+      : selectedStep;
 
   // Check for existing Square customer and handle role setting
   useEffect(() => {
     const handleSquareCustomer = async () => {
       if (
-        signUpLoaded &&
-        signUp?.status === "complete" &&
+        signUp.status === "complete" &&
         !(user?.unsafeMetadata as Record<string, unknown>)?.role
       ) {
         try {
@@ -97,7 +124,139 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
     };
 
     handleSquareCustomer();
-  }, [signUp, user, setUserRole, signUpLoaded]);
+  }, [signUp, user, setUserRole]);
+
+  const goTo = (next: Step) => {
+    setLocalError(null);
+    setCode("");
+    setStep(next);
+  };
+
+  // Moves the flow forward based on what Clerk still needs.
+  const advance = async () => {
+    if (signUp.status === "complete") {
+      await signUp.finalize();
+      return;
+    }
+    if (signUp.status !== "missing_requirements") {
+      setLocalError("Unable to complete sign up. Please try again.");
+      return;
+    }
+    if (
+      signUp.missingFields.includes("username") ||
+      signUp.missingFields.includes("phone_number")
+    ) {
+      goTo("continue");
+      return;
+    }
+    if (signUp.unverifiedFields.includes("phone_number")) {
+      const { error } = await signUp.verifications.sendPhoneCode();
+      if (!error) {
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        goTo("verify-phone");
+      }
+      return;
+    }
+    if (signUp.unverifiedFields.includes("email_address")) {
+      const { error } = await signUp.verifications.sendEmailCode();
+      if (!error) {
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        goTo("verify-email");
+      }
+      return;
+    }
+    setLocalError("Unable to complete sign up. Please try again.");
+  };
+
+  const handleStart = async (e: FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    if (password !== confirmPassword) {
+      setLocalError("Passwords do not match.");
+      return;
+    }
+    const { error } = await signUp.password({
+      username,
+      emailAddress,
+      phoneNumber: toE164(phoneValue),
+      password,
+    });
+    if (error) return;
+    await advance();
+  };
+
+  const handleContinue = async (e: FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    const { error } = await signUp.update({
+      ...(username ? { username } : {}),
+      ...(phoneValue ? { phoneNumber: toE164(phoneValue) } : {}),
+    });
+    if (error) return;
+    await advance();
+  };
+
+  const handleVerify = async (e: FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    const { error } =
+      step === "verify-phone"
+        ? await signUp.verifications.verifyPhoneCode({ code })
+        : await signUp.verifications.verifyEmailCode({ code });
+    if (error) return;
+    await advance();
+  };
+
+  const handleResend = async () => {
+    const { error } =
+      step === "verify-phone"
+        ? await signUp.verifications.sendPhoneCode()
+        : await signUp.verifications.sendEmailCode();
+    if (!error) setCooldown(RESEND_COOLDOWN_SECONDS);
+  };
+
+  const handleSocial = async (strategy: "oauth_google" | "oauth_facebook") => {
+    setLocalError(null);
+    await signUp.sso({
+      strategy,
+      redirectUrl: AFTER_SIGN_UP_URL,
+      redirectCallbackUrl: SSO_CALLBACK_URL,
+    });
+  };
+
+  const usernameField = (
+    <div>
+      <Label htmlFor="username">Username</Label>
+      <Input
+        id="username"
+        type="text"
+        autoComplete="username"
+        placeholder="Choose a username"
+        required
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        className={inputClassName}
+      />
+      <FieldErrorText error={errors.fields.username} />
+    </div>
+  );
+
+  const phoneField = (
+    <div>
+      <Label htmlFor="phoneNumber">Phone Number (US Only)</Label>
+      <PhoneInput
+        id="phoneNumber"
+        placeholder="(555) 123-4567"
+        required
+        value={phoneValue}
+        onChange={(e) => setPhoneValue(e.target.value)}
+        className={inputClassName}
+      />
+      <FieldErrorText error={errors.fields.phoneNumber} />
+    </div>
+  );
+
+  const isPhone = step === "verify-phone";
 
   return (
     <div className="max-w-md mx-auto">
@@ -110,113 +269,62 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
           className="w-auto h-auto"
         />
       </div>
-      <SignUp.Root>
-        <SignUp.Step name="start">
+
+      <GlobalErrors errors={errors.global} localError={localError} />
+
+      {step === "start" && (
+        <>
           <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
             Sign Up
           </h1>
-          <div className="space-y-4">
-            <Clerk.Field name="username">
-              <Clerk.Label asChild>
-                <Label htmlFor="username">Username</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Choose a username"
-                  required
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
+          <form className="space-y-4" onSubmit={handleStart}>
+            {usernameField}
 
-            <Clerk.Field name="emailAddress">
-              <Clerk.Label asChild>
-                <Label htmlFor="email">Email</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="Enter your email"
+                required
+                value={emailAddress}
+                onChange={(e) => setEmailAddress(e.target.value)}
+                className={inputClassName}
+              />
+              <FieldErrorText error={errors.fields.emailAddress} />
+            </div>
 
-            <Clerk.Field name="phoneNumber">
-              <Clerk.Label asChild>
-                <Label htmlFor="phoneNumber">Phone Number (US Only)</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <PhoneInput
-                  id="phoneNumber"
-                  type="tel"
-                  placeholder="(555) 123-4567"
-                  required
-                  value={phoneValue}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setPhoneValue(value);
-                    
-                    // Format the value for Clerk (E.164 format)
-                    const digits = value.replace(/\D/g, '');
-                    const e164Value = `+1${digits}`;
-                    
-                    // Update the input value directly
-                    e.target.value = e164Value;
-                  }}
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
+            {phoneField}
 
-            <Clerk.Field name="password">
-              <Clerk.Label asChild>
-                <Label htmlFor="password">Password</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Create a password"
-                  required
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Create a password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClassName}
+              />
+              <FieldErrorText error={errors.fields.password} />
+            </div>
 
-            <Clerk.Field name="confirmPassword">
-              <Clerk.Label asChild>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  required
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Re-enter your password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputClassName}
+              />
+            </div>
 
             <div
               id="clerk-captcha"
@@ -225,13 +333,12 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
               data-cl-language="en-US"
               className="mt-4"
             />
+            <FieldErrorText error={errors.fields.captcha} />
 
-            <SignUp.Action submit asChild>
-              <Button type="submit" className="w-full" variant="gold">
-                Sign Up
-              </Button>
-            </SignUp.Action>
-          </div>
+            <Button type="submit" className="w-full" variant="gold" disabled={isBusy}>
+              Sign Up
+            </Button>
+          </form>
 
           <div className="my-6 flex items-center gap-4">
             <hr className="flex-1 border-[#E6B325] opacity-40" />
@@ -242,23 +349,25 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Clerk.Connection name="google" asChild>
-              <Button
-                variant="outline"
-                className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
-              >
-                Google
-              </Button>
-            </Clerk.Connection>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+              disabled={isBusy}
+              onClick={() => handleSocial("oauth_google")}
+            >
+              Google
+            </Button>
 
-            <Clerk.Connection name="facebook" asChild>
-              <Button
-                variant="outline"
-                className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
-              >
-                Facebook
-              </Button>
-            </Clerk.Connection>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-[#E6B325] text-[#E6B325] hover:bg-[#E6B325] hover:text-white"
+              disabled={isBusy}
+              onClick={() => handleSocial("oauth_facebook")}
+            >
+              Facebook
+            </Button>
           </div>
 
           {!hideLoginLink && (
@@ -269,185 +378,75 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
               </Link>
             </p>
           )}
-        </SignUp.Step>
+        </>
+      )}
 
-        <SignUp.Step name="verifications">
-          <SignUp.Strategy name="phone_code">
-            <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
-              Verify your phone
-            </h1>
+      {(step === "verify-phone" || step === "verify-email") && (
+        <form onSubmit={handleVerify}>
+          <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
+            {isPhone ? "Verify your phone" : "Confirm your email"}
+          </h1>
 
-            <p className="text-center mb-4 text-gray-400">
-              We&apos;ve sent a verification code to{" "}
-              <span className="text-[#E6B325] font-medium">
-                {signUp?.phoneNumber}
-              </span>
-            </p>
+          <p className="text-center mb-4 text-gray-400">
+            We&apos;ve sent a verification code to{" "}
+            <span className="text-[#E6B325] font-medium">
+              {isPhone ? signUp.phoneNumber : signUp.emailAddress}
+            </span>
+          </p>
 
-            <Clerk.Field name="code">
-              <Clerk.Label asChild>
-                <Label>Phone verification code</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input placeholder="Enter code" />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
+          <Label htmlFor="code">
+            {isPhone ? "Phone verification code" : "Email verification code"}
+          </Label>
+          <Input
+            id="code"
+            placeholder="Enter code"
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className={inputClassName}
+          />
+          <FieldErrorText error={errors.fields.code} />
 
-            <div className="mt-4 space-y-4">
-              <SignUp.Action
-                resend
-                className="w-full text-[#E6B325] hover:text-[#FFD966] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                fallback={({ resendableAfter }) => (
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full text-[#E6B325]/50 text-sm cursor-not-allowed"
-                  >
-                    Resend code in {resendableAfter} seconds
-                  </button>
-                )}
-              >
-                Didn&apos;t receive the code? Resend
-              </SignUp.Action>
+          <div className="mt-4 space-y-4">
+            <button
+              type="button"
+              disabled={cooldown > 0 || isBusy}
+              onClick={handleResend}
+              className="w-full text-[#E6B325] hover:text-[#FFD966] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {cooldown > 0
+                ? `Resend code in ${cooldown} seconds`
+                : "Didn't receive the code? Resend"}
+            </button>
 
-              <SignUp.Action
-                navigate={signUp?.createdSessionId ? "previous" : "start"}
-                className="w-full text-gray-400 hover:text-white text-sm"
-              >
-                Need to change your phone number?
-              </SignUp.Action>
-            </div>
+            <button
+              type="button"
+              onClick={() => goTo(isPhone && signUp.createdSessionId ? "continue" : "start")}
+              className="w-full text-gray-400 hover:text-white text-sm"
+            >
+              {isPhone ? "Need to change your phone number?" : "Need to change your email?"}
+            </button>
+          </div>
 
-            <SignUp.Action submit asChild>
-              <Button type="submit" className="w-full mt-4" variant="gold">
-                Verify Phone
-              </Button>
-            </SignUp.Action>
-          </SignUp.Strategy>
+          <Button type="submit" className="w-full mt-4" variant="gold" disabled={isBusy}>
+            {isPhone ? "Verify Phone" : "Confirm Email"}
+          </Button>
+        </form>
+      )}
 
-          <SignUp.Strategy name="email_code">
-            <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
-              Confirm your email
-            </h1>
-
-            <p className="text-center mb-4 text-gray-400">
-              We&apos;ve sent a verification code to{" "}
-              <span className="text-[#E6B325] font-medium">
-                {signUp?.emailAddress}
-              </span>
-            </p>
-
-            <Clerk.Field name="code">
-              <Clerk.Label asChild>
-                <Label>Email verification code</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input placeholder="Enter code" />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
-
-            <div className="mt-4 space-y-4">
-              <SignUp.Action
-                resend
-                className="w-full text-[#E6B325] hover:text-[#FFD966] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                fallback={({ resendableAfter }) => (
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full text-[#E6B325]/50 text-sm cursor-not-allowed"
-                  >
-                    Resend code in {resendableAfter} seconds
-                  </button>
-                )}
-              >
-                Didn&apos;t receive the code? Resend
-              </SignUp.Action>
-
-              <SignUp.Action
-                navigate="start"
-                className="w-full text-gray-400 hover:text-white text-sm"
-              >
-                Need to change your email?
-              </SignUp.Action>
-            </div>
-
-            <SignUp.Action submit asChild>
-              <Button type="submit" className="w-full mt-4" variant="gold">
-                Confirm Email
-              </Button>
-            </SignUp.Action>
-          </SignUp.Strategy>
-        </SignUp.Step>
-
-        <SignUp.Step name="continue">
+      {step === "continue" && (
+        <form className="space-y-4" onSubmit={handleContinue}>
           <h1 className="text-2xl font-bold mb-6 text-center text-[#E6B325]">
             Complete your profile
           </h1>
-          <div className="space-y-4">
-            <Clerk.Field name="username">
-              <Clerk.Label asChild>
-                <Label htmlFor="username">Username</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Choose a username"
-                  required
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
-
-            <Clerk.Field name="phoneNumber">
-              <Clerk.Label asChild>
-                <Label htmlFor="phoneNumber">Phone Number (US Only)</Label>
-              </Clerk.Label>
-              <Clerk.Input
-                asChild
-                className="border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]"
-              >
-                <PhoneInput
-                  id="phoneNumber"
-                  type="tel"
-                  placeholder="(555) 123-4567"
-                  required
-                  value={phoneValue}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setPhoneValue(value);
-                    
-                    // Format the value for Clerk (E.164 format)
-                    const digits = value.replace(/\D/g, '');
-                    const e164Value = `+1${digits}`;
-                    
-                    // Update the input value directly
-                    e.target.value = e164Value;
-                  }}
-                />
-              </Clerk.Input>
-              <Clerk.FieldError />
-            </Clerk.Field>
-
-            <SignUp.Action submit asChild>
-              <Button type="submit" className="w-full mt-4" variant="gold">
-                Continue
-              </Button>
-            </SignUp.Action>
-          </div>
-        </SignUp.Step>
-      </SignUp.Root>
+          {usernameField}
+          {phoneField}
+          <Button type="submit" className="w-full mt-4" variant="gold" disabled={isBusy}>
+            Continue
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

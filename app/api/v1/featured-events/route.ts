@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { z } from 'zod';
 import { createFeaturedEventSchema } from "@validations/featured-events";
-import { FeaturedEvent } from '@prisma/client';
+import type { FeaturedEvent } from '@lib/generated/prisma/client';
 
 // Helper function to convert Prisma event to API response
 const convertPrismaEventToResponse = (event: FeaturedEvent) => ({
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.issues },
         { status: 400 }
       );
     }

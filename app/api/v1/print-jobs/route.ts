@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     console.error('Error creating print job:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }
@@ -59,7 +59,7 @@ export async function PATCH(request: Request) {
     console.error('Error updating print job:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }

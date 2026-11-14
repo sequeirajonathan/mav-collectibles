@@ -1,6 +1,6 @@
 import { CategoryGroup } from "@interfaces";
 
-export interface SquareCategory {
+interface SquareCategory {
   displayName: string;
   slug: string;
   squareCategoryId: string;

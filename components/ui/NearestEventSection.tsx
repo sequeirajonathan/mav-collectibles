@@ -40,12 +40,12 @@ export default function NearestEventSection({
             No Upcoming Events
           </h3>
           <p className="text-gray-300 mb-4">Check back soon for new events!</p>
-          <button
-            onClick={() => window.location.assign("/events")}
+          <Link
+            href="/events"
             className="text-[#E6B325] hover:text-[#FFD966] transition-colors underline"
           >
             View Past Events
-          </button>
+          </Link>
         </div>
       );
     }

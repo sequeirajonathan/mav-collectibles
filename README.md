@@ -56,11 +56,16 @@ mav-i/
 
 ## Getting Started
 
+Requires Node.js 20.9 or newer.
+
 1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up environment variables: Copy `.env.example` to `.env.local`
-4. Run the development server: `npm run dev`
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+2. Install dependencies: `npm install` (also generates the Prisma client into `lib/generated/prisma`)
+3. Set up environment variables: copy `.env.example` to `.env` (Prisma CLI) and/or `.env.local` (Next.js)
+4. Apply database migrations: `npx prisma migrate deploy` (optionally seed with `npx prisma db seed`)
+5. Run the development server: `npm run dev`
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+Other scripts: `npm run build`, `npm run lint`.
 
 ## Features
 
