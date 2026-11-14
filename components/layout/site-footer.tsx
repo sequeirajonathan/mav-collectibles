@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaEnvelope, FaFacebook, FaInstagram, FaMapMarkerAlt, FaPhoneAlt, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 import { STORE_ADDRESS } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
+import { DiscordIcon } from "@components/hub/discord";
 
 const PHONE = "(936) 449-1277";
 const EMAIL = "info@mavcollectibles.com";
@@ -27,7 +29,10 @@ export function SiteFooter() {
         <div>
           <Image src="/mav_collectibles.png" alt="MAV Collectibles" width={140} height={56} className="h-12 w-auto" />
           <p className="mt-3 text-sm text-muted-foreground">Your local game store for Pokémon and every TCG in Montgomery, TX.</p>
-          <div className="mt-4 flex gap-1">
+          <div className="mt-4 flex flex-wrap gap-1">
+            <Suspense fallback={null}>
+              <DiscordIcon />
+            </Suspense>
             {SOCIAL.map(({ href, label, Icon }) => (
               <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-panel-2 hover:text-gold">
                 <Icon size={20} />

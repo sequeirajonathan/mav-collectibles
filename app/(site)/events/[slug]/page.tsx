@@ -14,6 +14,7 @@ import { GameBadge, KindBadge } from "@components/hub/badges";
 import { RsvpButton } from "@components/hub/rsvp-button";
 import { AddToCalendar } from "@components/hub/add-to-calendar";
 import { ShareButton } from "@components/hub/share-button";
+import { DiscordLink } from "@components/hub/discord";
 import { publicEnv } from "@lib/env";
 
 type Params = Promise<{ slug: string }>;
@@ -114,6 +115,9 @@ async function EventContent({ params }: { params: Params }) {
           icsUrl={`/events/${event.slug}/calendar.ics`}
         />
         <ShareButton title={event.title} path={`/events/${event.slug}`} className="self-start fold:self-auto" />
+        <Suspense fallback={null}>
+          <DiscordLink className="self-start fold:self-auto" />
+        </Suspense>
       </div>
 
       {(event.summary || event.description) && (

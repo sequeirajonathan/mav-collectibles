@@ -3,7 +3,11 @@ import { cacheLife, cacheTag } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@lib/prisma";
 import {
+  DISCORD_INVITE,
   FLAG_NAMES,
+  communitySchema,
+  discordInviteSchema,
+  type Community,
   alertBannerSchema,
   googleReviewSchema,
   installerSchema,
@@ -101,5 +105,38 @@ export async function getGoogleReviews(): Promise<GoogleReview[]> {
     return parsed.success ? (parsed.data.result?.reviews ?? []) : [];
   } catch {
     return [];
+  }
+}
+
+/**
+ * The shop's Discord invite plus live member counts. Counts come from
+ * Discord's public invite API and refresh about hourly.
+ */
+export async function getCommunity(): Promise<Community> {
+  "use cache";
+  cacheTag(tags.community);
+  cacheLife("hours");
+  const row = await prisma.communitySettings.findUnique({ where: { id: 1 } });
+  const discordUrl = row?.discord_url ?? null;
+  const empty: Community = { discordUrl, serverName: null, members: null, online: null, expiresAt: null, valid: Boolean(discordUrl) };
+  const code = discordUrl?.match(DISCORD_INVITE)?.[2];
+  if (!code) return empty;
+  try {
+    const response = await fetch(`https://discord.com/api/v10/invites/${code}?with_counts=true&with_expiration=true`, {
+      signal: AbortSignal.timeout(4000),
+    });
+    if (response.status === 404) return { ...empty, valid: false };
+    if (!response.ok) return empty;
+    const invite = discordInviteSchema.parse(await response.json());
+    return communitySchema.parse({
+      discordUrl,
+      serverName: invite.guild?.name ?? null,
+      members: invite.approximate_member_count ?? null,
+      online: invite.approximate_presence_count ?? null,
+      expiresAt: invite.expires_at ? new Date(invite.expires_at).toISOString() : null,
+      valid: true,
+    });
+  } catch {
+    return empty;
   }
 }

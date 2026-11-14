@@ -5,6 +5,7 @@ import { CalendarDays, Megaphone, Store, Trophy } from "lucide-react";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { PostCard, PostCardSkeleton } from "@components/hub/post-card";
 import { SectionHeading, EmptyState } from "@components/hub/page-header";
+import { DiscordCta } from "@components/hub/discord";
 import { GameBadge, KindBadge } from "@components/hub/badges";
 import { GoogleReviews } from "@components/hub/google-reviews";
 import { YouTubeEmbed } from "@components/hub/youtube-embed";
@@ -199,6 +200,10 @@ export default function HomePage() {
           </div>
         </section>
       </div>
+
+      <Suspense fallback={null}>
+        <DiscordCta />
+      </Suspense>
 
       <Suspense fallback={null}>
         <Media />

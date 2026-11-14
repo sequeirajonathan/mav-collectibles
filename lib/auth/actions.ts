@@ -15,6 +15,9 @@ const GENERIC_SIGN_IN_ERROR = "Invalid email/username or password.";
 async function siteOrigin(): Promise<string> {
   const configured = publicEnv().NEXT_PUBLIC_SITE_URL;
   if (configured) return configured.replace(/\/$/, "");
+  // Email links must never be built from request headers in production
+  // (a forged Host header would point reset links at another site).
+  if (process.env.VERCEL_ENV === "production") throw new Error("NEXT_PUBLIC_SITE_URL must be set in production.");
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? "https";

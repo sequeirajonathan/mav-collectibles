@@ -74,7 +74,7 @@ the build fails if a client component tries to use it.
 |---|---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | public | `http://127.0.0.1:54321` | prod project URL | prod project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | public | local key | prod publishable key | prod publishable key |
-| `NEXT_PUBLIC_SITE_URL` | public | — | — | `https://mavcollectibles.com` |
+| `NEXT_PUBLIC_SITE_URL` | public | — | — | `https://mavcollectibles.com` (**required**: auth emails link here) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY` | public | optional | referrer-restricted key | referrer-restricted key |
 | `NEXT_PUBLIC_GOOGLE_PLACE_ID` | public | optional | place ID | place ID |
 | `NEXT_PUBLIC_MAINTENANCE_MODE` | public | `false` | `false` | as needed |
@@ -134,7 +134,9 @@ production release, and protect `main` so the `CI / verify` check must pass.
    `https://dxtlhxaxmuxxkdecehqb.supabase.co/auth/v1/callback`).
 4. **Auth → SMTP:** configure your own SMTP sender. The built-in sender is
    rate-limited to a few emails per hour and isn't meant for production.
-5. **Auth → Attack protection:** turn on leaked-password protection.
+5. **Auth → Attack protection:** turn on leaked-password protection. Under
+   **Providers → Email**, turn on *Secure password change* (changing a password
+   needs a recent sign-in), as in `supabase/config.toml`.
 6. **First admin:** sign up on the site, confirm the email, then in the SQL editor:
    ```sql
    update auth.users set raw_app_meta_data = raw_app_meta_data || '{"role":"ADMIN"}'

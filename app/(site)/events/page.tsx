@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { CalendarDays } from "lucide-react";
 import { PageHeader, EmptyState } from "@components/hub/page-header";
+import { DiscordCta } from "@components/hub/discord";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { listEvents, listGames } from "@lib/data/hub";
 import { EVENT_KINDS, EVENT_KIND_LABELS, eventKindSchema } from "@lib/contracts/hub";
@@ -118,6 +119,9 @@ export default function EventsPage({ searchParams }: { searchParams: SearchParam
       </Suspense>
       <Suspense fallback={<EventListSkeleton count={4} />}>
         <EventList searchParams={searchParams} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <DiscordCta className="mt-10" />
       </Suspense>
     </>
   );

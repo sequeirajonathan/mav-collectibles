@@ -95,3 +95,33 @@ export const googleReviewSchema = z.object({
   time: z.number(),
 });
 export type GoogleReview = z.infer<typeof googleReviewSchema>;
+
+/** A Discord invite link (discord.gg/… or discord.com/invite/…). */
+export const DISCORD_INVITE = /^https:\/\/(discord\.gg|discord\.com\/invite)\/([A-Za-z0-9-]+)$/;
+
+export const communityInput = z.object({
+  discordUrl: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : typeof v === "string" ? v.trim() : v),
+    z.string().regex(DISCORD_INVITE, "Paste an invite like https://discord.gg/abc123").nullable()
+  ),
+});
+
+/** Public details of a Discord invite, from Discord's invite API. */
+export const discordInviteSchema = z.object({
+  approximate_member_count: z.number().int().optional(),
+  approximate_presence_count: z.number().int().optional(),
+  expires_at: z.string().nullable().optional(),
+  guild: z.object({ name: z.string() }).optional(),
+});
+
+export const communitySchema = z.object({
+  discordUrl: z.string().nullable(),
+  serverName: z.string().nullable(),
+  members: z.number().int().nullable(),
+  online: z.number().int().nullable(),
+  /** When the invite stops working, or null for a permanent invite. */
+  expiresAt: isoDateTime.nullable(),
+  /** False when Discord says the invite is invalid or expired. */
+  valid: z.boolean(),
+});
+export type Community = z.infer<typeof communitySchema>;

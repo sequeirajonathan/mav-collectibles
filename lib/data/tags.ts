@@ -12,4 +12,5 @@ export const tags = {
   vendors: "vendors",
   leaderboard: "leaderboard",
   catalog: "catalog",
+  community: "community",
 } as const;

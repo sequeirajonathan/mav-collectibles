@@ -360,3 +360,12 @@ enum VendorTableStatus {
 
   @@map("vendor_table_status")
 }
+
+/// Community links shown across the site (Admin → Site).
+model CommunitySettings {
+  id          Int      @id @default(1) @db.SmallInt
+  discord_url String?
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("community_settings")
+}

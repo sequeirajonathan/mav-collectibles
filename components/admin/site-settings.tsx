@@ -6,8 +6,8 @@ import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
 import { Switch } from "@components/ui/switch";
 import { Field, inputClass } from "@components/hub/form";
-import { saveAlertBanner, saveVideoSettings, saveYouTubeSettings, setFlag } from "@lib/actions/site";
-import type { AlertBanner, FlagName, VideoSettings, YouTubeSettings } from "@lib/contracts/site";
+import { saveAlertBanner, saveCommunity, saveVideoSettings, saveYouTubeSettings, setFlag } from "@lib/actions/site";
+import type { AlertBanner, Community, FlagName, VideoSettings, YouTubeSettings } from "@lib/contracts/site";
 
 const FLAG_HELP: Record<FlagName, { label: string; help: string }> = {
   shopLive: { label: "Online shop is live", help: "Off: customers browse the shop as an in-store showcase with no cart. Staff always see the full shop." },
@@ -131,5 +131,53 @@ export function MediaForms({ youtube, video }: { youtube: YouTubeSettings | null
         <div><Button type="submit" variant="gold" disabled={pending}>Save</Button></div>
       </form>
     </div>
+  );
+}
+
+export function CommunityForm({ community, now }: { community: Community; now: number }) {
+  const router = useRouter();
+  const [discordUrl, setDiscordUrl] = useState(community.discordUrl ?? "");
+  const [error, setError] = useState<string>();
+  const [pending, startTransition] = useTransition();
+  const expiresAt = community.expiresAt ? new Date(community.expiresAt) : null;
+  const daysLeft = expiresAt ? Math.ceil((expiresAt.getTime() - now) / 86_400_000) : null;
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        startTransition(async () => {
+          const result = await saveCommunity({ discordUrl });
+          setError(result.ok ? undefined : (result.fieldErrors?.discordUrl ?? result.error));
+          if (result.ok) {
+            toast.success("Discord link saved");
+            router.refresh();
+          }
+        });
+      }}
+      className="space-y-4 rounded-xl border border-line bg-panel p-4"
+    >
+      <Field label="Discord invite link" hint="Shown on the home page, events and the footer. Leave empty to hide." error={error}>
+        {(id) => (
+          <input id={id} className={inputClass} inputMode="url" autoCapitalize="none" placeholder="https://discord.gg/…" value={discordUrl} onChange={(e) => setDiscordUrl(e.target.value)} />
+        )}
+      </Field>
+      {community.discordUrl && !community.valid && (
+        <p role="alert" className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm">
+          Discord says this invite no longer works, so it&apos;s hidden on the site. Paste a new one.
+        </p>
+      )}
+      {daysLeft !== null && community.valid && (
+        <p role="status" className="rounded-lg border border-gold/50 bg-gold/10 px-3 py-2 text-sm">
+          This invite expires in <strong>{daysLeft} day{daysLeft === 1 ? "" : "s"}</strong>. In Discord, choose
+          <em> Invite People → Edit invite link → Expire after: Never</em>, then paste the new link here.
+        </p>
+      )}
+      {community.members !== null && (
+        <p className="text-sm text-muted-foreground">
+          {community.serverName ?? "Server"}: {community.members.toLocaleString()} members, {community.online?.toLocaleString() ?? "?"} online.
+        </p>
+      )}
+      <div><Button type="submit" variant="gold" disabled={pending}>Save</Button></div>
+    </form>
   );
 }
