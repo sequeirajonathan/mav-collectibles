@@ -41,6 +41,27 @@ npm run dev
     `duo-cover-landscape`, `duo-inner`, `duo-inner-landscape`. Set
     `CHROMIUM_PATH=...` to reuse an installed Chromium.
 
+### Square sandbox with the real catalog
+
+`scripts/square/clone-catalog.ts` copies the shop's catalog (categories, items,
+variations, prices, images and stock counts) into a free Square **sandbox**, so
+development never touches the live store. The production step only *reads*.
+
+1. Create a free account at developer.squareup.com, open the default
+   application and copy its **Sandbox access token**.
+2. Run on your machine (tokens stay in your shell, never in the repo):
+   ```bash
+   SQUARE_PRODUCTION_TOKEN=... npx tsx scripts/square/clone-catalog.ts export   # → square-export/ (gitignored)
+   SQUARE_SANDBOX_TOKEN=...    npx tsx scripts/square/clone-catalog.ts import   # → sandbox; writes const/square-sandbox-map.json
+   npx tsx scripts/square/clone-catalog.ts fixtures                             # optional: refresh tests/fixtures/catalog.json
+   ```
+3. In `.env.local`: `CATALOG_SOURCE=square`, `SQUARE_ENVIRONMENT=sandbox`,
+   `SQUARE_ACCESS_TOKEN=<sandbox token>`, `SQUARE_LOCATION_IDS=<id printed by import>`.
+   Commit `const/square-sandbox-map.json` (category IDs only, no secrets) so the
+   app's production category IDs resolve to the sandbox copies.
+
+`import` refuses to run if the sandbox already has items (pass `--force` to add anyway).
+
 ### Changing the database
 
 1. `npm run db:migration <name>` creates `supabase/migrations/<timestamp>_<name>.sql`.
