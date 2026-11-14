@@ -8,14 +8,14 @@ MAV Collectibles runs in three environments. The database schema lives in
 | Where | Your machine | GitHub Actions (`ci.yml`) on every PR | Vercel + Supabase `mav-collectables-db` |
 | Database & auth | Local Supabase stack in Docker (`npm run db:start`) | Fresh local Supabase stack per run | Supabase project `dxtlhxaxmuxxkdecehqb` |
 | Data | `supabase/seed.sql` (content + test accounts) | Same seed | Real data; seed is never pushed |
-| Square | Sandbox | Not called | Production |
+| Catalog | Fixtures or Square sandbox | Fixtures (`tests/fixtures/catalog.json`) | Square production |
 | Deploys | `npm run dev` | — | `deploy.yml` on every push to `main` |
 
-**Vercel previews** are still built for each PR so you can look at UI changes.
-They have the production project's *public* Supabase URL and publishable key and
-Square sandbox credentials, but **no database URL or secret key**, so pages that
-need server data will show errors. On the free Supabase plan there is no
-separate staging database; CI is the test environment.
+**Vercel preview deployments are off** (`vercel.json`). Pages are prerendered from
+the database at build time, and on the free Supabase plan there is no staging
+database for previews to use. CI is the test environment: every PR gets a fresh
+database, the full test suite, and a downloadable Playwright report with
+screenshots of every page at every screen size.
 
 ## Daily development
 
@@ -31,8 +31,15 @@ npm run dev
 - Emails (sign-up confirmation, password reset) appear in Mailpit at
   http://127.0.0.1:54324.
 - `npm run db:reset` rebuilds the local database from migrations + seed.
-- `npm run test:e2e` runs the browser tests against a running app on port 3000
-  (`CHROMIUM_PATH=...` to reuse an installed Chromium).
+- Tests:
+  - `npm test`: unit + component tests (Vitest), no database needed.
+  - `npm run test:integration`: SQL-level tests for registration, waitlist and
+    concurrency against the local database.
+  - `npm run test:e2e`: Playwright against a running app on port 3000
+    (`npm run build && npm start` first; run `npm run db:reset` before for clean
+    seed data). Projects: `desktop`, `iphone`, `duo-cover`,
+    `duo-cover-landscape`, `duo-inner`, `duo-inner-landscape`. Set
+    `CHROMIUM_PATH=...` to reuse an installed Chromium.
 
 ### Changing the database
 
@@ -48,8 +55,9 @@ Never edit a migration that has already reached production; add a new one.
 ## Release pipeline
 
 ```
-PR ─▶ CI: lint · typecheck · migrations on a fresh DB · db lint · Prisma drift · build · e2e (24 checks)
-       └▶ Vercel preview (UI only)
+PR ─▶ CI: type-aware lint (no `any`) · typecheck · unit + component tests
+         · migrations on a fresh DB · db lint · Prisma drift · integration tests
+         · build · end-to-end + responsive tests on 6 screen sizes
 merge to main ─▶ CI again ─▶ [production approval, optional] ─▶ supabase db push ─▶ vercel deploy --prod
 ```
 
@@ -62,7 +70,7 @@ Browser-safe values (`NEXT_PUBLIC_*`) are inlined into the client bundle.
 Everything else is server-only: `lib/env.server.ts` imports `server-only`, so
 the build fails if a client component tries to use it.
 
-| Variable | Kind | Development | Vercel Preview | Vercel Production |
+| Variable | Kind | Development | (Preview: off) | Vercel Production |
 |---|---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | public | `http://127.0.0.1:54321` | prod project URL | prod project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | public | local key | prod publishable key | prod publishable key |
@@ -72,8 +80,10 @@ the build fails if a client component tries to use it.
 | `NEXT_PUBLIC_MAINTENANCE_MODE` | public | `false` | `false` | as needed |
 | `DATABASE_URL` | **secret** | local DB | — (not set) | pooler connection string |
 | `SUPABASE_SECRET_KEY` | **secret** | local key | — (not set) | prod secret key (`sb_secret_…`) |
-| `SQUARE_ENVIRONMENT` | config | `sandbox` | `sandbox` | `production` |
-| `SQUARE_ACCESS_TOKEN` | **secret** | sandbox token | sandbox token | production token |
+| `CATALOG_SOURCE` | config | `fixtures` or `square` | — | `square` (default) |
+| `SQUARE_ENVIRONMENT` | config | `sandbox` | — | `production` |
+| `SQUARE_ACCESS_TOKEN` | **secret** | sandbox token (optional) | — | production token |
+| `SQUARE_LOCATION_IDS` | config | sandbox location ID | — | (default: shop location) |
 | `SHIPPO_API_KEY` | **secret** | test key | test key | live key |
 | `GOOGLE_PLACES_API_KEY` | **secret** | optional | — | API-restricted key |
 
@@ -90,8 +100,7 @@ Delete these Production/Preview/Development variables. They are no longer read:
 - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (split into the embed and Places keys above)
 - `NEXT_PUBLIC_SQUARE_APPLICATION_ID`, `BLOB_READ_WRITE_TOKEN` (unused)
 
-Then scope the remaining ones per the table. `DATABASE_URL`, `SUPABASE_SECRET_KEY`
-and the production Square token must be **Production only**.
+Then set the remaining ones for **Production** only (previews are off).
 
 ## GitHub configuration (one-time)
 
@@ -137,6 +146,15 @@ production release, and protect `main` so the `CI / verify` check must pass.
    role to `PRINT_AGENT`. See the mav-print README.
 
 ## Roles and access
+
+| Role | Can |
+|---|---|
+| `USER` | RSVP, like/save/comment, apply as a vendor |
+| `EVENT` | + manage events, posts, vendors, check-in, results, seasons; moderate comments |
+| `STAFF` | + everything EVENT can, plus the print queue |
+| `PRINT_AGENT` | The shop PC: print queue only |
+| `ADMIN` | Everything, including site settings (feature flags such as `shopLive`), roles and downloads |
+
 
 Roles live in `app_metadata.role`, which only the server (secret key) can write.
 Every page and API route is governed by one table, `lib/auth/access.ts`,

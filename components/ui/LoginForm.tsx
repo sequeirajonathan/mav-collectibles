@@ -3,13 +3,14 @@
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@contexts/AuthContext";
 import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { GlobalErrors } from "@components/ui/AuthFormErrors";
-import { createClient } from "@utils/supabase/client";
+import { getBrowserClient } from "@utils/supabase/client";
 import { signInAction } from "@lib/auth/actions";
 import { safeNext } from "@lib/auth/redirect";
 
@@ -32,6 +33,8 @@ export function LoginForm({
   hideForgotPassword = false,
   hideSocialLogins = false,
 }: LoginFormProps) {
+  const router = useRouter();
+  const { refreshSession } = useAuth();
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
   const error = searchParams.get("error");
@@ -52,15 +55,15 @@ export function LoginForm({
       setIsBusy(false);
       return;
     }
-    // Full navigation so every client component picks up the new session.
-    if (destination) window.location.assign(destination);
-    else window.location.reload();
+    await refreshSession();
+    if (destination) router.replace(safeNext(destination));
+    router.refresh();
   };
 
   const handleSocial = async (provider: Provider) => {
     setFormError(null);
     const next = destination || window.location.pathname;
-    const { error: oauthError } = await createClient().auth.signInWithOAuth({
+    const { error: oauthError } = await (await getBrowserClient()).auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });

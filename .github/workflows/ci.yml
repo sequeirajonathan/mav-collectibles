@@ -20,9 +20,10 @@ jobs:
     timeout-minutes: 30
     env:
       NEXT_TELEMETRY_DISABLED: "1"
-      # Square/Shippo are never called for real in CI.
+      # CI never calls Square: the catalog comes from tests/fixtures and
+      # customer linking is off without a token.
       SQUARE_ENVIRONMENT: sandbox
-      SQUARE_ACCESS_TOKEN: ci-placeholder
+      CATALOG_SOURCE: fixtures
     steps:
       - uses: actions/checkout@v4
 
@@ -34,11 +35,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Lint (type-aware, no `any`)
         run: npm run lint
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Unit and component tests
+        run: npm test
 
       - name: Start local Supabase (applies migrations + seed)
         run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,postgres-meta
@@ -59,17 +63,33 @@ jobs:
       - name: Check Prisma schema matches migrations
         run: npm run db:check-prisma
 
+      - name: Integration tests (registration, waitlist, concurrency)
+        run: npm run test:integration
+
       - name: Build
         run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: End-to-end auth and access-control tests
+      - name: End-to-end + responsive tests (desktop, iPhone, iPhone Duo cover/inner)
+        # No db reset here: pages were prerendered from this database at build
+        # time, so the seed data must stay as built. Integration tests clean up
+        # after themselves.
         run: |
           npm run start -- -p 3000 > next.log 2>&1 &
           npx --yes wait-on@8.0.3 --timeout 60000 http://localhost:3000
           npm run test:e2e
+
+      - name: Upload Playwright report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 14
 
       - name: Server log on failure
         if: failure()

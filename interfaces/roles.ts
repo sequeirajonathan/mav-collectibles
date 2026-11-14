@@ -10,8 +10,6 @@ export enum UserRole {
   PRINT_AGENT = 'PRINT_AGENT',
 }
 
-export type UserRoleType = `${UserRole}`;
-
 const ROLE_VALUES = new Set<string>(Object.values(UserRole));
 
 export const parseRole = (value: unknown): UserRole =>
@@ -19,6 +17,9 @@ export const parseRole = (value: unknown): UserRole =>
 
 /** Roles that can open the admin dashboard. */
 export const ADMIN_PANEL_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.STAFF, UserRole.EVENT];
+
+/** Roles that manage the event hub: events, posts, vendors, check-in, results, moderation. */
+export const CONTENT_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.STAFF, UserRole.EVENT];
 
 /** Roles that can see and process print jobs. */
 export const PRINT_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.STAFF, UserRole.PRINT_AGENT];

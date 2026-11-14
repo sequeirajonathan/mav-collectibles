@@ -1,0 +1,121 @@
+import "server-only";
+import type { Square } from "square";
+import { createSquareClient, squareLocationIds } from "@lib/square";
+import { isCatalogItem, normalizeItemsWithInventory, normalizeProductResponse } from "@utils/square";
+import { catalogItemSchema, type CatalogItem, type CatalogPage, type Product } from "@lib/contracts/catalog";
+import { matchesStock, type CatalogSource, type ListOptions } from "./source";
+
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+    }
+  }
+  throw lastError;
+}
+
+/** Pages through Square search results until `limit` items pass the stock filter. */
+async function collect(query: Square.CatalogQuery, options: ListOptions): Promise<CatalogPage> {
+  const client = createSquareClient();
+  const locations = squareLocationIds();
+  const items: CatalogItem[] = [];
+  let cursor: string | undefined = options.cursor;
+
+  do {
+    const page = await withRetry(() =>
+      client.catalog.search({
+        objectTypes: ["ITEM"],
+        includeRelatedObjects: true,
+        query: {
+          ...query,
+          sortedAttributeQuery: { attributeName: "name", sortOrder: options.sort === "name_desc" ? "DESC" : "ASC" },
+        },
+        limit: 100,
+        ...(cursor ? { cursor } : {}),
+      })
+    );
+
+    const catalogItems = (page.objects ?? []).filter(isCatalogItem);
+    const variationIds = catalogItems.flatMap((item) =>
+      (item.itemData?.variations ?? []).flatMap((v) => (v.id ? [v.id] : []))
+    );
+    const counts = variationIds.length
+      ? await withRetry(() => client.inventory.batchGetCounts({ catalogObjectIds: variationIds, locationIds: locations }))
+      : { data: [] };
+
+    const inStock = new Map<string, number>();
+    for (const count of counts.data ?? []) {
+      if (count.catalogObjectId && count.state === "IN_STOCK") {
+        inStock.set(count.catalogObjectId, (inStock.get(count.catalogObjectId) ?? 0) + Number(count.quantity ?? 0));
+      }
+    }
+
+    const withInventory = catalogItems.map((item) => ({
+      ...item,
+      itemData: {
+        ...item.itemData,
+        variations: item.itemData?.variations?.map((v) => ({ ...v, inventory: v.id ? (inStock.get(v.id) ?? 0) : 0 })),
+      },
+    }));
+
+    for (const normalized of normalizeItemsWithInventory(withInventory, page.relatedObjects)) {
+      const item = catalogItemSchema.parse(normalized);
+      if (matchesStock(item, options.stock)) items.push(item);
+    }
+    cursor = page.cursor ?? undefined;
+  } while (items.length < options.limit && cursor);
+
+  const pageItems = items.slice(0, options.limit);
+  return { items: pageItems, cursor: cursor && pageItems.length === options.limit ? cursor : null };
+}
+
+export const squareCatalogSource: CatalogSource = {
+  listByCategories(categoryIds, options) {
+    return collect({ setQuery: { attributeName: "category_id", attributeValues: categoryIds } }, options);
+  },
+
+  search(query, options) {
+    return collect({ textQuery: { keywords: [query] } }, options);
+  },
+
+  async getProduct(id): Promise<Product | null> {
+    const client = createSquareClient();
+    let response = await client.catalog.object.get({ objectId: id, includeRelatedObjects: true });
+    if (!response.object) return null;
+
+    if (response.object.type === "ITEM_VARIATION") {
+      const parentId = response.object.itemVariationData?.itemId;
+      if (!parentId) return null;
+      response = await client.catalog.object.get({ objectId: parentId, includeRelatedObjects: true });
+      if (!response.object) return null;
+    }
+    if (response.object.type !== "ITEM") return null;
+
+    const variationIds = (response.object.itemData?.variations ?? []).flatMap((v) => (v.id ? [v.id] : []));
+    const [location] = squareLocationIds();
+    const counts = variationIds.length
+      ? await client.inventory.batchGetCounts({ catalogObjectIds: variationIds, locationIds: [location] })
+      : { data: [] };
+    const product = normalizeProductResponse(response, { counts: counts.data ?? [] }, location);
+
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.descriptionPlaintext ?? product.description,
+      imageUrls: product.imageUrls,
+      categoryName: product.category.name || undefined,
+      variations: product.variations.map((v) => ({
+        id: v.id,
+        name: v.name,
+        priceAmount: v.priceAmount,
+        priceCurrency: v.priceCurrency,
+        soldOut: v.soldOut || v.inventoryCount <= 0,
+        inventoryCount: v.inventoryCount,
+      })),
+    };
+  },
+};

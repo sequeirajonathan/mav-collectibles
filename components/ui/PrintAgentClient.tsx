@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { PrintJob, PrintCommand } from '@interfaces';
+import { useRouter } from 'next/navigation';
+import type { PrintCommand } from '@interfaces';
+import type { PrintJob } from '@lib/contracts/print-jobs';
 import { usePrintJobs } from '@hooks/usePrintJobs';
 import { ChevronDown } from 'lucide-react';
-import { useAppContext } from '../../contexts/AppContext';
 import { useAuth } from '@contexts/AuthContext';
 import { publicEnv } from '@lib/env';
 
@@ -90,10 +91,14 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
 };
 
 export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
-  const { isElectron } = useAppContext();
+  // The desktop agent's preload script exposes window.electron.
+  const [isElectron, setIsElectron] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- detect the desktop app after hydration
+  useEffect(() => setIsElectron(window.electron !== undefined), []);
   const [message, setMessage] = useState('');
   const { printJobs, error, isLoading } = usePrintJobs();
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
+  const router = useRouter();
   const { signOut, session } = useAuth();
 
   // Keep the desktop app's Supabase client authenticated as this agent.
@@ -129,7 +134,7 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
             console.log('🔐 PrintAgentClient - Starting sign out process');
           }
           await signOut();
-          window.location.assign('/print-agent/login');
+          router.replace('/print-agent/login');
           if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
             console.log('🔐 PrintAgentClient - Sign out completed successfully');
           }
@@ -146,13 +151,13 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
         window.electron?.removeListener?.('electron-sign-out', handleSignOut);
       };
     }
-  }, [isElectron, signOut]);
+  }, [isElectron, signOut, router]);
 
   if (!agentId) {
     return <div className="text-white text-center py-8">Loading agent info...</div>;
   }
 
-  const jobs = Array.isArray(printJobs) ? printJobs : (printJobs ? [printJobs] : []);
+  const jobs = printJobs;
 
   const handlePrint = async (jobId: string) => {
     try {
@@ -165,7 +170,8 @@ export function PrintAgentClient({ agentId }: PrintAgentClientProps) {
         type: 'PRINT',
         orderId: jobId,
         settings: {
-          printerName: job?.printer_name || '',
+          // Empty = the printer configured in the desktop agent's settings.
+          printerName: '',
           labelUrl: job?.label_url,
           silent: true,
         }

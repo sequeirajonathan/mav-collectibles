@@ -1,45 +1,57 @@
-import { z } from "zod";
-
 /**
  * Browser-safe configuration. Everything here is inlined into the client
  * bundle at build time, so it must never contain a secret.
  *
  * Each value is read with a literal `process.env.NEXT_PUBLIC_*` expression,
- * which is what lets Next.js inline it.
+ * which is what lets Next.js inline it. Validation is hand-written (no zod)
+ * because this module ships to every page.
  */
-const publicSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  NEXT_PUBLIC_SITE_URL: z.url().optional(),
-  NEXT_PUBLIC_API_URL: z.string().optional(),
-  NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY: z.string().optional(),
-  NEXT_PUBLIC_GOOGLE_PLACE_ID: z.string().optional(),
-  NEXT_PUBLIC_MAINTENANCE_MODE: z.enum(["true", "false"]).default("false"),
-  NEXT_PUBLIC_DEBUG: z.enum(["true", "false"]).default("false"),
-});
+interface PublicEnv {
+  NEXT_PUBLIC_SUPABASE_URL: string;
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
+  NEXT_PUBLIC_SITE_URL?: string;
+  NEXT_PUBLIC_API_URL?: string;
+  NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY?: string;
+  NEXT_PUBLIC_GOOGLE_PLACE_ID?: string;
+  NEXT_PUBLIC_MAINTENANCE_MODE: "true" | "false";
+  NEXT_PUBLIC_DEBUG: "true" | "false";
+}
 
-type PublicEnv = z.infer<typeof publicSchema>;
+const optional = (v: string | undefined) => (v ? v : undefined);
+const bool = (v: string | undefined): "true" | "false" => (v === "true" ? "true" : "false");
+
+function isUrl(value: string): boolean {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 let cached: PublicEnv | undefined;
 
 export function publicEnv(): PublicEnv {
   if (cached) return cached;
-  const parsed = publicSchema.safeParse({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || undefined,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || undefined,
-    NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY || undefined,
-    NEXT_PUBLIC_GOOGLE_PLACE_ID: process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID || undefined,
-    NEXT_PUBLIC_MAINTENANCE_MODE: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || undefined,
-    NEXT_PUBLIC_DEBUG: process.env.NEXT_PUBLIC_DEBUG || undefined,
-  });
-  if (!parsed.success) {
-    throw new Error(
-      `Invalid public environment variables:\n${z.prettifyError(parsed.error)}\nSee .env.example.`
-    );
+  const env: PublicEnv = {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
+    NEXT_PUBLIC_SITE_URL: optional(process.env.NEXT_PUBLIC_SITE_URL),
+    NEXT_PUBLIC_API_URL: optional(process.env.NEXT_PUBLIC_API_URL),
+    NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY: optional(process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY),
+    NEXT_PUBLIC_GOOGLE_PLACE_ID: optional(process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID),
+    NEXT_PUBLIC_MAINTENANCE_MODE: bool(process.env.NEXT_PUBLIC_MAINTENANCE_MODE),
+    NEXT_PUBLIC_DEBUG: bool(process.env.NEXT_PUBLIC_DEBUG),
+  };
+
+  const problems: string[] = [];
+  if (!isUrl(env.NEXT_PUBLIC_SUPABASE_URL)) problems.push("NEXT_PUBLIC_SUPABASE_URL must be a URL");
+  if (!env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) problems.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required");
+  if (env.NEXT_PUBLIC_SITE_URL && !isUrl(env.NEXT_PUBLIC_SITE_URL)) problems.push("NEXT_PUBLIC_SITE_URL must be a URL");
+  if (problems.length) {
+    throw new Error(`Invalid public environment variables:\n- ${problems.join("\n- ")}\nSee .env.example.`);
   }
-  cached = parsed.data;
+  cached = env;
   return cached;
 }
 

@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../lib/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../lib/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -29,22 +30,6 @@ model AlertBanner {
   updatedAt       DateTime @updatedAt
 
   @@map("alert_banners")
-}
-
-model FeaturedEvent {
-  id          String   @id @default(uuid())
-  title       String
-  date        DateTime
-  description String
-  imageSrc    String
-  imageAlt    String
-  link        String?
-  enabled     Boolean  @default(true)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("featured_events")
 }
 
 model YouTubeSettings {
@@ -101,17 +86,277 @@ model Installer {
   @@map("installers")
 }
 
-// Managed by supabase/migrations (linked 1:1 to auth.users; created by the
-// on_auth_user_created trigger). Read-only from the app's point of view
-// except for the user-editable columns.
+// Managed by supabase/migrations (one row per auth user, created by the
+// on_auth_user_created trigger).
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Profile {
-  id         String   @id @db.Uuid
-  username   String?
-  first_name String?
-  last_name  String?
-  phone      String?
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  id               String   @id @db.Uuid
+  username         String?
+  first_name       String?
+  last_name        String?
+  phone            String?
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @default(now()) @db.Timestamptz(6)
+  avatar_url       String?
+  favorite_game_id String?
+  game             Game?    @relation(fields: [favorite_game_id], references: [id], onUpdate: NoAction)
 
   @@map("profiles")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model EventRegistration {
+  id            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id      String             @db.Uuid
+  user_id       String             @db.Uuid
+  status        RegistrationStatus
+  note          String?
+  created_at    DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime           @default(now()) @db.Timestamptz(6)
+  checked_in_at DateTime?          @db.Timestamptz(6)
+  event         Event              @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([event_id, user_id])
+  @@index([event_id, status, created_at], map: "event_registrations_event_status_idx")
+  @@index([user_id], map: "event_registrations_user_idx")
+  @@map("event_registrations")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model EventVendor {
+  event_id    String            @db.Uuid
+  vendor_id   String            @db.Uuid
+  status      VendorTableStatus @default(requested)
+  table_label String?
+  message     String?
+  created_at  DateTime          @default(now()) @db.Timestamptz(6)
+  event       Event             @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  vendor      Vendor            @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([event_id, vendor_id])
+  @@map("event_vendors")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Event {
+  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                   String              @unique
+  title                  String
+  summary                String              @default("")
+  description            String              @default("")
+  kind                   EventKind           @default(tournament)
+  game_id                String?
+  format                 String?
+  starts_at              DateTime            @db.Timestamptz(6)
+  ends_at                DateTime?           @db.Timestamptz(6)
+  location               String              @default("MAV Collectibles")
+  cover_image_url        String?
+  capacity               Int?
+  entry_fee_cents        Int?
+  registration_opens_at  DateTime?           @db.Timestamptz(6)
+  registration_closes_at DateTime?           @db.Timestamptz(6)
+  status                 EventStatus         @default(draft)
+  featured               Boolean             @default(false)
+  created_by             String?             @db.Uuid
+  created_at             DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime            @default(now()) @db.Timestamptz(6)
+  event_registrations    EventRegistration[]
+  event_vendors          EventVendor[]
+  game                   Game?               @relation(fields: [game_id], references: [id], onUpdate: NoAction)
+  posts                  Post[]
+  tournament_results     TournamentResult[]
+
+  @@index([game_id], map: "events_game_idx")
+  @@index([status, starts_at])
+  @@map("events")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Game {
+  id         String    @id
+  name       String
+  short_name String
+  color      String    @default("#E6B325")
+  sort_order Int       @default(100)
+  active     Boolean   @default(true)
+  events     Event[]
+  posts      Post[]
+  profiles   Profile[]
+  seasons    Season[]
+
+  @@map("games")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PostComment {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id    String    @db.Uuid
+  user_id    String    @db.Uuid
+  body       String
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  deleted_by String?   @db.Uuid
+  post       Post      @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([post_id, created_at], map: "post_comments_post_idx")
+  @@map("post_comments")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PostLike {
+  post_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  post       Post     @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, user_id])
+  @@map("post_likes")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PostSave {
+  post_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  post       Post     @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, user_id])
+  @@index([user_id, created_at(sort: Desc)], map: "post_saves_user_idx")
+  @@map("post_saves")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Post {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String
+  body          String        @default("")
+  image_url     String?
+  game_id       String?
+  event_id      String?       @db.Uuid
+  pinned        Boolean       @default(false)
+  status        PostStatus    @default(draft)
+  published_at  DateTime?     @db.Timestamptz(6)
+  author_id     String?       @db.Uuid
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @default(now()) @db.Timestamptz(6)
+  post_comments PostComment[]
+  post_likes    PostLike[]
+  post_saves    PostSave[]
+  event         Event?        @relation(fields: [event_id], references: [id], onUpdate: NoAction)
+  game          Game?         @relation(fields: [game_id], references: [id], onUpdate: NoAction)
+
+  @@index([status, pinned(sort: Desc), published_at(sort: Desc)], map: "posts_feed_idx")
+  @@map("posts")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Season {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  game_id   String
+  name      String
+  starts_on DateTime @db.Date
+  ends_on   DateTime @db.Date
+  game      Game     @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("seasons")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model TournamentResult {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id    String   @db.Uuid
+  user_id     String?  @db.Uuid
+  player_name String
+  placement   Int
+  wins        Int      @default(0)
+  losses      Int      @default(0)
+  draws       Int      @default(0)
+  points      Int      @default(0)
+  deck        String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  event       Event    @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "tournament_results_user_idx")
+  @@map("tournament_results")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Vendor {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug          String        @unique
+  name          String
+  bio           String        @default("")
+  specialties   String        @default("")
+  games         String[]      @default([])
+  logo_url      String?
+  instagram     String?
+  website       String?
+  contact_email String?
+  owner_user_id String?       @unique(map: "vendors_owner_idx", where: raw("(owner_user_id IS NOT NULL)")) @db.Uuid
+  status        VendorStatus  @default(pending)
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @default(now()) @db.Timestamptz(6)
+  event_vendors EventVendor[]
+
+  @@map("vendors")
+}
+
+enum EventKind {
+  tournament
+  league
+  prerelease
+  release
+  casual
+  trade_night
+  vendor_day
+  special
+
+  @@map("event_kind")
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+  completed
+
+  @@map("event_status")
+}
+
+enum PostStatus {
+  draft
+  published
+
+  @@map("post_status")
+}
+
+enum RegistrationStatus {
+  registered
+  waitlisted
+  checked_in
+  cancelled
+
+  @@map("registration_status")
+}
+
+enum VendorStatus {
+  pending
+  approved
+  rejected
+
+  @@map("vendor_status")
+}
+
+enum VendorTableStatus {
+  requested
+  confirmed
+  declined
+
+  @@map("vendor_table_status")
 }

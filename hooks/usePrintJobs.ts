@@ -1,82 +1,46 @@
-import { useResource } from '@lib/swr';
-import { PrintJob } from '@validations/print-job';
-import { printJobSchema } from '@validations/print-job';
-import { useCallback, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-import { createClient } from '@utils/supabase/client';
+"use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { apiRequest } from "@lib/api/client";
+import { printJobListSchema, type PrintJob } from "@lib/contracts/print-jobs";
+import { getBrowserClient } from "@utils/supabase/client";
+
+/** Print queue for the print-agent screen, refreshed live via Supabase Realtime (RLS-scoped). */
 export function usePrintJobs() {
-  const {
-    data: printJobs,
-    error,
-    isLoading,
-    create,
-    update,
-    refresh,
-  } = useResource<PrintJob>('/print-jobs', {
-    onError: (error) => {
-      console.error('Print jobs operation failed:', error);
-      toast.error('Failed to load print jobs');
-    },
-  });
+  const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    try {
+      setPrintJobs(await apiRequest(printJobListSchema, "/print-jobs"));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to load print jobs"));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Uses the signed-in user's session, so RLS limits this to staff and print agents.
-    const supabase = createClient();
-    const channel = supabase
-      .channel('print-jobs-ui')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'print_jobs' },
-        () => {
-          refresh();
-        }
-      )
-      .subscribe();
-
+    // Initial load + live updates from an external system (Supabase Realtime).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refresh();
+    let cleanup: (() => void) | undefined;
+    let cancelled = false;
+    void getBrowserClient().then((supabase) => {
+      if (cancelled) return;
+      const channel = supabase
+        .channel("print-jobs-ui")
+        .on("postgres_changes", { event: "*", schema: "public", table: "print_jobs" }, () => void refresh())
+        .subscribe();
+      cleanup = () => void supabase.removeChannel(channel);
+    });
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      cleanup?.();
     };
   }, [refresh]);
 
-  const handleUpdate = useCallback(async (id: string, data: Partial<PrintJob>) => {
-    if (!id) {
-      throw new Error('Print job ID is required for update');
-    }
-
-    try {
-      const validatedData = printJobSchema.partial().parse(data);
-      const result = await update(id, validatedData);
-      await refresh();
-      toast.success('Print job updated successfully');
-      return result;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to update print job');
-      toast.error('Failed to update print job');
-      throw error;
-    }
-  }, [update, refresh]);
-
-  const handleCreate = useCallback(async (data: PrintJob) => {
-    try {
-      const validatedData = printJobSchema.parse(data);
-      const result = await create(validatedData);
-      await refresh();
-      toast.success('Print job created successfully');
-      return result;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to create print job');
-      toast.error('Failed to create print job');
-      throw error;
-    }
-  }, [create, refresh]);
-
-  return {
-    printJobs: Array.isArray(printJobs) ? printJobs : (printJobs ? [printJobs] : []),
-    isLoading,
-    error,
-    updatePrintJob: handleUpdate,
-    createPrintJob: handleCreate,
-    refresh,
-  };
-} 
+  return { printJobs, error, isLoading, refresh };
+}

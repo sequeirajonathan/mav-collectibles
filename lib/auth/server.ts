@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@utils/supabase/server";
 import { parseRole, UserRole } from "@interfaces/roles";
 
-interface CurrentUser {
+export interface CurrentUser {
   id: string;
   email: string | null;
   role: UserRole;

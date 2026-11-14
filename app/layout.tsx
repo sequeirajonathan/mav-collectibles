@@ -1,52 +1,36 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SWRConfig } from 'swr';
-import { swrConfig } from '@lib/swr';
-import { AppProvider } from "@contexts/AppContext";
 import "@styles/globals.css";
+import { AuthProvider } from "@contexts/AuthContext";
 import { CartProvider } from "@contexts/CartContext";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { AuthProvider } from '@contexts/AuthContext';
-import { Suspense } from 'react';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "MAV Collectables - Trading Card Game Shop",
-  description:
-    "Your local source for Pokémon, Yu-Gi-Oh!, Dragon Ball, One Piece and more trading cards",
+  title: { default: "MAV Collectibles · Pokémon & TCG events in Montgomery, TX", template: "%s · MAV Collectibles" },
+  description: "Pokémon league nights, TCG tournaments, prereleases, vendor days and trade nights at MAV Collectibles.",
+  applicationName: "MAV Collectibles",
+  appleWebApp: { capable: true, title: "MAV", statusBarStyle: "black-translucent" },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Lets content extend under notches/fold bars; layouts pad with env(safe-area-inset-*).
+  viewportFit: "cover",
+  themeColor: "#000000",
+  colorScheme: "dark",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-        <body className="antialiased min-h-screen bg-black text-white font-sans flex flex-col">
-          <AuthProvider>
-          <SWRConfig value={swrConfig}>
-              <AppProvider>
-                <CartProvider>
-                  <NuqsAdapter>
-                    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E6B325]"></div></div>}>
-                      {children}
-                    </Suspense>
-                  </NuqsAdapter>
-                </CartProvider>
-              </AppProvider>
-          </SWRConfig>
-          </AuthProvider>
-        </body>
-      </html>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground">
+        <AuthProvider>
+          <CartProvider>{children}</CartProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

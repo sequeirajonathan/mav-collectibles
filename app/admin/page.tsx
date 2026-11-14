@@ -1,76 +1,82 @@
-"use client";
+import Link from "next/link";
+import { Suspense } from "react";
+import { PageHeader } from "@components/hub/page-header";
+import { requirePageRole } from "@lib/auth/guard";
+import { CONTENT_ROLES } from "@interfaces/roles";
+import { prisma } from "@lib/prisma";
+import { listAllEventsForStaff } from "@lib/data/hub";
+import { capacityLabel, formatEventWhen } from "@lib/format";
+import { requestTime, upcomingOnly } from "@lib/hub-rules";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
-import FeatureFlagsTab from "@components/admin/FeatureFlagsTab";
-import AlertBannerTab from "@components/admin/AlertBannerTab";
-import FeaturedEventsTab from "@components/admin/FeaturedEventsTab";
-import YouTubeVideoTab from "@components/admin/YouTubeVideoTab";
-import VideoSettingsTab from "@components/admin/VideoSettingsTab";
-import RolesTab from "@components/admin/RolesTab";
-import DownloadsTab from "@components/admin/DownloadsTab";
-import InstallerUploadTab from "@components/admin/InstallerUploadTab";
-import { useAuth } from "@contexts/AuthContext";
-import { UserRole } from "@interfaces/roles";
-import "@styles/admin.css";
-
-export default function AdminDashboard() {
-  // Access is enforced by the proxy (lib/auth/access.ts); this only avoids
-  // rendering before the session has loaded on the client.
-  const { user, role, isLoaded } = useAuth();
-
-  if (!isLoaded || !user || role !== UserRole.ADMIN) {
-    return null;
-  }
-
+async function Overview() {
+  await requirePageRole(CONTENT_ROLES, "/admin");
+  const [events, pendingVendors, comments24h, members] = await Promise.all([
+    listAllEventsForStaff(),
+    prisma.vendor.count({ where: { status: "pending" } }),
+    prisma.postComment.count({ where: { created_at: { gte: new Date(requestTime() - 86_400_000) }, deleted_at: null } }),
+    prisma.profile.count(),
+  ]);
+  const upcoming = upcomingOnly(events, requestTime()).reverse().slice(0, 5);
+  const drafts = events.filter((e) => e.status === "draft").length;
+  const stat = "rounded-xl border border-line bg-panel p-4";
   return (
-    <div className="mx-auto py-8 pb-12 px-2 sm:px-4 max-w-4xl w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-[#E6B325]">Admin Dashboard</h1>
-      <Tabs 
-        defaultValue={typeof window !== 'undefined' ? window.location.hash.slice(1) || 'feature-flags' : 'feature-flags'} 
-        className="w-full"
-        onValueChange={(value) => {
-          if (typeof window !== 'undefined') {
-            window.location.hash = value;
-          }
-        }}
-      >
-        <div className="overflow-x-auto pb-2">
-          <TabsList className="flex flex-col sm:flex-row w-full mb-4 sm:mb-6 gap-1 sm:gap-2">
-            <TabsTrigger value="feature-flags" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">Feature Flags</TabsTrigger>
-            <TabsTrigger value="alert-banner" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">Alert Banner</TabsTrigger>
-            <TabsTrigger value="featured-events" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">Featured Events</TabsTrigger>
-            <TabsTrigger value="youtube-video" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">YouTube Video</TabsTrigger>
-            <TabsTrigger value="direct-streaming" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">Direct Streaming</TabsTrigger>
-            <TabsTrigger value="roles" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">User Roles</TabsTrigger>
-            <TabsTrigger value="downloads" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">Downloads</TabsTrigger>
-            <TabsTrigger value="upload-installer" className="text-xs sm:text-sm px-2 sm:px-4 py-1 text-left sm:text-center justify-start sm:justify-center w-full">Upload Installer</TabsTrigger>
-          </TabsList>
+    <>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Link href="/admin/vendors" className={`${stat} hover:border-gold/50`}>
+          <p className="text-3xl font-extrabold text-gold">{pendingVendors}</p>
+          <p className="text-sm text-muted-foreground">Vendor applications waiting</p>
+        </Link>
+        <Link href="/admin/events" className={`${stat} hover:border-gold/50`}>
+          <p className="text-3xl font-extrabold">{drafts}</p>
+          <p className="text-sm text-muted-foreground">Draft events</p>
+        </Link>
+        <div className={stat}>
+          <p className="text-3xl font-extrabold">{comments24h}</p>
+          <p className="text-sm text-muted-foreground">Comments in the last day</p>
         </div>
-        <TabsContent value="feature-flags">
-          <FeatureFlagsTab />
-        </TabsContent>
-        <TabsContent value="alert-banner">
-          <AlertBannerTab />
-        </TabsContent>
-        <TabsContent value="featured-events">
-          <FeaturedEventsTab />
-        </TabsContent>
-        <TabsContent value="youtube-video">
-          <YouTubeVideoTab />
-        </TabsContent>
-        <TabsContent value="direct-streaming">
-          <VideoSettingsTab />
-        </TabsContent>
-        <TabsContent value="roles">
-          <RolesTab />
-        </TabsContent>
-        <TabsContent value="downloads">
-          <DownloadsTab />
-        </TabsContent>
-        <TabsContent value="upload-installer">
-          <InstallerUploadTab />
-        </TabsContent>
-      </Tabs>
-    </div>
+        <div className={stat}>
+          <p className="text-3xl font-extrabold">{members}</p>
+          <p className="text-sm text-muted-foreground">Members</p>
+        </div>
+      </div>
+      <h2 className="mb-3 mt-8 text-lg font-bold">Next events</h2>
+      {upcoming.length === 0 ? (
+        <p className="text-muted-foreground">Nothing published coming up.</p>
+      ) : (
+        <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
+          {upcoming.map((e) => (
+            <li key={e.id} className="flex flex-col gap-2 p-4 fold:flex-row fold:items-center">
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold">{e.title}</p>
+                <p className="text-sm text-muted-foreground">{formatEventWhen(e.startsAt)} · {capacityLabel(e.capacity, e.registeredCount, e.waitlistCount)}</p>
+              </div>
+              <div className="flex gap-2">
+                <Link href={`/admin/events/${e.id}/attendees`} className="inline-flex min-h-10 items-center rounded-md bg-gold px-3 text-sm font-bold text-ink">Check-in</Link>
+                <Link href={`/admin/events/${e.id}`} className="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-sm font-semibold">Edit</Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+export default function AdminHome() {
+  return (
+    <>
+      <PageHeader
+        title="Dashboard"
+        actions={
+          <>
+            <Link href="/admin/events/new" className="inline-flex min-h-10 items-center rounded-md bg-gold px-4 text-sm font-bold text-ink hover:bg-gold-light">New event</Link>
+            <Link href="/admin/posts/new" className="inline-flex min-h-10 items-center rounded-md border border-line px-4 text-sm font-semibold hover:border-gold/60">New post</Link>
+          </>
+        }
+      />
+      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-panel" />}>
+        <Overview />
+      </Suspense>
+    </>
   );
 }

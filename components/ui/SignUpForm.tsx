@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@contexts/AuthContext";
 import Image from "next/image";
 import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@components/ui/button";
@@ -9,7 +11,7 @@ import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { PhoneInput } from "@components/ui/PhoneInput";
 import { FieldErrorText, GlobalErrors } from "@components/ui/AuthFormErrors";
-import { createClient } from "@utils/supabase/client";
+import { getBrowserClient } from "@utils/supabase/client";
 import { signUpAction, type SignUpFieldErrors } from "@lib/auth/actions";
 
 interface SignupFormProps {
@@ -20,6 +22,8 @@ const inputClassName =
   "border-2 border-[#E6B325] bg-[#181d29] text-white focus:border-[#FFD966]";
 
 export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
+  const router = useRouter();
+  const { refreshSession } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -45,13 +49,14 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
     if (result.needsEmailConfirmation) {
       setSentTo(email);
     } else {
-      window.location.assign("/dashboard");
+      await refreshSession();
+      router.replace("/dashboard");
     }
   };
 
   const handleSocial = async (provider: Provider) => {
     setFormError(null);
-    const { error } = await createClient().auth.signInWithOAuth({
+    const { error } = await (await getBrowserClient()).auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
     });

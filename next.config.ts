@@ -17,6 +17,10 @@ function supabaseImagePattern(): RemotePattern[] {
 }
 
 const nextConfig: NextConfig = {
+  // Partial prerendering + `use cache`: static shells stream instantly, dynamic
+  // parts render inside <Suspense> boundaries.
+  cacheComponents: true,
+  typedRoutes: true,
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [75, 80, 90],
@@ -50,6 +54,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
       },
     ],
   },

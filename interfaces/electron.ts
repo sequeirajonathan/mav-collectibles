@@ -1,5 +1,5 @@
 import { PrintCommand, PrintResponse } from './printAgent';
-import { PrintJob } from './printJob';
+import type { PrintJob } from '@lib/contracts/print-jobs';
 
 interface IpcRendererEvent {
   sender: {

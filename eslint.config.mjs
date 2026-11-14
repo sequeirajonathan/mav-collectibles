@@ -16,11 +16,10 @@ const eslintConfig = defineConfig([
       }],
       "no-unused-vars": "off", // Turn off base rule as it can report incorrect errors
       "no-unused-expressions": "error",
-      // React Compiler-oriented rules introduced in eslint-plugin-react-hooks 7.
-      // Kept visible as warnings; existing call sites predate them.
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/set-state-in-render": "warn",
-      "react-hooks/refs": "warn",
+      // No `any`, and no switching the type checker off.
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }],
+      "@typescript-eslint/no-non-null-assertion": "error",
       "import/no-unused-modules": ["error", {
         "unusedExports": true,
         "ignoreExports": [
@@ -31,6 +30,10 @@ const eslintConfig = defineConfig([
           "**/app/**/route.ts",
           "**/components/**/*.tsx",
           "proxy.ts",
+          "**/*.d.ts",
+          "tests/**",
+          "vitest.config.mts",
+          "playwright.config.ts",
           "next.config.ts",
           "prisma.config.ts",
           "postcss.config.mjs"
@@ -49,7 +52,23 @@ const eslintConfig = defineConfig([
       },
     },
   },
-
+  // Type-aware rules: catch `any` leaking in from untyped JSON, libraries or casts.
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    ignores: ["**/*.d.ts"],
+    languageOptions: {
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
+      "@typescript-eslint/no-unsafe-argument": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/await-thenable": "error",
+    },
+  },
 ]);
 
 export default eslintConfig;

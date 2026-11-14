@@ -2,6 +2,10 @@ import "server-only";
 import { Square } from "square";
 import { createSquareClient } from "@lib/square";
 import { prisma } from "@lib/prisma";
+import { serverEnv } from "@lib/env.server";
+
+/** Square customer features are off until a Square token is configured (dev, CI). */
+const squareEnabled = () => Boolean(serverEnv().SQUARE_ACCESS_TOKEN);
 
 /** Normalizes any US phone format to E.164 (+1XXXXXXXXXX), or null. */
 export function toE164(phone: string | null | undefined): string | null {
@@ -25,6 +29,7 @@ async function searchOne(filter: Square.CustomerFilter): Promise<Square.Customer
  * match gets linked to this user.
  */
 export async function findCustomerForUser(userId: string): Promise<Square.Customer | undefined> {
+  if (!squareEnabled()) return undefined;
   const byReference = await searchOne({ referenceId: { exact: userId } });
   if (byReference) return byReference;
 
@@ -46,20 +51,6 @@ export async function findCustomerForUser(userId: string): Promise<Square.Custom
   return byPhone;
 }
 
-/** Throws unless the Square customer is linked to this user. */
-export async function assertCustomerOwnedBy(customerId: string, userId: string): Promise<void> {
-  const { customer } = await createSquareClient().customers.get({ customerId });
-  if (!customer || customer.referenceId !== userId) {
-    throw new CustomerAccessError();
-  }
-}
-
-export class CustomerAccessError extends Error {
-  constructor() {
-    super("Customer does not belong to the signed-in user");
-  }
-}
-
 /**
  * Makes sure a signed-up user has a linked Square customer: links an existing
  * customer with the same phone, or creates one. Safe to call repeatedly.
@@ -68,6 +59,7 @@ export async function ensureSquareCustomer(user: {
   id: string;
   email: string | null;
 }): Promise<void> {
+  if (!squareEnabled()) return;
   const existing = await findCustomerForUser(user.id);
   if (existing) return;
 

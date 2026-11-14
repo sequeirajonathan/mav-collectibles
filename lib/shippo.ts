@@ -1,7 +1,7 @@
 import "server-only";
 import { Shippo } from "shippo";
 import { serverEnv } from "@lib/env.server";
-import { SquareCustomerAddress } from "@interfaces/square";
+import type { CustomerAddress as SquareCustomerAddress } from "@lib/contracts/customer";
 
 function createShippoClient() {
   const apiKey = serverEnv().SHIPPO_API_KEY;
@@ -27,12 +27,12 @@ export async function validateAddress(address: SquareCustomerAddress): Promise<S
     // Convert Square address format to Shippo format
     const shippoAddress = {
       name: "", // Optional for validation
-      street1: address.addressLine1,
+      street1: address.addressLine1 ?? "",
       street2: address.addressLine2,
-      city: address.locality,
-      state: address.administrativeDistrictLevel1,
-      zip: address.postalCode,
-      country: address.country,
+      city: address.locality ?? "",
+      state: address.administrativeDistrictLevel1 ?? "",
+      zip: address.postalCode ?? "",
+      country: address.country ?? "US",
       validate: true,
     };
 

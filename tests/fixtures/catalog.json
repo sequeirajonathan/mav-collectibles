@@ -1,0 +1,151 @@
+{
+  "_note": "Recorded catalog used when CATALOG_SOURCE=fixtures (CI and offline dev). Regenerate with scripts/square/export-catalog.ts.",
+  "items": [
+    {
+      "itemId": "FIXTURE_ITEM_1",
+      "variationId": "FIXTURE_VAR_1",
+      "name": "Prismatic Evolutions Elite Trainer Box",
+      "description": "Prismatic Evolutions Elite Trainer Box (fixture data for tests)",
+      "imageUrls": [
+        "/prismatic.jpg"
+      ],
+      "sku": "FX-001",
+      "priceAmount": 5999,
+      "priceCurrency": "USD",
+      "soldOut": false,
+      "categoryId": "JLGE7O4IOUUW36IB6ZJYWKUU",
+      "categoryName": "Pokémon",
+      "group": "TCG",
+      "inventoryCount": 4
+    },
+    {
+      "itemId": "FIXTURE_ITEM_2",
+      "variationId": "FIXTURE_VAR_2",
+      "name": "Paldean Fates Booster Bundle",
+      "description": "Paldean Fates Booster Bundle (fixture data for tests)",
+      "imageUrls": [
+        "/paldean_fates_image_1080x.webp"
+      ],
+      "sku": "FX-002",
+      "priceAmount": 3499,
+      "priceCurrency": "USD",
+      "soldOut": false,
+      "categoryId": "JLGE7O4IOUUW36IB6ZJYWKUU",
+      "categoryName": "Pokémon",
+      "group": "TCG",
+      "inventoryCount": 10
+    },
+    {
+      "itemId": "FIXTURE_ITEM_3",
+      "variationId": "FIXTURE_VAR_3",
+      "name": "Pokémon TCG Booster Pack",
+      "description": "Pokémon TCG Booster Pack (fixture data for tests)",
+      "imageUrls": [
+        "/pokemon-logo.png"
+      ],
+      "sku": "FX-003",
+      "priceAmount": 499,
+      "priceCurrency": "USD",
+      "soldOut": false,
+      "categoryId": "JLGE7O4IOUUW36IB6ZJYWKUU",
+      "categoryName": "Pokémon",
+      "group": "TCG",
+      "inventoryCount": 48
+    },
+    {
+      "itemId": "FIXTURE_ITEM_4",
+      "variationId": "FIXTURE_VAR_4",
+      "name": "Scarlet & Violet Collection Box",
+      "description": "Scarlet & Violet Collection Box (fixture data for tests)",
+      "imageUrls": [
+        "/pokemon-logo.png"
+      ],
+      "sku": "FX-004",
+      "priceAmount": 2999,
+      "priceCurrency": "USD",
+      "soldOut": true,
+      "categoryId": "JLGE7O4IOUUW36IB6ZJYWKUU",
+      "categoryName": "Pokémon",
+      "group": "TCG",
+      "inventoryCount": 0
+    }
+  ],
+  "products": [
+    {
+      "id": "FIXTURE_ITEM_1",
+      "name": "Prismatic Evolutions Elite Trainer Box",
+      "description": "Prismatic Evolutions Elite Trainer Box (fixture data for tests)",
+      "imageUrls": [
+        "/prismatic.jpg"
+      ],
+      "categoryName": "Pokémon",
+      "variations": [
+        {
+          "id": "FIXTURE_VAR_1",
+          "name": "Regular",
+          "priceAmount": 5999,
+          "priceCurrency": "USD",
+          "soldOut": false,
+          "inventoryCount": 4
+        }
+      ]
+    },
+    {
+      "id": "FIXTURE_ITEM_2",
+      "name": "Paldean Fates Booster Bundle",
+      "description": "Paldean Fates Booster Bundle (fixture data for tests)",
+      "imageUrls": [
+        "/paldean_fates_image_1080x.webp"
+      ],
+      "categoryName": "Pokémon",
+      "variations": [
+        {
+          "id": "FIXTURE_VAR_2",
+          "name": "Regular",
+          "priceAmount": 3499,
+          "priceCurrency": "USD",
+          "soldOut": false,
+          "inventoryCount": 10
+        }
+      ]
+    },
+    {
+      "id": "FIXTURE_ITEM_3",
+      "name": "Pokémon TCG Booster Pack",
+      "description": "Pokémon TCG Booster Pack (fixture data for tests)",
+      "imageUrls": [
+        "/pokemon-logo.png"
+      ],
+      "categoryName": "Pokémon",
+      "variations": [
+        {
+          "id": "FIXTURE_VAR_3",
+          "name": "Regular",
+          "priceAmount": 499,
+          "priceCurrency": "USD",
+          "soldOut": false,
+          "inventoryCount": 48
+        }
+      ]
+    },
+    {
+      "id": "FIXTURE_ITEM_4",
+      "name": "Scarlet & Violet Collection Box",
+      "description": "Scarlet & Violet Collection Box (fixture data for tests)",
+      "imageUrls": [
+        "/pokemon-logo.png"
+      ],
+      "categoryName": "Pokémon",
+      "variations": [
+        {
+          "id": "FIXTURE_VAR_4",
+          "name": "Regular",
+          "priceAmount": 2999,
+          "priceCurrency": "USD",
+          "soldOut": true,
+          "inventoryCount": 0
+        }
+      ]
+    }
+  ]
+}

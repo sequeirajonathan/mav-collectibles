@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@contexts/AuthContext";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
@@ -73,6 +74,7 @@ export function ForgotPasswordForm() {
 }
 
 export function ResetPasswordForm() {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +86,7 @@ export function ResetPasswordForm() {
     const result = await updatePasswordAction({ password, confirmPassword });
     setIsBusy(false);
     if (!result.ok) setError(result.error);
-    else window.location.assign("/dashboard");
+    else router.replace("/dashboard");
   };
 
   return (
@@ -123,6 +125,8 @@ export function ResetPasswordForm() {
 }
 
 export function CompleteProfileForm() {
+  const router = useRouter();
+  const { refreshProfile } = useAuth();
   const searchParams = useSearchParams();
   const next = safeNext(searchParams.get("next"));
   const [username, setUsername] = useState("");
@@ -142,7 +146,8 @@ export function CompleteProfileForm() {
       if ("fieldErrors" in result) setFieldErrors(result.fieldErrors);
       return;
     }
-    window.location.assign(next);
+    await refreshProfile();
+    router.replace(next);
   };
 
   return (

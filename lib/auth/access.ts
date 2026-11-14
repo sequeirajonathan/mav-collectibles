@@ -1,4 +1,4 @@
-import { PRINT_ROLES, UserRole } from "@interfaces/roles";
+import { CONTENT_ROLES, PRINT_ROLES, UserRole } from "@interfaces/roles";
 
 /**
  * The access policy for every page and API route, enforced in one place
@@ -19,54 +19,50 @@ interface Rule {
   access: Partial<Record<Method | "*", Access>>;
 }
 
-// The admin dashboard and content management are ADMIN-only (matching the
-// original admin page gate). STAFF/EVENT keep their maintenance-mode exemption.
 const ADMIN = [UserRole.ADMIN] as const;
 const ADMIN_ONLY = ADMIN;
 
+/**
+ * Order matters: the first matching rule wins, so specific paths come first.
+ * Server actions POST to the page they're used on; each action also checks the
+ * caller's role itself (lib/actions/safe-action.ts).
+ */
 const RULES: Rule[] = [
-  // ---- Pages --------------------------------------------------------------
+  // ---- Public pages ---------------------------------------------------------
   { path: "/", access: { "*": "public" } },
   { path: "/events*", access: { "*": "public" } },
+  { path: "/feed*", access: { "*": "public" } },
+  { path: "/vendors/apply", access: { "*": "user" } },
+  { path: "/vendors*", access: { "*": "public" } },
+  { path: "/leaderboard", access: { "*": "public" } },
+  { path: "/shop", access: { "*": "public" } },
   { path: "/category*", access: { "*": "public" } },
   { path: "/product*", access: { "*": "public" } },
-  { path: "/search*", access: { "*": "public" } },
-  { path: "/cart*", access: { "*": "public" } },
-  { path: "/maintenance*", access: { "*": "public" } },
-  { path: "/error*", access: { "*": "public" } },
-  { path: "/sign-in*", access: { "*": "public" } },
+  { path: "/search", access: { "*": "public" } },
+  { path: "/cart", access: { "*": "public" } },
+  { path: "/maintenance", access: { "*": "public" } },
+
+  // ---- Auth ---------------------------------------------------------------
+  { path: "/sign-in", access: { "*": "public" } },
   { path: "/sign-up", access: { "*": "public" } },
   { path: "/sign-up/complete", access: { "*": "user" } },
   { path: "/forgot-password", access: { "*": "public" } },
   { path: "/auth/*", access: { "*": "public" } },
   { path: "/reset-password", access: { "*": "user" } },
+
+  // ---- Print agent ----------------------------------------------------------
   { path: "/print-agent/login", access: { "*": "public" } },
   { path: "/print-agent*", access: { "*": PRINT_ROLES } },
-  { path: "/admin*", access: { "*": ADMIN } },
 
-  // ---- Public content (read-only for everyone, managed by staff) ----------
-  { path: "/api/v1/alert-banner*", access: { GET: "public", "*": ADMIN } },
-  { path: "/api/v1/feature-flags/seed", access: { "*": ADMIN_ONLY } },
-  { path: "/api/v1/feature-flags*", access: { GET: "public", "*": ADMIN } },
-  { path: "/api/v1/featured-events*", access: { GET: "public", "*": ADMIN } },
-  { path: "/api/v1/video-settings*", access: { GET: "public", "*": ADMIN } },
-  { path: "/api/v1/youtube-settings*", access: { GET: "public", "*": ADMIN } },
-  { path: "/api/v1/category*", access: { GET: "public" } },
-  { path: "/api/v1/product*", access: { GET: "public" } },
-  { path: "/api/v1/google-reviews", access: { GET: "public" } },
-  { path: "/api/v1/search", access: { POST: "public" } },
+  // ---- Admin ----------------------------------------------------------------
+  { path: "/admin/site*", access: { "*": ADMIN } },
+  { path: "/admin/roles*", access: { "*": ADMIN } },
+  { path: "/admin/downloads*", access: { "*": ADMIN } },
+  { path: "/admin*", access: { "*": CONTENT_ROLES } },
 
-  // ---- Staff tools --------------------------------------------------------
-  { path: "/api/v1/installers*", access: { "*": ADMIN } },
-  { path: "/api/v1/upload-installer*", access: { "*": ADMIN } },
-  { path: "/api/v1/upload", access: { "*": ADMIN } },
-  { path: "/api/v1/print-jobs*", access: { GET: PRINT_ROLES, PATCH: PRINT_ROLES, "*": ADMIN } },
-  { path: "/api/v1/users/role", access: { "*": ADMIN_ONLY } },
-  { path: "/api/v1/test*", access: { "*": ADMIN_ONLY } },
-
-  // ---- Signed-in customers (handlers scope data to the caller) ------------
-  { path: "/api/v1/square/customers*", access: { "*": "user" } },
-  { path: "/api/v1/user-profile", access: { "*": "user" } },
+  // ---- API (only what the browser fetches directly) -------------------------
+  { path: "/api/v1/catalog/*", access: { GET: "public" } },
+  { path: "/api/v1/print-jobs", access: { GET: PRINT_ROLES, PATCH: PRINT_ROLES, POST: ADMIN } },
 ];
 
 function matches(pattern: string, pathname: string): boolean {
