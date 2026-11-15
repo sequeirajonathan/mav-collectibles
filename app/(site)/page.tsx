@@ -91,7 +91,7 @@ async function Spotlight() {
 async function UpcomingEvents() {
   const events = (await listEvents({ limit: 6 })).filter((e) => e.status === "published");
   return events.length === 0 ? (
-    <EmptyState mascot="charizard" title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
+    <EmptyState mascot="random" title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
   ) : (
     <div className="grid gap-3 lg:grid-cols-2">
       {events.map((e) => (

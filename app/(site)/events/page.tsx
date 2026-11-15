@@ -66,7 +66,7 @@ async function EventList({ searchParams }: { searchParams: SearchParams }) {
   if (events.length === 0) {
     return (
       <EmptyState
-        mascot="dragonite"
+        mascot="random"
         title="Nothing scheduled here yet"
         description="Check back soon, or follow the feed for announcements."
         action={<Link href="/feed" className="font-semibold text-gold">Go to the feed →</Link>}

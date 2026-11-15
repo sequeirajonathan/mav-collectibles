@@ -1,12 +1,14 @@
+"use client";
+
+import { useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { cn } from "@utils";
 
 /**
  * Pixel-art sprites used as mascots. The Pokémon here are the ones that show
- * up most in the shop's own catalog, so each empty or waiting screen can have
- * its own character instead of repeating one.
+ * up most in the shop's own catalog.
  */
-export const MASCOTS = {
+const MASCOTS = {
   lucario: { src: "/images/lucario.gif", width: 47, height: 63 },
   gengar: { src: "/images/gengar.gif", width: 500, height: 493 },
   karp: { src: "/images/karp.gif", width: 500, height: 659 },
@@ -26,9 +28,30 @@ export const MASCOTS = {
   sylveon: { src: "/images/mascots/sylveon.gif", width: 51, height: 62 },
 } as const;
 
-export type MascotName = keyof typeof MASCOTS;
+type MascotName = keyof typeof MASCOTS;
+/** A specific character, or "random" for a different one on each visit. */
+export type MascotChoice = MascotName | "random";
 
-/** A bobbing pixel sprite. Decorative: hidden from screen readers. Size it with a height class. */
-export function Mascot({ name, className }: { name: MascotName; className?: string }) {
-  return <Image {...MASCOTS[name]} alt="" unoptimized className={cn("pixelated animate-bob w-auto", className)} />;
+/** Everyone except Magikarp, who is saved for the 404 page. */
+const POOL = (Object.keys(MASCOTS) as MascotName[]).filter((name) => name !== "karp");
+
+const subscribe = () => () => {};
+
+/**
+ * A bobbing pixel sprite in a fixed square, so every character takes up the
+ * same space whatever its artwork's size. Give the square a size with
+ * `className` (e.g. "size-24"). Decorative: hidden from screen readers.
+ *
+ * "random" picks in the browser, after the page loads, so the server and the
+ * browser never disagree about who is shown; the square holds the space until then.
+ */
+export function Mascot({ name, className }: { name: MascotChoice; className?: string }) {
+  const mounted = useSyncExternalStore(subscribe, () => true, () => false);
+  const [picked] = useState<MascotName>(() => (typeof window === "undefined" ? POOL[0] : POOL[Math.floor(Math.random() * POOL.length)]));
+  const shown = name === "random" ? (mounted ? picked : null) : name;
+  return (
+    <span aria-hidden className={cn("relative block shrink-0", className)}>
+      {shown && <Image {...MASCOTS[shown]} alt="" unoptimized className="pixelated animate-bob absolute inset-0 size-full object-contain object-bottom" />}
+    </span>
+  );
 }

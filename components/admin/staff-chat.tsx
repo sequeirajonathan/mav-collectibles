@@ -119,7 +119,7 @@ export function StaffChat({ initial, userId, isAdmin }: { initial: ChatMessage[]
       <div ref={list} role="log" aria-label="Messages" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto p-3 fold:p-4">
         {messages.length === 0 && (
           <div className="py-10 text-center text-muted-foreground">
-            <Mascot name="mew" className="mx-auto mb-3 h-20" />
+            <Mascot name="random" className="mx-auto mb-3 size-24" />
             No messages yet. Say hi to the team.
           </div>
         )}

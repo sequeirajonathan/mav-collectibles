@@ -49,7 +49,7 @@ async function Board({ searchParams }: { searchParams: SearchParams }) {
         {game.name} {season ? `· ${season.name}` : "· All time"}
       </h2>
       {rows.length === 0 ? (
-        <EmptyState mascot="mewtwo" title="No results yet" description="Standings appear here after the first tournament results are posted." />
+        <EmptyState mascot="random" title="No results yet" description="Standings appear here after the first tournament results are posted." />
       ) : (
         <>
           {/* Phones: stacked rows */}

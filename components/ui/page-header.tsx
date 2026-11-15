@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mascot, type MascotName } from "./mascot";
+import { Mascot, type MascotChoice } from "./mascot";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@utils";
@@ -78,11 +78,11 @@ export function EmptyState({
   title: string;
   description?: string;
   action?: ReactNode;
-  mascot?: MascotName;
+  mascot?: MascotChoice;
 }) {
   return (
     <div className="rounded-xl border border-dashed border-line bg-panel/60 px-6 py-10 text-center">
-      {mascot && <Mascot name={mascot} className="mx-auto mb-3 h-20" />}
+      {mascot && <Mascot name={mascot} className="mx-auto mb-3 size-24" />}
       <p className="font-semibold text-foreground">{title}</p>
       {description && <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}

@@ -29,7 +29,7 @@ export default function CartPage() {
     return (
       <>
         <PageHeader title="Your cart" />
-        <EmptyState mascot="sylveon" title="Your cart is empty" action={<Link href="/shop" className="font-semibold text-gold">Start browsing →</Link>} />
+        <EmptyState mascot="random" title="Your cart is empty" action={<Link href="/shop" className="font-semibold text-gold">Start browsing →</Link>} />
       </>
     );
   }

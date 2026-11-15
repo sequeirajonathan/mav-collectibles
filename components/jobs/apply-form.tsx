@@ -47,7 +47,7 @@ export function ApplyForm() {
   if (sent) {
     return (
       <div role="status" className={cn(cardVariants({ padding: "lg" }), "text-center")}>
-        <Mascot name="pikachu" className="mx-auto h-24" />
+        <Mascot name="random" className="mx-auto size-24" />
         <CheckCircle2 aria-hidden className="mx-auto mt-3 size-8 text-success" />
         <h2 className="mt-3 text-xl font-bold">Application sent</h2>
         <p className="mt-1 text-muted-foreground">Thanks for applying. We read every application and will reach out if it&apos;s a fit.</p>
