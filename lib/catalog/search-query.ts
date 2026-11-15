@@ -156,3 +156,26 @@ export function suggestQuery(query: string): string | null {
   });
   return changed ? fixed.join(" ") : null;
 }
+
+/**
+ * For results found by fuzzy matching: the real words the customer most likely
+ * meant, taken from the names that matched ("charzard" → "charizard"), so the
+ * results can be ranked as if they had typed it correctly.
+ */
+export function correctedTerms(terms: string[], names: string[]): string[] {
+  const counts = new Map<string, number>();
+  for (const name of names) {
+    for (const word of new Set(fold(name).split(/[^a-z0-9]+/).filter(Boolean))) counts.set(word, (counts.get(word) ?? 0) + 1);
+  }
+  return terms.map((term) => {
+    if (term.length < 4 || counts.has(term)) return term;
+    const max = term.length <= 5 ? 1 : 2;
+    let best: { word: string; distance: number; count: number } | null = null;
+    for (const [word, count] of counts) {
+      const distance = editDistance(term, word, max);
+      if (distance > max) continue;
+      if (!best || distance < best.distance || (distance === best.distance && count > best.count)) best = { word, distance, count };
+    }
+    return best ? best.word : term;
+  });
+}

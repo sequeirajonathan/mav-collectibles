@@ -4,6 +4,7 @@ import { serverEnv } from "@lib/env.server";
 import { catalogPageSchema, productSchema, type CatalogPage, type Product } from "@lib/contracts/catalog";
 import type { CatalogSource, ListOptions } from "@lib/catalog/source";
 import { CATEGORY_MAPPING, COLLECTIBLES_MAPPING, SUPPLIES_MAPPING, CATEGORY_GROUP_SLUGS } from "@const/categories";
+import { searchIndex, searchIndexReady, syncSearchIndex } from "@lib/catalog/search-index";
 import { tags } from "./tags";
 
 async function source(): Promise<CatalogSource> {
@@ -43,7 +44,15 @@ export async function searchCatalog(query: string, options: ListOptions): Promis
   "use cache";
   cacheTag(tags.catalog);
   cacheLife("minutes");
-  return catalogPageSchema.parse(await (await source()).search(query, options));
+  const catalog = await source();
+  // The shop's own index gives better matches; until it has been built, ask the catalog directly.
+  const page = (await searchIndexReady().catch(() => false)) ? await searchIndex(catalog, query, options) : await catalog.search(query, options);
+  return catalogPageSchema.parse(page);
+}
+
+/** Rebuilds the search index from the live catalog (Admin → Site, and the daily job). */
+export async function refreshSearchIndex(): Promise<{ itemCount: number }> {
+  return syncSearchIndex(await source());
 }
 
 export async function getProduct(id: string): Promise<Product | null> {

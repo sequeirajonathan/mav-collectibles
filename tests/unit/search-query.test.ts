@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { byRelevance, isSearchable, relevance, searchTerms, squareKeywords, suggestQuery } from "@lib/catalog/search-query";
+import { byRelevance, correctedTerms, isSearchable, relevance, searchTerms, squareKeywords, suggestQuery } from "@lib/catalog/search-query";
 
 describe("search terms", () => {
   it("ignores case, accents and punctuation", () => {
@@ -78,5 +78,16 @@ describe("spelling suggestions", () => {
     expect(suggestQuery("chari")).toBeNull();
     expect(suggestQuery("151")).toBeNull();
     expect(suggestQuery("zzzzqqqq")).toBeNull();
+  });
+});
+
+describe("ranking fuzzy matches", () => {
+  it("works out the intended word from the names that matched", () => {
+    const names = ["APEX Sleeves - Charizard", "Charizard ex - 006/165", "Radiant Charizard", "Charmander - 004/165"];
+    expect(correctedTerms(["charzard"], names)).toEqual(["charizard"]);
+    expect(correctedTerms(["charzard", "ex"], names)).toEqual(["charizard", "ex"]);
+    // Already a real word, or nothing close: left alone.
+    expect(correctedTerms(["charizard"], names)).toEqual(["charizard"]);
+    expect(correctedTerms(["zzzzzz"], names)).toEqual(["zzzzzz"]);
   });
 });

@@ -3,7 +3,8 @@
 import { updateTag } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@lib/prisma";
-import { createAction } from "@lib/actions/safe-action";
+import { ActionError, createAction } from "@lib/actions/safe-action";
+import { refreshSearchIndex } from "@lib/data/catalog";
 import { UserRole } from "@interfaces/roles";
 import {
   communityInput,
@@ -67,4 +68,15 @@ export const saveCommunity = createAction({ input: communityInput, access: ADMIN
   });
   updateTag(tags.community);
   return null;
+});
+
+/** Rebuild the search index now (it also refreshes itself once a day). */
+export const refreshSearchIndexAction = createAction({ input: z.object({}), access: ADMIN }, async () => {
+  try {
+    const result = await refreshSearchIndex();
+    updateTag(tags.catalog);
+    return result;
+  } catch (error) {
+    throw new ActionError(error instanceof Error ? error.message : "The refresh failed.");
+  }
 });

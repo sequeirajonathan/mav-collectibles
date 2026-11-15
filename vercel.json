@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build:production",
+  "crons": [{ "path": "/api/cron/search-index", "schedule": "17 10 * * *" }],
   "git": {
     "deploymentEnabled": {
       "main": true,
