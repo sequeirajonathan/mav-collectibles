@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 const EMAIL = "info@mavcollectibles.com";
-/** The line the shop's staff answer for hiring (from their own job posts). */
+/** Staff-run line for help with applications (from the shop's own job posts). */
 const HIRING_PHONE = "(936) 330-3553";
 
 export default function JobsPage() {
@@ -63,13 +63,14 @@ export default function JobsPage() {
             <h2 className="font-bold">Other ways to apply</h2>
             <ul className="mt-2 space-y-1 text-foreground/80">
               <li>
-                Call MAV at <a className="font-semibold text-gold" href={`tel:${HIRING_PHONE.replace(/\D/g, "")}`}>{HIRING_PHONE}</a>
-              </li>
-              <li>
                 Send your résumé to <a className="font-semibold text-gold" href={`mailto:${EMAIL}`}>{EMAIL}</a>
               </li>
               <li>Apply in store: {STORE_ADDRESS}</li>
             </ul>
+            <p className="mt-3">
+              <span className="font-semibold">Need help with your application?</span> If the form gives you trouble or you have a
+              question along the way, call <a className="font-semibold text-gold" href={`tel:${HIRING_PHONE.replace(/\D/g, "")}`}>{HIRING_PHONE}</a>.
+            </p>
             <p className="mt-3 text-muted-foreground">Don&apos;t see your role? Choose &ldquo;General application&rdquo; in the form. We&apos;re always glad to meet good people.</p>
           </div>
         </div>

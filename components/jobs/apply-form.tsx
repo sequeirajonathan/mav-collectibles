@@ -102,7 +102,7 @@ export function ApplyForm() {
       </div>
       {error && (
         <p role="alert" className="text-sm font-semibold text-danger">
-          {error}
+          {error} Still stuck? Call <a className="underline" href="tel:9363303553">(936) 330-3553</a> and we&apos;ll help.
         </p>
       )}
       <Button type="submit" size="lg" disabled={busy}>
