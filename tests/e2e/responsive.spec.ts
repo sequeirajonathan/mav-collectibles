@@ -27,6 +27,11 @@ const ADMIN_PAGES = [
   "/profile",
   "/vendors/apply",
   "/admin",
+  "/admin/chat",
+  "/admin/photos",
+  "/admin/requests",
+  "/admin/applications",
+  "/admin/downloads",
   "/admin/events",
   "/admin/events/new",
   "/admin/posts",
@@ -97,6 +102,12 @@ async function check(page: Page, path: string, testInfo: { project: { name: stri
   expect.soft(report.overflowPx, `${path}: page scrolls sideways; widest: ${report.offenders.join(" | ")}`).toBe(0);
   if (testInfo.project.name !== "desktop") {
     expect.soft(report.smallTargets, `${path}: tap targets under 32px`).toEqual([]);
+  }
+  // A page title squeezed into a sliver beside its actions is unreadable.
+  const titleWidth = await page.evaluate(() => document.querySelector("[data-page-header] > div")?.getBoundingClientRect().width ?? null);
+  if (titleWidth !== null) {
+    const room = Math.min(320, (page.viewportSize()?.width ?? 0) - 32);
+    expect.soft(titleWidth, `${path}: page title is squeezed`).toBeGreaterThanOrEqual(room);
   }
   if (testInfo.project.name === "duo-cover-landscape" && report.headerHeight > 0) {
     expect.soft(report.headerHeight, `${path}: header too tall for a landscape phone`).toBeLessThanOrEqual(56);

@@ -54,3 +54,23 @@ input:-webkit-autofill {
     background-color: var(--panel-2);
   }
 } 
+
+/* iPhone and iPad Safari size date and time fields to their own content, so
+   they spill out of their column. Make them behave like every other input. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  /* Empty fields collapse without their native chrome. */
+  min-height: 2.875rem;
+}
+input::-webkit-date-and-time-value {
+  text-align: left;
+}

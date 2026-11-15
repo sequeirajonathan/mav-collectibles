@@ -23,7 +23,7 @@ const LINKS: { href: Route; label: string; adminOnly?: boolean; hiringOnly?: boo
 export function AdminNav({ isAdmin, canHire }: { isAdmin: boolean; canHire: boolean }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Admin" className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:px-0">
+    <nav aria-label="Admin" className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 scrollbar-none scroll-fade fold:mx-0 fold:flex-wrap fold:px-0">
       {LINKS.filter((l) => (isAdmin || !l.adminOnly) && (canHire || !l.hiringOnly)).map((l) => {
         const active = l.href === "/admin" ? pathname === "/admin" : pathname.startsWith(l.href);
         return (

@@ -92,10 +92,10 @@ export function PushToggle() {
 
   if (state === "loading" || state === "unsupported") return null;
   if (state === "needs-install") {
-    return <p className="text-sm text-muted-foreground">To get notifications on an iPhone, add this site to your Home Screen (Share → Add to Home Screen), then open it from there.</p>;
+    return <p className="max-w-md text-sm text-muted-foreground">To get notifications on an iPhone, add this site to your Home Screen (Share → Add to Home Screen), then open it from there.</p>;
   }
   if (state === "blocked") {
-    return <p className="text-sm text-muted-foreground">Notifications are blocked for this site. Allow them in your browser or phone settings to turn them on.</p>;
+    return <p className="max-w-md text-sm text-muted-foreground">Notifications are blocked for this site. Allow them in your browser or phone settings to turn them on.</p>;
   }
   return state === "on" ? (
     <Button variant="outline" size="sm" onClick={turnOff} disabled={busy}>

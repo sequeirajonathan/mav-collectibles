@@ -17,13 +17,14 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 fold:mb-8 fold:flex-row fold:items-end fold:justify-between">
-      <div className="min-w-0">
+    <header data-page-header className="mb-6 flex flex-col gap-4 fold:mb-8 fold:flex-row fold:flex-wrap fold:items-end fold:justify-between">
+      {/* The title keeps a readable width; actions that don't fit beside it drop to their own row. */}
+      <div className="min-w-0 fold:min-w-80 fold:flex-1">
         {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
         <h1 className="ui-page-title mt-1 text-2xl font-bold tracking-tight text-foreground fold:text-3xl">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-sm text-muted-foreground fold:text-base">{description}</p>}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="flex max-w-full flex-wrap gap-2">{actions}</div>}
     </header>
   );
 }

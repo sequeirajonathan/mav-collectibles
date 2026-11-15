@@ -18,7 +18,7 @@ async function List() {
     <ul className={cardVariants({ variant: "list" })}>
       {events.map((e) => (
         <li key={e.id}>
-          <Link href={`/admin/events/${e.id}`} className="flex flex-col gap-1 p-4 hover:bg-panel-2 fold:flex-row fold:items-center fold:gap-4">
+          <Link href={`/admin/events/${e.id}`} className="flex flex-col items-start gap-1 p-4 hover:bg-panel-2 fold:flex-row fold:items-center fold:gap-4">
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">{e.title}</p>
               <p className="text-sm text-muted-foreground">{formatEventWhen(e.startsAt)} · {capacityLabel(e.capacity, e.registeredCount, e.waitlistCount)}</p>

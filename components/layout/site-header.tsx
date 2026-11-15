@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { NAV_LINKS } from "./nav-links";
 import { AccountMenu, CartLink } from "./account-menu";
 import { MobileNav } from "./mobile-nav";
@@ -21,12 +22,17 @@ export function SiteHeader() {
             // Plain link in the static shell; the active state streams in.
             <Suspense
               key={link.href}
-              // The Shop link waits for the visibility check, so it never flashes for customers while hidden.
-              fallback={link.href === "/shop" ? null : <Link href={link.href} className="rounded-md px-3 py-2 text-sm font-semibold text-foreground/80">{link.label}</Link>}
+              // Links that can be switched off wait for the check, so they never flash while hidden.
+              fallback={link.href === "/shop" || link.href === "/vendors" ? null : <Link href={link.href} className="rounded-md px-3 py-2 text-sm font-semibold text-foreground/80">{link.label}</Link>}
             >
               <NavLink href={link.href}>{link.label}</NavLink>
             </Suspense>
           ))}
+          <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:bg-panel-2 hover:text-foreground">
+            Singles
+            <ExternalLink aria-hidden className="size-3.5" />
+            <span className="sr-only">on TCGplayer (opens in a new tab)</span>
+          </a>
         </nav>
         <div className="ml-auto flex items-center gap-1">
           <ShopOnly>

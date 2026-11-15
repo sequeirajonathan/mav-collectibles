@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, X } from "lucide-react";
+import { ExternalLink, Menu, Search, X } from "lucide-react";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { ThemeToggle } from "./theme-toggle";
 import { InstallApp } from "./install-app";
 import { NAV_LINKS } from "./nav-links";
@@ -15,7 +16,7 @@ import { useShopMode } from "./shop-mode";
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { visible: shopVisible } = useShopMode();
+  const { visible: shopVisible, vendors: vendorsVisible } = useShopMode();
   const [openedOn, setOpenedOn] = useState(pathname);
   // Close the drawer after navigating (adjusting state during render, not in an effect).
   if (open && pathname !== openedOn) {
@@ -103,7 +104,7 @@ export function MobileNav() {
                 className="mb-2 justify-start border border-line"
               />
               <InstallApp className="mb-2" />
-              {NAV_LINKS.filter((link) => shopVisible || link.href !== "/shop").map((link) => (
+              {NAV_LINKS.filter((link) => (shopVisible || link.href !== "/shop") && (vendorsVisible || link.href !== "/vendors")).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -117,6 +118,10 @@ export function MobileNav() {
                   {link.label}
                 </Link>
               ))}
+              <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className="flex items-center gap-2 rounded-lg px-3 py-3 text-lg font-semibold text-foreground hover:bg-panel-2">
+                Singles on TCGplayer
+                <ExternalLink aria-hidden className="size-4" />
+              </a>
             </nav>
           </div>,
           document.body,

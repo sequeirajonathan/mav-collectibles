@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { VendorsOnly } from "@components/layout/shop-only";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -133,6 +134,7 @@ async function EventContent({ params }: { params: Params }) {
         </div>
       )}
 
+      <VendorsOnly>
       {event.vendors.length > 0 && (
         <section className="mt-10" aria-labelledby="vendors-heading">
           <h2 id="vendors-heading" className="text-lg font-bold">Vendors at this event</h2>
@@ -151,6 +153,7 @@ async function EventContent({ params }: { params: Params }) {
           </ul>
         </section>
       )}
+      </VendorsOnly>
 
       {event.results.length > 0 && (
         <section className="mt-10" aria-labelledby="results-heading">

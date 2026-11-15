@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowRight, CalendarDays, Megaphone, Store, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays, ExternalLink, Megaphone, Store, Trophy } from "lucide-react";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { PostCard, PostCardSkeleton } from "@components/hub/post-card";
 import { SectionHeading, EmptyState } from "@components/ui/page-header";
@@ -23,7 +24,7 @@ import { ChipLink, chipRowClass } from "@components/ui/chip";
 import { Eyebrow } from "@components/ui/page-header";
 import { JsonLd } from "@components/seo/json-ld";
 import { storeJsonLd } from "@lib/seo";
-import { ShopOnly } from "@components/layout/shop-only";
+import { ShopOnly, VendorsOnly } from "@components/layout/shop-only";
 import { BuyBanner } from "@components/home/buy-banner";
 import { GameGrid } from "@components/home/game-grid";
 import { Petals } from "@components/home/petals";
@@ -198,23 +199,30 @@ export default function HomePage() {
             <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
               League nights, tournaments, pre-releases and vendor days. RSVP, track your season points and never miss a release.
             </p>
+            <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className={cn(buttonVariants(), "mt-5")}>
+              Shop singles on TCGplayer
+              <ExternalLink aria-hidden />
+            </a>
           </div>
         </div>
         <Suspense fallback={<Skeleton className="mt-4 h-48 rounded-2xl fold:mt-6" />}>
           <Spotlight />
         </Suspense>
-        <ul className="mt-4 grid grid-cols-2 gap-2 fold:mt-6 fold:gap-3 lg:grid-cols-4">
-          {QUICK_LINKS.map(({ href, label, description, Icon }) => (
-            <li key={href}>
-              <Link href={href} className={cn(cardVariants({ variant: "interactive" }), "group flex h-full flex-col gap-1 p-3 fold:p-4")}>
-                <span className="mb-1 inline-flex size-9 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 transition-colors can-hover:group-hover:bg-gold/20">
-                  <Icon className="size-5 text-gold" />
-                </span>
-                <span className="font-bold">{label}</span>
-                <span className="text-xs text-muted-foreground fold:text-sm">{description}</span>
-              </Link>
-            </li>
-          ))}
+        <ul className="mt-4 grid grid-cols-2 gap-2 fold:mt-6 fold:gap-3 lg:grid-flow-col lg:auto-cols-fr lg:grid-cols-none">
+          {QUICK_LINKS.map(({ href, label, description, Icon }) => {
+            const tile = (
+              <li key={href}>
+                <Link href={href} className={cn(cardVariants({ variant: "interactive" }), "group flex h-full flex-col gap-1 p-3 fold:p-4")}>
+                  <span className="mb-1 inline-flex size-9 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 transition-colors can-hover:group-hover:bg-gold/20">
+                    <Icon className="size-5 text-gold" />
+                  </span>
+                  <span className="font-bold">{label}</span>
+                  <span className="text-xs text-muted-foreground fold:text-sm">{description}</span>
+                </Link>
+              </li>
+            );
+            return href === "/vendors" ? <VendorsOnly key={href}>{tile}</VendorsOnly> : tile;
+          })}
         </ul>
       </section>
 
@@ -243,10 +251,11 @@ export default function HomePage() {
         <LatestPosts />
       </Suspense>
 
-      <div className="grid gap-12 lg:grid-cols-2">
+      <div className="grid gap-12 lg:grid-flow-col lg:auto-cols-fr">
         <Suspense fallback={null}>
           <PokemonStandings />
         </Suspense>
+        <VendorsOnly>
         <section className={cn(cardVariants({ radius: "2xl" }), "bg-gradient-to-br from-panel to-panel-2 p-5 fold:p-6")}>
           <h2 className="text-xl font-bold">Sell or trade at MAV</h2>
           <p className="mt-2 text-foreground/80">
@@ -261,6 +270,7 @@ export default function HomePage() {
             </LinkButton>
           </div>
         </section>
+        </VendorsOnly>
       </div>
 
       <Suspense fallback={null}>
