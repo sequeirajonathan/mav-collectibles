@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FaEnvelope, FaFacebook, FaInstagram, FaMapMarkerAlt, FaPhoneAlt, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
 import { ShopOnly, VendorsOnly } from "./shop-only";
@@ -59,6 +60,9 @@ export function SiteFooter() {
             })}
             <li>
               <Link href="/pokemon-cards-montgomery-tx" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Pokémon cards</Link>
+            </li>
+            <li>
+              <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Singles on TCGplayer</a>
             </li>
             <li>
               <Link href="/sell-your-cards" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Sell your cards</Link>

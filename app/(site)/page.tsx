@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowRight, CalendarDays, Megaphone, Store, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays, ExternalLink, Megaphone, Store, Trophy } from "lucide-react";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { EventCard, EventListSkeleton } from "@components/hub/event-card";
 import { PostCard, PostCardSkeleton } from "@components/hub/post-card";
 import { SectionHeading, EmptyState } from "@components/ui/page-header";
@@ -198,6 +199,10 @@ export default function HomePage() {
             <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
               League nights, tournaments, pre-releases and vendor days. RSVP, track your season points and never miss a release.
             </p>
+            <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className={cn(buttonVariants(), "mt-5")}>
+              Shop singles on TCGplayer
+              <ExternalLink aria-hidden />
+            </a>
           </div>
         </div>
         <Suspense fallback={<Skeleton className="mt-4 h-48 rounded-2xl fold:mt-6" />}>

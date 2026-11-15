@@ -49,3 +49,11 @@ test.describe("search engines", () => {
     }
   });
 });
+
+test("singles link points at the TCGplayer store", async ({ page }) => {
+  await page.goto("/");
+  const links = page.locator('a[href="https://mavcollectibles.tcgplayerpro.com/"]');
+  await expect(links.filter({ hasText: "Shop singles on TCGplayer" })).toBeVisible();
+  expect(await links.count()).toBeGreaterThanOrEqual(2);
+  for (const link of await links.all()) await expect(link).toHaveAttribute("target", "_blank");
+});

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { NAV_LINKS } from "./nav-links";
 import { AccountMenu, CartLink } from "./account-menu";
 import { MobileNav } from "./mobile-nav";
@@ -27,6 +28,11 @@ export function SiteHeader() {
               <NavLink href={link.href}>{link.label}</NavLink>
             </Suspense>
           ))}
+          <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:bg-panel-2 hover:text-foreground">
+            Singles
+            <ExternalLink aria-hidden className="size-3.5" />
+            <span className="sr-only">on TCGplayer (opens in a new tab)</span>
+          </a>
         </nav>
         <div className="ml-auto flex items-center gap-1">
           <ShopOnly>

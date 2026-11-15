@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, X } from "lucide-react";
+import { ExternalLink, Menu, Search, X } from "lucide-react";
+import { TCGPLAYER_STORE_URL } from "@const/links";
 import { ThemeToggle } from "./theme-toggle";
 import { InstallApp } from "./install-app";
 import { NAV_LINKS } from "./nav-links";
@@ -117,6 +118,10 @@ export function MobileNav() {
                   {link.label}
                 </Link>
               ))}
+              <a href={TCGPLAYER_STORE_URL} target="_blank" rel="noopener" className="flex items-center gap-2 rounded-lg px-3 py-3 text-lg font-semibold text-foreground hover:bg-panel-2">
+                Singles on TCGplayer
+                <ExternalLink aria-hidden className="size-4" />
+              </a>
             </nav>
           </div>,
           document.body,
