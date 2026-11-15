@@ -7,6 +7,7 @@ import { serverEnv } from "@lib/env.server";
 import sandboxMap from "@const/square-sandbox-map.json";
 import { matchesStock, type CatalogSource, type ListOptions } from "./source";
 import { withProcessedImages } from "./product-images";
+import { isPublicCatalogItem } from "./visibility";
 
 /**
  * The app's category IDs (const/categories.ts) are production IDs. A sandbox
@@ -80,6 +81,8 @@ async function collect(query: Square.CatalogQuery, options: ListOptions): Promis
           ? { ...normalized, categoryId: fromSandbox.get(normalized.categoryId) ?? normalized.categoryId }
           : normalized
       );
+      // Never list order records or items outside the shop's own categories.
+      if (!isPublicCatalogItem({ name: item.name, description: item.description, categoryIds: [item.categoryId] })) continue;
       if (matchesStock(item, options.stock)) items.push(item);
     }
     cursor = page.cursor ?? undefined;
@@ -111,6 +114,12 @@ export const squareCatalogSource: CatalogSource = {
       if (!response.object) return null;
     }
     if (response.object.type !== "ITEM") return null;
+
+    const itemData = response.object.itemData;
+    const categoryIds = [...(itemData?.categories ?? []).map((c) => c.id), itemData?.reportingCategory?.id].map((id) =>
+      id && sandboxIdsActive() ? (fromSandbox.get(id) ?? id) : id
+    );
+    if (!isPublicCatalogItem({ name: itemData?.name ?? "", description: itemData?.description, categoryIds })) return null;
 
     const variationIds = (response.object.itemData?.variations ?? []).flatMap((v) => (v.id ? [v.id] : []));
     const [location] = squareLocationIds();
