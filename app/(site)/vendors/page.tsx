@@ -30,7 +30,7 @@ async function VendorDays() {
 async function VendorGrid() {
   const vendors = await listVendors();
   if (vendors.length === 0) {
-    return <EmptyState mascot="gengar" title="No vendors listed yet" description="Want a table at our next vendor day? Apply below." />;
+    return <EmptyState mascot="random" title="No vendors listed yet" description="Want a table at our next vendor day? Apply below." />;
   }
   return (
     <div className="grid gap-3 fold:grid-cols-2 lg:grid-cols-3">

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Check } from "lucide-react";
+import { Mascot } from "@components/ui/mascot";
 import { ApplyForm } from "@components/jobs/apply-form";
 import { Eyebrow } from "@components/ui/page-header";
 import { cardVariants } from "@components/ui/card";
@@ -22,14 +22,7 @@ export default function JobsPage() {
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-10">
         <div aria-hidden className="speed-lines pointer-events-none absolute inset-0" />
-        <Image
-          src="/images/lucario.gif"
-          alt=""
-          width={47}
-          height={63}
-          unoptimized
-          className="pixelated animate-bob pointer-events-none absolute bottom-3 right-4 hidden h-36 w-auto fold:block lg:right-16 lg:h-44"
-        />
+        <Mascot name="lucario" className="pointer-events-none !absolute bottom-3 right-4 hidden size-36 fold:block lg:right-16 lg:size-44" />
         <div className="relative max-w-2xl">
           <Eyebrow>Join the team</Eyebrow>
           <h1 className="ui-hero-title font-display mt-3 text-5xl leading-[1.05] fold:text-7xl">

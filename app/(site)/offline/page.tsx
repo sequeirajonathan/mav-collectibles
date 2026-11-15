@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WifiOff } from "lucide-react";
+import { Mascot } from "@components/ui/mascot";
 import { STORE_ADDRESS } from "@lib/format";
 
 export const metadata: Metadata = { title: "You're offline", robots: { index: false } };
@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "You're offline", robots: { index: fa
 export default function OfflinePage() {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center py-16 text-center">
-      <WifiOff aria-hidden className="size-10 text-gold" />
+      <Mascot name="snorlax" className="size-28" />
       <h1 className="mt-4 text-2xl font-bold">You&apos;re offline</h1>
       <p className="mt-2 text-muted-foreground">
         We couldn&apos;t reach MAV Collectibles. Check your connection and try again.

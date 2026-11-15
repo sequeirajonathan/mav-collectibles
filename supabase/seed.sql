@@ -12,6 +12,9 @@ insert into public.feature_flags (id, name, description, enabled, "updatedAt") v
   (gen_random_uuid()::text, 'showGoogleReviews', 'Controls visibility of Google Reviews section on the homepage', true, now())
 on conflict (name) do nothing;
 
+-- Local and test data shows the shop to everyone (production starts hidden).
+update public.feature_flags set enabled = true where name = 'shopVisible';
+
 insert into public.alert_banners (id, message, code, "backgroundColor", "textColor", enabled, "updatedAt")
 values ('1', 'Pokémon League every Friday at 6 PM. RSVP to save your seat!', null, '#E6B325', '#000000', true, now())
 on conflict (id) do nothing;

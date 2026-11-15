@@ -1,13 +1,13 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { cardVariants } from "@components/ui/card";
 import { Field, inputClass } from "@components/ui/field";
 import { JOB_POSITIONS, RESUME_MAX_BYTES, RESUME_TYPES } from "@const/jobs";
 import { cn } from "@utils";
+import { Mascot } from "@components/ui/mascot";
 
 export function ApplyForm() {
   const form = useRef<HTMLFormElement>(null);
@@ -47,7 +47,7 @@ export function ApplyForm() {
   if (sent) {
     return (
       <div role="status" className={cn(cardVariants({ padding: "lg" }), "text-center")}>
-        <Image src="/images/lucario.gif" alt="" width={47} height={63} unoptimized className="pixelated animate-bob mx-auto h-24 w-auto" />
+        <Mascot name="random" className="mx-auto size-24" />
         <CheckCircle2 aria-hidden className="mx-auto mt-3 size-8 text-success" />
         <h2 className="mt-3 text-xl font-bold">Application sent</h2>
         <p className="mt-1 text-muted-foreground">Thanks for applying. We read every application and will reach out if it&apos;s a fit.</p>

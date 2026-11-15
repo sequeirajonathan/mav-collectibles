@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { InfoCard, LocalHero } from "@components/local/local-page";
 import { VisitBlock } from "@components/local/visit-block";
 import { LinkButton } from "@components/ui/link-button";
+import { ShopOnly } from "@components/layout/shop-only";
 import { JsonLd } from "@components/seo/json-ld";
 import { STORE, storeJsonLd } from "@lib/seo";
 
@@ -28,12 +29,14 @@ export default function PokemonPage() {
             <li>Graded cards: PSA, CGC, Beckett and TAG slabs.</li>
             <li>Supplies: sleeves, binders, deck boxes, top loaders and playmats.</li>
           </ul>
+          <ShopOnly>
           <div className="flex flex-col gap-2 pt-1 fold:flex-row">
             <LinkButton href="/category/pokemon?group=TCG">Browse Pokémon</LinkButton>
             <LinkButton href="/category/pokemonsingles?group=TCG" variant="outline">
               Pokémon singles
             </LinkButton>
           </div>
+          </ShopOnly>
         </InfoCard>
 
         <InfoCard title="Play Pokémon here">
@@ -66,9 +69,11 @@ export default function PokemonPage() {
             {STORE.areas.at(-1)}.
           </p>
           <p>We also carry One Piece, Magic: The Gathering, Yu-Gi-Oh!, Dragon Ball Super, Digimon, Lorcana and more.</p>
+          <ShopOnly>
           <LinkButton href="/shop" variant="outline">
             Browse every game
           </LinkButton>
+          </ShopOnly>
         </InfoCard>
       </div>
 

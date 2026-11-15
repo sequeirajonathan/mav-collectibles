@@ -7,6 +7,7 @@ import { AccountMenu, CartLink } from "./account-menu";
 import { MobileNav } from "./mobile-nav";
 import { NavLink } from "./nav-link";
 import { ThemeToggle } from "./theme-toggle";
+import { ShopOnly } from "./shop-only";
 
 export function SiteHeader() {
   return (
@@ -18,12 +19,17 @@ export function SiteHeader() {
         <nav aria-label="Main" className="hidden flex-1 items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => (
             // Plain link in the static shell; the active state streams in.
-            <Suspense key={link.href} fallback={<Link href={link.href} className="rounded-md px-3 py-2 text-sm font-semibold text-foreground/80">{link.label}</Link>}>
+            <Suspense
+              key={link.href}
+              // The Shop link waits for the visibility check, so it never flashes for customers while hidden.
+              fallback={link.href === "/shop" ? null : <Link href={link.href} className="rounded-md px-3 py-2 text-sm font-semibold text-foreground/80">{link.label}</Link>}
+            >
               <NavLink href={link.href}>{link.label}</NavLink>
             </Suspense>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">
+          <ShopOnly>
           <form action="/search" className="hidden items-center gap-2 rounded-full border border-line bg-panel px-3 transition-colors focus-within:border-gold lg:flex">
             <Search className="size-4 text-muted-foreground" />
             <label htmlFor="header-search" className="sr-only">Search products</label>
@@ -32,6 +38,7 @@ export function SiteHeader() {
           <Link href="/search" className="inline-flex size-11 items-center justify-center rounded-md hover:bg-panel-2 lg:hidden" aria-label="Search products">
             <Search className="size-5" />
           </Link>
+          </ShopOnly>
           <ThemeToggle className="hidden fold:inline-flex" />
           <CartLink />
           <AccountMenu />

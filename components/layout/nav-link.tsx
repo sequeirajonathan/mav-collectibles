@@ -4,9 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Route } from "next";
 import { cn } from "@utils";
+import { useShopMode } from "./shop-mode";
 
 export function NavLink({ href, children }: { href: Route; children: React.ReactNode }) {
   const active = usePathname().startsWith(href);
+  const { visible } = useShopMode();
+  if (href === "/shop" && !visible) return null;
   return (
     <Link
       href={href}

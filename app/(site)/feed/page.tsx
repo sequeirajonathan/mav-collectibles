@@ -21,7 +21,7 @@ async function Feed({ searchParams }: { searchParams: SearchParams }) {
   const { posts, signedIn } = await withMyReactions(page.posts);
 
   if (posts.length === 0) {
-    return <EmptyState mascot="gengar" title="No posts yet" description="Announcements from the shop will show up here." />;
+    return <EmptyState mascot="random" title="No posts yet" description="Announcements from the shop will show up here." />;
   }
   return (
     <div className="space-y-5">

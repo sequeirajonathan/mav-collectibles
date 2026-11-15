@@ -4,6 +4,7 @@ import { httpUrl, isoDateTime, optionalText } from "./common";
 /** Every feature flag the app knows about. Unknown rows in the table are ignored. */
 export const FLAG_NAMES = [
   "shopLive",
+  "shopVisible",
   "showAlertBanner",
   "showYouTubeVideo",
   "showVideoPlayer",

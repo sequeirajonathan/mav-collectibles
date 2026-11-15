@@ -23,6 +23,7 @@ import { ChipLink, chipRowClass } from "@components/ui/chip";
 import { Eyebrow } from "@components/ui/page-header";
 import { JsonLd } from "@components/seo/json-ld";
 import { storeJsonLd } from "@lib/seo";
+import { ShopOnly } from "@components/layout/shop-only";
 import { BuyBanner } from "@components/home/buy-banner";
 import { GameGrid } from "@components/home/game-grid";
 import { Petals } from "@components/home/petals";
@@ -90,7 +91,7 @@ async function Spotlight() {
 async function UpcomingEvents() {
   const events = (await listEvents({ limit: 6 })).filter((e) => e.status === "published");
   return events.length === 0 ? (
-    <EmptyState mascot="lucario" title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
+    <EmptyState mascot="random" title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
   ) : (
     <div className="grid gap-3 lg:grid-cols-2">
       {events.map((e) => (
@@ -217,10 +218,12 @@ export default function HomePage() {
         </ul>
       </section>
 
-      <section>
-        <SectionHeading title="Choose your game" href="/shop" linkLabel="Whole shop" />
-        <GameGrid />
-      </section>
+      <ShopOnly>
+        <section>
+          <SectionHeading title="Choose your game" href="/shop" linkLabel="Whole shop" />
+          <GameGrid />
+        </section>
+      </ShopOnly>
 
       <BuyBanner />
 
