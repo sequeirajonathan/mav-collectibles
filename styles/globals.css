@@ -7,7 +7,8 @@
  * and a navy outline.
  *   - Light (default): pale blue-white surfaces, navy text, dragon blue accent,
  *     logo yellow for the main call to action.
- *   - Dark (`data-theme="dark"`): black surfaces, gold accent.
+ *   - Dark (`data-theme="dark"`): the same palette at night. Deep navy surfaces,
+ *     a lighter dragon blue accent, logo yellow for the main call to action.
  * Use the semantic tokens (bg-panel, text-gold, border-line, bg-cta, ...)
  * instead of hex values. "gold" is the accent token's name in both themes; in
  * the light theme its value is the dragon blue, because yellow text can't be
@@ -127,40 +128,42 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --ink: #05060a;
-  --background: #000000;
-  --foreground: #f5f5f4;
-  --muted-foreground: #a1a1aa;
-  --card: #0d1017;
-  --panel: #0d1017;
-  --panel-2: #181d29;
-  --line: rgb(255 255 255 / 0.08);
-  --line-strong: rgb(230 179 37 / 0.45);
-  --gold: #e6b325;
-  --gold-light: #ffd966;
-  --gold-dark: #b38a00;
-  --accent-rgb: 230 179 37;
-  --cta: #e6b325;
-  --cta-hover: #ffd966;
-  --cta-active: #b38a00;
-  --cta-ink: #05060a;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --silver: #d4d4d8;
+  /* The same logo palette at night: deep navy surfaces, the dragon's blue
+     lightened for accents, and the logo yellow for calls to action. */
+  --ink: #06121d;
+  --background: #08131e;
+  --foreground: #eaf2fa;
+  --muted-foreground: #9db2c7;
+  --card: #0f2233;
+  --panel: #0f2233;
+  --panel-2: #183249;
+  --line: rgb(160 205 245 / 0.14);
+  --line-strong: rgb(95 178 234 / 0.55);
+  --gold: #5fb2ea;
+  --gold-light: #8ccaf5;
+  --gold-dark: #2f8fd0;
+  --accent-rgb: 95 178 234;
+  --cta: #ffd02e;
+  --cta-hover: #ffdc5e;
+  --cta-active: #f0bd10;
+  --cta-ink: #10222f;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --silver: #cbd5e1;
   --bronze: #f59e0b;
-  --scrim: rgb(0 0 0 / 0.8);
-  --hero-glow: rgb(230 179 37 / 0.18);
-  --hero-glow-2: rgb(88 101 242 / 0.12);
-  --dot: rgb(255 255 255 / 0.06);
-  --spot-hi: rgb(255 255 255 / 0.13);
-  --spot-lo: rgb(0 0 0 / 0.45);
+  --scrim: rgb(8 19 30 / 0.85);
+  --hero-glow: rgb(255 208 46 / 0.16);
+  --hero-glow-2: rgb(95 178 234 / 0.18);
+  --dot: rgb(160 205 245 / 0.08);
+  --spot-hi: rgb(160 205 245 / 0.16);
+  --spot-lo: rgb(0 0 0 / 0.4);
   --tile-shadow: rgb(0 0 0 / 0.55);
-  --sweep: rgb(255 255 255 / 0.05);
-  --pop-ink: #000000;
-  --speed: rgb(230 179 37 / 0.09);
-  --sleeve: #10141d;
-  --sleeve-dot: rgb(255 255 255 / 0.05);
+  --sweep: rgb(160 205 245 / 0.07);
+  --pop-ink: #04101a;
+  --speed: rgb(95 178 234 / 0.1);
+  --sleeve: #0b1b2a;
+  --sleeve-dot: rgb(160 205 245 / 0.07);
   --holo-blend: color-dodge;
 }
 
@@ -393,11 +396,11 @@ html[data-style="comic"] {
   --card: var(--comic-paper);
 }
 html[data-style="comic"][data-theme="dark"] {
-  --comic-ink: #f5f5f4;
-  --comic-shadow: #e6b325;
-  --comic-paper: #0d1017;
-  --comic-dot: rgb(255 255 255 / 0.1);
-  --background: #000000;
+  --comic-ink: #eaf2fa;
+  --comic-shadow: #ffd02e;
+  --comic-paper: #0f2233;
+  --comic-dot: rgb(160 205 245 / 0.1);
+  --background: #08131e;
 }
 html[data-style="comic"] {
   .comic-only {
@@ -456,8 +459,8 @@ html[data-style="comic"] {
   }
   &[data-theme="dark"] .ui-section-title {
     background-color: var(--cta);
-    color: #05060a;
-    box-shadow: 4px 4px 0 rgb(255 255 255 / 0.85);
+    color: #10222f;
+    box-shadow: 4px 4px 0 #eaf2fa;
   }
   .ui-page-title {
     font-family: var(--font-display);
