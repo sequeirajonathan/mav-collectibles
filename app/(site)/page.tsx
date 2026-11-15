@@ -219,9 +219,7 @@ export default function HomePage() {
         <GameGrid />
       </section>
 
-      <Suspense fallback={<Skeleton className="h-96 rounded-2xl" />}>
-        <BuyBanner />
-      </Suspense>
+      <BuyBanner />
 
       <section>
         <SectionHeading title="Coming up" href="/events" linkLabel="All events" />

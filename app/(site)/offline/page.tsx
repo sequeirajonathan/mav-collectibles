@@ -17,7 +17,7 @@ export default function OfflinePage() {
         Try again
       </a>
       <p className="mt-8 text-sm text-muted-foreground">
-        Visit us at {STORE_ADDRESS} · <a className="text-gold" href="tel:9363303553">(936) 330-3553</a>
+        Visit us at {STORE_ADDRESS} · <a className="text-gold" href="tel:9364491277">(936) 449-1277</a>
       </p>
     </div>
   );
