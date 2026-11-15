@@ -85,7 +85,10 @@ export function SiteFooter() {
           </dl>
         </div>
       </div>
-      <p className="border-t border-line px-safe py-4 text-center text-xs text-muted-foreground">© MAV Collectibles</p>
+      <p className="border-t border-line px-safe py-4 text-center text-xs text-muted-foreground">
+        © MAV Collectibles ·{" "}
+        <Link href="/privacy" className="inline-flex min-h-9 items-center hover:text-gold">Privacy</Link>
+      </p>
     </footer>
   );
 }
