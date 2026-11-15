@@ -22,6 +22,8 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Comic lettering: headlines, section titles, big numerals. Never body text. */
+  --font-display: var(--font-bangers), var(--font-geist-sans);
 
   /* Breakpoints. `fold` targets the iPhone Duo inner display (~626pt wide)
      and small tablets: enough room for two columns. */
@@ -115,6 +117,12 @@
   --spot-lo: rgb(16 42 67 / 0.1);
   --tile-shadow: rgb(16 42 67 / 0.28);
   --sweep: rgb(255 255 255 / 0.7);
+  /* Comic touches: outline/hard-shadow ink, speed lines, card-sleeve tiles. */
+  --pop-ink: #10222f;
+  --speed: rgb(27 108 168 / 0.1);
+  --sleeve: #12283b;
+  --sleeve-dot: rgb(255 255 255 / 0.07);
+  --holo-blend: hard-light;
 }
 
 [data-theme="dark"] {
@@ -149,6 +157,11 @@
   --spot-lo: rgb(0 0 0 / 0.45);
   --tile-shadow: rgb(0 0 0 / 0.55);
   --sweep: rgb(255 255 255 / 0.05);
+  --pop-ink: #000000;
+  --speed: rgb(230 179 37 / 0.09);
+  --sleeve: #10141d;
+  --sleeve-dot: rgb(255 255 255 / 0.05);
+  --holo-blend: color-dodge;
 }
 
 @layer base {
@@ -187,7 +200,125 @@
   }
 }
 
+@keyframes petal-fall {
+  from {
+    transform: translate3d(0, -2rem, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  to {
+    transform: translate3d(var(--drift, 3rem), 34rem, 0) rotate(540deg);
+    opacity: 0;
+  }
+}
+@keyframes bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
 @layer utilities {
+  /* ---- Comic / trading-card flavour ---------------------------------------- */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.03em;
+    font-weight: 400;
+  }
+  /* Logo-style lettering: yellow fill, ink outline, hard drop shadow. For a word or two. */
+  .text-pop {
+    color: var(--cta);
+    -webkit-text-stroke: 0.1em var(--pop-ink);
+    paint-order: stroke fill;
+    text-shadow: 0.06em 0.07em 0 var(--pop-ink);
+    padding-inline: 0.06em;
+  }
+  /* Manga speed lines radiating from the trailing edge of a hero. */
+  .speed-lines {
+    background-image: repeating-conic-gradient(from 0deg at 88% 50%, var(--speed) 0deg 1.1deg, transparent 1.1deg 5deg);
+    mask-image: radial-gradient(circle at 88% 50%, transparent 0 9rem, #000 26rem);
+  }
+  /* Tilted sticker label. */
+  .sticker {
+    display: inline-block;
+    rotate: -4deg;
+    border: 2px solid var(--pop-ink);
+    border-radius: 0.5rem;
+    background-color: var(--cta);
+    color: var(--cta-ink);
+    box-shadow: 3px 3px 0 var(--pop-ink);
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+  /* Card-sleeve tile: dark, dotted, lifts with a hard shadow on hover. */
+  .sleeve {
+    background-color: var(--sleeve);
+    background-image: radial-gradient(var(--sleeve-dot) 1.5px, transparent 1.5px);
+    background-size: 14px 14px;
+    border: 2px solid var(--pop-ink);
+    transition: translate 0.15s ease, box-shadow 0.15s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    a:hover > .sleeve,
+    .sleeve:hover {
+      translate: -3px -3px;
+      box-shadow: 6px 6px 0 var(--cta);
+    }
+  }
+  /* Holographic foil sweep on hover, like tilting a rare card. Put on a positioned, clipped box. */
+  .holo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: linear-gradient(
+      115deg,
+      transparent 25%,
+      rgb(255 80 160 / 0.28) 38%,
+      rgb(80 200 255 / 0.3) 47%,
+      rgb(255 230 90 / 0.3) 56%,
+      transparent 70%
+    );
+    background-size: 280% 280%;
+    background-position: 100% 0;
+    mix-blend-mode: var(--holo-blend);
+    opacity: 0;
+    transition: opacity 0.25s ease, background-position 0.7s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .holo::after,
+    .holo:hover::after {
+      opacity: 1;
+      background-position: 0 100%;
+    }
+  }
+  /* Falling sakura petal (components/home/petals.tsx sets --x, --d, --delay, --drift). */
+  .petal {
+    position: absolute;
+    top: 0;
+    left: var(--x);
+    width: 0.7rem;
+    height: 0.5rem;
+    border-radius: 80% 0 80% 0;
+    background: linear-gradient(135deg, #fbcfe8, #f472b6);
+    opacity: 0;
+    animation: petal-fall var(--d, 9s) linear var(--delay, 0s) infinite;
+  }
+  .pixelated {
+    image-rendering: pixelated;
+  }
+  .animate-bob {
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .petal {
+      display: none;
+    }
+  }
+
   /* Loading placeholders (components/ui/skeleton.tsx): a soft light sweep. */
   .skeleton {
     background-image: linear-gradient(100deg, transparent 30%, var(--sweep) 50%, transparent 70%);

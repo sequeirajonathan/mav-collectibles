@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bangers, Geist, Geist_Mono } from "next/font/google";
 import "@styles/globals.css";
 import { AuthProvider } from "@contexts/AuthContext";
 import { CartProvider } from "@contexts/CartContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
+/* Comic lettering for headlines and big numerals. */
+const bangers = Bangers({ variable: "--font-bangers", subsets: ["latin"], weight: "400", display: "swap" });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
@@ -41,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // The theme script below sets data-theme before first paint, so the
     // attribute can differ from the server's HTML.
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

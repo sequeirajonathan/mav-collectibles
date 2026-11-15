@@ -17,7 +17,7 @@ function DateBlock({ iso, className }: { iso: string; className?: string }) {
       )}
     >
       <span className="text-[0.65rem] font-bold tracking-wider text-gold">{d.month}</span>
-      <span className="text-xl font-extrabold leading-none text-foreground">{d.day}</span>
+      <span className="font-display text-2xl leading-none text-foreground">{d.day}</span>
       <span className="text-[0.65rem] text-muted-foreground">{d.weekday}</span>
     </div>
   );
