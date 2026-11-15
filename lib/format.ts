@@ -1,7 +1,7 @@
 /** The shop's time zone. Every event time is shown in it, on server and client alike. */
 export const STORE_TIME_ZONE = "America/Chicago";
 export const STORE_NAME = "MAV Collectibles";
-export const STORE_PHONE = "(936) 449-1277";
+export const STORE_PHONE = "(936) 330-3553";
 export const STORE_ADDRESS = "19786 Hwy 105 W ste 190, Montgomery, TX 77356";
 
 const fmt = (options: Intl.DateTimeFormatOptions) =>

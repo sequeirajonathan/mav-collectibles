@@ -77,8 +77,8 @@ export function ProductPurchase({ product }: { product: Product }) {
         <div className={cn(cardVariants({ variant: "accent", padding: "row", radius: "lg" }), "text-sm")}>
           <p className="font-semibold text-foreground">Available in store</p>
           <p className="mt-0.5 text-foreground/80">Stop by MAV Collectibles or give us a call to hold it for you.</p>
-          <a href="tel:9364491277" className="mt-2 inline-flex min-h-10 items-center font-semibold text-gold">
-            Call (936) 449-1277
+          <a href="tel:9363303553" className="mt-2 inline-flex min-h-10 items-center font-semibold text-gold">
+            Call (936) 330-3553
           </a>
         </div>
       )}

@@ -116,7 +116,7 @@ export default function PrivacyPage() {
 
         <Section id="contact" title="Contact">
           <p>
-            Questions? Email {mail} or call <a className="text-gold" href="tel:9364491277">(936) 449-1277</a>.
+            Questions? Email {mail} or call <a className="text-gold" href="tel:9363303553">(936) 330-3553</a>.
           </p>
         </Section>
       </div>

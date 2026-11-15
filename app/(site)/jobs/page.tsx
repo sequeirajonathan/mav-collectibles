@@ -5,7 +5,7 @@ import { ApplyForm } from "@components/jobs/apply-form";
 import { Eyebrow } from "@components/ui/page-header";
 import { cardVariants } from "@components/ui/card";
 import { JOB_OPENINGS } from "@const/jobs";
-import { STORE_ADDRESS } from "@lib/format";
+import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { cn } from "@utils";
 
 export const metadata: Metadata = {
@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 };
 
 const EMAIL = "info@mavcollectibles.com";
-const HIRING_PHONE = "(936) 330-3553";
 
 export default function JobsPage() {
   return (
@@ -62,7 +61,7 @@ export default function JobsPage() {
             <h2 className="font-bold">Other ways to apply</h2>
             <ul className="mt-2 space-y-1 text-foreground/80">
               <li>
-                Call MAV at <a className="font-semibold text-gold" href="tel:9363303553">{HIRING_PHONE}</a>
+                Call MAV at <a className="font-semibold text-gold" href={`tel:${STORE_PHONE.replace(/\D/g, "")}`}>{STORE_PHONE}</a>
               </li>
               <li>
                 Send your résumé to <a className="font-semibold text-gold" href={`mailto:${EMAIL}`}>{EMAIL}</a>
