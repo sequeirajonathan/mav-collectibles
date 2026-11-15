@@ -1,6 +1,6 @@
 import { CategoryGroup } from "@interfaces";
 
-export interface SquareCategory {
+interface SquareCategory {
   displayName: string;
   slug: string;
   squareCategoryId: string;
@@ -93,7 +93,82 @@ export const CATEGORY_MAPPING: Record<string, SquareCategory> = {
     slug: "squareenix",
     squareCategoryId: "2UYGU6IBT5CC2XHPOFISKRDC",
   },
+  magicsingles: {
+    displayName: "Magic - Singles",
+    slug: "magicsingles",
+    squareCategoryId: "NGKVLCPJP3KCNPDLFTDMQTNU",
+  },
+  onepiecesingles: {
+    displayName: "One Piece - Singles",
+    slug: "onepiecesingles",
+    squareCategoryId: "QQS47L524ANFOBBRF2D6SESX",
+  },
+  gundam: {
+    displayName: "Gundam Card Game",
+    slug: "gundam",
+    squareCategoryId: "BFW7GRSGGJBJWZUGG7KUDECG",
+  },
+  gundamsingles: {
+    displayName: "Gundam - Singles",
+    slug: "gundamsingles",
+    squareCategoryId: "5WUAU7NFG4ERG3372BSS3MLH",
+  },
+  riftbound: {
+    displayName: "Riftbound",
+    slug: "riftbound",
+    squareCategoryId: "YD2VF354ISLPOEUSCOXI6UBU",
+  },
+  riftboundsingles: {
+    displayName: "Riftbound - Singles",
+    slug: "riftboundsingles",
+    squareCategoryId: "5TGTD7WPUKFIWBFAL3BFW474",
+  },
+  dragonballsingles: {
+    displayName: "Dragon Ball Super - Singles",
+    slug: "dragonballsingles",
+    squareCategoryId: "4MUPRDYBMNOSTLOVEL7TDAYC",
+  },
+  kayou: {
+    displayName: "Kayou",
+    slug: "kayou",
+    squareCategoryId: "XBZIXYRGMG7IEW4TZ62BBCRC",
+  },
+  hololive: {
+    displayName: "hololive",
+    slug: "hololive",
+    squareCategoryId: "Y7YB3ZVBR7OMVVSM7QVSZXWO",
+  },
+  cyberpunk: {
+    displayName: "Cyberpunk TCG",
+    slug: "cyberpunk",
+    squareCategoryId: "UT27M3NIJ4UBHJR4WNRY6TEJ",
+  },
+  mylittlepony: {
+    displayName: "My Little Pony Card Game",
+    slug: "mylittlepony",
+    squareCategoryId: "P5SOUPU5A4D7PXJNSA4VCGFY",
+  },
+  godzilla: {
+    displayName: "Godzilla CCG",
+    slug: "godzilla",
+    squareCategoryId: "GWWSFKEVE73YMN6KRUQ3Z2RX",
+  },
+  upperdeck: {
+    displayName: "Upper Deck",
+    slug: "upperdeck",
+    squareCategoryId: "TFWS4HRNXN754MS4XOXH3ESN",
+  },
+  historicautographs: {
+    displayName: "Historic Autographs",
+    slug: "historicautographs",
+    squareCategoryId: "O2FWHTIHBRGGZVY67HQHDPHD",
+  },
 };
+
+// Not on the site on purpose: food and drinks, plushies (in-store only),
+// "TCG Player" (order records), "League Tournaments & Play" (event entries),
+// "Psa Submission" (customer grading orders) and uncategorized items.
+// lib/catalog/visibility.ts hides everything that isn't mapped here.
 
 // --- Collectibles ---
 export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
@@ -107,11 +182,6 @@ export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
     slug: "funko",
     squareCategoryId: "DMXYKGGPUSSZZBZMRC5LNLPV",
   },
-  plushies: {
-    displayName: "Plushies",
-    slug: "plushies",
-    squareCategoryId: "Y3HB2FYHP74AAKQ3MNMOQRYU",
-  },
   toys: {
     displayName: "Toys",
     slug: "toys",
@@ -121,7 +191,57 @@ export const COLLECTIBLES_MAPPING: Record<string, SquareCategory> = {
     displayName: "Bandai Namco",
     slug: "bandai",
     squareCategoryId: "2WGAXPFOCVU6E3YCKLENXCBZ",
-  }
+  },
+  warhammer: {
+    displayName: "Warhammer",
+    slug: "warhammer",
+    squareCategoryId: "Z3AWPKEXIN67IDNOKDHPNDDN",
+  },
+  blindbox: {
+    displayName: "Blind Boxes",
+    slug: "blindbox",
+    squareCategoryId: "TGPKVNWRJFIGW62G7UC5AC22",
+  },
+  beyblade: {
+    displayName: "Beyblade X",
+    slug: "beyblade",
+    squareCategoryId: "JIPD374HBCITPZYM2SA3P375",
+  },
+  dnd: {
+    displayName: "Dungeons & Dragons",
+    slug: "dnd",
+    squareCategoryId: "2HL3F6YAGBPLTO2VAF44LI6E",
+  },
+  loungefly: {
+    displayName: "Loungefly",
+    slug: "loungefly",
+    squareCategoryId: "TLUKD2E5H6IBGDDHZBDDPZH4",
+  },
+  lego: {
+    displayName: "LEGO",
+    slug: "lego",
+    squareCategoryId: "A54XSEGLMO3REDGUAHNMWFXN",
+  },
+  videogames: {
+    displayName: "Video Games",
+    slug: "videogames",
+    squareCategoryId: "YTNN3DVBI25PMTIC5C462IDU",
+  },
+  gamingsystems: {
+    displayName: "Gaming Systems",
+    slug: "gamingsystems",
+    squareCategoryId: "ZPYQGLLBGE4CZ265FANV7B4M",
+  },
+  comics: {
+    displayName: "Marvel Comics",
+    slug: "comics",
+    squareCategoryId: "W4ABQUJXOFNZGQSVDFXCBGMY",
+  },
+  mavmerch: {
+    displayName: "MAV Merch",
+    slug: "mavmerch",
+    squareCategoryId: "6YVXJCIP6MDSPZI6VBYXH3AB",
+  },
 };
 
 // --- Supplies & Grading ---
@@ -155,6 +275,31 @@ export const SUPPLIES_MAPPING: Record<string, SquareCategory> = {
     displayName: "Graded Guard",
     slug: "gradedguard",
     squareCategoryId: "6RZANZZZ62FG33XW6AMMC5OI",
+  },
+  dice: {
+    displayName: "Dice",
+    slug: "dice",
+    squareCategoryId: "NMNP2OPWMLH7FC4BJ7XM2A2T",
+  },
+  manamoon: {
+    displayName: "Mana Moon Deck Boxes",
+    slug: "manamoon",
+    squareCategoryId: "VUVSICIWIUGTVRV6UM37O2EH",
+  },
+  vaultx: {
+    displayName: "Vault X",
+    slug: "vaultx",
+    squareCategoryId: "YR653WFRWM3NUPODELOBJDP2",
+  },
+  paints: {
+    displayName: "Paints & Brushes",
+    slug: "paints",
+    squareCategoryId: "NRCG6EHIYYYRH2DMTOVRWDY7",
+  },
+  paragonforge: {
+    displayName: "Paragon Forge Bags",
+    slug: "paragonforge",
+    squareCategoryId: "J6NRXZTSKW73JZC4IIOFSH4O",
   },
 };
 

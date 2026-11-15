@@ -1,0 +1,73 @@
+# Keeps cleaned copies of the shop's Square product photos up to date.
+# Square is only read; the cleaned copies go to Supabase Storage.
+#
+# Runs every night and picks up new or replaced photos. Run it by hand
+# (Actions → Product images → Run workflow) for the first full pass: about
+# 7,000 photos, resumable, so re-run it if it stops at the time limit.
+#
+# Required GitHub configuration (Settings → Environments → "production"):
+#   Secrets:   SQUARE_ACCESS_TOKEN, SUPABASE_SECRET_KEY
+#   Variables: SUPABASE_PROJECT_ID
+#
+# Two optional parts are OFF by default and switched on by an admin in
+# Admin → Site:
+#   - "Suggest better card photos": TCGplayer matches for card singles, which
+#     wait for staff approval in Admin → Photos.
+#   - "Paid background removal" (Photoroom): also needs secret
+#     PHOTOROOM_API_KEY here. Optional variable IMAGE_PAID_LIMIT caps the paid
+#     photos per run (default 200).
+name: Product images
+
+on:
+  schedule:
+    - cron: "17 9 * * *" # 3:17 or 4:17 AM in Texas
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Most photos to process this run (empty = all)
+        required: false
+
+concurrency:
+  group: product-images
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Process new product photos
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 300
+    env:
+      SQUARE_ENVIRONMENT: production
+      SQUARE_ACCESS_TOKEN: ${{ secrets.SQUARE_ACCESS_TOKEN }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_ID }}.supabase.co
+      IMAGE_BG_PROVIDER: ${{ vars.IMAGE_BG_PROVIDER }}
+      PHOTOROOM_API_KEY: ${{ secrets.PHOTOROOM_API_KEY }}
+      IMAGE_PAID_LIMIT: ${{ vars.IMAGE_PAID_LIMIT }}
+      IMAGE_REPLACE_TCGPLAYER: ${{ vars.IMAGE_REPLACE_TCGPLAYER }}
+      LIMIT: ${{ inputs.limit }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Cache the background-removal model
+        uses: actions/cache@v4
+        with:
+          path: .cache/models
+          key: isnet-general-use-v1
+      - name: Process photos
+        run: |
+          if [ -n "$LIMIT" ]; then
+            npx tsx scripts/images/sync.ts --limit "$LIMIT"
+          else
+            npx tsx scripts/images/sync.ts
+          fi
+      - name: Propose better photos for card singles (off unless enabled)
+        run: npx tsx scripts/images/tcgplayer.ts

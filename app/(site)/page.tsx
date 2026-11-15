@@ -1,295 +1,257 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import AnnouncementCarousel from "@components/ui/AnnouncementCarousel";
-import VideoSection from "@components/ui/VideoSection";
-import { motion } from "framer-motion";
-import { CATEGORY_MAPPING } from "@const/categories";
-import { useRouter } from "next/navigation";
-import GoogleReviews from "@components/ui/GoogleReviews";
 import Link from "next/link";
-import { Button } from "@components/ui/button";
-import NearestEventSection from "@components/ui/NearestEventSection";
-import { useFeatureFlags } from "@hooks/useFeatureFlag";
+import { Suspense } from "react";
+import { ArrowRight, CalendarDays, Megaphone, Store, Trophy } from "lucide-react";
+import { EventCard, EventListSkeleton } from "@components/hub/event-card";
+import { PostCard, PostCardSkeleton } from "@components/hub/post-card";
+import { SectionHeading, EmptyState } from "@components/ui/page-header";
+import { DiscordCta } from "@components/hub/discord";
+import { GameBadge, KindBadge } from "@components/hub/badges";
+import { GoogleReviews } from "@components/hub/google-reviews";
+import { YouTubeEmbed } from "@components/hub/youtube-embed";
+import { LiveStream } from "@components/hub/live-stream";
+import { getLeaderboard, listEvents, listGames, listPosts } from "@lib/data/hub";
+import { withMyReactions } from "@lib/data/viewer";
+import { getFlags, getVideoSettings, getYouTubeSettings } from "@lib/data/site";
+import { capacityLabel, formatEventWhen } from "@lib/format";
+import { cardVariants } from "@components/ui/card";
+import { cn } from "@utils";
+import { Skeleton } from "@components/ui/skeleton";
+import { LinkButton } from "@components/ui/link-button";
+import { buttonVariants } from "@components/ui/button";
+import { ChipLink, chipRowClass } from "@components/ui/chip";
+import { Eyebrow } from "@components/ui/page-header";
+import { RankMark } from "@components/hub/badges";
 
-export default function Home() {
-  const { data: featureFlags = [] } = useFeatureFlags();
-  const [mounted, setMounted] = useState(false);
-  const [isElectron, setIsElectron] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    setMounted(true);
-    // Check if running in Electron
-    setIsElectron(window.navigator.userAgent.includes('Electron'));
-  }, []);
-
-  // If running in Electron, don't render the home page
-  if (isElectron) {
-    return null;
-  }
-
-  const announcements = [
-    {
-      id: "1",
-      title: "New Pokémon TCG Releases",
-      description:
-        "Check out the latest Paldean Fates expansion, now available in store and online!",
-      buttonText: "Shop Now",
-      buttonLink: "/category/pokemon-tcg?group=TCG",
-      bgColor: "bg-gradient-to-r from-blue-900 to-purple-900",
-    },
-    {
-      id: "2",
-      title: "Weekly Tournament - Friday Nights",
-      description:
-        "Join us every Friday at 6PM for our weekly Pokémon TCG tournament. All skill levels welcome!",
-      buttonText: "Learn More",
-      buttonLink: "/category/events",
-      bgColor: "bg-gradient-to-r from-gray-900 to-gray-800",
-    },
-    {
-      id: "3",
-      title: "Free Shipping on Orders Over $50",
-      description:
-        "For a limited time, get free shipping on all orders over $50. No coupon needed!",
-      buttonText: "Start Shopping",
-      buttonLink: "/category/tcg",
-      bgColor: "bg-gradient-to-r from-[#B38A00]/20 to-[#E6B325]/20",
-    },
-  ];
-
-  const getTopCardGames = () => {
-    const topSlugs = [
-      "pokemon",
-      "magic",
-      "onepiece",
-      "dragonball",
-      "digimon",
-      "yugioh",
-      "weiss",
-      "union",
-    ];
-
-    const imageMap: Record<string, string> = {
-      pokemon: "/pokemon-logo.png",
-      magic: "/magic_1.webp",
-      onepiece: "/one-piece-card-game.jpg",
-      dragonball: "/dragonball.png",
-      digimon: "/digimon_card_game_logo.png",
-      yugioh: "/yugioh-logo.png",
-      weiss: "/weiss.png",
-      union: "/union.png",
-    };
-
-    return topSlugs
-      .map((slug) => CATEGORY_MAPPING[slug])
-      .filter(Boolean)
-      .map((category) => ({
-        title: category.displayName,
-        href: `/category/${category.slug}`,
-        image: imageMap[category.slug] || `/${category.slug}-logo.png`,
-        squareCategory: category.displayName,
-        scaleClass:
-          category.slug === "dragonball"
-            ? "scale-90 md:scale-95"
-            : category.slug === "union"
-            ? "scale-95 md:scale-100"
-            : category.slug === "yugioh"
-            ? "scale-65 md:scale-75 object-center"
-            : "scale-85 md:scale-95",
-      }));
-  };
-
-  const cardGames = getTopCardGames();
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
-  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
-
-  function handleCardGameClick(displayName: string) {
-    // Find the mapping by displayName (case-insensitive)
-    const mapping = Object.values(CATEGORY_MAPPING).find(
-      (cat) => cat.displayName.toLowerCase() === displayName.toLowerCase()
-    );
-    if (!mapping) return;
-    const params = new URLSearchParams();
-    params.set("group", "TCG");
-    router.push(`/category/${mapping.slug}?${params.toString()}`);
-  }
-
-  // Show Google Reviews only if the feature flag is enabled and we have feature flags data
-  const showGoogleReviews = featureFlags?.length > 0 && 
-    featureFlags.find((f) => f.name === "showGoogleReviews")?.enabled;
-
+/** Decorative fan of trading cards for the hero on wide screens. Pure CSS, hidden from assistive tech. */
+function HeroCards() {
+  const card = "absolute top-1/2 aspect-[5/7] w-28 rounded-xl border shadow-2xl shadow-black/60 xl:w-32";
   return (
-    <div className="flex flex-col w-full min-h-screen space-y-12 pt-2">
-      {/* Video Hero */}
-      <VideoSection />
-
-      {/* Announcements Carousel */}
-      <div className="w-full">
-        <AnnouncementCarousel announcements={announcements} />
-      </div>
-
-      {/* ─── Trading Card Games ─────────────────────────────────────────────── */}
-      <motion.div
-        initial={false}
-        animate={mounted ? { opacity: 1, y: 0 } : {}}
-        className="flex items-center w-full"
-      >
-        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
-        <span className="mx-4 text-2xl font-bold text-[#E6B325] uppercase">
-          Trading Card Games
-        </span>
-        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
-      </motion.div>
-
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
-      >
-        {cardGames.map((game) => (
-          <motion.div
-            key={game.href}
-            variants={item}
-            className="group relative flex flex-col cursor-pointer"
-            onClick={() => handleCardGameClick(game.title)}
-          >
-            <div className="relative w-full aspect-square overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 transition-all duration-300 group-hover:border-brand-blue/30 group-hover:bg-gray-900/80">
-              <Image
-                src={game.image}
-                alt={game.title}
-                fill
-                className={`object-contain transition-transform duration-300 group-hover:scale-105 ${game.scaleClass}`}
-                sizes="(max-width:640px)100vw,(max-width:768px)50vw,(max-width:1024px)33vw,25vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="mt-2 text-center">
-              <h3 className="text-lg md:text-xl font-bold group-hover:text-[#E6B325] transition-colors">
-                {game.title}
-              </h3>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* ─── Community Divider ─────────────────────────────────────────────── */}
-      <motion.div
-        initial={false}
-        animate={mounted ? { opacity: 1, y: 0 } : {}}
-        className="flex items-center w-full"
-      >
-        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
-        <span className="mx-4 text-2xl font-bold text-[#E6B325] uppercase">
-          Community
-        </span>
-        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
-      </motion.div>
-
-      {/* Community + Upcoming Event side by side */}
-      <div className="w-full flex flex-col md:flex-row gap-6">
-        {/* Discord Card */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="flex-shrink-0 w-full md:w-1/3 md:h-[340px]"
-        >
-          <motion.div
-            variants={item}
-            className="cursor-pointer h-full"
-            onClick={() => window.open("https://discord.gg/szgNfjR8", "_blank")}
-          >
-            <div className="relative w-full h-full md:h-full bg-gradient-to-br from-[#5865F2]/80 to-black border border-brand-blue/20 hover:border-brand-blue/40 flex flex-col items-center justify-center rounded-lg shadow-xl px-8 md:px-12 pt-3 pb-6 md:pt-4 md:pb-8 transition-transform hover:scale-[1.02]">
-              <div className="flex flex-col items-center justify-center flex-grow w-full">
-                <div className="relative w-32 h-32 mb-4 md:w-36 md:h-36 flex items-center justify-center mx-auto">
-                  <Image
-                    src="/mav_collectibles.png"
-                    alt="MAV Collectibles Logo"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <h3 className="text-lg font-bold text-white text-center mb-6 mt-2">
-                  Join Our Discord
-                </h3>
-              </div>
-              <span className="inline-block px-3 py-1 bg-[#5865F2] text-white rounded-full text-xs font-semibold mt-4">
-                discord.gg/szgNfjR8
-              </span>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Upcoming Event Card */}
-        <div className="flex-1 h-[340px]">
-          <NearestEventSection hideTitle />
+    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-10 hidden w-72 lg:block xl:right-16">
+      <div className={cn(card, "left-4 -translate-y-1/2 -rotate-12 border-line bg-gradient-to-br from-panel-2 to-ink")} />
+      <div className={cn(card, "left-36 -translate-y-1/2 rotate-12 border-discord/40 bg-gradient-to-br from-discord/30 to-ink")} />
+      <div className={cn(card, "left-20 -translate-y-[55%] border-gold/60 bg-gradient-to-br from-gold-light via-gold to-gold-dark p-2")}>
+        <div className="flex h-full items-center justify-center rounded-lg border border-ink/20">
+          <div className="relative size-12 overflow-hidden rounded-full border-4 border-ink bg-foreground">
+            <div className="absolute inset-x-0 top-0 h-1/2 bg-danger" />
+            <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-ink" />
+            <div className="absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-ink bg-foreground" />
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* ─── Why Us Divider ─────────────────────────────────────────────── */}
-      <motion.div
-        initial={false}
-        animate={mounted ? { opacity: 1, y: 0 } : {}}
-        className="flex items-center w-full"
-      >
-        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
-        <span className="mx-4 text-2xl font-bold text-[#E6B325] uppercase">
-          Why Us?
+async function Spotlight() {
+  const events = await listEvents({ limit: 12 });
+  const spotlight = events.find((e) => e.featured && e.status === "published") ?? events.find((e) => e.status === "published");
+  if (!spotlight) return null;
+  return (
+    <Link
+      href={`/events/${spotlight.slug}`}
+      className={cn(
+        cardVariants({ variant: "featured", radius: "2xl" }),
+        "group relative mt-4 block overflow-hidden transition-shadow duration-300 can-hover:hover:shadow-glow fold:mt-6"
+      )}
+    >
+      {spotlight.coverImageUrl && (
+        <Image src={spotlight.coverImageUrl} alt="" fill priority sizes="(min-width: 1280px) 1280px, 100vw" className="object-cover opacity-40 transition-[opacity,scale] duration-500 can-hover:group-hover:scale-[1.02] can-hover:group-hover:opacity-50" />
+      )}
+      <div className="relative bg-gradient-to-r from-panel/95 via-panel/75 to-transparent p-5 fold:p-8">
+        <Eyebrow className="flex items-center gap-2">
+          <span aria-hidden className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-gold" />
+          </span>
+          Next up
+        </Eyebrow>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {spotlight.game && <GameBadge game={spotlight.game} />}
+          <KindBadge kind={spotlight.kind} />
+        </div>
+        <h2 className="mt-2 max-w-xl text-2xl font-extrabold leading-tight fold:text-3xl">{spotlight.title}</h2>
+        <p className="mt-1 text-foreground/80">{formatEventWhen(spotlight.startsAt, spotlight.endsAt)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{capacityLabel(spotlight.capacity, spotlight.registeredCount, spotlight.waitlistCount)}</p>
+        <span className={cn(buttonVariants(), "mt-4 can-hover:group-hover:bg-gold-light")}>
+          Details & RSVP
+          <ArrowRight aria-hidden className="transition-transform can-hover:group-hover:translate-x-0.5" />
         </span>
-        <div className="h-px bg-gradient-to-r from-[#5865F2] via-[#5865F2] to-[#E6B325] flex-grow" />
-      </motion.div>
-
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate={mounted ? "show" : "hidden"}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-      >
-        {[
-          {
-            title: "Quality Selection",
-            description:
-              "We carefully curate our inventory to offer only the best cards.",
-          },
-          {
-            title: "Expert Knowledge",
-            description:
-              "Our team is passionate about trading cards and ready to help.",
-          },
-          {
-            title: "Community Focus",
-            description:
-              "We're more than a store – we're a hub for collectors and players, where everyone gets treated like family.",
-          },
-        ].map((feature, i) => (
-          <motion.div
-            key={i}
-            variants={item}
-            className="p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800/50 hover:border-brand-blue/30 transition-all duration-300 hover:bg-gray-900/80"
-          >
-            <h3 className="text-xl font-semibold mb-2 text-brand-blue-light">
-              {feature.title}
-            </h3>
-            <p className="text-gray-300">{feature.description}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Google Reviews & Continue Browsing */}
-      {showGoogleReviews && <GoogleReviews />}
-      <div className="mt-8 text-center">
-        <Link href="/category/tcg">
-          <Button variant="gold">CONTINUE BROWSING</Button>
-        </Link>
       </div>
+    </Link>
+  );
+}
+
+async function UpcomingEvents() {
+  const events = (await listEvents({ limit: 6 })).filter((e) => e.status === "published");
+  return events.length === 0 ? (
+    <EmptyState title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
+  ) : (
+    <div className="grid gap-3 lg:grid-cols-2">
+      {events.map((e) => (
+        <EventCard key={e.id} event={e} />
+      ))}
+    </div>
+  );
+}
+
+async function LatestPosts() {
+  const page = await listPosts({ limit: 3 });
+  if (page.posts.length === 0) return null;
+  const { posts, signedIn } = await withMyReactions(page.posts);
+  return (
+    <section>
+      <SectionHeading title="Latest news" href="/feed" />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {posts.map((p) => (
+          <PostCard key={p.id} post={p} signedIn={signedIn} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+async function GameStrip() {
+  const games = await listGames();
+  return (
+    <nav aria-label="Games we play" className={chipRowClass}>
+      {games.map((g) => (
+        <ChipLink key={g.id} href={`/events?game=${g.id}`} dot={g.color} className="px-4 font-semibold text-foreground">
+          {g.shortName}
+        </ChipLink>
+      ))}
+    </nav>
+  );
+}
+
+async function PokemonStandings() {
+  const rows = (await getLeaderboard("pokemon")).slice(0, 5);
+  if (rows.length === 0) return null;
+  return (
+    <section>
+      <SectionHeading title="Pokémon standings" href="/leaderboard?game=pokemon" linkLabel="Full leaderboard" />
+      <ol className={cardVariants({ variant: "list" })}>
+        {rows.map((r) => (
+          <li key={`${r.rank}-${r.playerName}`} className="flex items-center gap-3 px-4 py-3">
+            <RankMark rank={r.rank} />
+            <span className="min-w-0 flex-1 truncate font-semibold">{r.playerName}</span>
+            <span className="font-bold tabular-nums">{r.points} pts</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+async function Media() {
+  const flags = await getFlags();
+  const [youtube, video] = await Promise.all([
+    flags.showYouTubeVideo ? getYouTubeSettings() : null,
+    flags.showVideoPlayer ? getVideoSettings() : null,
+  ]);
+  if (!youtube && !video) return null;
+  return (
+    <section className="space-y-4">
+      <SectionHeading title={video?.isLive ? "Live now" : "Watch"} />
+      {video && <LiveStream settings={video} />}
+      {youtube && <YouTubeEmbed videoId={youtube.videoId} title={youtube.title} playlistId={youtube.playlistId || undefined} />}
+    </section>
+  );
+}
+
+async function Reviews() {
+  const flags = await getFlags();
+  return flags.showGoogleReviews ? <GoogleReviews /> : null;
+}
+
+const QUICK_LINKS = [
+  { href: "/events", label: "Events", description: "Leagues, tournaments, prereleases", Icon: CalendarDays },
+  { href: "/feed", label: "News", description: "Announcements & recaps", Icon: Megaphone },
+  { href: "/vendors", label: "Vendors", description: "Buy, sell & trade days", Icon: Store },
+  { href: "/leaderboard", label: "Leaderboard", description: "Season standings", Icon: Trophy },
+] as const;
+
+export default function HomePage() {
+  return (
+    <div className="space-y-12 fold:space-y-14">
+      <section>
+        <div className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-12 short:py-6">
+          <HeroCards />
+          <div className="relative max-w-3xl lg:max-w-xl xl:max-w-2xl">
+            <Eyebrow>Montgomery, TX</Eyebrow>
+            <h1 className="mt-2 text-3xl font-extrabold leading-[1.1] tracking-tight fold:text-5xl short:text-3xl">
+              Your home for <span className="text-foil">Pokémon</span> <span className="text-gold">&</span> every TCG.
+            </h1>
+            <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
+              League nights, tournaments, prereleases and vendor days. RSVP, track your season points and never miss a release.
+            </p>
+          </div>
+        </div>
+        <Suspense fallback={<Skeleton className="mt-4 h-48 rounded-2xl fold:mt-6" />}>
+          <Spotlight />
+        </Suspense>
+        <ul className="mt-4 grid grid-cols-2 gap-2 fold:mt-6 fold:gap-3 lg:grid-cols-4">
+          {QUICK_LINKS.map(({ href, label, description, Icon }) => (
+            <li key={href}>
+              <Link href={href} className={cn(cardVariants({ variant: "interactive" }), "group flex h-full flex-col gap-1 p-3 fold:p-4")}>
+                <span className="mb-1 inline-flex size-9 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 transition-colors can-hover:group-hover:bg-gold/20">
+                  <Icon className="size-5 text-gold" />
+                </span>
+                <span className="font-bold">{label}</span>
+                <span className="text-xs text-muted-foreground fold:text-sm">{description}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <SectionHeading title="Coming up" href="/events" linkLabel="All events" />
+        <Suspense fallback={<div className="h-11 can-hover:h-9" />}>
+          <GameStrip />
+        </Suspense>
+        <div className="mt-4">
+          <Suspense fallback={<EventListSkeleton count={4} />}>
+            <UpcomingEvents />
+          </Suspense>
+        </div>
+      </section>
+
+      <Suspense fallback={<div className="grid gap-4 md:grid-cols-2"><PostCardSkeleton /><PostCardSkeleton /></div>}>
+        <LatestPosts />
+      </Suspense>
+
+      <div className="grid gap-12 lg:grid-cols-2">
+        <Suspense fallback={null}>
+          <PokemonStandings />
+        </Suspense>
+        <section className={cn(cardVariants({ radius: "2xl" }), "bg-gradient-to-br from-panel to-panel-2 p-5 fold:p-6")}>
+          <h2 className="text-xl font-bold">Sell or trade at MAV</h2>
+          <p className="mt-2 text-foreground/80">
+            Vendors set up at the shop on vendor days. Bring your binder, slabs and sealed product and meet the community.
+          </p>
+          <div className="mt-4 flex flex-col gap-2 fold:flex-row">
+            <LinkButton href="/vendors" variant="outline">
+              Meet the vendors
+            </LinkButton>
+            <LinkButton href="/vendors/apply">
+              Apply for a table
+            </LinkButton>
+          </div>
+        </section>
+      </div>
+
+      <Suspense fallback={null}>
+        <DiscordCta />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <Media />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <Reviews />
+      </Suspense>
     </div>
   );
 }

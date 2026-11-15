@@ -1,4 +1,4 @@
-export interface Location {
+interface Location {
   id: string;
   name: string;
   address: {
@@ -29,7 +29,7 @@ export interface Location {
   };
 }
 
-export const ACTIVE_LOCATIONS: Record<string, Location> = {
+const ACTIVE_LOCATIONS: Record<string, Location> = {
   brickAndMortar: {
     id: "LTZNXWZDB0FH9",
     name: "Brick & Mortar",

@@ -1,78 +1,51 @@
-import * as React from "react"
-import { cn } from "@utils"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@utils";
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border border-gray-700 bg-gray-900 text-gray-50 shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+/**
+ * The panel surface used for every boxed thing on the site.
+ * Use `asChild` to put the styling on a <Link>, <ul>, <form> or <article>.
+ */
+const cardVariants = cva("rounded-xl border bg-panel", {
+  variants: {
+    variant: {
+      default: "border-line",
+      /** Clickable cards: gold edge, soft glow and a 2px lift on hover (mouse only). */
+      interactive:
+        "border-line transition-[border-color,box-shadow,translate] duration-200 can-hover:hover:-translate-y-0.5 can-hover:hover:border-gold/50 can-hover:hover:shadow-glow",
+      /** Rows separated by hairlines (lists, tables on phones). */
+      list: "divide-y divide-line overflow-hidden border-line",
+      /** Highlighted callout (linked event, "available in store"). */
+      accent: "border-gold/30 bg-gold/5",
+      /** Gold-edged hero/feature panel. */
+      featured: "border-gold/40",
+      /** Placeholder for "nothing here yet". */
+      dashed: "border-dashed border-line bg-panel/60",
+      /** A recessed surface inside another card (inputs, thumbnails). */
+      inset: "border-line bg-panel-2",
+    },
+    padding: {
+      none: "",
+      sm: "p-3",
+      md: "p-4",
+      lg: "p-4 fold:p-6",
+      row: "px-4 py-3",
+    },
+    radius: {
+      lg: "rounded-lg",
+      xl: "rounded-xl",
+      "2xl": "rounded-2xl",
+    },
+  },
+  defaultVariants: { variant: "default", padding: "none", radius: "xl" },
+});
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+type CardProps = React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof cardVariants> & { asChild?: boolean };
 
-const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight text-[#E6B325]",
-      className
-    )}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
+function Card({ className, variant, padding, radius, asChild = false, ...props }: CardProps) {
+  const Comp = asChild ? Slot : "div";
+  return <Comp className={cn(cardVariants({ variant, padding, radius }), className)} {...props} />;
+}
 
-const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-gray-400", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
-
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
-
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
-
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } 
+export { Card, cardVariants, type CardProps };

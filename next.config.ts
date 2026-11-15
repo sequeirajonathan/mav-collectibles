@@ -1,19 +1,49 @@
 import type { NextConfig } from "next";
+import type { RemotePattern } from "next/dist/shared/lib/image-config";
+
+// Storage images are served from whichever Supabase project this environment uses.
+function supabaseImagePattern(): RemotePattern[] {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return [];
+  const { protocol, hostname, port } = new URL(url);
+  return [
+    {
+      protocol: protocol.replace(":", "") as "http" | "https",
+      hostname,
+      port,
+      pathname: "/storage/v1/object/public/**",
+    },
+  ];
+}
+
+// Local development and CI serve storage from 127.0.0.1, which the image
+// optimizer refuses by default. Never true for a real (public) Supabase URL.
+const localStorage = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
 
 const nextConfig: NextConfig = {
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: "https://xuktdxadhwvdpmzscvgg.supabase.co",
-    NEXT_PUBLIC_SUPABASE_ANON_KEY:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1a3RkeGFkaHd2ZHBtenNjdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1ODYyMTcsImV4cCI6MjA2MDE2MjIxN30.OX7_vI_m3V1j_YobAyycZKN03BQEr9HzEEDlIP399vI",
+  // The service worker must never be served stale, or installed apps keep old code.
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
+    ];
   },
+  // Partial prerendering + `use cache`: static shells stream instantly, dynamic
+  // parts render inside <Suspense> boundaries.
+  cacheComponents: true,
+  typedRoutes: true,
   images: {
+    dangerouslyAllowLocalIP: localStorage,
     formats: ["image/avif", "image/webp"],
+    qualities: [75, 80, 90],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "xuktdxadhwvdpmzscvgg.supabase.co",
-      },
+      ...supabaseImagePattern(),
       {
         protocol: "https",
         hostname: "items-images-production.s3.us-west-2.amazonaws.com",
@@ -41,6 +71,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
       },
     ],
   },

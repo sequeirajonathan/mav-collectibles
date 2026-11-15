@@ -1,14 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import "server-only";
+import { createClient } from "@supabase/supabase-js";
+import { publicEnv } from "@lib/env";
+import { serverEnv } from "@lib/env.server";
 
+/**
+ * Supabase client with the secret key. Bypasses RLS and can manage users.
+ * Server-only; use it only after the caller has been authorized.
+ */
 export function createAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  );
-} 
+  return createClient(publicEnv().NEXT_PUBLIC_SUPABASE_URL, serverEnv().SUPABASE_SECRET_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}

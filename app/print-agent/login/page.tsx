@@ -1,7 +1,10 @@
-// rneder printagetform
-
-import { PrintAgentLoginForm } from '@components/ui/PrintAgentLoginForm';
+import { Suspense } from "react";
+import { PrintAgentLoginForm } from "@components/print-agent/login-form";
 
 export default function PrintAgentLoginPage() {
-  return <PrintAgentLoginForm />;
+  return (
+    <Suspense>
+      <PrintAgentLoginForm />
+    </Suspense>
+  );
 }
