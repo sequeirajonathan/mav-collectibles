@@ -396,10 +396,12 @@ html[data-style="comic"] {
   --card: var(--comic-paper);
 }
 html[data-style="comic"][data-theme="dark"] {
-  --comic-ink: #eaf2fa;
-  --comic-shadow: #ffd02e;
+  /* At night the panels are drawn in soft blue line with black shadows.
+     Yellow is kept for the things you press and the one word in the hero. */
+  --comic-ink: #44688a;
+  --comic-shadow: #02070c;
   --comic-paper: #0f2233;
-  --comic-dot: rgb(160 205 245 / 0.1);
+  --comic-dot: transparent;
   --background: #08131e;
 }
 html[data-style="comic"] {
@@ -457,10 +459,57 @@ html[data-style="comic"] {
     transform: skewX(-8deg) rotate(-1deg);
     box-shadow: 4px 4px 0 var(--cta);
   }
-  &[data-theme="dark"] .ui-section-title {
-    background-color: var(--cta);
-    color: #10222f;
-    box-shadow: 4px 4px 0 #eaf2fa;
+  &[data-theme="dark"] {
+    .ui-section-title {
+      background-color: #02070c;
+      color: var(--cta);
+      box-shadow: 4px 4px 0 var(--gold-dark);
+    }
+    .ui-eyebrow {
+      background-color: var(--panel-2);
+      color: var(--gold-light);
+    }
+    .ui-btn {
+      border-color: #02070c;
+    }
+    /* Night splash panel: dragon blue with Ben-Day dots, not a wall of yellow. */
+    .bg-hero {
+      border-color: #02070c;
+      background-color: #17507f;
+      background-image:
+        radial-gradient(circle at 0% 0%, rgb(140 202 245 / 0.35), transparent 50%),
+        radial-gradient(rgb(4 16 26 / 0.3) 2.2px, transparent 2.6px);
+      background-size: auto, 13px 13px;
+      color: #eaf2fa;
+    }
+    .bg-hero .speed-lines {
+      background-image: repeating-conic-gradient(from 0deg at 88% 50%, rgb(255 255 255 / 0.1) 0deg 1.4deg, transparent 1.4deg 5deg);
+    }
+    .bg-hero p {
+      color: #eaf2fa;
+    }
+    .bg-hero .ui-eyebrow {
+      background-color: #0f2233;
+      color: #eaf2fa;
+    }
+    .ui-hero-title {
+      color: #ffffff;
+      text-shadow: 0.05em 0.06em 0 #04101a;
+    }
+    .ui-hero-title .text-pop {
+      color: var(--cta);
+      -webkit-text-stroke-color: #04101a;
+      text-shadow: 0.07em 0.08em 0 #04101a;
+    }
+    .sleeve {
+      border-color: var(--comic-ink);
+    }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &[data-theme="dark"] .ui-card-interactive:hover {
+      border-color: var(--gold);
+      box-shadow: 8px 8px 0 var(--gold-dark);
+    }
   }
   .ui-page-title {
     font-family: var(--font-display);
