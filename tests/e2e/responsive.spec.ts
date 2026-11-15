@@ -104,7 +104,7 @@ async function check(page: Page, path: string, testInfo: { project: { name: stri
     expect.soft(report.smallTargets, `${path}: tap targets under 32px`).toEqual([]);
   }
   // A page title squeezed into a sliver beside its actions is unreadable.
-  const titleWidth = await page.locator("h1").first().evaluate((el) => el.parentElement?.getBoundingClientRect().width ?? 0).catch(() => null);
+  const titleWidth = await page.evaluate(() => document.querySelector("[data-page-header] > div")?.getBoundingClientRect().width ?? null);
   if (titleWidth !== null) {
     const room = Math.min(320, (page.viewportSize()?.width ?? 0) - 32);
     expect.soft(titleWidth, `${path}: page title is squeezed`).toBeGreaterThanOrEqual(room);

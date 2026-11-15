@@ -17,7 +17,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 fold:mb-8 fold:flex-row fold:flex-wrap fold:items-end fold:justify-between">
+    <header data-page-header className="mb-6 flex flex-col gap-4 fold:mb-8 fold:flex-row fold:flex-wrap fold:items-end fold:justify-between">
       {/* The title keeps a readable width; actions that don't fit beside it drop to their own row. */}
       <div className="min-w-0 fold:min-w-80 fold:flex-1">
         {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
