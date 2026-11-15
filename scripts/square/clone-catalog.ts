@@ -377,7 +377,7 @@ async function runImport(): Promise<void> {
 // fixtures: square-export/ → tests/fixtures/catalog.json (trimmed)
 // ---------------------------------------------------------------------------
 
-const PER_CATEGORY = 6;
+const PER_CATEGORY = 4;
 const POKEMON_ITEMS = 16;
 
 async function runFixtures(): Promise<void> {
