@@ -71,6 +71,7 @@ export function Sparkle({ className }: { className?: string }) {
 const MASCOTS = {
   gengar: { src: "/images/gengar.gif", width: 500, height: 493 },
   karp: { src: "/images/karp.gif", width: 500, height: 659 },
+  lucario: { src: "/images/lucario.gif", width: 47, height: 63 },
 } as const;
 
 /** "Nothing here yet" placeholder with an optional action and pixel-art mascot. */

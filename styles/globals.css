@@ -216,6 +216,14 @@
     opacity: 0;
   }
 }
+@keyframes wheel-spin {
+  from {
+    transform: translateZ(calc(-1 * var(--r))) rotateY(0deg);
+  }
+  to {
+    transform: translateZ(calc(-1 * var(--r))) rotateY(-360deg);
+  }
+}
 @keyframes ticker {
   to {
     transform: translateX(-50%);
@@ -324,6 +332,50 @@
       radial-gradient(circle at 100% 0%, rgb(255 255 255 / 0.28), transparent 45%),
       radial-gradient(rgb(16 34 47 / 0.22) 2.2px, transparent 2.6px);
     background-size: auto, 13px 13px;
+  }
+  /* Product wheel: cards stand on a ring that turns towards the viewer.
+     --n is the number of cards; the radius follows from the card pitch. */
+  .wheel {
+    --pitch: 7.4rem;
+    --r: calc(var(--n) * var(--pitch) / 6.283);
+    perspective: 1500px;
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+  .wheel-ring {
+    position: absolute;
+    left: 50%;
+    top: 0.75rem;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+    transform: translateZ(calc(-1 * var(--r)));
+    animation: wheel-spin 60s linear infinite;
+  }
+  .wheel-item {
+    position: absolute;
+    left: -3.25rem;
+    width: 6.5rem;
+    backface-visibility: hidden;
+    transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--r));
+  }
+  @media (min-width: 36rem) {
+    .wheel {
+      --pitch: 8.6rem;
+    }
+    .wheel-item {
+      left: -3.75rem;
+      width: 7.5rem;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .wheel:hover .wheel-ring {
+      animation-play-state: paused;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wheel-ring {
+      animation: none;
+    }
   }
   .buy-ticker-track {
     animation: ticker 28s linear infinite;

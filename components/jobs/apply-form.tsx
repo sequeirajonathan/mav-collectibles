@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { cardVariants } from "@components/ui/card";
@@ -46,7 +47,8 @@ export function ApplyForm() {
   if (sent) {
     return (
       <div role="status" className={cn(cardVariants({ padding: "lg" }), "text-center")}>
-        <CheckCircle2 aria-hidden className="mx-auto size-10 text-success" />
+        <Image src="/images/lucario.gif" alt="" width={47} height={63} unoptimized className="pixelated animate-bob mx-auto h-24 w-auto" />
+        <CheckCircle2 aria-hidden className="mx-auto mt-3 size-8 text-success" />
         <h2 className="mt-3 text-xl font-bold">Application sent</h2>
         <p className="mt-1 text-muted-foreground">Thanks for applying. We read every application and will reach out if it&apos;s a fit.</p>
       </div>

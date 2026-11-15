@@ -22,12 +22,12 @@ export default function JobsPage() {
       <section className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-10">
         <div aria-hidden className="speed-lines pointer-events-none absolute inset-0" />
         <Image
-          src="/images/gengar.gif"
+          src="/images/lucario.gif"
           alt=""
-          width={500}
-          height={493}
+          width={47}
+          height={63}
           unoptimized
-          className="pixelated animate-bob pointer-events-none absolute bottom-3 right-4 hidden h-32 w-auto fold:block lg:right-12 lg:h-40"
+          className="pixelated animate-bob pointer-events-none absolute bottom-3 right-4 hidden h-36 w-auto fold:block lg:right-16 lg:h-44"
         />
         <div className="relative max-w-2xl">
           <Eyebrow>Join the team</Eyebrow>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { ImagePlus, Loader2, SendHorizontal, Trash2, X } from "lucide-react";
 import { Button } from "@components/ui/button";
@@ -116,7 +117,12 @@ export function StaffChat({ initial, userId, isAdmin }: { initial: ChatMessage[]
   return (
     <div className={cn(cardVariants(), "flex h-[min(70dvh,44rem)] flex-col overflow-hidden")}>
       <div ref={list} role="log" aria-label="Messages" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto p-3 fold:p-4">
-        {messages.length === 0 && <p className="py-10 text-center text-muted-foreground">No messages yet. Say hi to the team.</p>}
+        {messages.length === 0 && (
+          <div className="py-10 text-center text-muted-foreground">
+            <Image src="/images/lucario.gif" alt="" width={47} height={63} unoptimized className="pixelated animate-bob mx-auto mb-3 h-24 w-auto" />
+            No messages yet. Say hi to the team.
+          </div>
+        )}
         {messages.map((m) => {
           const mine = m.authorId === userId;
           return (
