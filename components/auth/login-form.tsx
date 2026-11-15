@@ -21,6 +21,8 @@ interface LoginFormProps {
   hideTitle?: boolean;
   hideForgotPassword?: boolean;
   hideSocialLogins?: boolean;
+  /** Show the Facebook button (Admin → Site switch). */
+  facebook?: boolean;
 }
 
 
@@ -30,6 +32,7 @@ export function LoginForm({
   hideTitle = false,
   hideForgotPassword = false,
   hideSocialLogins = false,
+  facebook = false,
 }: LoginFormProps) {
   const router = useRouter();
   const { refreshSession } = useAuth();
@@ -173,14 +176,16 @@ export function LoginForm({
             Google
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full mt-2"
-            onClick={() => handleSocial("facebook")}
-          >
-            Facebook
-          </Button>
+          {facebook && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mt-2"
+              onClick={() => handleSocial("facebook")}
+            >
+              Facebook
+            </Button>
+          )}
         </>
       )}
     </div>

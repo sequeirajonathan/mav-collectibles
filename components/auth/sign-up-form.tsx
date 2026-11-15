@@ -16,10 +16,12 @@ import { signUpAction, type SignUpFieldErrors } from "@lib/auth/actions";
 
 interface SignupFormProps {
   hideLoginLink?: boolean;
+  /** Show the Facebook button (Admin → Site switch). */
+  facebook?: boolean;
 }
 
 
-export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
+export function SignupForm({ hideLoginLink = false, facebook = false }: SignupFormProps) {
   const router = useRouter();
   const { refreshSession } = useAuth();
   const [username, setUsername] = useState("");
@@ -185,14 +187,16 @@ export function SignupForm({ hideLoginLink = false }: SignupFormProps) {
         >
           Google
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleSocial("facebook")}
-        >
-          Facebook
-        </Button>
+        {facebook && (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => handleSocial("facebook")}
+          >
+            Facebook
+          </Button>
+        )}
       </div>
 
       {!hideLoginLink && (

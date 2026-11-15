@@ -19,6 +19,7 @@ const FLAG_HELP: Record<FlagName, { label: string; help: string }> = {
   showGoogleReviews: { label: "Show Google reviews", help: "Recent 4–5 star reviews on the home page." },
   tcgplayerPhotos: { label: "Suggest better card photos", help: "Each night, match cards with a missing or blurry photo to TCGplayer. Suggestions wait in Admin → Photos until someone approves them." },
   paidBackgroundRemoval: { label: "Paid background removal", help: "Use Photoroom to cut products out of table and shelf photos. Costs a few cents per photo and needs a Photoroom key; without one this does nothing." },
+  facebookSignIn: { label: "Facebook sign-in", help: "Show the Facebook button on the sign-in and sign-up pages. Turn on only once the Facebook app is published (Live); before that, visitors get a Facebook error." },
 };
 
 export function FlagToggles({ flags }: { flags: { name: FlagName; enabled: boolean }[] }) {
