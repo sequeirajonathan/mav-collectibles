@@ -10,7 +10,7 @@ import { ConfirmButton } from "./confirm-button";
 import { createEvent, deleteEvent, duplicateEvent, updateEvent } from "@lib/actions/hub";
 import { EVENT_KINDS, EVENT_KIND_LABELS, type Game } from "@lib/contracts/hub";
 import { storeLocalToIso, STORE_TIME_ZONE } from "@lib/format";
-import type { EventFormValues } from "./event-form-values";
+import { EVENT_TEMPLATES, type EventFormValues } from "./event-form-values";
 import { cardVariants } from "@components/ui/card";
 import { cn } from "@utils";
 
@@ -84,6 +84,27 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
 
   return (
     <form onSubmit={save} className="space-y-6">
+      {!eventId && (
+        <fieldset>
+          <legend className="text-sm font-semibold">Start from a template</legend>
+          <p className="text-xs text-muted-foreground">Fills in the type, game, format and entry fee. Change anything after.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {EVENT_TEMPLATES.map((t) => (
+              <Button
+                key={t.label}
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setV((cur) => ({ ...cur, ...t.values, slug: slugTouched ? cur.slug : slugify(t.values.title) }));
+                }}
+              >
+                {t.label}
+              </Button>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <div className="grid gap-5 lg:grid-cols-2">
         <Field label="Title" error={errors.title}>
           {(id) => (

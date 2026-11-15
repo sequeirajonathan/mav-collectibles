@@ -50,3 +50,23 @@ export function eventFormDefaults(e?: {
   };
 }
 
+
+/**
+ * Starting points for a new event, based on how the shop actually runs them
+ * (formats and door prices from its Square "League Tournaments & Play" items).
+ */
+interface EventTemplate {
+  label: string;
+  values: Pick<EventFormValues, "title" | "kind" | "gameId" | "format" | "entryFeeDollars" | "capacity" | "summary">;
+}
+
+export const EVENT_TEMPLATES: EventTemplate[] = [
+  { label: "Pokémon League night", values: { title: "Pokémon League Night", kind: "league", gameId: "pokemon", format: "Standard", entryFeeDollars: "5", capacity: "32", summary: "Weekly league play. All skill levels welcome." } },
+  { label: "Pokémon League Challenge", values: { title: "Pokémon League Challenge", kind: "tournament", gameId: "pokemon", format: "Standard", entryFeeDollars: "10", capacity: "32", summary: "Sanctioned League Challenge. Bring a deck list." } },
+  { label: "MAV Cup", values: { title: "MAV's Cup", kind: "tournament", gameId: "pokemon", format: "Standard", entryFeeDollars: "20", capacity: "64", summary: "Our monthly Cup with prizing for top finishers." } },
+  { label: "Prerelease", values: { title: "Prerelease", kind: "prerelease", gameId: "pokemon", format: "Sealed", entryFeeDollars: "35", capacity: "32", summary: "Play the new set early. Kit included with entry." } },
+  { label: "Release event", values: { title: "Release Event", kind: "release", gameId: "one-piece", format: "Sealed", entryFeeDollars: "35", capacity: "32", summary: "Celebrate the new set with sealed play and promos." } },
+  { label: "Store tournament", values: { title: "Store Tournament", kind: "tournament", gameId: "one-piece", format: "Constructed", entryFeeDollars: "10", capacity: "32", summary: "Weekly store tournament with promo prizing." } },
+  { label: "Set championship", values: { title: "Set Championship", kind: "tournament", gameId: "lorcana", format: "Constructed", entryFeeDollars: "20", capacity: "32", summary: "Compete for the set championship playmat and promos." } },
+  { label: "Vendor & trade day", values: { title: "Vendor & Trade Day", kind: "vendor_day", gameId: "", format: "", entryFeeDollars: "0", capacity: "", summary: "Local vendors set up at the shop. Bring your binder." } },
+];

@@ -13,7 +13,7 @@ const PUBLIC_PAGES = [
   "/leaderboard",
   "/shop",
   "/category/pokemon?group=TCG",
-  "/product/FIXTURE_ITEM_1",
+  "/product/4I2PLGWBAL4UQVPQXQZOU6W3",
   "/search?q=box",
   "/cart",
   "/maintenance",
