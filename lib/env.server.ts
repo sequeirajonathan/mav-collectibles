@@ -18,6 +18,12 @@ const serverSchema = z.object({
   GOOGLE_PLACES_API_KEY: z.string().min(1).optional(),
   // The first admin: see lib/auth/bootstrap.ts.
   BOOTSTRAP_ADMIN_EMAIL: z.email().optional(),
+  // Email (Resend). Without a key the site works and simply sends nothing.
+  RESEND_API_KEY: z.string().min(1).optional(),
+  /** "Name <address>" on a domain verified in Resend. */
+  EMAIL_FROM: z.string().min(3).optional(),
+  /** Where new job applications are sent. */
+  JOBS_NOTIFY_EMAIL: z.email().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverSchema>;
@@ -36,6 +42,9 @@ export function serverEnv(): ServerEnv {
     SHIPPO_API_KEY: process.env.SHIPPO_API_KEY || undefined,
     GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY || undefined,
     BOOTSTRAP_ADMIN_EMAIL: process.env.BOOTSTRAP_ADMIN_EMAIL || undefined,
+    RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
+    EMAIL_FROM: process.env.EMAIL_FROM || undefined,
+    JOBS_NOTIFY_EMAIL: process.env.JOBS_NOTIFY_EMAIL || undefined,
   });
   if (!parsed.success) {
     throw new Error(

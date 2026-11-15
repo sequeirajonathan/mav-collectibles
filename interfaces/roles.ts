@@ -21,5 +21,8 @@ export const ADMIN_PANEL_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.
 /** Roles that manage the event hub: events, posts, vendors, check-in, results, moderation. */
 export const CONTENT_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.STAFF, UserRole.EVENT];
 
+/** Roles that can read job applications and résumés. */
+export const HIRING_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.STAFF];
+
 /** Roles that can see and process print jobs. */
 export const PRINT_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.STAFF, UserRole.PRINT_AGENT];

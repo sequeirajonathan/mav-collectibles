@@ -42,7 +42,7 @@ async function rest(path: string, init: { method?: string; token?: string; body?
 const HUB_TABLES = [
   "events", "event_registrations", "posts", "post_likes", "post_saves", "post_comments",
   "vendors", "event_vendors", "seasons", "tournament_results", "games",
-  "feature_flags", "staff_requests", "alert_banners", "youtube_settings", "VideoSettings", "installers",
+  "feature_flags", "staff_requests", "job_applications", "alert_banners", "youtube_settings", "VideoSettings", "installers",
 ];
 
 let customer: Session;

@@ -4,13 +4,13 @@ import { Toaster } from "react-hot-toast";
 import { SiteHeader } from "@components/layout/site-header";
 import { AdminNav } from "@components/admin/admin-nav";
 import { getCurrentUser } from "@lib/auth/server";
-import { UserRole } from "@interfaces/roles";
+import { HIRING_ROLES, UserRole } from "@interfaces/roles";
 
 export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · MAV" }, robots: { index: false } };
 
 async function Nav() {
   const user = await getCurrentUser();
-  return <AdminNav isAdmin={user?.role === UserRole.ADMIN} />;
+  return <AdminNav isAdmin={user?.role === UserRole.ADMIN} canHire={!!user && HIRING_ROLES.includes(user.role)} />;
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

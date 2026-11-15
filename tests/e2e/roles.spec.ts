@@ -15,6 +15,7 @@ type Outcome = "ok" | "signin" | "home" | "agent";
 const ROLES: Role[] = ["anon", "customer", "events", "staff", "printer", "admin"];
 
 const CONTENT: Record<Role, Outcome> = { anon: "signin", customer: "home", events: "ok", staff: "ok", printer: "home", admin: "ok" };
+const HIRING: Record<Role, Outcome> = { anon: "signin", customer: "home", events: "home", staff: "ok", printer: "home", admin: "ok" };
 const ADMIN_ONLY: Record<Role, Outcome> = { anon: "signin", customer: "home", events: "home", staff: "home", printer: "home", admin: "ok" };
 const SIGNED_IN: Record<Role, Outcome> = { anon: "signin", customer: "ok", events: "ok", staff: "ok", printer: "ok", admin: "ok" };
 const PUBLIC: Record<Role, Outcome> = { anon: "ok", customer: "ok", events: "ok", staff: "ok", printer: "ok", admin: "ok" };
@@ -28,6 +29,7 @@ const PAGES: [string, Record<Role, Outcome>][] = [
   ["/leaderboard", PUBLIC],
   ["/shop", PUBLIC],
   ["/privacy", PUBLIC],
+  ["/jobs", PUBLIC],
   ["/dashboard", SIGNED_IN],
   ["/profile", SIGNED_IN],
   ["/vendors/apply", SIGNED_IN],
@@ -40,6 +42,7 @@ const PAGES: [string, Record<Role, Outcome>][] = [
   ["/admin/seasons", CONTENT],
   ["/admin/photos", CONTENT],
   ["/admin/requests", CONTENT],
+  ["/admin/applications", HIRING],
   ["/admin/site", ADMIN_ONLY],
   ["/admin/roles", ADMIN_ONLY],
   ["/admin/downloads", ADMIN_ONLY],

@@ -54,6 +54,9 @@ export function SiteFooter() {
             <li>
               <Link href="/vendors/apply" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Become a vendor</Link>
             </li>
+            <li>
+              <Link href="/jobs" className="inline-flex min-h-9 items-center font-semibold text-gold hover:text-gold-light">We&apos;re hiring</Link>
+            </li>
           </ul>
         </nav>
         <div>

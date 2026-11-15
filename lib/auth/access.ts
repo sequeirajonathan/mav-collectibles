@@ -1,4 +1,4 @@
-import { CONTENT_ROLES, PRINT_ROLES, UserRole } from "@interfaces/roles";
+import { CONTENT_ROLES, HIRING_ROLES, PRINT_ROLES, UserRole } from "@interfaces/roles";
 
 /**
  * The access policy for every page and API route, enforced in one place
@@ -43,6 +43,7 @@ const RULES: Rule[] = [
   { path: "/maintenance", access: { "*": "public" } },
   { path: "/offline", access: { "*": "public" } },
   { path: "/privacy", access: { "*": "public" } },
+  { path: "/jobs", access: { "*": "public" } },
   { path: "/manifest.webmanifest", access: { "*": "public" } },
 
   // ---- Auth ---------------------------------------------------------------
@@ -61,10 +62,13 @@ const RULES: Rule[] = [
   { path: "/admin/site*", access: { "*": ADMIN } },
   { path: "/admin/roles*", access: { "*": ADMIN } },
   { path: "/admin/downloads*", access: { "*": ADMIN } },
+  { path: "/admin/applications*", access: { "*": HIRING_ROLES } },
   { path: "/admin*", access: { "*": CONTENT_ROLES } },
 
   // ---- API (only what the browser fetches directly) -------------------------
   { path: "/api/v1/catalog/*", access: { GET: "public" } },
+  { path: "/api/v1/job-applications", access: { POST: "public" } },
+  { path: "/api/v1/job-applications/:id/resume", access: { GET: HIRING_ROLES } },
   { path: "/api/v1/print-jobs", access: { GET: PRINT_ROLES, PATCH: PRINT_ROLES, POST: ADMIN } },
 ];
 
