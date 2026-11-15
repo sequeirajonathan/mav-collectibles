@@ -42,6 +42,7 @@ const RULES: Rule[] = [
   { path: "/cart", access: { "*": "public" } },
   { path: "/maintenance", access: { "*": "public" } },
   { path: "/offline", access: { "*": "public" } },
+  { path: "/privacy", access: { "*": "public" } },
   { path: "/manifest.webmanifest", access: { "*": "public" } },
 
   // ---- Auth ---------------------------------------------------------------

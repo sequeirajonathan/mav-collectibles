@@ -57,6 +57,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/maintenance") ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/auth/") ||
+    // Sign-in providers (Google, Facebook) require this page to stay reachable.
+    pathname === "/privacy" ||
     // Print-agent screens are role-gated by the route policy below.
     pathname.startsWith("/print-agent");
   if (isMaintenanceMode() && !maintenanceExempt && !maintenanceOpenPath) {

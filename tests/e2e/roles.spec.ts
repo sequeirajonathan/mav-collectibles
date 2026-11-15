@@ -27,6 +27,7 @@ const PAGES: [string, Record<Role, Outcome>][] = [
   ["/vendors", PUBLIC],
   ["/leaderboard", PUBLIC],
   ["/shop", PUBLIC],
+  ["/privacy", PUBLIC],
   ["/dashboard", SIGNED_IN],
   ["/profile", SIGNED_IN],
   ["/vendors/apply", SIGNED_IN],
