@@ -37,6 +37,7 @@ const PAGES: [string, Record<Role, Outcome>][] = [
   ["/admin/posts/new", CONTENT],
   ["/admin/vendors", CONTENT],
   ["/admin/seasons", CONTENT],
+  ["/admin/photos", CONTENT],
   ["/admin/site", ADMIN_ONLY],
   ["/admin/roles", ADMIN_ONLY],
   ["/admin/downloads", ADMIN_ONLY],

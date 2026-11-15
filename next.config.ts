@@ -16,12 +16,17 @@ function supabaseImagePattern(): RemotePattern[] {
   ];
 }
 
+// Local development and CI serve storage from 127.0.0.1, which the image
+// optimizer refuses by default. Never true for a real (public) Supabase URL.
+const localStorage = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+
 const nextConfig: NextConfig = {
   // Partial prerendering + `use cache`: static shells stream instantly, dynamic
   // parts render inside <Suspense> boundaries.
   cacheComponents: true,
   typedRoutes: true,
   images: {
+    dangerouslyAllowLocalIP: localStorage,
     formats: ["image/avif", "image/webp"],
     qualities: [75, 80, 90],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

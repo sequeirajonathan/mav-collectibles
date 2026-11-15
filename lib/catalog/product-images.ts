@@ -38,3 +38,27 @@ export async function withProcessedImages<T extends Square.CatalogObject>(object
     return { ...object, imageData: { ...object.imageData, url: publicUrl(row.path) } };
   });
 }
+
+/**
+ * Staff-approved replacement photos (Admin → Photos) for the given Square
+ * items: item ID → photo URL. Empty on any failure, so photos never break.
+ */
+export async function approvedReplacements(itemIds: string[]): Promise<Map<string, string>> {
+  if (!itemIds.length) return new Map();
+  try {
+    const rows = await prisma.imageReplacement.findMany({
+      where: { square_item_id: { in: itemIds }, status: "approved" },
+      select: { square_item_id: true, path: true },
+    });
+    return new Map(rows.map((r) => [r.square_item_id, publicUrl(r.path)]));
+  } catch (error) {
+    console.error("Replacement photo lookup failed; using Square photos", error);
+    return new Map();
+  }
+}
+
+/** Puts an approved replacement in place of an item's main photo. */
+export function withReplacement(imageUrls: string[] | undefined, replacement: string | undefined): string[] {
+  const current = imageUrls ?? [];
+  return replacement ? [replacement, ...current.slice(1)] : current;
+}

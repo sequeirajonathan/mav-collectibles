@@ -9,6 +9,10 @@
 #   Secrets:   SQUARE_ACCESS_TOKEN, SUPABASE_SECRET_KEY
 #   Variables: SUPABASE_PROJECT_ID
 #
+# TCGplayer photo replacement for card singles is OFF by default. To turn it
+# on, add variable IMAGE_REPLACE_TCGPLAYER=true. Matches wait for staff
+# approval in Admin → Photos before customers see them.
+#
 # Paid background removal (Photoroom) is OFF by default. To turn it on, add to
 # the same environment: secret PHOTOROOM_API_KEY and variable
 # IMAGE_BG_PROVIDER=photoroom. Optional variable IMAGE_PAID_LIMIT caps the paid
@@ -45,6 +49,7 @@ jobs:
       IMAGE_BG_PROVIDER: ${{ vars.IMAGE_BG_PROVIDER }}
       PHOTOROOM_API_KEY: ${{ secrets.PHOTOROOM_API_KEY }}
       IMAGE_PAID_LIMIT: ${{ vars.IMAGE_PAID_LIMIT }}
+      IMAGE_REPLACE_TCGPLAYER: ${{ vars.IMAGE_REPLACE_TCGPLAYER }}
       LIMIT: ${{ inputs.limit }}
     steps:
       - uses: actions/checkout@v4
@@ -65,3 +70,5 @@ jobs:
           else
             npx tsx scripts/images/sync.ts
           fi
+      - name: Propose better photos for card singles (off unless enabled)
+        run: npx tsx scripts/images/tcgplayer.ts

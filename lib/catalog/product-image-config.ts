@@ -6,3 +6,6 @@ export const PRODUCT_IMAGE_BUCKET = "product-images";
  * sync then redoes every photo, and the new files get new URLs.
  */
 export const PROCESSOR_VERSION = 1;
+
+/** A photo whose longest side is under this is treated as low resolution. */
+export const LOW_RES_PX = 500;

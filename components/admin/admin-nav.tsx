@@ -11,6 +11,7 @@ const LINKS: { href: Route; label: string; adminOnly?: boolean }[] = [
   { href: "/admin/posts", label: "Posts" },
   { href: "/admin/vendors", label: "Vendors" },
   { href: "/admin/seasons", label: "Seasons" },
+  { href: "/admin/photos", label: "Photos" },
   { href: "/admin/site", label: "Site", adminOnly: true },
   { href: "/admin/roles", label: "Roles", adminOnly: true },
   { href: "/admin/downloads", label: "Downloads", adminOnly: true },

@@ -85,6 +85,12 @@ copy when one exists and the Square original otherwise.
   `IMAGE_PAID_LIMIT` caps paid photos per run (default 200). Card scans and
   graded slabs are never sent. The Photoroom call hasn't been run against the
   live service yet: test with a small limit first.
+- **Better photos for card singles (off by default):** with variable
+  `IMAGE_REPLACE_TCGPLAYER=true`, the nightly job matches singles whose Square
+  photo is missing or under 500 px to TCGplayer's catalogue (via tcgcsv.com) and
+  stores the match as *proposed*. Staff approve or reject each one in
+  **Admin → Photos**; customers only see approved ones. Matching is strict
+  (set + card name + collector number), so some cards get no proposal.
 - **Improving the processing:** change `scripts/images/process-image.ts` and
   bump `PROCESSOR_VERSION` in `lib/catalog/product-image-config.ts`; the next
   run redoes every photo under new file names.
