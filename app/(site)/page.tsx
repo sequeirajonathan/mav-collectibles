@@ -21,6 +21,8 @@ import { LinkButton } from "@components/ui/link-button";
 import { buttonVariants } from "@components/ui/button";
 import { ChipLink, chipRowClass } from "@components/ui/chip";
 import { Eyebrow } from "@components/ui/page-header";
+import { JsonLd } from "@components/seo/json-ld";
+import { storeJsonLd } from "@lib/seo";
 import { BuyBanner } from "@components/home/buy-banner";
 import { GameGrid } from "@components/home/game-grid";
 import { Petals } from "@components/home/petals";
@@ -177,6 +179,7 @@ const QUICK_LINKS = [
 export default function HomePage() {
   return (
     <div className="space-y-12 fold:space-y-14">
+      <JsonLd data={storeJsonLd()} />
       <section>
         <div className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-12 short:py-6">
           <div aria-hidden className="speed-lines pointer-events-none absolute inset-0" />

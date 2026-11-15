@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MapPin, Phone } from "lucide-react";
 import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { buttonVariants } from "@components/ui/button";
@@ -28,7 +29,10 @@ export function BuyBanner() {
           </h2>
           <p className="mt-3 text-base text-white/90 fold:text-lg">
             Cleaning out a binder or selling a whole collection? Bring it to the counter. We look through singles, slabs and sealed
-            product and make you a fair offer, or work out a trade.
+            product and make you a fair offer, or work out a trade.{" "}
+            <Link href="/sell-your-cards" className="font-semibold text-[#ffd02e] underline underline-offset-2">
+              How selling works
+            </Link>
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-2 fold:flex-row lg:flex-col">

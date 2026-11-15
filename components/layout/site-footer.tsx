@@ -52,6 +52,15 @@ export function SiteFooter() {
               </li>
             ))}
             <li>
+              <Link href="/pokemon-cards-montgomery-tx" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Pokémon cards</Link>
+            </li>
+            <li>
+              <Link href="/sell-your-cards" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Sell your cards</Link>
+            </li>
+            <li>
+              <Link href="/visit" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Visit us</Link>
+            </li>
+            <li>
               <Link href="/vendors/apply" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Become a vendor</Link>
             </li>
             <li>

@@ -19,6 +19,8 @@ import { publicEnv } from "@lib/env";
 import { cardVariants } from "@components/ui/card";
 import { cn } from "@utils";
 import { Skeleton } from "@components/ui/skeleton";
+import { JsonLd } from "@components/seo/json-ld";
+import { eventJsonLd } from "@lib/seo";
 
 type Params = Promise<{ slug: string }>;
 
@@ -68,6 +70,7 @@ async function EventContent({ params }: { params: Params }) {
 
   return (
     <article className="mx-auto max-w-3xl">
+      {event.status !== "draft" && <JsonLd data={eventJsonLd(event)} />}
       {event.coverImageUrl && (
         <div className="relative -mx-4 mb-5 aspect-[16/9] overflow-hidden fold:mx-0 fold:rounded-xl">
           <Image src={event.coverImageUrl} alt="" fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />

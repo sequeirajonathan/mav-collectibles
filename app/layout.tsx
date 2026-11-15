@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { siteUrl } from "@lib/seo";
 import { SITE_STYLE } from "@const/site-style";
 import { Bangers, Geist, Geist_Mono } from "next/font/google";
 import "@styles/globals.css";
@@ -12,8 +13,19 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: { default: "MAV Collectibles · Pokémon & TCG events in Montgomery, TX", template: "%s · MAV Collectibles" },
-  description: "Pokémon league nights, TCG tournaments, pre-releases, vendor days and trade nights at MAV Collectibles.",
+  description:
+    "Pokémon cards and trading card games in Montgomery, TX. Sealed product, singles and graded cards, plus league nights, tournaments and pre-releases. We buy, sell and trade.",
   applicationName: "MAV Collectibles",
+  metadataBase: new URL(siteUrl()),
+  // Each page's canonical address is its own path on the main domain.
+  alternates: { canonical: "./" },
+  openGraph: {
+    type: "website",
+    siteName: "MAV Collectibles",
+    locale: "en_US",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "MAV Collectibles: Pokémon and trading card games in Montgomery, TX" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
   // iOS "Add to Home Screen": app title, status bar, and the home-screen icon.
   appleWebApp: { capable: true, title: "MAV", statusBarStyle: "default" },
   icons: { icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }] },
