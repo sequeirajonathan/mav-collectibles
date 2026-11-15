@@ -44,6 +44,12 @@ const RULES: Rule[] = [
   { path: "/offline", access: { "*": "public" } },
   { path: "/privacy", access: { "*": "public" } },
   { path: "/jobs", access: { "*": "public" } },
+  { path: "/pokemon-cards-montgomery-tx", access: { "*": "public" } },
+  { path: "/sell-your-cards", access: { "*": "public" } },
+  { path: "/visit", access: { "*": "public" } },
+  { path: "/robots.txt", access: { "*": "public" } },
+  { path: "/sitemap.xml", access: { "*": "public" } },
+  { path: "/og.png", access: { "*": "public" } },
   { path: "/manifest.webmanifest", access: { "*": "public" } },
 
   // ---- Auth ---------------------------------------------------------------
