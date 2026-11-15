@@ -37,6 +37,8 @@ test.describe("event hub", () => {
     await page.goto("/events/one-piece-casual");
     await page.getByRole("button", { name: "RSVP" }).click();
     await expect(page.getByText("You're going", { exact: true }).filter({ visible: true })).toBeVisible();
+    // The button updates at once; wait for the save to be confirmed before leaving the page.
+    await expect(page.getByText("You're in! See you there.")).toBeVisible();
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: "One Piece Casual Night" })).toBeVisible();
   });

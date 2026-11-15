@@ -112,18 +112,22 @@ test.describe("role matrix", () => {
 
 test.describe("role changes", () => {
   test("a demoted user loses access immediately, even with an unexpired token", async ({ browser }) => {
-    const staff = await pageFor(browser, "staff");
-    await staff.goto("/admin/events");
-    await expect(staff).toHaveURL(/\/admin\/events$/);
-
     const admin = await pageFor(browser, "admin");
     const setRole = async (role: RegExp) => {
       await admin.goto("/admin/roles");
-      await admin.getByLabel("Email, username or user ID").fill("staff@mav.local");
-      await admin.getByRole("radio", { name: role }).check();
-      await admin.getByRole("button", { name: "Update role" }).click();
+      // While the page streams in, its form can briefly exist twice; use the visible one.
+      const form = admin.locator("form").filter({ visible: true }).filter({ has: admin.getByRole("button", { name: "Update role" }) });
+      await form.getByLabel("Email, username or user ID").fill("staff@mav.local");
+      await form.getByRole("radio", { name: role }).check();
+      await form.getByRole("button", { name: "Update role" }).click();
       await expect(admin.getByText(/staff is now/i)).toBeVisible();
     };
+
+    // Start from a known state, so a retry after a failed attempt still works.
+    await setRole(/^staff/i);
+    const staff = await pageFor(browser, "staff");
+    await staff.goto("/admin/events");
+    await expect(staff).toHaveURL(/\/admin\/events$/);
 
     try {
       await setRole(/^customer|^user/i);
