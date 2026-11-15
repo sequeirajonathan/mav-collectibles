@@ -2,12 +2,12 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaEnvelope, FaFacebook, FaInstagram, FaMapMarkerAlt, FaPhoneAlt, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
-import { STORE_ADDRESS } from "@lib/format";
+import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
 
-const PHONE = "(936) 449-1277";
+const PHONE = STORE_PHONE;
 const EMAIL = "info@mavcollectibles.com";
 const HOURS = [
   { day: "Mon", hours: "Closed" },

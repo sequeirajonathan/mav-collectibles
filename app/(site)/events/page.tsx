@@ -13,7 +13,7 @@ import { ChipLink, chipRowClass } from "@components/ui/chip";
 
 export const metadata: Metadata = {
   title: "Events & tournaments",
-  description: "Pokémon league nights, tournaments, prereleases, trade nights and vendor days at MAV Collectibles.",
+  description: "Pokémon league nights, tournaments, pre-releases, trade nights and vendor days at MAV Collectibles.",
 };
 
 type SearchParams = Promise<{ game?: string; kind?: string }>;
@@ -96,7 +96,7 @@ export default function EventsPage({ searchParams }: { searchParams: SearchParam
       <PageHeader
         eyebrow="Play at MAV"
         title="Events & tournaments"
-        description="League nights, tournaments, prereleases, trade nights and vendor days. RSVP to save your seat."
+        description="League nights, tournaments, pre-releases, trade nights and vendor days. RSVP to save your seat."
         actions={
           <a
             href="/events/calendar.ics"

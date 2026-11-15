@@ -31,7 +31,7 @@ export type EventKind = z.infer<typeof eventKindSchema>;
 export const EVENT_KIND_LABELS: Record<EventKind, string> = {
   tournament: "Tournament",
   league: "League night",
-  prerelease: "Prerelease",
+  prerelease: "Pre-release",
   release: "Release event",
   casual: "Casual play",
   trade_night: "Trade night",

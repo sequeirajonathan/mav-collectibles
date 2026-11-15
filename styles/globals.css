@@ -216,6 +216,11 @@
     opacity: 0;
   }
 }
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
 @keyframes bob {
   50% {
     transform: translateY(-6px);
@@ -309,6 +314,24 @@
     background: linear-gradient(135deg, #fbcfe8, #f472b6);
     opacity: 0;
     animation: petal-fall var(--d, 9s) linear var(--delay, 0s) infinite;
+  }
+  /* "We buy your cards" panel: dragon blue with Ben-Day dots in both themes. */
+  .buy-panel {
+    border: 3px solid #10222f;
+    box-shadow: 6px 6px 0 #10222f;
+    background-color: #1b6ca8;
+    background-image:
+      radial-gradient(circle at 100% 0%, rgb(255 255 255 / 0.28), transparent 45%),
+      radial-gradient(rgb(16 34 47 / 0.22) 2.2px, transparent 2.6px);
+    background-size: auto, 13px 13px;
+  }
+  .buy-ticker-track {
+    animation: ticker 28s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .buy-ticker-track {
+      animation: none;
+    }
   }
   .pixelated {
     image-rendering: pixelated;

@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: { default: "MAV Collectibles · Pokémon & TCG events in Montgomery, TX", template: "%s · MAV Collectibles" },
-  description: "Pokémon league nights, TCG tournaments, prereleases, vendor days and trade nights at MAV Collectibles.",
+  description: "Pokémon league nights, TCG tournaments, pre-releases, vendor days and trade nights at MAV Collectibles.",
   applicationName: "MAV Collectibles",
   // iOS "Add to Home Screen": app title, status bar, and the home-screen icon.
   appleWebApp: { capable: true, title: "MAV", statusBarStyle: "default" },

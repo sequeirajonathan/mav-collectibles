@@ -21,6 +21,7 @@ import { LinkButton } from "@components/ui/link-button";
 import { buttonVariants } from "@components/ui/button";
 import { ChipLink, chipRowClass } from "@components/ui/chip";
 import { Eyebrow } from "@components/ui/page-header";
+import { BuyBanner } from "@components/home/buy-banner";
 import { GameGrid } from "@components/home/game-grid";
 import { Petals } from "@components/home/petals";
 import { RankMark } from "@components/hub/badges";
@@ -167,7 +168,7 @@ async function Reviews() {
 }
 
 const QUICK_LINKS = [
-  { href: "/events", label: "Events", description: "Leagues, tournaments, prereleases", Icon: CalendarDays },
+  { href: "/events", label: "Events", description: "Leagues, tournaments, pre-releases", Icon: CalendarDays },
   { href: "/feed", label: "News", description: "Announcements & recaps", Icon: Megaphone },
   { href: "/vendors", label: "Vendors", description: "Buy, sell & trade days", Icon: Store },
   { href: "/leaderboard", label: "Leaderboard", description: "Season standings", Icon: Trophy },
@@ -191,7 +192,7 @@ export default function HomePage() {
               Your home for <span className="text-pop">Pokémon</span> & every TCG.
             </h1>
             <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
-              League nights, tournaments, prereleases and vendor days. RSVP, track your season points and never miss a release.
+              League nights, tournaments, pre-releases and vendor days. RSVP, track your season points and never miss a release.
             </p>
           </div>
         </div>
@@ -217,6 +218,8 @@ export default function HomePage() {
         <SectionHeading title="Choose your game" href="/shop" linkLabel="Whole shop" />
         <GameGrid />
       </section>
+
+      <BuyBanner />
 
       <section>
         <SectionHeading title="Coming up" href="/events" linkLabel="All events" />

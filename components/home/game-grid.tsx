@@ -4,14 +4,14 @@ import { cn } from "@utils";
 
 /** Logo tiles for the games people walk in asking for. Slugs match const/categories.ts. */
 const GAMES = [
-  { slug: "pokemon", name: "Pokémon", logo: "/pokemon-logo.png" },
-  { slug: "onepiece", name: "One Piece", logo: "/one-piece-card-game.jpg", cover: true },
-  { slug: "magic", name: "Magic: The Gathering", logo: "/magic_1.webp" },
-  { slug: "dragonball", name: "Dragon Ball Super", logo: "/dragonball.png" },
-  { slug: "yugioh", name: "Yu-Gi-Oh!", logo: "/yugioh-logo.png" },
-  { slug: "digimon", name: "Digimon", logo: "/digimon_card_game_logo.png" },
-  { slug: "gundam", name: "Gundam", logo: "/gundam.png" },
-  { slug: "union", name: "Union Arena", logo: "/union.png" },
+  { slug: "pokemon", name: "Pokémon", logo: "/games/pokemon.png" },
+  { slug: "onepiece", name: "One Piece", logo: "/games/onepiece.jpg", cover: true },
+  { slug: "magic", name: "Magic: The Gathering", logo: "/games/magic.png" },
+  { slug: "dragonball", name: "Dragon Ball Super", logo: "/games/dragonball.png" },
+  { slug: "yugioh", name: "Yu-Gi-Oh!", logo: "/games/yugioh.png" },
+  { slug: "digimon", name: "Digimon", logo: "/games/digimon.png" },
+  { slug: "gundam", name: "Gundam", logo: "/games/gundam.png" },
+  { slug: "union", name: "Union Arena", logo: "/games/union.png" },
 ] as const;
 
 export function GameGrid() {
@@ -26,7 +26,7 @@ export function GameGrid() {
                 alt=""
                 fill
                 sizes="(min-width: 576px) 25vw, 50vw"
-                className={cn("cover" in g ? "object-cover" : "object-contain p-[14%]", "transition-transform duration-300 can-hover:group-hover:scale-105")}
+                className={cn("cover" in g ? "object-cover" : "object-contain p-[12%]", "transition-transform duration-300 can-hover:group-hover:scale-105")}
               />
             </div>
             <span className="mt-2 block text-center text-sm font-bold text-foreground can-hover:group-hover:text-gold">{g.name}</span>
