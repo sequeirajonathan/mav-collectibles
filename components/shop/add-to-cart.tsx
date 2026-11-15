@@ -7,7 +7,7 @@ import { Button } from "@components/ui/button";
 import { useCart } from "@contexts/CartContext";
 import { useShopMode } from "@components/layout/shop-mode";
 import type { Product } from "@lib/contracts/catalog";
-import { formatMoneyCents } from "@lib/format";
+import { MARKET_PRICE_LABEL, STORE_PHONE, formatMoneyCents, isMarketPriced } from "@lib/format";
 import { cn } from "@utils";
 import { cardVariants } from "@components/ui/card";
 
@@ -18,10 +18,18 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [selectedId, setSelectedId] = useState(firstAvailable?.id);
   const selected = product.variations.find((v) => v.id === selectedId) ?? firstAvailable;
   if (!selected) return null;
+  const marketPriced = isMarketPriced(selected.priceAmount);
 
   return (
     <div className="space-y-4">
-      <p className="text-3xl font-extrabold text-gold">{formatMoneyCents(selected.priceAmount, selected.priceCurrency)}</p>
+      {marketPriced ? (
+        <div>
+          <p className="text-2xl font-extrabold text-gold">{MARKET_PRICE_LABEL}</p>
+          <p className="mt-1 text-sm text-muted-foreground">This one is priced to the market, so the price changes. Call or stop by for today&apos;s price.</p>
+        </div>
+      ) : (
+        <p className="text-3xl font-extrabold text-gold">{formatMoneyCents(selected.priceAmount, selected.priceCurrency)}</p>
+      )}
       {product.variations.length > 1 && (
         <fieldset>
           <legend className="text-sm font-semibold">Option</legend>
@@ -51,7 +59,7 @@ export function ProductPurchase({ product }: { product: Product }) {
             ? `Only ${selected.inventoryCount} left`
             : "In stock"}
       </p>
-      {canPurchase ? (
+      {canPurchase && !marketPriced ? (
         <div className="flex flex-col gap-2 fold:flex-row">
           <Button
             variant="gold"
@@ -76,9 +84,9 @@ export function ProductPurchase({ product }: { product: Product }) {
       ) : (
         <div className={cn(cardVariants({ variant: "accent", padding: "row", radius: "lg" }), "text-sm")}>
           <p className="font-semibold text-foreground">Available in store</p>
-          <p className="mt-0.5 text-foreground/80">Stop by MAV Collectibles or give us a call to hold it for you.</p>
-          <a href="tel:9364491277" className="mt-2 inline-flex min-h-10 items-center font-semibold text-gold">
-            Call (936) 449-1277
+          <p className="mt-0.5 text-foreground/80">{marketPriced ? "Stop by MAV Collectibles or give us a call for today's price." : "Stop by MAV Collectibles or give us a call to hold it for you."}</p>
+          <a href={`tel:${STORE_PHONE.replace(/\D/g, "")}`} className="mt-2 inline-flex min-h-10 items-center font-semibold text-gold">
+            Call {STORE_PHONE}
           </a>
         </div>
       )}

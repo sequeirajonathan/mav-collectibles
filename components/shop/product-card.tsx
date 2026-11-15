@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import type { CatalogItem } from "@lib/contracts/catalog";
 import { useCart } from "@contexts/CartContext";
 import { useShopMode } from "@components/layout/shop-mode";
-import { formatMoneyCents } from "@lib/format";
+import { MARKET_PRICE_LABEL, formatMoneyCents, isMarketPriced } from "@lib/format";
 import { cn } from "@utils";
 import { Card, cardVariants } from "@components/ui/card";
 import { Skeleton } from "@components/ui/skeleton";
@@ -19,6 +19,7 @@ export function ProductCard({ item, priority = false }: { item: CatalogItem; pri
   const { addItem } = useCart();
   const image = item.imageUrls?.[0];
   const name = tidyProductName(item.name);
+  const marketPriced = isMarketPriced(item.priceAmount);
   const lowStock = !item.soldOut && item.inventoryCount !== undefined && item.inventoryCount > 0 && item.inventoryCount <= 3;
   return (
     <article className={cn(cardVariants({ variant: "interactive" }), "group relative flex flex-col overflow-hidden")}>
@@ -45,8 +46,12 @@ export function ProductCard({ item, priority = false }: { item: CatalogItem; pri
           <Link href={`/product/${item.itemId}`} className="after:absolute after:inset-0 hover:text-gold-light">{name}</Link>
         </h3>
         <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-          <span className="text-base font-extrabold text-gold">{formatMoneyCents(item.priceAmount, item.priceCurrency)}</span>
-          {canPurchase ? (
+          {marketPriced ? (
+            <span className="text-sm font-bold text-gold">{MARKET_PRICE_LABEL}</span>
+          ) : (
+            <span className="text-base font-extrabold text-gold">{formatMoneyCents(item.priceAmount, item.priceCurrency)}</span>
+          )}
+          {marketPriced ? null : canPurchase ? (
             <button
               type="button"
               disabled={item.soldOut}

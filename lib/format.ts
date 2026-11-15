@@ -53,6 +53,13 @@ export function formatMoneyCents(cents: number, currency = "USD"): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: cents % 100 === 0 ? 0 : 2 }).format(cents / 100);
 }
 
+/**
+ * Items entered in the register at $0 are priced to the market on the day, not
+ * free. They show a "contact us" label and can't be added to a cart.
+ */
+export const isMarketPriced = (cents: number) => cents <= 0;
+export const MARKET_PRICE_LABEL = "Contact us for pricing";
+
 export function formatEntryFee(cents: number | null): string {
   if (cents === null) return "Free";
   if (cents === 0) return "Free";
