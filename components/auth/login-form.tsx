@@ -54,8 +54,10 @@ export function LoginForm({
       return;
     }
     await refreshSession();
-    if (destination) router.replace(safeNext(destination));
+    // Refresh first (drops pages cached while signed out), then navigate. The
+    // other order lets a late refresh land on the new page with stale data.
     router.refresh();
+    if (destination) router.replace(safeNext(destination));
   };
 
   const handleSocial = async (provider: Provider) => {

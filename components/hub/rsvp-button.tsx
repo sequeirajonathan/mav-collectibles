@@ -22,7 +22,10 @@ interface RsvpButtonProps {
 export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full }: RsvpButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [optimistic, setOptimistic] = useOptimistic(status);
+  // What the server last confirmed to this button. It wins over the `status`
+  // prop so a page refresh that started before the RSVP can't undo it on screen.
+  const [confirmed, setConfirmed] = useState<{ status: RegistrationStatus | null } | null>(null);
+  const [optimistic, setOptimistic] = useOptimistic(confirmed ? confirmed.status : status);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   if (!signedIn) {
@@ -41,6 +44,7 @@ export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full
         toast.error(result.error);
         return;
       }
+      setConfirmed({ status: result.data.status });
       toast.success(result.data.status === "waitlisted" ? "You're on the waitlist" : "You're in! See you there.");
       router.refresh();
     });
@@ -54,6 +58,7 @@ export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full
         toast.error(result.error);
         return;
       }
+      setConfirmed({ status: null });
       toast.success("Your spot was released");
       router.refresh();
     });
