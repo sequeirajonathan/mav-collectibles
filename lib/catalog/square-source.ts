@@ -8,6 +8,7 @@ import sandboxMap from "@const/square-sandbox-map.json";
 import { matchesStock, type CatalogSource, type ListOptions } from "./source";
 import { approvedReplacements, withProcessedImages, withReplacement } from "./product-images";
 import { isPublicCatalogItem } from "./visibility";
+import { byRelevance, searchTerms, squareKeywords } from "./search-query";
 
 /**
  * The app's category IDs (const/categories.ts) are production IDs. A sandbox
@@ -94,6 +95,99 @@ async function collect(query: Square.CatalogQuery, options: ListOptions): Promis
   return { items: pageItems, cursor: cursor && pageItems.length === options.limit ? cursor : null };
 }
 
+/** Square returns matches in name order; cap how many we pull in to rank. */
+const SEARCH_CANDIDATE_PAGES = 6;
+const SEARCH_CHUNK = 50;
+
+/**
+ * Search with the best matches first. Square's own search only orders by
+ * name and also matches descriptions, so "charizard" would lead with a booster
+ * pack whose description mentions it. Here every match is fetched (up to a
+ * cap), ranked by how well its name fits, and only then filtered by stock and
+ * cut into pages. The cursor is a position in that ranked list.
+ */
+async function searchRanked(query: string, options: ListOptions): Promise<CatalogPage> {
+  const terms = searchTerms(query);
+  const keywords = squareKeywords(terms);
+  if (keywords.length === 0) return { items: [], cursor: null };
+
+  const client = createSquareClient();
+  const locations = squareLocationIds();
+  const candidates: (Square.CatalogObject & { type: "ITEM" })[] = [];
+  const related: Square.CatalogObject[] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < SEARCH_CANDIDATE_PAGES; page++) {
+    const result = await withRetry(() =>
+      client.catalog.search({
+        objectTypes: ["ITEM"],
+        includeRelatedObjects: true,
+        query: { textQuery: { keywords } },
+        limit: 100,
+        ...(cursor ? { cursor } : {}),
+      })
+    );
+    for (const object of result.objects ?? []) {
+      if (!isCatalogItem(object)) continue;
+      const data = object.itemData;
+      const categoryIds = [...(data?.categories ?? []).map((c) => c.id), data?.reportingCategory?.id].map((id) =>
+        id && sandboxIdsActive() ? (fromSandbox.get(id) ?? id) : id
+      );
+      // Never list order records or items outside the shop's own categories.
+      if (isPublicCatalogItem({ name: data?.name ?? "", description: data?.description, categoryIds })) candidates.push(object);
+    }
+    related.push(...(result.relatedObjects ?? []));
+    cursor = result.cursor ?? undefined;
+    if (!cursor) break;
+  }
+
+  const ranked = byRelevance(
+    candidates.map((object) => ({ name: object.itemData?.name ?? "", object })),
+    terms,
+    options.sort
+  );
+  const relatedProcessed = await withProcessedImages(related);
+
+  const items: CatalogItem[] = [];
+  let position = Math.max(0, Number(options.cursor) || 0);
+  while (items.length < options.limit && position < ranked.length) {
+    const chunk = ranked.slice(position, position + SEARCH_CHUNK).map((entry) => entry.object);
+    const variationIds = chunk.flatMap((item) => (item.itemData?.variations ?? []).flatMap((v) => (v.id ? [v.id] : [])));
+    const counts = variationIds.length
+      ? await withRetry(() => client.inventory.batchGetCounts({ catalogObjectIds: variationIds, locationIds: locations }))
+      : { data: [] };
+    const inStock = new Map<string, number>();
+    for (const count of counts.data ?? []) {
+      if (count.catalogObjectId && count.state === "IN_STOCK") {
+        inStock.set(count.catalogObjectId, (inStock.get(count.catalogObjectId) ?? 0) + Number(count.quantity ?? 0));
+      }
+    }
+    const replacements = await approvedReplacements(chunk.flatMap((i) => (i.id ? [i.id] : [])));
+
+    // One at a time, so the page can stop exactly where it fills up.
+    for (const object of chunk) {
+      position++;
+      const withInventory = {
+        ...object,
+        itemData: {
+          ...object.itemData,
+          variations: object.itemData?.variations?.map((v) => ({ ...v, inventory: v.id ? (inStock.get(v.id) ?? 0) : 0 })),
+        },
+      };
+      for (const raw of normalizeItemsWithInventory([withInventory], relatedProcessed)) {
+        const normalized = { ...raw, imageUrls: withReplacement(raw.imageUrls, replacements.get(raw.itemId)) };
+        const item = catalogItemSchema.parse(
+          sandboxIdsActive() && normalized.categoryId
+            ? { ...normalized, categoryId: fromSandbox.get(normalized.categoryId) ?? normalized.categoryId }
+            : normalized
+        );
+        if (matchesStock(item, options.stock)) items.push(item);
+      }
+      if (items.length >= options.limit) break;
+    }
+  }
+  return { items: items.slice(0, options.limit), cursor: position < ranked.length ? String(position) : null };
+}
+
 export const squareCatalogSource: CatalogSource = {
   listByCategories(categoryIds, options) {
     const ids = sandboxIdsActive() ? categoryIds.map((id) => toSandbox.get(id) ?? id) : categoryIds;
@@ -101,7 +195,7 @@ export const squareCatalogSource: CatalogSource = {
   },
 
   search(query, options) {
-    return collect({ textQuery: { keywords: [query] } }, options);
+    return searchRanked(query, options);
   },
 
   async getProduct(id): Promise<Product | null> {
