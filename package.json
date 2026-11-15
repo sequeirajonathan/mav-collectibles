@@ -18,7 +18,8 @@
     "test:e2e": "playwright test",
     "test": "vitest run --project unit --project components",
     "test:watch": "vitest --project unit --project components",
-    "test:integration": "vitest run --project integration"
+    "test:integration": "vitest run --project integration",
+    "build:production": "node scripts/deploy/migrate.mjs && next build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

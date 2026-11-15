@@ -9,7 +9,7 @@ MAV Collectibles runs in three environments. The database schema lives in
 | Database & auth | Local Supabase stack in Docker (`npm run db:start`) | Fresh local Supabase stack per run | Supabase project `dxtlhxaxmuxxkdecehqb` |
 | Data | `supabase/seed.sql` (content + test accounts) | Same seed | Real data; seed is never pushed |
 | Catalog | Fixtures or Square sandbox | Fixtures (`tests/fixtures/catalog.json`) | Square production |
-| Deploys | `npm run dev` | — | `deploy.yml` on every push to `main` |
+| Deploys | `npm run dev` | — | Vercel, on every push to `main` (migrations run first, in the build) |
 
 **Vercel preview deployments are off** (`vercel.json`). Pages are prerendered from
 the database at build time, and on the free Supabase plan there is no staging
@@ -113,11 +113,16 @@ Never edit a migration that has already reached production; add a new one.
 PR ─▶ CI: type-aware lint (no `any`) · typecheck · unit + component tests
          · migrations on a fresh DB · db lint · Prisma drift · integration tests
          · build · end-to-end + responsive tests on 6 screen sizes
-merge to main ─▶ CI again ─▶ [production approval, optional] ─▶ supabase db push ─▶ vercel deploy --prod
+merge to main ─▶ Vercel production build: apply pending migrations ─▶ build ─▶ deploy
 ```
 
-`vercel.json` turns off Vercel's own Git deploys for `main`, so production only
-changes through `deploy.yml`, after migrations succeed.
+Vercel deploys `main` only (`vercel.json`; other branches don't deploy). The
+build command is `npm run build:production`, which first runs
+`scripts/deploy/migrate.mjs`: it applies any pending `supabase/migrations` to
+the production database using `DATABASE_URL`, and stops the build if that
+fails, so the site never ships ahead of its database. No GitHub secrets are
+needed to deploy. Protect `main` so the `CI / verify` check must pass before
+merging.
 
 ## Variables
 
@@ -158,23 +163,16 @@ Delete these Production/Preview/Development variables. They are no longer read:
 
 Then set the remaining ones for **Production** only (previews are off).
 
-## GitHub configuration (one-time)
+## GitHub configuration (only for the nightly photo job)
 
-Settings → Environments → **New environment** `production`:
+Deploying needs nothing here. The *Product images* workflow does: Settings →
+Environments → **New environment** `production`:
 
 | Name | Type | Value |
 |---|---|---|
-| `SUPABASE_ACCESS_TOKEN` | secret | Personal access token from supabase.com/dashboard/account/tokens |
-| `SUPABASE_DB_PASSWORD` | secret | The production database password |
-| `VERCEL_TOKEN` | secret | Token from vercel.com/account/tokens |
-| `SQUARE_ACCESS_TOKEN` | secret | Square production token (read-only use, for the nightly photo job) |
-| `SUPABASE_SECRET_KEY` | secret | Production secret key (`sb_secret_…`), for the nightly photo job |
+| `SQUARE_ACCESS_TOKEN` | secret | Square production token (read-only use) |
+| `SUPABASE_SECRET_KEY` | secret | Production secret key (`sb_secret_…`) |
 | `SUPABASE_PROJECT_ID` | variable | `dxtlhxaxmuxxkdecehqb` |
-| `VERCEL_ORG_ID` | variable | `team_sMnSSXzNrFvRsmm06ojfFbc4` |
-| `VERCEL_PROJECT_ID` | variable | `prj_jl9VG2RKnQIYpJDSj05RfFVAu0Xe` |
-
-Optional: enable **Required reviewers** on the environment to approve each
-production release, and protect `main` so the `CI / verify` check must pass.
 
 ## Production Supabase setup (one-time)
 
