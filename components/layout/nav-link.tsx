@@ -8,8 +8,9 @@ import { useShopMode } from "./shop-mode";
 
 export function NavLink({ href, children }: { href: Route; children: React.ReactNode }) {
   const active = usePathname().startsWith(href);
-  const { visible } = useShopMode();
+  const { visible, vendors } = useShopMode();
   if (href === "/shop" && !visible) return null;
+  if (href === "/vendors" && !vendors) return null;
   return (
     <Link
       href={href}

@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // A hidden shop stays out of search results.
   const shop = flags.shopVisible;
   return [
-    ...STATIC.filter((p) => shop || p.path !== "/shop").map((p) => ({ url: `${base}${p.path}`, changeFrequency: p.changeFrequency, priority: p.priority })),
+    ...STATIC.filter((p) => (shop || p.path !== "/shop") && (flags.vendorsVisible || p.path !== "/vendors")).map((p) => ({ url: `${base}${p.path}`, changeFrequency: p.changeFrequency, priority: p.priority })),
     ...(shop ? CATEGORY_GROUPS : []).flatMap((group) =>
       group.categories.map((c) => ({
         url: `${base}/category/${c.slug}?group=${GROUP_PARAM[group.name] ?? "TCG"}`,
@@ -35,6 +35,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
     ),
     ...events.filter((e) => e.status === "published").map((e) => ({ url: `${base}/events/${e.slug}`, changeFrequency: "daily" as const, priority: 0.7 })),
-    ...vendors.map((v) => ({ url: `${base}/vendors/${v.slug}`, changeFrequency: "weekly" as const, priority: 0.4 })),
+    ...(flags.vendorsVisible ? vendors : []).map((v) => ({ url: `${base}/vendors/${v.slug}`, changeFrequency: "weekly" as const, priority: 0.4 })),
   ];
 }

@@ -15,7 +15,7 @@ import { useShopMode } from "./shop-mode";
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { visible: shopVisible } = useShopMode();
+  const { visible: shopVisible, vendors: vendorsVisible } = useShopMode();
   const [openedOn, setOpenedOn] = useState(pathname);
   // Close the drawer after navigating (adjusting state during render, not in an effect).
   if (open && pathname !== openedOn) {
@@ -103,7 +103,7 @@ export function MobileNav() {
                 className="mb-2 justify-start border border-line"
               />
               <InstallApp className="mb-2" />
-              {NAV_LINKS.filter((link) => shopVisible || link.href !== "/shop").map((link) => (
+              {NAV_LINKS.filter((link) => (shopVisible || link.href !== "/shop") && (vendorsVisible || link.href !== "/vendors")).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

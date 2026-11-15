@@ -17,6 +17,7 @@ import {
 } from "@lib/contracts/hub";
 import { slug as slugSchema, uuid } from "@lib/contracts/common";
 import { tags } from "@lib/data/tags";
+import { getFlags } from "@lib/data/site";
 
 const REGISTRATION_ERRORS: Record<string, string> = {
   event_not_open: "This event isn't open for registration.",
@@ -144,6 +145,7 @@ function slugify(value: string) {
 
 /** A signed-in user applies as a vendor (or updates their pending application). */
 export const applyAsVendor = createAction({ input: vendorApplicationInput, access: "user" }, async (input, user) => {
+  if (!(await getFlags()).vendorsVisible) throw new ActionError("Vendor applications are closed right now.");
   if (input.eventId) {
     const event = await prisma.event.findFirst({
       where: { id: input.eventId, kind: "vendor_day", status: "published", starts_at: { gt: new Date() } },

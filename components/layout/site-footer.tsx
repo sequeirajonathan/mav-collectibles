@@ -6,7 +6,7 @@ import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
-import { ShopOnly } from "./shop-only";
+import { ShopOnly, VendorsOnly } from "./shop-only";
 
 const PHONE = STORE_PHONE;
 const EMAIL = "info@mavcollectibles.com";
@@ -53,7 +53,9 @@ export function SiteFooter() {
                   <Link href={l.href} className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">{l.label}</Link>
                 </li>
               );
-              return l.href === "/shop" ? <ShopOnly key={l.href}>{item}</ShopOnly> : item;
+              if (l.href === "/shop") return <ShopOnly key={l.href}>{item}</ShopOnly>;
+              if (l.href === "/vendors") return <VendorsOnly key={l.href}>{item}</VendorsOnly>;
+              return item;
             })}
             <li>
               <Link href="/pokemon-cards-montgomery-tx" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Pokémon cards</Link>
@@ -64,9 +66,11 @@ export function SiteFooter() {
             <li>
               <Link href="/visit" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Visit us</Link>
             </li>
-            <li>
-              <Link href="/vendors/apply" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Become a vendor</Link>
-            </li>
+            <VendorsOnly>
+              <li>
+                <Link href="/vendors/apply" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Become a vendor</Link>
+              </li>
+            </VendorsOnly>
             <li>
               <Link href="/jobs" className="inline-flex min-h-9 items-center font-semibold text-gold hover:text-gold-light">We&apos;re hiring</Link>
             </li>

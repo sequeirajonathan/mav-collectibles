@@ -9,7 +9,7 @@ import { getFlags } from "@lib/data/site";
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const flags = await getFlags();
   return (
-    <ShopModeProvider live={flags.shopLive} shopVisible={flags.shopVisible}>
+    <ShopModeProvider live={flags.shopLive} shopVisible={flags.shopVisible} vendorsVisible={flags.vendorsVisible}>
       <Suspense fallback={null}>
         <AlertBanner />
       </Suspense>

@@ -6,3 +6,8 @@ import { useShopMode } from "./shop-mode";
 export function ShopOnly({ children }: { children: React.ReactNode }) {
   return useShopMode().visible ? <>{children}</> : null;
 }
+
+/** Shows its children only while the Vendors section is switched on. */
+export function VendorsOnly({ children }: { children: React.ReactNode }) {
+  return useShopMode().vendors ? <>{children}</> : null;
+}

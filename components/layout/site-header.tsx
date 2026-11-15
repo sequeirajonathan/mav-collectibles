@@ -21,8 +21,8 @@ export function SiteHeader() {
             // Plain link in the static shell; the active state streams in.
             <Suspense
               key={link.href}
-              // The Shop link waits for the visibility check, so it never flashes for customers while hidden.
-              fallback={link.href === "/shop" ? null : <Link href={link.href} className="rounded-md px-3 py-2 text-sm font-semibold text-foreground/80">{link.label}</Link>}
+              // Links that can be switched off wait for the check, so they never flash while hidden.
+              fallback={link.href === "/shop" || link.href === "/vendors" ? null : <Link href={link.href} className="rounded-md px-3 py-2 text-sm font-semibold text-foreground/80">{link.label}</Link>}
             >
               <NavLink href={link.href}>{link.label}</NavLink>
             </Suspense>

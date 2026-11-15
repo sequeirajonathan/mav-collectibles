@@ -13,6 +13,7 @@ import { cn } from "@utils";
 
 const FLAG_HELP: Record<FlagName, { label: string; help: string }> = {
   shopLive: { label: "Online shop is live", help: "Off: customers browse the shop as an in-store showcase with no cart. Staff always see the full shop." },
+  vendorsVisible: { label: "Show vendors", help: "Off: the Vendors pages, the vendor links and the table application form are hidden from the site. Staff can still manage vendors in Admin." },
   shopVisible: { label: "Show the shop to customers", help: "Off: only admins and staff can open the shop. Everyone else sees a coming-soon note, and the shop links and search are hidden." },
   showAlertBanner: { label: "Show alert banner", help: "The strip at the very top of every page." },
   showYouTubeVideo: { label: "Show YouTube video", help: "Featured video on the home page." },
