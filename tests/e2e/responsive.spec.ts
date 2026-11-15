@@ -28,6 +28,7 @@ const ADMIN_PAGES = [
   "/vendors/apply",
   "/admin",
   "/admin/chat",
+  "/admin/guide",
   "/admin/photos",
   "/admin/requests",
   "/admin/applications",

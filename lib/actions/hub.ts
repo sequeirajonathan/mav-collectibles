@@ -17,6 +17,7 @@ import {
 } from "@lib/contracts/hub";
 import { slug as slugSchema, uuid } from "@lib/contracts/common";
 import { tags } from "@lib/data/tags";
+import { answersSchema, checkAnswers, parseStoredQuestions } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
 
 const REGISTRATION_ERRORS: Record<string, string> = {
@@ -34,13 +35,20 @@ function refreshEvent(slug: string) {
 // Players: RSVP
 // ---------------------------------------------------------------------------
 export const registerForEvent = createAction(
-  { input: z.object({ eventId: uuid }), access: "user" },
-  async ({ eventId }, user) => {
-    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  { input: z.object({ eventId: uuid, answers: answersSchema.default({}) }), access: "user" },
+  async ({ eventId, answers: given }, user) => {
+    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true, questions: true } });
     if (!event) throw new ActionError("Event not found.");
+    // Answers are checked before a spot is taken, so nobody is registered with a half-filled form.
+    const { answers, errors } = checkAnswers(parseStoredQuestions(event.questions), given);
+    if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     try {
-      const rows = await prisma.$queryRaw<{ status: string }[]>`
-        select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`;
+      // One transaction: a player is never registered without their answers.
+      const [rows] = await prisma.$transaction([
+        prisma.$queryRaw<{ status: string }[]>`
+          select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`,
+        prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } }),
+      ]);
       refreshEvent(event.slug);
       return { status: registrationStatusSchema.parse(rows[0]?.status) };
     } catch (error) {
@@ -48,6 +56,22 @@ export const registerForEvent = createAction(
       if (message) throw new ActionError(REGISTRATION_ERRORS[message]);
       throw error;
     }
+  }
+);
+
+/** A registered player changes their answers to the event's questions. */
+export const saveRegistrationAnswers = createAction(
+  { input: z.object({ eventId: uuid, answers: answersSchema }), access: "user" },
+  async ({ eventId, answers: given }, user) => {
+    const registration = await prisma.eventRegistration.findUnique({
+      where: { event_id_user_id: { event_id: eventId, user_id: user.id } },
+      select: { status: true, event: { select: { questions: true } } },
+    });
+    if (!registration || registration.status === "cancelled") throw new ActionError("You're not registered for this event.");
+    const { answers, errors } = checkAnswers(parseStoredQuestions(registration.event.questions), given);
+    if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
+    await prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } });
+    return null;
   }
 );
 
@@ -202,6 +226,9 @@ function eventData(input: z.infer<typeof eventInput>) {
     starts_at: input.startsAt,
     ends_at: input.endsAt,
     location: input.location,
+    link_url: input.linkUrl,
+    link_label: input.linkUrl ? input.linkLabel : null,
+    questions: input.questions,
     cover_image_url: input.coverImageUrl,
     capacity: input.capacity,
     entry_fee_cents: input.entryFeeDollars === null ? null : Math.round(input.entryFeeDollars * 100),
@@ -264,6 +291,9 @@ export const duplicateEvent = createAction(
         starts_at: startsAt,
         ends_at: moved(source.ends_at),
         location: source.location,
+        link_url: source.link_url,
+        link_label: source.link_label,
+        questions: source.questions ?? [],
         cover_image_url: source.cover_image_url,
         capacity: source.capacity,
         entry_fee_cents: source.entry_fee_cents,

@@ -111,6 +111,7 @@ model EventRegistration {
   user_id       String             @db.Uuid
   status        RegistrationStatus
   note          String?
+  answers       Json               @default("{}")
   created_at    DateTime           @default(now()) @db.Timestamptz(6)
   updated_at    DateTime           @default(now()) @db.Timestamptz(6)
   checked_in_at DateTime?          @db.Timestamptz(6)
@@ -151,6 +152,9 @@ model Event {
   starts_at              DateTime            @db.Timestamptz(6)
   ends_at                DateTime?           @db.Timestamptz(6)
   location               String              @default("MAV Collectibles")
+  link_url               String?
+  link_label             String?
+  questions              Json                @default("[]")
   cover_image_url        String?
   capacity               Int?
   entry_fee_cents        Int?
@@ -419,10 +423,12 @@ model StaffRequest {
   created_by_name String
   response        String    @default("")
   completed_at    DateTime? @db.Timestamptz(6)
+  notified_at     DateTime? @db.Timestamptz(6)
   created_at      DateTime  @default(now()) @db.Timestamptz(6)
   updated_at      DateTime  @default(now()) @db.Timestamptz(6)
 
   @@index([status, created_at], map: "staff_requests_status_idx")
+  @@index([completed_at], map: "staff_requests_unnotified_idx", where: raw("status = 'done' AND notified_at IS NULL"))
   @@map("staff_requests")
 }
 

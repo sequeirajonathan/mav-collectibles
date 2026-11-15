@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 import { serverEnv } from "@lib/env.server";
 import { refreshSearchIndex } from "@lib/data/catalog";
+import { sendRequestAlerts } from "@lib/request-alerts";
 import { tags } from "@lib/data/tags";
 
 export const maxDuration = 300;
@@ -18,6 +19,8 @@ function authorized(request: NextRequest): boolean {
 /** Daily job (vercel.json): rebuild the shop's search index from the catalog. */
 export async function GET(request: NextRequest) {
   if (!authorized(request)) return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Not allowed" } }, { status: 401 });
+  // Backstop for finished staff requests that haven't been announced yet.
+  await sendRequestAlerts().catch((error) => console.error("Request alerts failed", error));
   try {
     const result = await refreshSearchIndex();
     revalidateTag(tags.catalog, "max");

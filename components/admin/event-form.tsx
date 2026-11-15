@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
 import { Field, inputClass } from "@components/ui/field";
+import { QuestionsEditor } from "./questions-editor";
 import { ImageUpload } from "./image-upload";
 import { ConfirmButton } from "./confirm-button";
 import { createEvent, deleteEvent, duplicateEvent, updateEvent } from "@lib/actions/hub";
@@ -16,6 +17,14 @@ import { cn } from "@utils";
 
 const slugify = (v: string) => v.toLowerCase().normalize("NFKD").replace(/[^\w\s-]/g, "").trim().replace(/[\s_]+/g, "-").replace(/-+/g, "-").slice(0, 70);
 const toIso = (local: string) => (local ? storeLocalToIso(local) : "");
+
+/** First problem with the sign-up questions, in words staff can act on. */
+function questionError(errors: Record<string, string>): string | undefined {
+  const entry = Object.entries(errors).find(([key]) => key === "questions" || key.startsWith("questions."));
+  if (!entry) return undefined;
+  const index = Number(entry[0].split(".")[1]);
+  return Number.isInteger(index) ? `Question ${index + 1}: ${entry[1]}` : entry[1];
+}
 
 export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?: string; initial: EventFormValues }) {
   const router = useRouter();
@@ -36,6 +45,9 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
     startsAt: toIso(v.startsAt),
     endsAt: toIso(v.endsAt),
     location: v.location,
+    linkUrl: v.linkUrl,
+    linkLabel: v.linkLabel,
+    questions: v.questions,
     coverImageUrl: v.coverImageUrl,
     capacity: v.capacity,
     entryFeeDollars: v.entryFeeDollars,
@@ -163,12 +175,21 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
           {(id) => <input id={id} type="datetime-local" className={inputClass} value={v.registrationClosesAt} onChange={(e) => set("registrationClosesAt", e.target.value)} />}
         </Field>
       </div>
+      <div className="grid gap-5 fold:grid-cols-[2fr_1fr]">
+        <Field label="Link (optional)" hint="A sign-up form or page players need, such as a Google Form. Shown as a button on the event." error={errors.linkUrl}>
+          {(id) => <input id={id} type="url" inputMode="url" placeholder="https://" className={inputClass} value={v.linkUrl} onChange={(e) => set("linkUrl", e.target.value)} />}
+        </Field>
+        <Field label="Button text" hint="Blank = Player form" error={errors.linkLabel}>
+          {(id) => <input id={id} maxLength={40} placeholder="Player form" className={inputClass} value={v.linkLabel} onChange={(e) => set("linkLabel", e.target.value)} />}
+        </Field>
+      </div>
       <Field label="Short summary" hint="Shown on cards and in calendars (200 characters)" error={errors.summary}>
         {(id) => <input id={id} maxLength={200} className={inputClass} value={v.summary} onChange={(e) => set("summary", e.target.value)} />}
       </Field>
       <Field label="Details" hint="Prizes, deck rules, what to bring…" error={errors.description}>
         {(id) => <textarea id={id} rows={8} className={inputClass} value={v.description} onChange={(e) => set("description", e.target.value)} />}
       </Field>
+      <QuestionsEditor value={v.questions} onChange={(next) => set("questions", next)} error={questionError(errors)} />
       <ImageUpload label="Cover image" folder="events" value={v.coverImageUrl} onChange={(url) => set("coverImageUrl", url)} />
       <div className={cn(cardVariants({ padding: "md" }), "flex flex-wrap items-center gap-4")}>
         <Field label="Status">

@@ -5,8 +5,10 @@ import { VendorsOnly } from "@components/layout/shop-only";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { MapPin, Ticket, Users } from "lucide-react";
-import { getEvent, getMyRegistration } from "@lib/data/hub";
+import { ExternalLink, MapPin, Ticket, Users } from "lucide-react";
+import { buttonVariants } from "@components/ui/button";
+import { Linkified } from "@components/ui/linkified";
+import { getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
 import { getCurrentUser } from "@lib/auth/server";
 import { googleCalendarUrl, outlookCalendarUrl, type CalendarEvent } from "@lib/calendar";
 import { capacityLabel, formatEntryFee, formatEventWhen } from "@lib/format";
@@ -24,6 +26,7 @@ import { JsonLd } from "@components/seo/json-ld";
 import { eventJsonLd } from "@lib/seo";
 
 type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ rsvp?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const event = await getEvent((await params).slug);
@@ -37,11 +40,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 type Event = NonNullable<Awaited<ReturnType<typeof getEvent>>>;
 
-async function Rsvp({ event }: { event: Event }) {
+async function Rsvp({ event, searchParams }: { event: Event; searchParams: SearchParams }) {
   const user = await getCurrentUser();
   await connection();
   const closedReason = registrationClosedReason(event, requestTime());
-  const status = user ? await getMyRegistration(event.id, user.id) : null;
+  const [status, answers] = user ? await Promise.all([getMyRegistration(event.id, user.id), getMyAnswers(event.id, user.id)]) : [null, {}];
   return (
     <RsvpButton
       eventId={event.id}
@@ -50,11 +53,14 @@ async function Rsvp({ event }: { event: Event }) {
       signedIn={user !== null}
       closedReason={closedReason}
       full={isFull(event)}
+      questions={event.questions}
+      answers={answers}
+      autoOpen={(await searchParams).rsvp === "1"}
     />
   );
 }
 
-async function EventContent({ params }: { params: Params }) {
+async function EventContent({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const event = await getEvent((await params).slug);
   if (!event) notFound();
 
@@ -114,8 +120,14 @@ async function EventContent({ params }: { params: Params }) {
 
       <div className="mt-4 flex flex-col gap-2 fold:flex-row fold:flex-wrap fold:items-center">
         <Suspense fallback={<Skeleton className="h-11 w-full rounded-md bg-panel-2 fold:w-28" />}>
-          <Rsvp event={event} />
+          <Rsvp event={event} searchParams={searchParams} />
         </Suspense>
+        {event.linkUrl && (
+          <a href={event.linkUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline" })}>
+            {event.linkLabel || "Player form"}
+            <ExternalLink aria-hidden />
+          </a>
+        )}
         <AddToCalendar
           googleUrl={googleCalendarUrl(calendarEvent)}
           outlookUrl={outlookCalendarUrl(calendarEvent)}
@@ -130,7 +142,7 @@ async function EventContent({ params }: { params: Params }) {
       {(event.summary || event.description) && (
         <div className="mt-8 space-y-3 text-foreground/90">
           {event.summary && <p className="text-lg text-foreground">{event.summary}</p>}
-          {event.description && <p className="whitespace-pre-line leading-relaxed">{event.description}</p>}
+          {event.description && <p className="whitespace-pre-line leading-relaxed"><Linkified text={event.description} /></p>}
         </div>
       )}
 
@@ -191,14 +203,14 @@ function EventSkeleton() {
   );
 }
 
-export default function EventPage({ params }: { params: Params }) {
+export default function EventPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   return (
     <>
       <nav className="mb-4 text-sm">
         <Link href="/events" className="text-muted-foreground hover:text-gold">← All events</Link>
       </nav>
       <Suspense fallback={<EventSkeleton />}>
-        <EventContent params={params} />
+        <EventContent params={params} searchParams={searchParams} />
       </Suspense>
     </>
   );

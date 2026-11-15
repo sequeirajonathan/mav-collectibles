@@ -7,6 +7,7 @@ import { eventFormDefaults } from "@components/admin/event-form-values";
 import { EventTabs } from "@components/admin/event-tabs";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
+import { SignupLink } from "@components/admin/signup-link";
 import { getEventForEdit, listGames } from "@lib/data/hub";
 import { uuid } from "@lib/contracts/common";
 import { Skeleton } from "@components/ui/skeleton";
@@ -21,7 +22,14 @@ async function Edit({ params }: { params: Params }) {
   if (!event) notFound();
   return (
     <>
-      <PageHeader title={event.title} actions={event.status !== "draft" && <Link href={`/events/${event.slug}`} className="text-sm font-semibold text-gold">View public page →</Link>} />
+      <PageHeader title={event.title} actions={
+          event.status !== "draft" && (
+            <>
+              <SignupLink slug={event.slug} />
+              <Link href={`/events/${event.slug}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-gold can-hover:min-h-9">View public page →</Link>
+            </>
+          )
+        } />
       <EventTabs id={id} active="details" />
       <EventForm games={games} eventId={id} initial={eventFormDefaults(event)} />
     </>

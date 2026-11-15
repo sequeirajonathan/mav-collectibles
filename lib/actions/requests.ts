@@ -3,6 +3,7 @@
 import { prisma } from "@lib/prisma";
 import { ActionError, createAction } from "@lib/actions/safe-action";
 import { CONTENT_ROLES, UserRole } from "@interfaces/roles";
+import { sendRequestAlerts } from "@lib/request-alerts";
 import { deleteRequestInput, submitRequestInput, updateRequestInput } from "@lib/contracts/requests";
 
 /** Staff ask for a feature or report a problem. */
@@ -22,6 +23,7 @@ export const updateStaffRequest = createAction({ input: updateRequestInput, acce
   if (!current) throw new ActionError("That request no longer exists.");
   const completedAt = status === "done" ? (current.status === "done" ? current.completed_at : new Date()) : null;
   await prisma.staffRequest.update({ where: { id }, data: { status, priority, response, completed_at: completedAt } });
+  if (status === "done") await sendRequestAlerts();
   return null;
 });
 

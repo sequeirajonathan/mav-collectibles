@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { PageHeader } from "@components/ui/page-header";
+import { sendRequestAlerts } from "@lib/request-alerts";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES, HIRING_ROLES } from "@interfaces/roles";
 import { countNewJobApplications } from "@lib/data/jobs";
@@ -15,6 +16,8 @@ import { LinkButton } from "@components/ui/link-button";
 
 async function Overview() {
   const user = await requirePageRole(CONTENT_ROLES, "/admin");
+  // Requests finished outside this screen are announced the next time staff open Admin.
+  await sendRequestAlerts().catch(() => 0);
   const canHire = HIRING_ROLES.includes(user.role);
   const [events, pendingVendors, comments24h, members, openRequests, newApplications] = await Promise.all([
     listAllEventsForStaff(),

@@ -3,24 +3,52 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { Check, Search, UserMinus } from "lucide-react";
+import { Check, Download, Search, UserMinus } from "lucide-react";
+import { Button } from "@components/ui/button";
+import type { EventQuestion } from "@lib/event-questions";
 import { removeAttendee, setCheckIn } from "@lib/actions/hub";
 import type { Attendee } from "@lib/contracts/hub";
 import { cn } from "@utils";
 import { cardVariants } from "@components/ui/card";
 
 /** Door list with one-tap check-in. Big tap targets for using on a phone at the counter. */
-export function AttendeeList({ eventId, attendees }: { eventId: string; attendees: Attendee[] }) {
+/** One spreadsheet cell; quoted, and never starting with a character a spreadsheet would run as a formula. */
+function cell(value: string): string {
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+const STATUS_LABEL = { registered: "Registered", waitlisted: "Waitlist", checked_in: "Checked in", cancelled: "Cancelled" } as const;
+
+export function attendeesCsv(attendees: Attendee[], questions: EventQuestion[]): string {
+  const header = ["Name", "Email", "Status", "Registered", ...questions.map((q) => q.label)];
+  const rows = attendees.map((a) => [a.displayName, a.email ?? "", STATUS_LABEL[a.status], a.registeredAt.slice(0, 10), ...questions.map((q) => a.answers[q.id] ?? "")]);
+  return [header, ...rows].map((row) => row.map(cell).join(",")).join("\r\n");
+}
+
+export function AttendeeList({ eventId, eventSlug, attendees, questions = [] }: { eventId: string; eventSlug?: string; attendees: Attendee[]; questions?: EventQuestion[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [pending, startTransition] = useTransition();
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? attendees.filter((a) => a.displayName.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q)) : attendees;
+    if (!q) return attendees;
+    // Players are often known by the name they gave on the form, not their account name.
+    return attendees.filter((a) => [a.displayName, a.email ?? "", ...Object.values(a.answers)].some((text) => text.toLowerCase().includes(q)));
   }, [attendees, query]);
 
   const going = attendees.filter((a) => a.status !== "waitlisted");
   const checkedIn = attendees.filter((a) => a.status === "checked_in").length;
+
+  const download = () => {
+    // The leading mark makes Excel read accents correctly.
+    const url = URL.createObjectURL(new Blob(["\uFEFF", attendeesCsv(attendees, questions)], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${eventSlug ?? "event"}-players.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const run = (fn: () => ReturnType<typeof setCheckIn>) =>
     startTransition(async () => {
@@ -36,6 +64,11 @@ export function AttendeeList({ eventId, attendees }: { eventId: string; attendee
           <strong className="text-foreground">{checkedIn}</strong> of {going.length} checked in
           {attendees.length > going.length && ` · ${attendees.length - going.length} waitlisted`}
         </p>
+        {attendees.length > 0 && (
+          <Button type="button" variant="outline" size="sm" onClick={download}>
+            <Download aria-hidden /> Download spreadsheet
+          </Button>
+        )}
         <label className="flex w-full items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 fold:w-64">
           <Search className="size-4 text-muted-foreground" />
           <span className="sr-only">Find a player</span>
@@ -49,7 +82,7 @@ export function AttendeeList({ eventId, attendees }: { eventId: string; attendee
           {filtered.map((a) => {
             const isIn = a.status === "checked_in";
             return (
-              <li key={a.userId} className="flex items-center gap-3 px-3 py-2 fold:px-4">
+              <li key={a.userId} className="flex items-start gap-3 px-3 py-2 fold:px-4">
                 <button
                   type="button"
                   disabled={pending || a.status === "waitlisted"}
@@ -70,6 +103,16 @@ export function AttendeeList({ eventId, attendees }: { eventId: string; attendee
                     {a.status === "waitlisted" ? "Waitlist" : isIn ? "Checked in" : "Registered"}
                     {a.email && ` · ${a.email}`}
                   </p>
+                  {questions.length > 0 && (
+                    <dl className="mt-1 grid gap-x-4 gap-y-0.5 text-xs fold:grid-cols-2">
+                      {questions.map((q) => (
+                        <div key={q.id} className="flex min-w-0 gap-1">
+                          <dt className="shrink-0 text-muted-foreground">{q.label}:</dt>
+                          <dd className={cn("min-w-0 break-words", a.answers[q.id] ? "font-semibold" : "text-muted-foreground")}>{a.answers[q.id] || "—"}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
                 </div>
                 <button
                   type="button"

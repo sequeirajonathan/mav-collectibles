@@ -49,8 +49,9 @@ export default function PrivacyPage() {
               don&apos;t post anything on your behalf.
             </li>
             <li>
-              <strong>What you do here:</strong> the events you RSVP to, tournament results and season points, posts
-              you like, save or comment on, and vendor applications you send us.
+              <strong>What you do here:</strong> the events you RSVP to and the answers you give to an event&apos;s
+              sign-up questions (for example a player ID or date of birth, which only our staff see), tournament results and
+              season points, posts you like, save or comment on, and vendor applications you send us.
             </li>
             <li>
               <strong>Store records:</strong> if the email on your account matches a customer record at our register,
