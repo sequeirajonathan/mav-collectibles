@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search, X } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+import { InstallApp } from "./install-app";
 import { NAV_LINKS } from "./nav-links";
 import { cn } from "@utils";
 
@@ -59,6 +60,7 @@ export function MobileNav() {
               <input id="mobile-search" name="q" type="search" placeholder="Search products" className="min-h-11 w-full bg-transparent text-base outline-none" />
             </form>
             <ThemeToggle withLabel className="mb-2 justify-start border border-line" />
+            <InstallApp className="mb-2" />
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}

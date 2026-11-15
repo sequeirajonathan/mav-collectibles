@@ -21,6 +21,18 @@ function supabaseImagePattern(): RemotePattern[] {
 const localStorage = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
 
 const nextConfig: NextConfig = {
+  // The service worker must never be served stale, or installed apps keep old code.
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
+    ];
+  },
   // Partial prerendering + `use cache`: static shells stream instantly, dynamic
   // parts render inside <Suspense> boundaries.
   cacheComponents: true,

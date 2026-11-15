@@ -5,6 +5,7 @@ import { FaEnvelope, FaFacebook, FaInstagram, FaMapMarkerAlt, FaPhoneAlt, FaTikt
 import { STORE_ADDRESS } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
 import { DiscordIcon } from "@components/hub/discord";
+import { InstallApp } from "./install-app";
 
 const PHONE = "(936) 449-1277";
 const EMAIL = "info@mavcollectibles.com";
@@ -30,6 +31,7 @@ export function SiteFooter() {
         <div>
           <Image src="/mav_collectibles.png" alt="MAV Collectibles" width={140} height={56} className="h-12 w-auto" />
           <p className="mt-3 text-sm text-muted-foreground">Your local game store for Pokémon and every TCG in Montgomery, TX.</p>
+          <InstallApp className="mt-4 max-w-56" />
           <div className="mt-4 flex flex-wrap gap-1">
             <Suspense fallback={null}>
               <DiscordIcon />

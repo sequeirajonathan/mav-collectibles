@@ -11,9 +11,13 @@ export const metadata: Metadata = {
   title: { default: "MAV Collectibles · Pokémon & TCG events in Montgomery, TX", template: "%s · MAV Collectibles" },
   description: "Pokémon league nights, TCG tournaments, prereleases, vendor days and trade nights at MAV Collectibles.",
   applicationName: "MAV Collectibles",
-  appleWebApp: { capable: true, title: "MAV", statusBarStyle: "black-translucent" },
+  // iOS "Add to Home Screen": app title, status bar, and the home-screen icon.
+  appleWebApp: { capable: true, title: "MAV", statusBarStyle: "default" },
+  icons: { icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }] },
+  formatDetection: { telephone: false },
 };
 import { THEME_STORAGE_KEY } from "@components/layout/theme";
+import { ServiceWorker } from "@components/layout/install-app";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -44,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground">
         <AuthProvider>
           <CartProvider>{children}</CartProvider>
+          <ServiceWorker />
         </AuthProvider>
       </body>
     </html>
