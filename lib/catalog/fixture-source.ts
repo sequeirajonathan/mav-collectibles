@@ -5,6 +5,7 @@ import { z } from "zod";
 import { catalogItemSchema, productSchema, type CatalogItem } from "@lib/contracts/catalog";
 import { matchesStock, type CatalogSource, type ListOptions } from "./source";
 import { isPublicCatalogItem } from "./visibility";
+import { byRelevance, searchTerms } from "./search-query";
 
 const fixtureSchema = z.object({ items: z.array(catalogItemSchema), products: z.array(productSchema) });
 type Fixture = z.infer<typeof fixtureSchema>;
@@ -40,8 +41,14 @@ export const fixtureCatalogSource: CatalogSource = {
   },
   async search(query, options) {
     const { items } = await fixture();
-    const q = query.toLowerCase();
-    return page(items.filter((i) => i.name.toLowerCase().includes(q)), options);
+    // Same terms and ranking as the live search; only the matching itself is local.
+    const terms = searchTerms(query);
+    const fold = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const matches = items.filter((i) => matchesStock(i, options.stock) && terms.every((t) => fold(`${i.name} ${i.description ?? ""}`).includes(t)));
+    const ranked = byRelevance(matches, terms, options.sort);
+    const start = options.cursor ? Number(options.cursor) : 0;
+    const next = start + options.limit;
+    return { items: ranked.slice(start, next), cursor: next < ranked.length ? String(next) : null };
   },
   async getProduct(id) {
     const { products } = await fixture();

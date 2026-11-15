@@ -30,7 +30,7 @@ export function SiteHeader() {
         </nav>
         <div className="ml-auto flex items-center gap-1">
           <ShopOnly>
-          <form action="/search" className="hidden items-center gap-2 rounded-full border border-line bg-panel px-3 transition-colors focus-within:border-gold lg:flex">
+          <form action="/search" className="hidden items-center gap-2 rounded-full border border-line bg-panel px-3 transition-[border-color,box-shadow] focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/30 lg:flex">
             <Search className="size-4 text-muted-foreground" />
             <label htmlFor="header-search" className="sr-only">Search products</label>
             <input id="header-search" name="q" type="search" placeholder="Search products" className="h-9 w-44 bg-transparent text-sm outline-none" />

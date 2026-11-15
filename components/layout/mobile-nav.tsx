@@ -83,7 +83,7 @@ export function MobileNav() {
               {shopVisible && (
               <form
                 action="/search"
-                className="mb-3 flex items-center gap-2 rounded-lg border border-line bg-panel-2 px-3"
+                className="mb-3 flex items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/30"
               >
                 <Search className="size-4 text-muted-foreground" />
                 <label htmlFor="mobile-search" className="sr-only">

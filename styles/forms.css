@@ -22,10 +22,10 @@ input:focus {
   outline: none !important;
 }
 
-/* Custom focus styles */
+/* Custom focus styles: colour the border an input already has. Inputs without
+   one (search boxes inside a rounded wrapper) show focus on the wrapper. */
 input:focus {
   border-color: var(--gold) !important;
-  border-width: 1px !important;
 }
 
 /* Ensure text remains visible during autofill in Webkit */
