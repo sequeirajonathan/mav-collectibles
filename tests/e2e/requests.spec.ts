@@ -33,6 +33,12 @@ test.describe("staff requests", () => {
     await expect(done).toContainText("Added under the event time.");
     await expect(done).toContainText("Done");
 
+    // Finishing it posts an announcement in Team chat for everyone.
+    await staff.goto("/admin/chat");
+    const note = staff.getByText(new RegExp(`Request finished: .${title}`)).filter({ visible: true });
+    await expect(note).toBeVisible();
+    await expect(note).toContainText("Added under the event time.");
+
     await staff.context().close();
     await admin.context().close();
   });

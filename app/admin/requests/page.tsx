@@ -5,6 +5,7 @@ import { PageHeader, EmptyState } from "@components/ui/page-header";
 import { ChipLink } from "@components/ui/chip";
 import { Skeleton } from "@components/ui/skeleton";
 import { RequestCard, RequestForm } from "@components/admin/staff-requests";
+import { sendRequestAlerts } from "@lib/request-alerts";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES, UserRole } from "@interfaces/roles";
 import { listStaffRequests } from "@lib/data/requests";
@@ -21,6 +22,8 @@ const EMPTY = {
 
 async function Requests({ searchParams }: { searchParams: SearchParams }) {
   const user = await requirePageRole(CONTENT_ROLES, "/admin/requests");
+  // Requests finished outside this screen are announced the next time staff open Admin.
+  await sendRequestAlerts().catch(() => 0);
   const view = viewSchema.catch("open").parse((await searchParams).view);
   const { rows, counts } = await listStaffRequests(view);
   const isAdmin = user.role === UserRole.ADMIN;
