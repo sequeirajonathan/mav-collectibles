@@ -3,6 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@utils/supabase/server";
 import { prisma } from "@lib/prisma";
 import { ensureSquareCustomer } from "@lib/square-customer";
+import { bootstrapFirstAdmin } from "@lib/auth/bootstrap";
 import { safeNext } from "@lib/auth/redirect";
 
 /**
@@ -34,6 +35,8 @@ export async function GET(request: NextRequest) {
 
   const { data } = await supabase.auth.getUser();
   const user = data.user;
+  // First admin (BOOTSTRAP_ADMIN_EMAIL): promote on email confirmation, then reissue the session.
+  if (user && (await bootstrapFirstAdmin(user.id).catch(() => false))) await supabase.auth.refreshSession();
   if (user && next !== "/reset-password") {
     // OAuth sign-ups have no username/phone yet: collect them first.
     const profile = await prisma.profile.findUnique({ where: { id: user.id } });

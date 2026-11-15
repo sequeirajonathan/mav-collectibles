@@ -80,13 +80,14 @@ copy when one exists and the Square original otherwise.
   to `.cache/`.
 - **Paid background removal (off by default):** the free model only handles
   products on a plain white background. Photoroom also handles tables and
-  shelves. To turn it on, add secret `PHOTOROOM_API_KEY` and variable
-  `IMAGE_BG_PROVIDER=photoroom` to the GitHub `production` environment;
+  shelves. To turn it on, add secret `PHOTOROOM_API_KEY` to the GitHub
+  `production` environment and switch on *Paid background removal* in
+  **Admin → Site**;
   `IMAGE_PAID_LIMIT` caps paid photos per run (default 200). Card scans and
   graded slabs are never sent. The Photoroom call hasn't been run against the
   live service yet: test with a small limit first.
-- **Better photos for card singles (off by default):** with variable
-  `IMAGE_REPLACE_TCGPLAYER=true`, the nightly job matches singles whose Square
+- **Better photos for card singles (off by default):** when an admin turns on
+  *Suggest better card photos* in **Admin → Site**, the nightly job matches singles whose Square
   photo is missing or under 500 px to TCGplayer's catalogue (via tcgcsv.com) and
   stores the match as *proposed*. Staff approve or reject each one in
   **Admin → Photos**; customers only see approved ones. Matching is strict
@@ -140,6 +141,7 @@ the build fails if a client component tries to use it.
 | `SQUARE_LOCATION_IDS` | config | sandbox location ID | — | (default: shop location) |
 | `SHIPPO_API_KEY` | **secret** | test key | test key | live key |
 | `GOOGLE_PLACES_API_KEY` | **secret** | optional | — | API-restricted key |
+| `BOOTSTRAP_ADMIN_EMAIL` | config | — | — | the first admin's email (see below) |
 
 In Vercel, mark every **secret** row as *Sensitive*.
 
@@ -193,13 +195,11 @@ production release, and protect `main` so the `CI / verify` check must pass.
 5. **Auth → Attack protection:** turn on leaked-password protection. Under
    **Providers → Email**, turn on *Secure password change* (changing a password
    needs a recent sign-in), as in `supabase/config.toml`.
-6. **First admin:** sign up on the site, confirm the email, then in the SQL editor:
-   ```sql
-   update auth.users set raw_app_meta_data = raw_app_meta_data || '{"role":"ADMIN"}'
-   where email = 'you@example.com';
-   ```
-   Sign out and back in. After that, manage roles in the admin **Roles** tab
-   (`ADMIN`, `STAFF`, `EVENT`, `PRINT_AGENT`, `USER`).
+6. **First admin:** set `BOOTSTRAP_ADMIN_EMAIL` in Vercel (Production) to your
+   email, then sign up on the site with that address and confirm it. You become
+   `ADMIN` on confirmation. It only works while the site has no admin, so it
+   can't be used to take over later. After that, manage roles in the admin
+   **Roles** tab (`ADMIN`, `STAFF`, `EVENT`, `PRINT_AGENT`, `USER`).
 7. **Print agent account:** create a normal account for the shop PC and set its
    role to `PRINT_AGENT`. See the mav-print README.
 

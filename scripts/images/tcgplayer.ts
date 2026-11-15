@@ -2,7 +2,7 @@
  * Proposes better photos for card singles whose Square photo is missing or
  * low resolution, using TCGplayer's catalogue (via the tcgcsv.com mirror).
  *
- *   npx tsx scripts/images/tcgplayer.ts                 # needs IMAGE_REPLACE_TCGPLAYER=true
+ *   npx tsx scripts/images/tcgplayer.ts                 # runs when the Admin → Site switch is on
  *   npx tsx scripts/images/tcgplayer.ts --from-export --limit 50
  *
  * Every match is stored as "proposed". Customers see nothing until staff
@@ -20,6 +20,7 @@ import { z } from "zod";
 import { processImage } from "./process-image";
 import { pickGroup, pickProduct, type TcgGroup, type TcgProduct } from "./tcg-match";
 import { LOW_RES_PX, PRODUCT_IMAGE_BUCKET } from "../../lib/catalog/product-image-config";
+import { flagEnabled } from "./flags";
 
 /** Square singles categories → TCGplayer category IDs to search (first match wins). */
 const SINGLES: Record<string, number[]> = {
@@ -153,13 +154,15 @@ const sizeRow = z.object({ square_image_id: z.string(), width: z.number(), heigh
 const doneRow = z.object({ square_item_id: z.string(), square_image_id: z.string().nullable() });
 
 async function main() {
-  if (process.env.IMAGE_REPLACE_TCGPLAYER !== "true" && !flag("force")) {
-    console.log("TCGplayer photo replacement is off (set IMAGE_REPLACE_TCGPLAYER=true to turn it on).");
-    return;
-  }
   const supabase = createClient(required("NEXT_PUBLIC_SUPABASE_URL"), required("SUPABASE_SECRET_KEY"), {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  // On when an admin switched it on in Admin → Site (or IMAGE_REPLACE_TCGPLAYER=true).
+  const on = process.env.IMAGE_REPLACE_TCGPLAYER === "true" || flag("force") || (await flagEnabled(supabase, "tcgplayerPhotos"));
+  if (!on) {
+    console.log("Card photo suggestions are off (turn on \"Suggest better card photos\" in Admin → Site).");
+    return;
+  }
   const limit = Number(option("limit") ?? Infinity);
 
   async function all<T>(table: string, columns: string, key: string, schema: z.ZodType<T>): Promise<T[]> {

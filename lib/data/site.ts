@@ -30,6 +30,8 @@ const FLAG_DEFAULTS: FlagMap = {
   showYouTubeVideo: false,
   showVideoPlayer: false,
   showGoogleReviews: true,
+  tcgplayerPhotos: false,
+  paidBackgroundRemoval: false,
 };
 
 export async function getFlags(): Promise<FlagMap> {

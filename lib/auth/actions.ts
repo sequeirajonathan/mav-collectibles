@@ -7,6 +7,7 @@ import { publicEnv } from "@lib/env";
 import { createClient } from "@utils/supabase/server";
 import { getCurrentUser } from "@lib/auth/server";
 import { ensureSquareCustomer, toE164 } from "@lib/square-customer";
+import { bootstrapFirstAdmin } from "@lib/auth/bootstrap";
 
 type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -47,13 +48,15 @@ export async function signInAction(input: {
   if (!email) return { ok: false, error: GENERIC_SIGN_IN_ERROR };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password: input.password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: input.password });
   if (error) {
     if (error.code === "email_not_confirmed") {
       return { ok: false, error: "Please confirm your email address first. Check your inbox for the link." };
     }
     return { ok: false, error: GENERIC_SIGN_IN_ERROR };
   }
+  // First admin (BOOTSTRAP_ADMIN_EMAIL): promote, then reissue the session so it carries the role.
+  if (data.user && (await bootstrapFirstAdmin(data.user.id).catch(() => false))) await supabase.auth.refreshSession();
   return { ok: true };
 }
 

@@ -22,6 +22,7 @@ import { SquareClient, SquareEnvironment } from "square";
 import { z } from "zod";
 import { processImage } from "./process-image";
 import { PRODUCT_IMAGE_BUCKET, PROCESSOR_VERSION } from "../../lib/catalog/product-image-config";
+import { flagEnabled } from "./flags";
 
 /** Categories whose photos are card scans or slabs: trimmed and rounded, never cut out. */
 const CARD_CATEGORY = /singles|graded|slab|\bPSA\b|\bCGC\b|\bBGS\b|tcg ?player/i;
@@ -143,9 +144,11 @@ async function main() {
   }
 
   // Paid background removal: off unless both settings are present.
-  const paidOn = process.env.IMAGE_BG_PROVIDER === "photoroom" && Boolean(process.env.PHOTOROOM_API_KEY);
+  // Switched on in Admin → Site (or IMAGE_BG_PROVIDER=photoroom), and only with a key.
+  const paidWanted = process.env.IMAGE_BG_PROVIDER === "photoroom" || (await flagEnabled(supabase, "paidBackgroundRemoval"));
+  const paidOn = paidWanted && Boolean(process.env.PHOTOROOM_API_KEY);
   let paidLeft = paidOn ? Number(process.env.IMAGE_PAID_LIMIT || 200) : 0;
-  if (process.env.IMAGE_BG_PROVIDER === "photoroom" && !paidOn) console.warn("IMAGE_BG_PROVIDER=photoroom but PHOTOROOM_API_KEY is missing; using the free model.");
+  if (paidWanted && !paidOn) console.warn("Paid background removal is switched on but PHOTOROOM_API_KEY is missing; using the free model.");
 
   const stale = (s: Source) => {
     const row = existing.get(s.id);

@@ -9,14 +9,13 @@
 #   Secrets:   SQUARE_ACCESS_TOKEN, SUPABASE_SECRET_KEY
 #   Variables: SUPABASE_PROJECT_ID
 #
-# TCGplayer photo replacement for card singles is OFF by default. To turn it
-# on, add variable IMAGE_REPLACE_TCGPLAYER=true. Matches wait for staff
-# approval in Admin → Photos before customers see them.
-#
-# Paid background removal (Photoroom) is OFF by default. To turn it on, add to
-# the same environment: secret PHOTOROOM_API_KEY and variable
-# IMAGE_BG_PROVIDER=photoroom. Optional variable IMAGE_PAID_LIMIT caps the paid
-# photos per run (default 200). Remove the variable to turn it off again.
+# Two optional parts are OFF by default and switched on by an admin in
+# Admin → Site:
+#   - "Suggest better card photos": TCGplayer matches for card singles, which
+#     wait for staff approval in Admin → Photos.
+#   - "Paid background removal" (Photoroom): also needs secret
+#     PHOTOROOM_API_KEY here. Optional variable IMAGE_PAID_LIMIT caps the paid
+#     photos per run (default 200).
 name: Product images
 
 on:

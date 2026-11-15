@@ -16,6 +16,8 @@ const serverSchema = z.object({
   CATALOG_SOURCE: z.enum(["square", "fixtures"]).default("square"),
   SHIPPO_API_KEY: z.string().min(1).optional(),
   GOOGLE_PLACES_API_KEY: z.string().min(1).optional(),
+  // The first admin: see lib/auth/bootstrap.ts.
+  BOOTSTRAP_ADMIN_EMAIL: z.email().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverSchema>;
@@ -33,6 +35,7 @@ export function serverEnv(): ServerEnv {
     CATALOG_SOURCE: process.env.CATALOG_SOURCE || undefined,
     SHIPPO_API_KEY: process.env.SHIPPO_API_KEY || undefined,
     GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY || undefined,
+    BOOTSTRAP_ADMIN_EMAIL: process.env.BOOTSTRAP_ADMIN_EMAIL || undefined,
   });
   if (!parsed.success) {
     throw new Error(

@@ -8,6 +8,8 @@ export const FLAG_NAMES = [
   "showYouTubeVideo",
   "showVideoPlayer",
   "showGoogleReviews",
+  "tcgplayerPhotos",
+  "paidBackgroundRemoval",
 ] as const;
 const flagNameSchema = z.enum(FLAG_NAMES);
 export type FlagName = z.infer<typeof flagNameSchema>;
