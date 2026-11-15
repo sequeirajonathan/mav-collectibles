@@ -13,7 +13,7 @@ import { LinkButton } from "@components/ui/link-button";
 async function List() {
   await requirePageRole(CONTENT_ROLES, "/admin/posts");
   const posts = await listAllPostsForStaff();
-  if (posts.length === 0) return <EmptyState title="No posts yet" action={<Link href="/admin/posts/new" className="font-semibold text-gold">Write the first one →</Link>} />;
+  if (posts.length === 0) return <EmptyState mascot="gardevoir" title="No posts yet" action={<Link href="/admin/posts/new" className="font-semibold text-gold">Write the first one →</Link>} />;
   return (
     <ul className={cardVariants({ variant: "list" })}>
       {posts.map((p) => (

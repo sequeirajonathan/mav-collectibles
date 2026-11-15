@@ -27,6 +27,7 @@ async function Applications({ searchParams }: { searchParams: SearchParams }) {
       </div>
       {rows.length === 0 ? (
         <EmptyState
+          mascot="lucario"
           title={status === "new" ? "No new applications" : `Nothing under "${APPLICATION_STATUS_LABEL[status]}"`}
           description="Applications sent from the We're hiring page show up here."
           action={<LinkButton href="/jobs" variant="outline">View the hiring page</LinkButton>}

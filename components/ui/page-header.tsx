@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { Mascot, type MascotName } from "./mascot";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@utils";
@@ -68,12 +68,6 @@ export function Sparkle({ className }: { className?: string }) {
   );
 }
 
-const MASCOTS = {
-  gengar: { src: "/images/gengar.gif", width: 500, height: 493 },
-  karp: { src: "/images/karp.gif", width: 500, height: 659 },
-  lucario: { src: "/images/lucario.gif", width: 47, height: 63 },
-} as const;
-
 /** "Nothing here yet" placeholder with an optional action and pixel-art mascot. */
 export function EmptyState({
   title,
@@ -84,18 +78,11 @@ export function EmptyState({
   title: string;
   description?: string;
   action?: ReactNode;
-  mascot?: keyof typeof MASCOTS;
+  mascot?: MascotName;
 }) {
   return (
     <div className="rounded-xl border border-dashed border-line bg-panel/60 px-6 py-10 text-center">
-      {mascot && (
-        <Image
-          {...MASCOTS[mascot]}
-          alt=""
-          unoptimized
-          className="pixelated animate-bob mx-auto mb-3 h-20 w-auto"
-        />
-      )}
+      {mascot && <Mascot name={mascot} className="mx-auto mb-3 h-20" />}
       <p className="font-semibold text-foreground">{title}</p>
       {description && <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}

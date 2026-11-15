@@ -36,7 +36,7 @@ async function Requests({ searchParams }: { searchParams: SearchParams }) {
           ))}
         </div>
         {rows.length === 0 ? (
-          <EmptyState {...EMPTY[view]} />
+          <EmptyState mascot="gyarados" {...EMPTY[view]} />
         ) : (
           <div className="grid gap-3 xl:grid-cols-2">
             {rows.map((r) => (

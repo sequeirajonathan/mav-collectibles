@@ -13,7 +13,7 @@ import { LinkButton } from "@components/ui/link-button";
 async function List() {
   await requirePageRole(CONTENT_ROLES, "/admin/events");
   const events = await listAllEventsForStaff();
-  if (events.length === 0) return <EmptyState title="No events yet" action={<Link href="/admin/events/new" className="font-semibold text-gold">Create the first one →</Link>} />;
+  if (events.length === 0) return <EmptyState mascot="rayquaza" title="No events yet" action={<Link href="/admin/events/new" className="font-semibold text-gold">Create the first one →</Link>} />;
   return (
     <ul className={cardVariants({ variant: "list" })}>
       {events.map((e) => (

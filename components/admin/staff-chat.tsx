@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { ImagePlus, Loader2, SendHorizontal, Trash2, X } from "lucide-react";
 import { Button } from "@components/ui/button";
@@ -10,6 +9,7 @@ import { inputClass } from "@components/ui/field";
 import { deleteStaffMessage, sendStaffMessage } from "@lib/actions/chat";
 import { CHAT_IMAGE_MAX_BYTES, CHAT_IMAGE_TYPES, chatListSchema, uploadResponseSchema, type ChatMessage } from "@lib/contracts/chat";
 import { cn } from "@utils";
+import { Mascot } from "@components/ui/mascot";
 
 const POLL_MS = 5000;
 const time = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -119,7 +119,7 @@ export function StaffChat({ initial, userId, isAdmin }: { initial: ChatMessage[]
       <div ref={list} role="log" aria-label="Messages" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto p-3 fold:p-4">
         {messages.length === 0 && (
           <div className="py-10 text-center text-muted-foreground">
-            <Image src="/images/lucario.gif" alt="" width={47} height={63} unoptimized className="pixelated animate-bob mx-auto mb-3 h-24 w-auto" />
+            <Mascot name="mew" className="mx-auto mb-3 h-20" />
             No messages yet. Say hi to the team.
           </div>
         )}

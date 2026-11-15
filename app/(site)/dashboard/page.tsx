@@ -40,7 +40,7 @@ async function MyEvents() {
   if (!user) return null;
   const events = await listMyEvents(user.id);
   if (events.length === 0) {
-    return <EmptyState title="No RSVPs yet" description="Find a league night or tournament and save your seat." action={<Link href="/events" className="font-semibold text-gold">Browse events →</Link>} />;
+    return <EmptyState mascot="charmander" title="No RSVPs yet" description="Find a league night or tournament and save your seat." action={<Link href="/events" className="font-semibold text-gold">Browse events →</Link>} />;
   }
   return (
     <div className="grid gap-3 lg:grid-cols-2">
@@ -60,7 +60,7 @@ async function SavedPosts() {
   const user = await getCurrentUser();
   if (!user) return null;
   const { posts } = await withMyReactions(await listSavedPosts(user.id));
-  if (posts.length === 0) return <EmptyState title="Nothing saved yet" description="Tap Save on a post to keep it here." />;
+  if (posts.length === 0) return <EmptyState mascot="umbreon" title="Nothing saved yet" description="Tap Save on a post to keep it here." />;
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {posts.map((p) => (
