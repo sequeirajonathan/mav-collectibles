@@ -32,6 +32,7 @@ const FLAG_DEFAULTS: FlagMap = {
   showGoogleReviews: true,
   tcgplayerPhotos: false,
   paidBackgroundRemoval: false,
+  facebookSignIn: false,
 };
 
 export async function getFlags(): Promise<FlagMap> {
