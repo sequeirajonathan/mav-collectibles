@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_STYLE } from "@const/site-style";
 import { Bangers, Geist, Geist_Mono } from "next/font/google";
 import "@styles/globals.css";
 import { AuthProvider } from "@contexts/AuthContext";
@@ -43,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // The theme script below sets data-theme before first paint, so the
     // attribute can differ from the server's HTML.
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable}`} data-style={SITE_STYLE} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

@@ -7,23 +7,23 @@ import { cn } from "@utils";
  * The panel surface used for every boxed thing on the site.
  * Use `asChild` to put the styling on a <Link>, <ul>, <form> or <article>.
  */
-const cardVariants = cva("rounded-xl border bg-panel", {
+const cardVariants = cva("ui-card rounded-xl border bg-panel", {
   variants: {
     variant: {
       default: "border-line",
       /** Clickable cards: gold edge, soft glow and a 2px lift on hover (mouse only). */
       interactive:
-        "border-line transition-[border-color,box-shadow,translate] duration-200 can-hover:hover:-translate-y-0.5 can-hover:hover:border-gold/50 can-hover:hover:shadow-glow",
+        "ui-card-interactive border-line transition-[border-color,box-shadow,translate] duration-200 can-hover:hover:-translate-y-0.5 can-hover:hover:border-gold/50 can-hover:hover:shadow-glow",
       /** Rows separated by hairlines (lists, tables on phones). */
-      list: "divide-y divide-line overflow-hidden border-line",
+      list: "ui-card-flat divide-y divide-line overflow-hidden border-line",
       /** Highlighted callout (linked event, "available in store"). */
       accent: "border-gold/30 bg-gold/5",
       /** Gold-edged hero/feature panel. */
       featured: "border-gold/40",
       /** Placeholder for "nothing here yet". */
-      dashed: "border-dashed border-line bg-panel/60",
+      dashed: "ui-card-flat border-dashed border-line bg-panel/60",
       /** A recessed surface inside another card (inputs, thumbnails). */
-      inset: "border-line bg-panel-2",
+      inset: "ui-card-flat border-line bg-panel-2",
     },
     padding: {
       none: "",

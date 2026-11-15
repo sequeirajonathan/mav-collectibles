@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@utils";
 
 /** Small rounded label: event kind, status, role, counts. */
-const badgeVariants = cva("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold", {
+const badgeVariants = cva("ui-badge inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold", {
   variants: {
     variant: {
       neutral: "border-line bg-panel-2 font-medium text-muted-foreground",

@@ -181,12 +181,13 @@ export default function HomePage() {
           <div aria-hidden className="speed-lines pointer-events-none absolute inset-0" />
           <Petals />
           <HeroCards />
+          <span aria-hidden className="comic-only burst absolute right-4 top-4 lg:right-[21rem] lg:top-6">New pulls weekly!</span>
           <div className="relative max-w-3xl lg:max-w-xl xl:max-w-2xl">
             <div className="flex flex-wrap items-center gap-3">
               <Eyebrow>Montgomery, TX</Eyebrow>
               <span className="sticker px-2 py-1 text-sm">Buy · Sell · Trade</span>
             </div>
-            <h1 className="font-display mt-3 text-[2.6rem] leading-[1.12] fold:text-6xl short:text-4xl">
+            <h1 className="ui-hero-title font-display mt-3 text-[2.6rem] leading-[1.12] fold:text-6xl short:text-4xl">
               Your home for <span className="text-pop">Pokémon</span> & every TCG.
             </h1>
             <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">

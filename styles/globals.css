@@ -374,3 +374,171 @@
     display: none;
   }
 }
+
+/* ==========================================================================
+   Comic-book style (const/site-style.ts → html[data-style="comic"]).
+   Ink outlines, hard offset shadows, Ben-Day dots and caption boxes, applied
+   to the shared UI kit through its ui-* hooks so every page picks it up.
+   ========================================================================== */
+.comic-only {
+  display: none;
+}
+html[data-style="comic"] {
+  --comic-ink: #10222f;
+  --comic-shadow: #10222f;
+  --comic-paper: #fffdf5;
+  --comic-dot: rgb(16 34 47 / 0.16);
+  --background: #fdf6e0;
+  --panel: var(--comic-paper);
+  --card: var(--comic-paper);
+}
+html[data-style="comic"][data-theme="dark"] {
+  --comic-ink: #f5f5f4;
+  --comic-shadow: #e6b325;
+  --comic-paper: #0d1017;
+  --comic-dot: rgb(255 255 255 / 0.1);
+  --background: #000000;
+}
+html[data-style="comic"] {
+  .comic-only {
+    display: revert;
+  }
+  body {
+    /* Newsprint: faint Ben-Day dots across the page. */
+    background-image: radial-gradient(var(--comic-dot) 1px, transparent 1.2px);
+    background-size: 9px 9px;
+  }
+  .ui-card:not(.ui-card-flat) {
+    border: 2.5px solid var(--comic-ink);
+    box-shadow: 5px 5px 0 var(--comic-shadow);
+  }
+  .ui-card-flat {
+    border-width: 2px;
+    border-color: var(--comic-ink);
+  }
+  .ui-btn {
+    border: 2.5px solid var(--comic-ink);
+    box-shadow: 3px 3px 0 var(--comic-shadow);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    transition: translate 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+  }
+  .ui-btn:active {
+    translate: 3px 3px;
+    box-shadow: 0 0 0 var(--comic-shadow);
+  }
+  .ui-chip,
+  .ui-badge {
+    border: 2px solid var(--comic-ink);
+  }
+  /* Narration caption box. */
+  .ui-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    border: 2px solid var(--comic-ink);
+    background-color: var(--cta);
+    color: var(--cta-ink);
+    padding: 0.2rem 0.5rem;
+    letter-spacing: 0.14em;
+    box-shadow: 2px 2px 0 var(--comic-shadow);
+  }
+  /* Section titles on a slanted ink banner. */
+  .ui-section-title {
+    background-color: var(--comic-ink);
+    color: var(--cta);
+    padding: 0.2rem 0.9rem 0.2rem 0.6rem;
+    transform: skewX(-8deg) rotate(-1deg);
+    box-shadow: 4px 4px 0 var(--cta);
+  }
+  &[data-theme="dark"] .ui-section-title {
+    background-color: var(--cta);
+    color: #05060a;
+    box-shadow: 4px 4px 0 rgb(255 255 255 / 0.85);
+  }
+  .ui-page-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    font-size: 2.4rem;
+    line-height: 1.05;
+  }
+  /* Hero: a splash panel in the logo's yellow with Ben-Day shading. */
+  .bg-hero {
+    border: 3px solid var(--comic-ink);
+    box-shadow: 7px 7px 0 var(--comic-shadow);
+    background-color: #ffd02e;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgb(255 255 255 / 0.75), transparent 45%),
+      radial-gradient(rgb(214 96 20 / 0.35) 2.2px, transparent 2.6px);
+    background-size: auto, 13px 13px;
+    color: #10222f;
+  }
+  .bg-hero .speed-lines {
+    background-image: repeating-conic-gradient(from 0deg at 88% 50%, rgb(255 255 255 / 0.5) 0deg 1.4deg, transparent 1.4deg 5deg);
+  }
+  .bg-hero p {
+    color: #10222f;
+  }
+  .bg-hero .ui-eyebrow {
+    background-color: #fffdf5;
+  }
+  .bg-hero .sticker {
+    background-color: #e11d48;
+    color: #fff;
+    border-color: #10222f;
+    box-shadow: 3px 3px 0 #10222f;
+  }
+  .ui-hero-title {
+    color: #10222f;
+    rotate: -1.5deg;
+    text-shadow: 0.05em 0.06em 0 rgb(255 255 255 / 0.9);
+  }
+  .ui-hero-title .text-pop {
+    color: #fff;
+    -webkit-text-stroke-color: #10222f;
+    text-shadow: 0.07em 0.08em 0 #e11d48;
+  }
+  .sleeve {
+    border-width: 2.5px;
+    border-color: var(--comic-ink);
+    box-shadow: 5px 5px 0 var(--comic-shadow);
+  }
+  /* Shouty starburst. */
+  .burst {
+    display: grid;
+    place-items: center;
+    width: 7.5rem;
+    aspect-ratio: 1;
+    padding: 1.4rem;
+    rotate: 10deg;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background-color: #e11d48;
+    filter: drop-shadow(3px 3px 0 #10222f);
+    clip-path: polygon(50% 0%, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 43%, 100% 57%, 84% 64%, 88% 83%, 70% 80%, 62% 98%, 50% 85%, 38% 98%, 30% 80%, 12% 83%, 16% 64%, 0% 57%, 12% 43%, 2% 28%, 20% 25%, 21% 7%, 39% 14%);
+  }
+  @media (max-width: 63.99rem) {
+    .burst {
+      display: none;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-card-interactive:hover {
+      translate: -2px -2px;
+      border-color: var(--comic-ink);
+      box-shadow: 8px 8px 0 var(--cta);
+    }
+    .ui-btn:hover {
+      translate: -1px -1px;
+      box-shadow: 5px 5px 0 var(--comic-shadow);
+    }
+  }
+}

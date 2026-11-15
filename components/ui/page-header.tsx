@@ -20,7 +20,7 @@ export function PageHeader({
     <header className="mb-6 flex flex-col gap-4 fold:mb-8 fold:flex-row fold:items-end fold:justify-between">
       <div className="min-w-0">
         {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground fold:text-3xl">{title}</h1>
+        <h1 className="ui-page-title mt-1 text-2xl font-bold tracking-tight text-foreground fold:text-3xl">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-sm text-muted-foreground fold:text-base">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
@@ -30,14 +30,14 @@ export function PageHeader({
 
 /** Small gold all-caps label above a heading. */
 export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn("text-xs font-bold uppercase tracking-[0.2em] text-gold", className)}>{children}</p>;
+  return <p className={cn("ui-eyebrow text-xs font-bold uppercase tracking-[0.2em] text-gold", className)}>{children}</p>;
 }
 
 /** <h2> for a section, with an optional "See all →" link on the right. */
 export function SectionHeading({ title, href, linkLabel }: { title: string; href?: string; linkLabel?: string }) {
   return (
     <div className="mb-4 flex items-baseline justify-between gap-4">
-      <h2 className="font-display flex items-center gap-2 text-2xl text-foreground fold:text-3xl">
+      <h2 className="ui-section-title font-display flex items-center gap-2 text-2xl text-foreground fold:text-3xl">
         <Sparkle className="size-5 shrink-0 fold:size-6" />
         {title}
       </h2>

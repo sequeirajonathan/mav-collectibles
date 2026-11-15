@@ -16,9 +16,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         /** Primary call to action. One per view, ideally. */
-        gold: "bg-cta font-bold text-cta-ink shadow-sm shadow-gold/10 hover:bg-cta-hover hover:shadow-gold/25 active:bg-cta-active",
+        gold: "ui-btn bg-cta font-bold text-cta-ink shadow-sm shadow-gold/10 hover:bg-cta-hover hover:shadow-gold/25 active:bg-cta-active",
         /** Secondary action next to a gold one. */
-        outline: "border border-line bg-panel/40 text-foreground hover:border-gold/60 hover:bg-panel-2",
+        outline: "ui-btn border border-line bg-panel/40 text-foreground hover:border-gold/60 hover:bg-panel-2",
         /** Tertiary/inline action (cancel, share, back). */
         ghost: "text-foreground/90 hover:bg-panel-2 hover:text-foreground",
         /** Quiet filled surface. */
