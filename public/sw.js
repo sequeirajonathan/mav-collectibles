@@ -7,7 +7,7 @@
  *    other sites.
  * Bump VERSION to drop old caches.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = `mav-${VERSION}`;
 const OFFLINE_URL = "/offline";
 
@@ -55,4 +55,39 @@ self.addEventListener("fetch", (event) => {
       )
     );
   }
+});
+
+// ---- Staff notifications ---------------------------------------------------
+self.addEventListener("push", (event) => {
+  let notice = { title: "MAV Collectibles", body: "", url: "/admin" };
+  try {
+    if (event.data) notice = { ...notice, ...event.data.json() };
+  } catch {
+    // Not JSON: show the generic notice.
+  }
+  event.waitUntil(
+    self.registration.showNotification(notice.title, {
+      body: notice.body,
+      tag: notice.tag,
+      renotify: Boolean(notice.tag),
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: notice.url },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  // Only ever open pages on this site.
+  const target = new URL((event.notification.data && event.notification.data.url) || "/admin", self.location.origin);
+  if (target.origin !== self.location.origin) return;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      for (const client of windows) {
+        if (new URL(client.url).pathname === target.pathname && "focus" in client) return client.focus();
+      }
+      return self.clients.openWindow(target.href);
+    })
+  );
 });

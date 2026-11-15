@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "MAV Collectibles",
     short_name: "MAV",
-    description: "Pokémon league nights, TCG tournaments, prereleases and vendor days at MAV Collectibles.",
+    description: "Pokémon league nights, TCG tournaments, pre-releases and vendor days at MAV Collectibles.",
     start_url: "/?source=app",
     scope: "/",
     display: "standalone",

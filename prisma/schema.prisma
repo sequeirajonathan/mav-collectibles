@@ -425,3 +425,51 @@ model StaffRequest {
   @@index([status, created_at], map: "staff_requests_status_idx")
   @@map("staff_requests")
 }
+
+// Job applications from /jobs (Admin → Applications).
+model JobApplication {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  position     String
+  name         String
+  email        String
+  phone        String   @default("")
+  availability String   @default("")
+  message      String   @default("")
+  resume_path  String?
+  resume_name  String?
+  status       String   @default("new")
+  notes        String   @default("")
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([status, created_at], map: "job_applications_status_idx")
+  @@index([email, created_at], map: "job_applications_email_idx")
+  @@map("job_applications")
+}
+
+// Internal staff chat (Admin → Chat).
+model StaffMessage {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  author_id   String    @db.Uuid
+  author_name String
+  body        String    @default("")
+  image_path  String?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)], map: "staff_messages_created_idx")
+  @@map("staff_messages")
+}
+
+// Browsers that staff have turned notifications on for.
+model PushSubscription {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id], map: "push_subscriptions_user_idx")
+  @@map("push_subscriptions")
+}

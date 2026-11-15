@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { PageHeader } from "@components/ui/page-header";
 import { requirePageRole } from "@lib/auth/guard";
-import { CONTENT_ROLES } from "@interfaces/roles";
+import { CONTENT_ROLES, HIRING_ROLES } from "@interfaces/roles";
+import { countNewJobApplications } from "@lib/data/jobs";
 import { prisma } from "@lib/prisma";
 import { listAllEventsForStaff } from "@lib/data/hub";
 import { countOpenStaffRequests } from "@lib/data/requests";
@@ -13,13 +14,15 @@ import { Skeleton } from "@components/ui/skeleton";
 import { LinkButton } from "@components/ui/link-button";
 
 async function Overview() {
-  await requirePageRole(CONTENT_ROLES, "/admin");
-  const [events, pendingVendors, comments24h, members, openRequests] = await Promise.all([
+  const user = await requirePageRole(CONTENT_ROLES, "/admin");
+  const canHire = HIRING_ROLES.includes(user.role);
+  const [events, pendingVendors, comments24h, members, openRequests, newApplications] = await Promise.all([
     listAllEventsForStaff(),
     prisma.vendor.count({ where: { status: "pending" } }),
     prisma.postComment.count({ where: { created_at: { gte: new Date(requestTime() - 86_400_000) }, deleted_at: null } }),
     prisma.profile.count(),
     countOpenStaffRequests(),
+    canHire ? countNewJobApplications() : 0,
   ]);
   const upcoming = upcomingOnly(events, requestTime()).reverse().slice(0, 5);
   const drafts = events.filter((e) => e.status === "draft").length;
@@ -27,7 +30,7 @@ async function Overview() {
   const linkStat = cardVariants({ variant: "interactive", padding: "md" });
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <Link href="/admin/vendors" className={linkStat}>
           <p className="text-3xl font-extrabold text-gold">{pendingVendors}</p>
           <p className="text-sm text-muted-foreground">Vendor applications waiting</p>
@@ -40,6 +43,12 @@ async function Overview() {
           <p className="text-3xl font-extrabold">{openRequests}</p>
           <p className="text-sm text-muted-foreground">Open staff requests</p>
         </Link>
+        {canHire && (
+          <Link href="/admin/applications" className={linkStat}>
+            <p className="text-3xl font-extrabold">{newApplications}</p>
+            <p className="text-sm text-muted-foreground">New job applications</p>
+          </Link>
+        )}
         <div className={stat}>
           <p className="text-3xl font-extrabold">{comments24h}</p>
           <p className="text-sm text-muted-foreground">Comments in the last day</p>

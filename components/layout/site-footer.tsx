@@ -2,12 +2,12 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaEnvelope, FaFacebook, FaInstagram, FaMapMarkerAlt, FaPhoneAlt, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
-import { STORE_ADDRESS } from "@lib/format";
+import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
 
-const PHONE = "(936) 449-1277";
+const PHONE = STORE_PHONE;
 const EMAIL = "info@mavcollectibles.com";
 const HOURS = [
   { day: "Mon", hours: "Closed" },
@@ -53,6 +53,9 @@ export function SiteFooter() {
             ))}
             <li>
               <Link href="/vendors/apply" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Become a vendor</Link>
+            </li>
+            <li>
+              <Link href="/jobs" className="inline-flex min-h-9 items-center font-semibold text-gold hover:text-gold-light">We&apos;re hiring</Link>
             </li>
           </ul>
         </nav>

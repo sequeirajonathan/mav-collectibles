@@ -5,6 +5,7 @@ import {
   formatEntryFee,
   formatEventWhen,
   formatMoneyCents,
+  isMarketPriced,
   groupByDay,
   isoToStoreLocal,
   storeLocalToIso,
@@ -46,5 +47,8 @@ describe("labels", () => {
     expect(formatEntryFee(0)).toBe("Free");
     expect(formatEntryFee(500)).toBe("$5 at the door");
     expect(formatMoneyCents(5999)).toBe("$59.99");
+    // $0 in the register means "priced to the market", never "free".
+    expect(isMarketPriced(0)).toBe(true);
+    expect(isMarketPriced(1)).toBe(false);
   });
 });

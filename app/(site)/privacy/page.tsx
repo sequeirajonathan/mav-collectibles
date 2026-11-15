@@ -57,6 +57,10 @@ export default function PrivacyPage() {
               we may link the two so your account reflects your in-store history.
             </li>
             <li>
+              <strong>Job applications:</strong> if you apply for a job, the details you enter and your résumé. Only
+              the people who hire for the shop can see them, and you can ask us to delete them at any time.
+            </li>
+            <li>
               <strong>On your device:</strong> a cookie that keeps you signed in, and your light or dark theme choice.
             </li>
           </ul>

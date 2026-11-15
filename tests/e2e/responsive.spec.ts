@@ -119,6 +119,28 @@ test.describe("responsive layout", () => {
     await page.getByRole("button", { name: "Open menu" }).click();
     const drawer = page.getByRole("dialog", { name: "Menu" });
     await expect(drawer).toBeVisible();
+
+    // The panel must cover the full height of the screen, not sit inside the header bar.
+    const viewport = page.viewportSize() ?? { width: 0, height: 0 };
+    const panel = await drawer.getByRole("navigation", { name: "Menu" }).boundingBox();
+    expect(panel?.y ?? -1).toBe(0);
+    expect(panel?.height ?? 0).toBeGreaterThanOrEqual(viewport.height - 1);
+    expect((panel?.x ?? 0) + (panel?.width ?? 0)).toBeLessThanOrEqual(viewport.width + 1);
+
+    // Every destination is really on screen and is the thing a finger would hit.
+    for (const name of ["Events", "News", "Vendors", "Leaderboard", "Shop"]) {
+      const link = drawer.getByRole("link", { name, exact: true });
+      await link.scrollIntoViewIfNeeded();
+      await expect(link).toBeInViewport({ ratio: 1 });
+      const onTop = await link.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return hit === el || el.contains(hit);
+      });
+      expect(onTop, `${name} is covered by something else`).toBe(true);
+    }
+    await expect(drawer.getByRole("button", { name: "Close menu" }).last()).toBeInViewport();
+
     await drawer.getByRole("link", { name: "Leaderboard" }).click();
     await expect(page).toHaveURL(/\/leaderboard/);
     await expect(drawer).toBeHidden();

@@ -91,7 +91,7 @@ begin
   returning id into league;
 
   insert into public.events (slug, title, summary, kind, game_id, format, starts_at, capacity, entry_fee_cents, status, created_by)
-  values ('pokemon-prerelease', 'Pokémon Prerelease', 'Build a deck from 4 boosters and play the new set first.', 'prerelease', 'pokemon', 'Sealed', now() + interval '14 days', 2, 3000, 'published', admin_id)
+  values ('pokemon-prerelease', 'Pokémon Pre-release', 'Build a deck from 4 boosters and play the new set first.', 'prerelease', 'pokemon', 'Sealed', now() + interval '14 days', 2, 3000, 'published', admin_id)
   returning id into prerelease;
 
   insert into public.events (slug, title, summary, kind, game_id, starts_at, ends_at, status, created_by)
