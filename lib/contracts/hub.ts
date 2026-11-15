@@ -69,6 +69,9 @@ export type EventSummary = z.infer<typeof eventSummarySchema>;
 
 export const eventDetailSchema = eventSummarySchema.extend({
   description: z.string(),
+  /** Optional button on the event page, e.g. a sign-up form. */
+  linkUrl: z.string().nullable(),
+  linkLabel: z.string().nullable(),
   registrationOpensAt: isoDateTime.nullable(),
   registrationClosesAt: isoDateTime.nullable(),
   /** The signed-in viewer's registration, if any. */
@@ -105,6 +108,8 @@ export const eventInput = z
     startsAt: z.coerce.date({ error: "Pick a start date and time" }),
     endsAt: optionalDateTime,
     location: z.string().trim().min(1).max(120),
+    linkUrl: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), httpUrl("Paste the full link, starting with https://").max(500).nullable()).default(null),
+    linkLabel: optionalText(40).default(null),
     coverImageUrl: optionalUrl,
     capacity: z.preprocess((v) => (v === "" || v === null ? null : v), z.coerce.number().int().positive().nullable()),
     entryFeeDollars: z.preprocess(

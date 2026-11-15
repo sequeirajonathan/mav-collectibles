@@ -170,6 +170,8 @@ export async function getEvent(slug: string): Promise<Omit<EventDetail, "myRegis
   const detail = eventDetailSchema.omit({ myRegistration: true }).parse({
     ...toSummary(e, counts),
     description: e.description,
+    linkUrl: e.link_url,
+    linkLabel: e.link_label,
     registrationOpensAt: e.registration_opens_at,
     registrationClosesAt: e.registration_closes_at,
     vendors: e.event_vendors

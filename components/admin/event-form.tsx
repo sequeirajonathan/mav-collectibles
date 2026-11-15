@@ -36,6 +36,8 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
     startsAt: toIso(v.startsAt),
     endsAt: toIso(v.endsAt),
     location: v.location,
+    linkUrl: v.linkUrl,
+    linkLabel: v.linkLabel,
     coverImageUrl: v.coverImageUrl,
     capacity: v.capacity,
     entryFeeDollars: v.entryFeeDollars,
@@ -161,6 +163,14 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
         </Field>
         <Field label="Registration closes" hint="Blank = when the event starts" error={errors.registrationClosesAt}>
           {(id) => <input id={id} type="datetime-local" className={inputClass} value={v.registrationClosesAt} onChange={(e) => set("registrationClosesAt", e.target.value)} />}
+        </Field>
+      </div>
+      <div className="grid gap-5 fold:grid-cols-[2fr_1fr]">
+        <Field label="Link (optional)" hint="A sign-up form or page players need, such as a Google Form. Shown as a button on the event." error={errors.linkUrl}>
+          {(id) => <input id={id} type="url" inputMode="url" placeholder="https://" className={inputClass} value={v.linkUrl} onChange={(e) => set("linkUrl", e.target.value)} />}
+        </Field>
+        <Field label="Button text" hint="Blank = Player form" error={errors.linkLabel}>
+          {(id) => <input id={id} maxLength={40} placeholder="Player form" className={inputClass} value={v.linkLabel} onChange={(e) => set("linkLabel", e.target.value)} />}
         </Field>
       </div>
       <Field label="Short summary" hint="Shown on cards and in calendars (200 characters)" error={errors.summary}>

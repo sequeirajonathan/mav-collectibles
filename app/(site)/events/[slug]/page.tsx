@@ -5,7 +5,9 @@ import { VendorsOnly } from "@components/layout/shop-only";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { MapPin, Ticket, Users } from "lucide-react";
+import { ExternalLink, MapPin, Ticket, Users } from "lucide-react";
+import { buttonVariants } from "@components/ui/button";
+import { Linkified } from "@components/ui/linkified";
 import { getEvent, getMyRegistration } from "@lib/data/hub";
 import { getCurrentUser } from "@lib/auth/server";
 import { googleCalendarUrl, outlookCalendarUrl, type CalendarEvent } from "@lib/calendar";
@@ -116,6 +118,12 @@ async function EventContent({ params }: { params: Params }) {
         <Suspense fallback={<Skeleton className="h-11 w-full rounded-md bg-panel-2 fold:w-28" />}>
           <Rsvp event={event} />
         </Suspense>
+        {event.linkUrl && (
+          <a href={event.linkUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline" })}>
+            {event.linkLabel || "Player form"}
+            <ExternalLink aria-hidden />
+          </a>
+        )}
         <AddToCalendar
           googleUrl={googleCalendarUrl(calendarEvent)}
           outlookUrl={outlookCalendarUrl(calendarEvent)}
@@ -130,7 +138,7 @@ async function EventContent({ params }: { params: Params }) {
       {(event.summary || event.description) && (
         <div className="mt-8 space-y-3 text-foreground/90">
           {event.summary && <p className="text-lg text-foreground">{event.summary}</p>}
-          {event.description && <p className="whitespace-pre-line leading-relaxed">{event.description}</p>}
+          {event.description && <p className="whitespace-pre-line leading-relaxed"><Linkified text={event.description} /></p>}
         </div>
       )}
 

@@ -101,6 +101,9 @@ test.describe("event hub", () => {
     await page.getByRole("textbox", { name: "Title", exact: true }).fill(title);
     await page.getByLabel("Starts", { exact: true }).filter({ visible: true }).fill("2030-06-07T18:00");
     await page.getByRole("spinbutton", { name: "Capacity", exact: true }).fill("16");
+    await page.getByRole("textbox", { name: "Link (optional)" }).fill("https://forms.gle/example123");
+    await page.getByRole("textbox", { name: "Button text" }).fill("Deck list form");
+    await page.getByRole("textbox", { name: "Details" }).fill("Rules are at https://example.com/rules. Bring sleeves.");
     await page.getByLabel("Status", { exact: true }).filter({ visible: true }).selectOption("published");
     await page.getByRole("button", { name: "Create event" }).click();
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
@@ -109,6 +112,11 @@ test.describe("event hub", () => {
     const adminUrl = page.url();
     await page.goto(`/events/${slug}`);
     await expect(page.getByText("Fri, Jun 7 · 6:00 PM", { exact: true }).filter({ visible: true }).first()).toBeVisible();
+    // The pasted form link is a button, and addresses in the details are clickable.
+    const formLink = page.getByRole("link", { name: "Deck list form" });
+    await expect(formLink).toHaveAttribute("href", "https://forms.gle/example123");
+    await expect(formLink).toHaveAttribute("target", "_blank");
+    await expect(page.getByRole("link", { name: "https://example.com/rules", exact: true })).toHaveAttribute("href", "https://example.com/rules");
     await page.getByRole("button", { name: "RSVP" }).click();
     await expect(page.getByText("You're going", { exact: true }).filter({ visible: true })).toBeVisible();
 

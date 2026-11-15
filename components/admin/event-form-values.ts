@@ -14,6 +14,8 @@ export interface EventFormValues {
   startsAt: string; // store-local datetime-local value
   endsAt: string;
   location: string;
+  linkUrl: string;
+  linkLabel: string;
   coverImageUrl: string | null;
   capacity: string;
   entryFeeDollars: string;
@@ -25,7 +27,7 @@ export interface EventFormValues {
 
 export function eventFormDefaults(e?: {
   title: string; slug: string; summary: string; description: string; kind: EventKind; game_id: string | null; format: string | null;
-  starts_at: Date; ends_at: Date | null; location: string; cover_image_url: string | null; capacity: number | null; entry_fee_cents: number | null;
+  starts_at: Date; ends_at: Date | null; location: string; link_url: string | null; link_label: string | null; cover_image_url: string | null; capacity: number | null; entry_fee_cents: number | null;
   registration_opens_at: Date | null; registration_closes_at: Date | null; status: EventStatus; featured: boolean;
 }): EventFormValues {
   const local = (d: Date | null) => (d ? isoToStoreLocal(d.toISOString()) : "");
@@ -40,6 +42,8 @@ export function eventFormDefaults(e?: {
     startsAt: local(e?.starts_at ?? null),
     endsAt: local(e?.ends_at ?? null),
     location: e?.location ?? "MAV Collectibles",
+    linkUrl: e?.link_url ?? "",
+    linkLabel: e?.link_label ?? "",
     coverImageUrl: e?.cover_image_url ?? null,
     capacity: e?.capacity?.toString() ?? "",
     entryFeeDollars: e?.entry_fee_cents == null ? "" : (e.entry_fee_cents / 100).toString(),
