@@ -7,7 +7,8 @@
  * and a navy outline.
  *   - Light (default): pale blue-white surfaces, navy text, dragon blue accent,
  *     logo yellow for the main call to action.
- *   - Dark (`data-theme="dark"`): black surfaces, gold accent.
+ *   - Dark (`data-theme="dark"`): the same palette at night. Deep navy surfaces,
+ *     a lighter dragon blue accent, logo yellow for the main call to action.
  * Use the semantic tokens (bg-panel, text-gold, border-line, bg-cta, ...)
  * instead of hex values. "gold" is the accent token's name in both themes; in
  * the light theme its value is the dragon blue, because yellow text can't be
@@ -22,6 +23,8 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Comic lettering: headlines, section titles, big numerals. Never body text. */
+  --font-display: var(--font-bangers), var(--font-geist-sans);
 
   /* Breakpoints. `fold` targets the iPhone Duo inner display (~626pt wide)
      and small tablets: enough room for two columns. */
@@ -115,40 +118,53 @@
   --spot-lo: rgb(16 42 67 / 0.1);
   --tile-shadow: rgb(16 42 67 / 0.28);
   --sweep: rgb(255 255 255 / 0.7);
+  /* Comic touches: outline/hard-shadow ink, speed lines, card-sleeve tiles. */
+  --pop-ink: #10222f;
+  --speed: rgb(27 108 168 / 0.1);
+  --sleeve: #12283b;
+  --sleeve-dot: rgb(255 255 255 / 0.07);
+  --holo-blend: hard-light;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --ink: #05060a;
-  --background: #000000;
-  --foreground: #f5f5f4;
-  --muted-foreground: #a1a1aa;
-  --card: #0d1017;
-  --panel: #0d1017;
-  --panel-2: #181d29;
-  --line: rgb(255 255 255 / 0.08);
-  --line-strong: rgb(230 179 37 / 0.45);
-  --gold: #e6b325;
-  --gold-light: #ffd966;
-  --gold-dark: #b38a00;
-  --accent-rgb: 230 179 37;
-  --cta: #e6b325;
-  --cta-hover: #ffd966;
-  --cta-active: #b38a00;
-  --cta-ink: #05060a;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --silver: #d4d4d8;
+  /* The same logo palette at night: deep navy surfaces, the dragon's blue
+     lightened for accents, and the logo yellow for calls to action. */
+  --ink: #06121d;
+  --background: #08131e;
+  --foreground: #eaf2fa;
+  --muted-foreground: #9db2c7;
+  --card: #0f2233;
+  --panel: #0f2233;
+  --panel-2: #183249;
+  --line: rgb(160 205 245 / 0.14);
+  --line-strong: rgb(95 178 234 / 0.55);
+  --gold: #5fb2ea;
+  --gold-light: #8ccaf5;
+  --gold-dark: #2f8fd0;
+  --accent-rgb: 95 178 234;
+  --cta: #ffd02e;
+  --cta-hover: #ffdc5e;
+  --cta-active: #f0bd10;
+  --cta-ink: #10222f;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --silver: #cbd5e1;
   --bronze: #f59e0b;
-  --scrim: rgb(0 0 0 / 0.8);
-  --hero-glow: rgb(230 179 37 / 0.18);
-  --hero-glow-2: rgb(88 101 242 / 0.12);
-  --dot: rgb(255 255 255 / 0.06);
-  --spot-hi: rgb(255 255 255 / 0.13);
-  --spot-lo: rgb(0 0 0 / 0.45);
+  --scrim: rgb(8 19 30 / 0.85);
+  --hero-glow: rgb(255 208 46 / 0.16);
+  --hero-glow-2: rgb(95 178 234 / 0.18);
+  --dot: rgb(160 205 245 / 0.08);
+  --spot-hi: rgb(160 205 245 / 0.16);
+  --spot-lo: rgb(0 0 0 / 0.4);
   --tile-shadow: rgb(0 0 0 / 0.55);
-  --sweep: rgb(255 255 255 / 0.05);
+  --sweep: rgb(160 205 245 / 0.07);
+  --pop-ink: #04101a;
+  --speed: rgb(95 178 234 / 0.1);
+  --sleeve: #0b1b2a;
+  --sleeve-dot: rgb(160 205 245 / 0.07);
+  --holo-blend: color-dodge;
 }
 
 @layer base {
@@ -187,7 +203,125 @@
   }
 }
 
+@keyframes petal-fall {
+  from {
+    transform: translate3d(0, -2rem, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  to {
+    transform: translate3d(var(--drift, 3rem), 34rem, 0) rotate(540deg);
+    opacity: 0;
+  }
+}
+@keyframes bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
 @layer utilities {
+  /* ---- Comic / trading-card flavour ---------------------------------------- */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.03em;
+    font-weight: 400;
+  }
+  /* Logo-style lettering: yellow fill, ink outline, hard drop shadow. For a word or two. */
+  .text-pop {
+    color: var(--cta);
+    -webkit-text-stroke: 0.1em var(--pop-ink);
+    paint-order: stroke fill;
+    text-shadow: 0.06em 0.07em 0 var(--pop-ink);
+    padding-inline: 0.06em;
+  }
+  /* Manga speed lines radiating from the trailing edge of a hero. */
+  .speed-lines {
+    background-image: repeating-conic-gradient(from 0deg at 88% 50%, var(--speed) 0deg 1.1deg, transparent 1.1deg 5deg);
+    mask-image: radial-gradient(circle at 88% 50%, transparent 0 9rem, #000 26rem);
+  }
+  /* Tilted sticker label. */
+  .sticker {
+    display: inline-block;
+    rotate: -4deg;
+    border: 2px solid var(--pop-ink);
+    border-radius: 0.5rem;
+    background-color: var(--cta);
+    color: var(--cta-ink);
+    box-shadow: 3px 3px 0 var(--pop-ink);
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+  /* Card-sleeve tile: dark, dotted, lifts with a hard shadow on hover. */
+  .sleeve {
+    background-color: var(--sleeve);
+    background-image: radial-gradient(var(--sleeve-dot) 1.5px, transparent 1.5px);
+    background-size: 14px 14px;
+    border: 2px solid var(--pop-ink);
+    transition: translate 0.15s ease, box-shadow 0.15s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    a:hover > .sleeve,
+    .sleeve:hover {
+      translate: -3px -3px;
+      box-shadow: 6px 6px 0 var(--cta);
+    }
+  }
+  /* Holographic foil sweep on hover, like tilting a rare card. Put on a positioned, clipped box. */
+  .holo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: linear-gradient(
+      115deg,
+      transparent 25%,
+      rgb(255 80 160 / 0.28) 38%,
+      rgb(80 200 255 / 0.3) 47%,
+      rgb(255 230 90 / 0.3) 56%,
+      transparent 70%
+    );
+    background-size: 280% 280%;
+    background-position: 100% 0;
+    mix-blend-mode: var(--holo-blend);
+    opacity: 0;
+    transition: opacity 0.25s ease, background-position 0.7s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .holo::after,
+    .holo:hover::after {
+      opacity: 1;
+      background-position: 0 100%;
+    }
+  }
+  /* Falling sakura petal (components/home/petals.tsx sets --x, --d, --delay, --drift). */
+  .petal {
+    position: absolute;
+    top: 0;
+    left: var(--x);
+    width: 0.7rem;
+    height: 0.5rem;
+    border-radius: 80% 0 80% 0;
+    background: linear-gradient(135deg, #fbcfe8, #f472b6);
+    opacity: 0;
+    animation: petal-fall var(--d, 9s) linear var(--delay, 0s) infinite;
+  }
+  .pixelated {
+    image-rendering: pixelated;
+  }
+  .animate-bob {
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .petal {
+      display: none;
+    }
+  }
+
   /* Loading placeholders (components/ui/skeleton.tsx): a soft light sweep. */
   .skeleton {
     background-image: linear-gradient(100deg, transparent 30%, var(--sweep) 50%, transparent 70%);
@@ -241,5 +375,222 @@
   }
   .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* ==========================================================================
+   Comic-book style (const/site-style.ts → html[data-style="comic"]).
+   Ink outlines, hard offset shadows, Ben-Day dots and caption boxes, applied
+   to the shared UI kit through its ui-* hooks so every page picks it up.
+   ========================================================================== */
+.comic-only {
+  display: none;
+}
+html[data-style="comic"] {
+  --comic-ink: #10222f;
+  --comic-shadow: #10222f;
+  --comic-paper: #fffdf5;
+  --comic-dot: rgb(16 34 47 / 0.16);
+  --background: #fdf6e0;
+  --panel: var(--comic-paper);
+  --card: var(--comic-paper);
+}
+html[data-style="comic"][data-theme="dark"] {
+  /* At night the panels are drawn in soft blue line with black shadows.
+     Yellow is kept for the things you press and the one word in the hero. */
+  --comic-ink: #44688a;
+  --comic-shadow: #02070c;
+  --comic-paper: #0f2233;
+  --comic-dot: transparent;
+  --background: #08131e;
+}
+html[data-style="comic"] {
+  .comic-only {
+    display: revert;
+  }
+  body {
+    /* Newsprint: faint Ben-Day dots across the page. */
+    background-image: radial-gradient(var(--comic-dot) 1px, transparent 1.2px);
+    background-size: 9px 9px;
+  }
+  .ui-card:not(.ui-card-flat) {
+    border: 2.5px solid var(--comic-ink);
+    box-shadow: 5px 5px 0 var(--comic-shadow);
+  }
+  .ui-card-flat {
+    border-width: 2px;
+    border-color: var(--comic-ink);
+  }
+  .ui-btn {
+    border: 2.5px solid var(--comic-ink);
+    box-shadow: 3px 3px 0 var(--comic-shadow);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    transition: translate 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+  }
+  .ui-btn:active {
+    translate: 3px 3px;
+    box-shadow: 0 0 0 var(--comic-shadow);
+  }
+  .ui-chip,
+  .ui-badge {
+    border: 2px solid var(--comic-ink);
+  }
+  /* Narration caption box. */
+  .ui-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    border: 2px solid var(--comic-ink);
+    background-color: var(--cta);
+    color: var(--cta-ink);
+    padding: 0.2rem 0.5rem;
+    letter-spacing: 0.14em;
+    box-shadow: 2px 2px 0 var(--comic-shadow);
+  }
+  /* Section titles on a slanted ink banner. */
+  .ui-section-title {
+    background-color: var(--comic-ink);
+    color: var(--cta);
+    padding: 0.2rem 0.9rem 0.2rem 0.6rem;
+    transform: skewX(-8deg) rotate(-1deg);
+    box-shadow: 4px 4px 0 var(--cta);
+  }
+  &[data-theme="dark"] {
+    .ui-section-title {
+      background-color: #02070c;
+      color: var(--cta);
+      box-shadow: 4px 4px 0 var(--gold-dark);
+    }
+    .ui-eyebrow {
+      background-color: var(--panel-2);
+      color: var(--gold-light);
+    }
+    .ui-btn {
+      border-color: #02070c;
+    }
+    /* Night splash panel: dragon blue with Ben-Day dots, not a wall of yellow. */
+    .bg-hero {
+      border-color: #02070c;
+      background-color: #17507f;
+      background-image:
+        radial-gradient(circle at 0% 0%, rgb(140 202 245 / 0.35), transparent 50%),
+        radial-gradient(rgb(4 16 26 / 0.3) 2.2px, transparent 2.6px);
+      background-size: auto, 13px 13px;
+      color: #eaf2fa;
+    }
+    .bg-hero .speed-lines {
+      background-image: repeating-conic-gradient(from 0deg at 88% 50%, rgb(255 255 255 / 0.1) 0deg 1.4deg, transparent 1.4deg 5deg);
+    }
+    .bg-hero p {
+      color: #eaf2fa;
+    }
+    .bg-hero .ui-eyebrow {
+      background-color: #0f2233;
+      color: #eaf2fa;
+    }
+    .ui-hero-title {
+      color: #ffffff;
+      text-shadow: 0.05em 0.06em 0 #04101a;
+    }
+    .ui-hero-title .text-pop {
+      color: var(--cta);
+      -webkit-text-stroke-color: #04101a;
+      text-shadow: 0.07em 0.08em 0 #04101a;
+    }
+    .sleeve {
+      border-color: var(--comic-ink);
+    }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &[data-theme="dark"] .ui-card-interactive:hover {
+      border-color: var(--gold);
+      box-shadow: 8px 8px 0 var(--gold-dark);
+    }
+  }
+  .ui-page-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    font-size: 2.4rem;
+    line-height: 1.05;
+  }
+  /* Hero: a splash panel in the logo's yellow with Ben-Day shading. */
+  .bg-hero {
+    border: 3px solid var(--comic-ink);
+    box-shadow: 7px 7px 0 var(--comic-shadow);
+    background-color: #ffd02e;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgb(255 255 255 / 0.75), transparent 45%),
+      radial-gradient(rgb(214 96 20 / 0.35) 2.2px, transparent 2.6px);
+    background-size: auto, 13px 13px;
+    color: #10222f;
+  }
+  .bg-hero .speed-lines {
+    background-image: repeating-conic-gradient(from 0deg at 88% 50%, rgb(255 255 255 / 0.5) 0deg 1.4deg, transparent 1.4deg 5deg);
+  }
+  .bg-hero p {
+    color: #10222f;
+  }
+  .bg-hero .ui-eyebrow {
+    background-color: #fffdf5;
+  }
+  .bg-hero .sticker {
+    background-color: #e11d48;
+    color: #fff;
+    border-color: #10222f;
+    box-shadow: 3px 3px 0 #10222f;
+  }
+  .ui-hero-title {
+    color: #10222f;
+    rotate: -1.5deg;
+    text-shadow: 0.05em 0.06em 0 rgb(255 255 255 / 0.9);
+  }
+  .ui-hero-title .text-pop {
+    color: #fff;
+    -webkit-text-stroke-color: #10222f;
+    text-shadow: 0.07em 0.08em 0 #e11d48;
+  }
+  .sleeve {
+    border-width: 2.5px;
+    border-color: var(--comic-ink);
+    box-shadow: 5px 5px 0 var(--comic-shadow);
+  }
+  /* Shouty starburst. */
+  .burst {
+    display: grid;
+    place-items: center;
+    width: 7.5rem;
+    aspect-ratio: 1;
+    padding: 1.4rem;
+    rotate: 10deg;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background-color: #e11d48;
+    filter: drop-shadow(3px 3px 0 #10222f);
+    clip-path: polygon(50% 0%, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 43%, 100% 57%, 84% 64%, 88% 83%, 70% 80%, 62% 98%, 50% 85%, 38% 98%, 30% 80%, 12% 83%, 16% 64%, 0% 57%, 12% 43%, 2% 28%, 20% 25%, 21% 7%, 39% 14%);
+  }
+  @media (max-width: 63.99rem) {
+    .burst {
+      display: none;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-card-interactive:hover {
+      translate: -2px -2px;
+      border-color: var(--comic-ink);
+      box-shadow: 8px 8px 0 var(--cta);
+    }
+    .ui-btn:hover {
+      translate: -1px -1px;
+      box-shadow: 5px 5px 0 var(--comic-shadow);
+    }
   }
 }

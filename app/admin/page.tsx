@@ -5,6 +5,7 @@ import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { prisma } from "@lib/prisma";
 import { listAllEventsForStaff } from "@lib/data/hub";
+import { countOpenStaffRequests } from "@lib/data/requests";
 import { capacityLabel, formatEventWhen } from "@lib/format";
 import { requestTime, upcomingOnly } from "@lib/hub-rules";
 import { cardVariants } from "@components/ui/card";
@@ -13,11 +14,12 @@ import { LinkButton } from "@components/ui/link-button";
 
 async function Overview() {
   await requirePageRole(CONTENT_ROLES, "/admin");
-  const [events, pendingVendors, comments24h, members] = await Promise.all([
+  const [events, pendingVendors, comments24h, members, openRequests] = await Promise.all([
     listAllEventsForStaff(),
     prisma.vendor.count({ where: { status: "pending" } }),
     prisma.postComment.count({ where: { created_at: { gte: new Date(requestTime() - 86_400_000) }, deleted_at: null } }),
     prisma.profile.count(),
+    countOpenStaffRequests(),
   ]);
   const upcoming = upcomingOnly(events, requestTime()).reverse().slice(0, 5);
   const drafts = events.filter((e) => e.status === "draft").length;
@@ -25,7 +27,7 @@ async function Overview() {
   const linkStat = cardVariants({ variant: "interactive", padding: "md" });
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Link href="/admin/vendors" className={linkStat}>
           <p className="text-3xl font-extrabold text-gold">{pendingVendors}</p>
           <p className="text-sm text-muted-foreground">Vendor applications waiting</p>
@@ -33,6 +35,10 @@ async function Overview() {
         <Link href="/admin/events" className={linkStat}>
           <p className="text-3xl font-extrabold">{drafts}</p>
           <p className="text-sm text-muted-foreground">Draft events</p>
+        </Link>
+        <Link href="/admin/requests" className={linkStat}>
+          <p className="text-3xl font-extrabold">{openRequests}</p>
+          <p className="text-sm text-muted-foreground">Open staff requests</p>
         </Link>
         <div className={stat}>
           <p className="text-3xl font-extrabold">{comments24h}</p>

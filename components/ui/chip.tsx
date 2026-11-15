@@ -9,7 +9,7 @@ export const chipRowClass =
 /** Pill-shaped filter/tab. 44px tall on touch screens, 36px with a mouse. */
 export function chipClass(active = false) {
   return cn(
-    "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-medium transition-colors can-hover:min-h-9",
+    "ui-chip inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-medium transition-colors can-hover:min-h-9",
     active
       ? "border-gold bg-gold font-semibold text-ink"
       : "border-line bg-panel text-muted-foreground hover:border-gold/50 hover:text-foreground"

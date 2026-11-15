@@ -21,6 +21,8 @@ import { LinkButton } from "@components/ui/link-button";
 import { buttonVariants } from "@components/ui/button";
 import { ChipLink, chipRowClass } from "@components/ui/chip";
 import { Eyebrow } from "@components/ui/page-header";
+import { GameGrid } from "@components/home/game-grid";
+import { Petals } from "@components/home/petals";
 import { RankMark } from "@components/hub/badges";
 
 /** Decorative fan of trading cards for the hero on wide screens. Pure CSS, hidden from assistive tech. */
@@ -30,7 +32,7 @@ function HeroCards() {
     <div aria-hidden className="pointer-events-none absolute inset-y-0 right-10 hidden w-72 lg:block xl:right-16">
       <div className={cn(card, "left-4 -translate-y-1/2 -rotate-12 border-line bg-gradient-to-br from-panel-2 to-ink")} />
       <div className={cn(card, "left-36 -translate-y-1/2 rotate-12 border-discord/40 bg-gradient-to-br from-discord/30 to-ink")} />
-      <div className={cn(card, "left-20 -translate-y-[55%] border-gold/60 bg-gradient-to-br from-gold-light via-gold to-gold-dark p-2")}>
+      <div className={cn(card, "holo left-20 -translate-y-[55%] overflow-hidden border-gold/60 bg-gradient-to-br from-gold-light via-gold to-gold-dark p-2")}>
         <div className="flex h-full items-center justify-center rounded-lg border border-ink/20">
           <div className="relative size-12 overflow-hidden rounded-full border-4 border-ink bg-foreground">
             <div className="absolute inset-x-0 top-0 h-1/2 bg-danger" />
@@ -85,7 +87,7 @@ async function Spotlight() {
 async function UpcomingEvents() {
   const events = (await listEvents({ limit: 6 })).filter((e) => e.status === "published");
   return events.length === 0 ? (
-    <EmptyState title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
+    <EmptyState mascot="gengar" title="New events are coming soon" description="Follow the news feed for the next league night and tournament." />
   ) : (
     <div className="grid gap-3 lg:grid-cols-2">
       {events.map((e) => (
@@ -176,11 +178,17 @@ export default function HomePage() {
     <div className="space-y-12 fold:space-y-14">
       <section>
         <div className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-12 short:py-6">
+          <div aria-hidden className="speed-lines pointer-events-none absolute inset-0" />
+          <Petals />
           <HeroCards />
+          <span aria-hidden className="comic-only burst absolute right-4 top-4 lg:right-[21rem] lg:top-6">New pulls weekly!</span>
           <div className="relative max-w-3xl lg:max-w-xl xl:max-w-2xl">
-            <Eyebrow>Montgomery, TX</Eyebrow>
-            <h1 className="mt-2 text-3xl font-extrabold leading-[1.1] tracking-tight fold:text-5xl short:text-3xl">
-              Your home for <span className="text-foil">Pokémon</span> <span className="text-gold">&</span> every TCG.
+            <div className="flex flex-wrap items-center gap-3">
+              <Eyebrow>Montgomery, TX</Eyebrow>
+              <span className="sticker px-2 py-1 text-sm">Buy · Sell · Trade</span>
+            </div>
+            <h1 className="ui-hero-title font-display mt-3 text-[2.6rem] leading-[1.12] fold:text-6xl short:text-4xl">
+              Your home for <span className="text-pop">Pokémon</span> & every TCG.
             </h1>
             <p className="mt-3 max-w-2xl text-foreground/80 fold:text-lg">
               League nights, tournaments, prereleases and vendor days. RSVP, track your season points and never miss a release.
@@ -203,6 +211,11 @@ export default function HomePage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section>
+        <SectionHeading title="Choose your game" href="/shop" linkLabel="Whole shop" />
+        <GameGrid />
       </section>
 
       <section>

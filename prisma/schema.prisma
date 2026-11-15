@@ -405,3 +405,23 @@ model ImageReplacement {
   @@index([status, created_at], map: "image_replacements_status_idx")
   @@map("image_replacements")
 }
+
+// Feature requests and bug reports from staff (Admin → Requests).
+model StaffRequest {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kind            String    @default("feature")
+  title           String
+  details         String    @default("")
+  page            String?
+  priority        String    @default("normal")
+  status          String    @default("new")
+  created_by      String    @db.Uuid
+  created_by_name String
+  response        String    @default("")
+  completed_at    DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([status, created_at], map: "staff_requests_status_idx")
+  @@map("staff_requests")
+}

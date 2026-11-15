@@ -24,7 +24,7 @@ export function ProductTile({
   imageClassName?: string;
 }) {
   return (
-    <div className={cn("bg-spotlight relative overflow-hidden", className)}>
+    <div className={cn("bg-spotlight holo relative overflow-hidden", className)}>
       {src ? (
         <Image
           src={src}
