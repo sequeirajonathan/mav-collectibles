@@ -16,6 +16,9 @@ create table public.product_images (
   height integer not null check (height > 0),
   -- The Square URL this was made from; a changed URL means a new photo.
   source_url text not null,
+  -- What removed the background: the free local model, the paid service, or
+  -- nothing (card scans and photos left as they are).
+  background_provider text not null default 'none' check (background_provider in ('none', 'local', 'photoroom')),
   -- Bumped when the processing improves, so old output is redone.
   processor_version integer not null,
   processed_at timestamptz not null default now()

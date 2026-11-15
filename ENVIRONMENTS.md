@@ -78,6 +78,13 @@ copy when one exists and the Square original otherwise.
 - **Locally:** `npx tsx scripts/images/sync.ts --from-export --limit 50` after a
   catalog export, with `.env.local` loaded. The model (~170 MB) downloads once
   to `.cache/`.
+- **Paid background removal (off by default):** the free model only handles
+  products on a plain white background. Photoroom also handles tables and
+  shelves. To turn it on, add secret `PHOTOROOM_API_KEY` and variable
+  `IMAGE_BG_PROVIDER=photoroom` to the GitHub `production` environment;
+  `IMAGE_PAID_LIMIT` caps paid photos per run (default 200). Card scans and
+  graded slabs are never sent. The Photoroom call hasn't been run against the
+  live service yet: test with a small limit first.
 - **Improving the processing:** change `scripts/images/process-image.ts` and
   bump `PROCESSOR_VERSION` in `lib/catalog/product-image-config.ts`; the next
   run redoes every photo under new file names.

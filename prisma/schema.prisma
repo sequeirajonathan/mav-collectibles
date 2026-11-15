@@ -378,6 +378,7 @@ model ProductImage {
   width             Int
   height            Int
   source_url        String
+  background_provider String @default("none")
   processor_version Int
   processed_at      DateTime @default(now()) @db.Timestamptz(6)
 

@@ -273,7 +273,47 @@ async function roundedPhoto(image: Sharp, trimBorder: boolean): Promise<Buffer> 
   return sharp(base).ensureAlpha().composite([{ input: corners, blend: "dest-in" }]).png().toBuffer();
 }
 
-export async function processImage(source: Buffer): Promise<ProcessedImage> {
+/**
+ * Paid background removal (Photoroom). OFF unless the caller passes
+ * `paid: true`, which scripts/images/sync.ts only does when
+ * IMAGE_BG_PROVIDER=photoroom and PHOTOROOM_API_KEY are set. Unlike the local
+ * model it handles real backgrounds (tables, shelves).
+ *
+ * NOTE: written from Photoroom's public API docs and not yet run against the
+ * live service (no account yet). Verify on a few photos before the first paid run.
+ */
+async function photoroomCutout(working: Buffer): Promise<Buffer | null> {
+  const key = process.env.PHOTOROOM_API_KEY;
+  if (!key) throw new Error("PHOTOROOM_API_KEY is not set.");
+  const form = new FormData();
+  form.append("image_file", new Blob([new Uint8Array(working)], { type: "image/png" }), "photo.png");
+  form.append("format", "png");
+  const response = await fetch("https://sdk.photoroom.com/v1/segment", {
+    method: "POST",
+    headers: { "x-api-key": key, accept: "image/png" },
+    body: form,
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!response.ok) throw new Error(`Photoroom: HTTP ${response.status}`);
+  const png = Buffer.from(await response.arrayBuffer());
+
+  // Same sanity check as the local path: reject an empty or untouched result.
+  const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let kept = 0;
+  for (let i = 3; i < data.length; i += 4) if (data[i] > 127) kept++;
+  const coverage = kept / (info.width * info.height);
+  if (coverage < 0.04 || coverage > 0.97) return null;
+  return sharp(png).trim({ threshold: 1 }).png().toBuffer();
+}
+
+interface ProcessOptions {
+  /** Card scans and graded slabs: never cut out, only trim and round. */
+  card?: boolean;
+  /** Use the paid provider for this photo (see photoroomCutout). */
+  paid?: boolean;
+}
+
+export async function processImage(source: Buffer, options: ProcessOptions = {}): Promise<ProcessedImage & { provider: "local" | "photoroom" | "none" }> {
   // Work at a bounded size; never upscale small originals.
   const working = await sharp(source).rotate().flatten({ background: "#ffffff" }).resize(1400, 1400, { fit: "inside", withoutEnlargement: true }).png().toBuffer();
   const image = sharp(working);
@@ -284,9 +324,15 @@ export async function processImage(source: Buffer): Promise<ProcessedImage> {
   const plainDark = border.dark > 0.7;
 
   let kind: ImageKind = "photo";
+  let provider: "local" | "photoroom" | "none" = "none";
   let result: Buffer | null = null;
-  if (plainLight) {
+  if (!options.card && options.paid) {
+    result = await photoroomCutout(working);
+    provider = "photoroom";
+    if (result) kind = "cutout";
+  } else if (!options.card && plainLight) {
     result = await cutout(image, width, height);
+    provider = "local";
     if (result) kind = "cutout";
   }
   result ??= await roundedPhoto(image, plainLight || plainDark);
@@ -295,5 +341,5 @@ export async function processImage(source: Buffer): Promise<ProcessedImage> {
     .resize(MAX_SIDE, MAX_SIDE, { fit: "inside", withoutEnlargement: true })
     .webp({ quality: 82, alphaQuality: 90, effort: 5 })
     .toBuffer({ resolveWithObject: true });
-  return { data, kind, width: info.width, height: info.height };
+  return { data, kind, width: info.width, height: info.height, provider };
 }

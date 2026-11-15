@@ -8,6 +8,11 @@
 # Required GitHub configuration (Settings → Environments → "production"):
 #   Secrets:   SQUARE_ACCESS_TOKEN, SUPABASE_SECRET_KEY
 #   Variables: SUPABASE_PROJECT_ID
+#
+# Paid background removal (Photoroom) is OFF by default. To turn it on, add to
+# the same environment: secret PHOTOROOM_API_KEY and variable
+# IMAGE_BG_PROVIDER=photoroom. Optional variable IMAGE_PAID_LIMIT caps the paid
+# photos per run (default 200). Remove the variable to turn it off again.
 name: Product images
 
 on:
@@ -37,6 +42,9 @@ jobs:
       SQUARE_ACCESS_TOKEN: ${{ secrets.SQUARE_ACCESS_TOKEN }}
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_ID }}.supabase.co
+      IMAGE_BG_PROVIDER: ${{ vars.IMAGE_BG_PROVIDER }}
+      PHOTOROOM_API_KEY: ${{ secrets.PHOTOROOM_API_KEY }}
+      IMAGE_PAID_LIMIT: ${{ vars.IMAGE_PAID_LIMIT }}
       LIMIT: ${{ inputs.limit }}
     steps:
       - uses: actions/checkout@v4
