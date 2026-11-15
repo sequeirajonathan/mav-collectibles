@@ -6,6 +6,7 @@ import { NAV_LINKS } from "./nav-links";
 import { AccountMenu, CartLink } from "./account-menu";
 import { MobileNav } from "./mobile-nav";
 import { NavLink } from "./nav-link";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
   return (
@@ -31,6 +32,7 @@ export function SiteHeader() {
           <Link href="/search" className="inline-flex size-11 items-center justify-center rounded-md hover:bg-panel-2 lg:hidden" aria-label="Search products">
             <Search className="size-5" />
           </Link>
+          <ThemeToggle className="hidden fold:inline-flex" />
           <CartLink />
           <AccountMenu />
           <Suspense fallback={<span className="inline-block size-11 md:hidden" aria-hidden />}>

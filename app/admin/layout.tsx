@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         {children}
       </div>
-      <Toaster position="bottom-center" toastOptions={{ style: { background: "#181d29", color: "#f5f5f4" } }} />
+      <Toaster position="bottom-center" toastOptions={{ style: { background: "var(--panel-2)", color: "var(--foreground)", border: "1px solid var(--line)" } }} />
     </>
   );
 }

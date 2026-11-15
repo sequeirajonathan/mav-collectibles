@@ -31,10 +31,10 @@ export function ProductCard({ item, priority = false }: { item: CatalogItem; pri
           imageClassName="transition-transform duration-300 can-hover:group-hover:scale-[1.04]"
         />
         {item.soldOut && (
-          <span className="absolute left-2 top-2 rounded-full bg-black/80 px-2 py-0.5 text-xs font-bold text-danger">Sold out</span>
+          <span className="absolute left-2 top-2 rounded-full border border-line bg-scrim px-2 py-0.5 text-xs font-bold text-danger">Sold out</span>
         )}
         {lowStock && (
-          <span className="absolute left-2 top-2 rounded-full bg-black/80 px-2 py-0.5 text-xs font-bold text-gold">Only {item.inventoryCount} left</span>
+          <span className="absolute left-2 top-2 rounded-full border border-line bg-scrim px-2 py-0.5 text-xs font-bold text-gold">Only {item.inventoryCount} left</span>
         )}
       </Link>
       <div className="flex flex-1 flex-col gap-1 border-t border-line p-3">

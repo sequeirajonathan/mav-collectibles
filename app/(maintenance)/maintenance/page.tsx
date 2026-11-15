@@ -16,7 +16,7 @@ function CautionTape({ label }: { label: string }) {
 /** Shown to visitors while maintenance mode is on. Staff can still sign in. */
 export default function MaintenancePage() {
   return (
-    <div className="grid min-h-dvh grid-rows-[auto_1fr_auto] bg-black pt-[env(safe-area-inset-top)]">
+    <div data-theme="dark" className="grid min-h-dvh grid-rows-[auto_1fr_auto] bg-black text-foreground pt-[env(safe-area-inset-top)]">
       <CautionTape label="UNDER CONSTRUCTION" />
       <main className="flex items-center justify-center px-safe py-8 short:py-3">
         <div className="flex w-full max-w-md flex-col items-center text-center short:max-w-2xl short:flex-row short:gap-6 short:text-left">

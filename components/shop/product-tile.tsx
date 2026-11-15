@@ -32,7 +32,7 @@ export function ProductTile({
           fill
           priority={priority}
           sizes={sizes}
-          className={cn("object-contain p-[9%] drop-shadow-[0_10px_14px_rgb(0_0_0/0.55)]", imageClassName)}
+          className={cn("object-contain p-[9%] drop-shadow-[0_10px_14px_var(--tile-shadow)]", imageClassName)}
         />
       ) : (
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground">

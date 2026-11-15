@@ -13,19 +13,34 @@ export const metadata: Metadata = {
   applicationName: "MAV Collectibles",
   appleWebApp: { capable: true, title: "MAV", statusBarStyle: "black-translucent" },
 };
+import { THEME_STORAGE_KEY } from "@components/layout/theme";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   // Lets content extend under notches/fold bars; layouts pad with env(safe-area-inset-*).
   viewportFit: "cover",
-  themeColor: "#000000",
-  colorScheme: "dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f6fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#f2f6fb" },
+  ],
+  colorScheme: "light dark",
 };
+
+/**
+ * Light is the default. A visitor's choice is remembered in localStorage and
+ * applied here, before anything paints, so there is no flash of the wrong theme.
+ */
+const THEME_SCRIPT = `try{if(localStorage.getItem("${THEME_STORAGE_KEY}")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    // The theme script below sets data-theme before first paint, so the
+    // attribute can differ from the server's HTML.
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground">
         <AuthProvider>
           <CartProvider>{children}</CartProvider>

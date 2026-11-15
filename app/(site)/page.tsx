@@ -58,7 +58,7 @@ async function Spotlight() {
       {spotlight.coverImageUrl && (
         <Image src={spotlight.coverImageUrl} alt="" fill priority sizes="(min-width: 1280px) 1280px, 100vw" className="object-cover opacity-40 transition-[opacity,scale] duration-500 can-hover:group-hover:scale-[1.02] can-hover:group-hover:opacity-50" />
       )}
-      <div className="relative bg-gradient-to-r from-black/90 via-black/70 to-transparent p-5 fold:p-8">
+      <div className="relative bg-gradient-to-r from-panel/95 via-panel/75 to-transparent p-5 fold:p-8">
         <Eyebrow className="flex items-center gap-2">
           <span aria-hidden className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold opacity-60" />

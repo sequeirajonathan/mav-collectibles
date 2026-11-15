@@ -3,9 +3,15 @@
 @import "./forms.css";
 
 /*
- * MAV Collectibles is a single dark theme: black surfaces, gold accents.
- * Use the semantic tokens (bg-panel, text-gold, border-line, ...) instead of
- * hex values so the look stays consistent and can change in one place.
+ * Two themes built from the logo: a steel-blue dragon with yellow lettering
+ * and a navy outline.
+ *   - Light (default): pale blue-white surfaces, navy text, dragon blue accent,
+ *     logo yellow for the main call to action.
+ *   - Dark (`data-theme="dark"`): black surfaces, gold accent.
+ * Use the semantic tokens (bg-panel, text-gold, border-line, bg-cta, ...)
+ * instead of hex values. "gold" is the accent token's name in both themes; in
+ * the light theme its value is the dragon blue, because yellow text can't be
+ * read on white.
  */
 
 /* Phones in landscape (incl. iPhone Duo cover screen, ~466pt tall): compact chrome. */
@@ -52,6 +58,15 @@
   --color-success: var(--success);
   --color-discord: #5865f2;
   --color-warning: var(--warning);
+  /* Main call-to-action fill and its text (yellow in both themes). */
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-cta-active: var(--cta-active);
+  --color-cta-ink: var(--cta-ink);
+  /* Pills that sit on top of photos. */
+  --color-scrim: var(--scrim);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
   --color-danger: var(--danger);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -60,12 +75,50 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* Hover glow for interactive cards (see components/ui/card.tsx). */
-  --shadow-glow: 0 0 0 1px rgb(230 179 37 / 0.12), 0 12px 32px -16px rgb(230 179 37 / 0.45);
+  --shadow-glow: 0 0 0 1px rgb(var(--accent-rgb) / 0.14), 0 12px 32px -16px rgb(var(--accent-rgb) / 0.45);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --radius: 0.75rem;
+  /* Text on an accent-coloured fill. */
+  --ink: #ffffff;
+  --background: #f2f6fb;
+  --foreground: #10222f;
+  --muted-foreground: #526579;
+  --card: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #e4edf6;
+  --line: rgb(16 42 67 / 0.13);
+  --line-strong: rgb(27 108 168 / 0.5);
+  /* Accent: the dragon's blue. */
+  --gold: #1b6ca8;
+  --gold-light: #2380c4;
+  --gold-dark: #134f7c;
+  --accent-rgb: 27 108 168;
+  /* Call to action: the logo's yellow with navy text. */
+  --cta: #ffd02e;
+  --cta-hover: #ffdc5e;
+  --cta-active: #f0bd10;
+  --cta-ink: #10222f;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --silver: #64748b;
+  --bronze: #b45309;
+  --scrim: rgb(255 255 255 / 0.92);
+  /* Decorative layers (hero, product tiles, skeletons). */
+  --hero-glow: rgb(255 208 46 / 0.28);
+  --hero-glow-2: rgb(27 108 168 / 0.16);
+  --dot: rgb(16 42 67 / 0.07);
+  --spot-hi: rgb(255 255 255 / 0.9);
+  --spot-lo: rgb(16 42 67 / 0.1);
+  --tile-shadow: rgb(16 42 67 / 0.28);
+  --sweep: rgb(255 255 255 / 0.7);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
   --ink: #05060a;
   --background: #000000;
   --foreground: #f5f5f4;
@@ -78,9 +131,24 @@
   --gold: #e6b325;
   --gold-light: #ffd966;
   --gold-dark: #b38a00;
+  --accent-rgb: 230 179 37;
+  --cta: #e6b325;
+  --cta-hover: #ffd966;
+  --cta-active: #b38a00;
+  --cta-ink: #05060a;
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --silver: #d4d4d8;
+  --bronze: #f59e0b;
+  --scrim: rgb(0 0 0 / 0.8);
+  --hero-glow: rgb(230 179 37 / 0.18);
+  --hero-glow-2: rgb(88 101 242 / 0.12);
+  --dot: rgb(255 255 255 / 0.06);
+  --spot-hi: rgb(255 255 255 / 0.13);
+  --spot-lo: rgb(0 0 0 / 0.45);
+  --tile-shadow: rgb(0 0 0 / 0.55);
+  --sweep: rgb(255 255 255 / 0.05);
 }
 
 @layer base {
@@ -122,7 +190,7 @@
 @layer utilities {
   /* Loading placeholders (components/ui/skeleton.tsx): a soft light sweep. */
   .skeleton {
-    background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.05) 50%, transparent 70%);
+    background-image: linear-gradient(100deg, transparent 30%, var(--sweep) 50%, transparent 70%);
     background-size: 200% 100%;
     background-repeat: no-repeat;
     animation: shimmer 1.6s ease-in-out infinite;
@@ -131,17 +199,17 @@
   .bg-hero {
     background-color: var(--panel);
     background-image:
-      radial-gradient(70% 90% at 0% 0%, rgb(230 179 37 / 0.18), transparent 60%),
-      radial-gradient(50% 70% at 100% 100%, rgb(88 101 242 / 0.12), transparent 70%),
-      radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px);
+      radial-gradient(70% 90% at 0% 0%, var(--hero-glow), transparent 60%),
+      radial-gradient(50% 70% at 100% 100%, var(--hero-glow-2), transparent 70%),
+      radial-gradient(var(--dot) 1px, transparent 1px);
     background-size: auto, auto, 22px 22px;
   }
   /* Product tile: a soft spotlight so cut-out products and card scans both sit well on the dark theme. */
   .bg-spotlight {
     background-color: var(--panel-2);
     background-image:
-      radial-gradient(75% 60% at 50% 42%, rgb(255 255 255 / 0.13), transparent 72%),
-      radial-gradient(60% 20% at 50% 96%, rgb(0 0 0 / 0.45), transparent 75%);
+      radial-gradient(75% 60% at 50% 42%, var(--spot-hi), transparent 72%),
+      radial-gradient(60% 20% at 50% 96%, var(--spot-lo), transparent 75%);
   }
   /* Gold foil text for a word or two in big headings. */
   .text-foil {

@@ -47,7 +47,7 @@ async function MyEvents() {
       {events.map((e) => (
         <div key={e.id} className="relative">
           <EventCard event={e} />
-          <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/80 px-2 py-0.5 text-xs font-bold text-success">
+          <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-line bg-scrim px-2 py-0.5 text-xs font-bold text-success">
             {e.myStatus === "waitlisted" ? "Waitlist" : e.myStatus === "checked_in" ? "Checked in" : "Going"}
           </span>
         </div>

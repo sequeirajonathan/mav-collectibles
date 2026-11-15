@@ -10,7 +10,9 @@ export function GameBadge({ game, className }: { game: Game; className?: string 
     <Badge
       variant="outline"
       className={className}
-      style={{ borderColor: `${game.color}66`, color: game.color, backgroundColor: `${game.color}14` }}
+      // The game's colour tints the pill and its dot; the label stays in the
+      // theme's text colour so yellow or pale brands remain readable on white.
+      style={{ borderColor: `${game.color}80`, backgroundColor: `${game.color}1f` }}
     >
       <span aria-hidden className="size-1.5 rounded-full" style={{ backgroundColor: game.color }} />
       {game.shortName}
@@ -39,8 +41,8 @@ export function StatusPill({ status }: { status: EventStatus }) {
 
 const PODIUM = [
   "border-gold/60 bg-gold/15 text-gold",
-  "border-zinc-300/40 bg-zinc-300/10 text-zinc-200",
-  "border-amber-700/50 bg-amber-700/15 text-amber-500",
+  "border-silver/40 bg-silver/10 text-silver",
+  "border-bronze/50 bg-bronze/15 text-bronze",
 ];
 
 /** Leaderboard rank: gold/silver/bronze discs for the podium, a plain number after that. */
