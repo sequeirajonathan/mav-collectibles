@@ -7,6 +7,7 @@ import { cn } from "@utils";
 
 const LINKS: { href: Route; label: string; adminOnly?: boolean; hiringOnly?: boolean }[] = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/chat", label: "Chat" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/posts", label: "Posts" },
   { href: "/admin/vendors", label: "Vendors" },

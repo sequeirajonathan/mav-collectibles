@@ -24,6 +24,8 @@ const serverSchema = z.object({
   EMAIL_FROM: z.string().min(3).optional(),
   /** Where new job applications are sent. */
   JOBS_NOTIFY_EMAIL: z.email().optional(),
+  // Web push for staff notifications. Without both keys nothing is sent.
+  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
 });
 
 type ServerEnv = z.infer<typeof serverSchema>;
@@ -45,6 +47,7 @@ export function serverEnv(): ServerEnv {
     RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
     EMAIL_FROM: process.env.EMAIL_FROM || undefined,
     JOBS_NOTIFY_EMAIL: process.env.JOBS_NOTIFY_EMAIL || undefined,
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || undefined,
   });
   if (!parsed.success) {
     throw new Error(

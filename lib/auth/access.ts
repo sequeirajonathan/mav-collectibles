@@ -69,6 +69,7 @@ const RULES: Rule[] = [
   { path: "/api/v1/catalog/*", access: { GET: "public" } },
   { path: "/api/v1/job-applications", access: { POST: "public" } },
   { path: "/api/v1/job-applications/:id/resume", access: { GET: HIRING_ROLES } },
+  { path: "/api/v1/staff-chat*", access: { GET: CONTENT_ROLES, POST: CONTENT_ROLES } },
   { path: "/api/v1/print-jobs", access: { GET: PRINT_ROLES, PATCH: PRINT_ROLES, POST: ADMIN } },
 ];
 

@@ -6,6 +6,8 @@ import { RESUME_MAX_BYTES, RESUME_TYPES } from "@const/jobs";
 import { sendEmail } from "@lib/email";
 import { serverEnv } from "@lib/env.server";
 import { publicEnv } from "@lib/env";
+import { notifyRoles } from "@lib/push";
+import { HIRING_ROLES } from "@interfaces/roles";
 
 const DAY_MS = 86_400_000;
 /** Enough for a real hiring push; stops a script from filling the table. */
@@ -66,6 +68,8 @@ export const POST = defineRoute({
 
     const resumeName = resume ? resume.name.replace(/[^\w.\- ()]/g, "_").slice(0, 200) : null;
     await prisma.jobApplication.create({ data: { ...input, resume_path: resumePath, resume_name: resumeName } });
+
+    await notifyRoles(HIRING_ROLES, { title: "New job application", body: `${input.name} applied for ${input.position}`, url: "/admin/applications", tag: "job-application" });
 
     const notify = serverEnv().JOBS_NOTIFY_EMAIL;
     if (notify) {
