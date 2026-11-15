@@ -73,6 +73,8 @@ const RULES: Rule[] = [
 
   // ---- API (only what the browser fetches directly) -------------------------
   { path: "/api/v1/catalog/*", access: { GET: "public" } },
+  // Scheduled jobs: the route itself checks the CRON_SECRET bearer token.
+  { path: "/api/cron/*", access: { GET: "public" } },
   { path: "/api/v1/job-applications", access: { POST: "public" } },
   { path: "/api/v1/job-applications/:id/resume", access: { GET: HIRING_ROLES } },
   { path: "/api/v1/staff-chat*", access: { GET: CONTENT_ROLES, POST: CONTENT_ROLES } },

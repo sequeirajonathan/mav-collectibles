@@ -26,6 +26,8 @@ const serverSchema = z.object({
   JOBS_NOTIFY_EMAIL: z.email().optional(),
   // Web push for staff notifications. Without both keys nothing is sent.
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  /** Shared secret Vercel sends with scheduled jobs (app/api/cron). */
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 type ServerEnv = z.infer<typeof serverSchema>;
@@ -48,6 +50,7 @@ export function serverEnv(): ServerEnv {
     EMAIL_FROM: process.env.EMAIL_FROM || undefined,
     JOBS_NOTIFY_EMAIL: process.env.JOBS_NOTIFY_EMAIL || undefined,
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || undefined,
+    CRON_SECRET: process.env.CRON_SECRET || undefined,
   });
   if (!parsed.success) {
     throw new Error(

@@ -5,7 +5,7 @@ import { isCatalogItem, normalizeItemsWithInventory, normalizeProductResponse } 
 import { catalogItemSchema, type CatalogItem, type CatalogPage, type Product } from "@lib/contracts/catalog";
 import { serverEnv } from "@lib/env.server";
 import sandboxMap from "@const/square-sandbox-map.json";
-import { matchesStock, type CatalogSource, type ListOptions } from "./source";
+import { matchesStock, type CatalogSource, type IndexableItem, type ListOptions } from "./source";
 import { approvedReplacements, withProcessedImages, withReplacement } from "./product-images";
 import { isPublicCatalogItem } from "./visibility";
 import { byRelevance, searchTerms, squareKeywords } from "./search-query";
@@ -188,7 +188,75 @@ async function searchRanked(query: string, options: ListOptions): Promise<Catalo
   return { items: items.slice(0, options.limit), cursor: position < ranked.length ? String(position) : null };
 }
 
+/** Stock per variation across the shop's locations. */
+async function stockCounts(client: ReturnType<typeof createSquareClient>, variationIds: string[]): Promise<Map<string, number>> {
+  const inStock = new Map<string, number>();
+  const locations = squareLocationIds();
+  for (let i = 0; i < variationIds.length; i += 500) {
+    const ids = variationIds.slice(i, i + 500);
+    const pager = await withRetry(() => client.inventory.batchGetCounts({ catalogObjectIds: ids, locationIds: locations }));
+    for await (const count of pager) {
+      if (count.catalogObjectId && count.state === "IN_STOCK") {
+        inStock.set(count.catalogObjectId, (inStock.get(count.catalogObjectId) ?? 0) + Number(count.quantity ?? 0));
+      }
+    }
+  }
+  return inStock;
+}
+
+/** Every public item with price, photos and stock, for the search index. */
+async function listAllForIndex(): Promise<IndexableItem[]> {
+  const client = createSquareClient();
+  const objects: (Square.CatalogObject & { type: "ITEM" })[] = [];
+  const related: Square.CatalogObject[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await withRetry(() =>
+      client.catalog.search({ objectTypes: ["ITEM", "IMAGE", "CATEGORY"], includeDeletedObjects: false, limit: 1000, ...(cursor ? { cursor } : {}) })
+    );
+    for (const object of page.objects ?? []) {
+      if (isCatalogItem(object)) {
+        if (!object.itemData?.isArchived) objects.push(object);
+      } else related.push(object);
+    }
+    cursor = page.cursor ?? undefined;
+  } while (cursor);
+
+  const isPublic = (object: Square.CatalogObject & { type: "ITEM" }) => {
+    const data = object.itemData;
+    const categoryIds = [...(data?.categories ?? []).map((c) => c.id), data?.reportingCategory?.id].map((id) =>
+      id && sandboxIdsActive() ? (fromSandbox.get(id) ?? id) : id
+    );
+    return isPublicCatalogItem({ name: data?.name ?? "", description: data?.description, categoryIds });
+  };
+  const visible = objects.filter(isPublic);
+  const variationIdsOf = (object: Square.CatalogObject & { type: "ITEM" }) =>
+    (object.itemData?.variations ?? []).flatMap((v) => (v.id ? [v.id] : []));
+  const inStock = await stockCounts(client, visible.flatMap(variationIdsOf));
+
+  const items: IndexableItem[] = [];
+  for (const object of visible) {
+    const withInventory = {
+      ...object,
+      itemData: {
+        ...object.itemData,
+        variations: object.itemData?.variations?.map((v) => ({ ...v, inventory: v.id ? (inStock.get(v.id) ?? 0) : 0 })),
+      },
+    };
+    const [raw] = normalizeItemsWithInventory([withInventory], related);
+    if (!raw) continue;
+    const item = catalogItemSchema.parse(
+      sandboxIdsActive() && raw.categoryId ? { ...raw, categoryId: fromSandbox.get(raw.categoryId) ?? raw.categoryId } : raw
+    );
+    items.push({ ...item, variationIds: variationIdsOf(object) });
+  }
+  return items;
+}
+
 export const squareCatalogSource: CatalogSource = {
+  listAll: listAllForIndex,
+  liveStock: (variationIds) => stockCounts(createSquareClient(), variationIds),
+
   listByCategories(categoryIds, options) {
     const ids = sandboxIdsActive() ? categoryIds.map((id) => toSandbox.get(id) ?? id) : categoryIds;
     return collect({ setQuery: { attributeName: "category_id", attributeValues: ids } }, options);

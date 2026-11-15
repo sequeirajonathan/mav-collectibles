@@ -50,6 +50,10 @@ export const fixtureCatalogSource: CatalogSource = {
     const next = start + options.limit;
     return { items: ranked.slice(start, next), cursor: next < ranked.length ? String(next) : null };
   },
+  async listAll() {
+    const { items } = await fixture();
+    return items.map((item) => ({ ...item, variationIds: [item.variationId] }));
+  },
   async getProduct(id) {
     const { products } = await fixture();
     return products.find((p) => p.id === id || p.variations.some((v) => v.id === id)) ?? null;
