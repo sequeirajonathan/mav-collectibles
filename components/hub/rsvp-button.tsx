@@ -23,9 +23,11 @@ interface RsvpButtonProps {
   questions?: EventQuestion[];
   /** This player's saved answers, when they're already registered. */
   answers?: Answers;
+  /** Opened from a sign-up link: go straight to the questions. */
+  autoOpen?: boolean;
 }
 
-export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full, questions = [], answers = {} }: RsvpButtonProps) {
+export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full, questions = [], answers = {}, autoOpen = false }: RsvpButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // What the server last confirmed to this button. It wins over the `status`
@@ -33,13 +35,13 @@ export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full
   const [confirmed, setConfirmed] = useState<{ status: RegistrationStatus | null } | null>(null);
   const [optimistic, setOptimistic] = useOptimistic(confirmed ? confirmed.status : status);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
-  const [asking, setAsking] = useState(false);
+  const [asking, setAsking] = useState(autoOpen && signedIn && status === null && !closedReason && questions.length > 0);
   const [savedAnswers, setSavedAnswers] = useState<Answers>(answers);
 
   if (!signedIn) {
     return (
       <Button asChild variant="gold" className="w-full fold:w-auto">
-        <Link href={`/sign-in?next=/events/${slug}`}>Sign in to RSVP</Link>
+        <Link href={autoOpen ? `/sign-in?next=${encodeURIComponent(`/events/${slug}?rsvp=1`)}` : `/sign-in?next=/events/${slug}`}>Sign in to RSVP</Link>
       </Button>
     );
   }

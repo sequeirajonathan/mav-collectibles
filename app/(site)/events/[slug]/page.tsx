@@ -26,6 +26,7 @@ import { JsonLd } from "@components/seo/json-ld";
 import { eventJsonLd } from "@lib/seo";
 
 type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ rsvp?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const event = await getEvent((await params).slug);
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 type Event = NonNullable<Awaited<ReturnType<typeof getEvent>>>;
 
-async function Rsvp({ event }: { event: Event }) {
+async function Rsvp({ event, searchParams }: { event: Event; searchParams: SearchParams }) {
   const user = await getCurrentUser();
   await connection();
   const closedReason = registrationClosedReason(event, requestTime());
@@ -54,11 +55,12 @@ async function Rsvp({ event }: { event: Event }) {
       full={isFull(event)}
       questions={event.questions}
       answers={answers}
+      autoOpen={(await searchParams).rsvp === "1"}
     />
   );
 }
 
-async function EventContent({ params }: { params: Params }) {
+async function EventContent({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const event = await getEvent((await params).slug);
   if (!event) notFound();
 
@@ -118,7 +120,7 @@ async function EventContent({ params }: { params: Params }) {
 
       <div className="mt-4 flex flex-col gap-2 fold:flex-row fold:flex-wrap fold:items-center">
         <Suspense fallback={<Skeleton className="h-11 w-full rounded-md bg-panel-2 fold:w-28" />}>
-          <Rsvp event={event} />
+          <Rsvp event={event} searchParams={searchParams} />
         </Suspense>
         {event.linkUrl && (
           <a href={event.linkUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline" })}>
@@ -201,14 +203,14 @@ function EventSkeleton() {
   );
 }
 
-export default function EventPage({ params }: { params: Params }) {
+export default function EventPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   return (
     <>
       <nav className="mb-4 text-sm">
         <Link href="/events" className="text-muted-foreground hover:text-gold">← All events</Link>
       </nav>
       <Suspense fallback={<EventSkeleton />}>
-        <EventContent params={params} />
+        <EventContent params={params} searchParams={searchParams} />
       </Suspense>
     </>
   );

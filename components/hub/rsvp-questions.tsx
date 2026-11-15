@@ -63,6 +63,7 @@ export function RsvpQuestions({
               <input
                 {...common}
                 type={q.type === "date" ? "date" : "text"}
+                autoComplete="off"
                 inputMode={q.type === "number" ? "numeric" : undefined}
                 className={inputClass}
                 onChange={(e) => set(q.id, e.target.value)}

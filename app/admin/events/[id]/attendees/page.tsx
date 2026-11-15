@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@components/ui/page-header";
 import { EventTabs } from "@components/admin/event-tabs";
 import { AttendeeList } from "@components/admin/attendee-list";
+import { SignupLink } from "@components/admin/signup-link";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { getEventForEdit, listAttendees } from "@lib/data/hub";
@@ -21,7 +22,7 @@ async function Attendees({ params }: { params: Params }) {
   if (!event) notFound();
   return (
     <>
-      <PageHeader title={event.title} description={formatEventWhen(event.starts_at.toISOString())} />
+      <PageHeader title={event.title} description={formatEventWhen(event.starts_at.toISOString())} actions={event.status !== "draft" && <SignupLink slug={event.slug} />} />
       <EventTabs id={id} active="attendees" />
       <AttendeeList eventId={id} eventSlug={event.slug} attendees={attendees} questions={parseStoredQuestions(event.questions)} />
     </>

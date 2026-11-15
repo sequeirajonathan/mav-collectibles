@@ -18,6 +18,14 @@ import { cn } from "@utils";
 const slugify = (v: string) => v.toLowerCase().normalize("NFKD").replace(/[^\w\s-]/g, "").trim().replace(/[\s_]+/g, "-").replace(/-+/g, "-").slice(0, 70);
 const toIso = (local: string) => (local ? storeLocalToIso(local) : "");
 
+/** First problem with the sign-up questions, in words staff can act on. */
+function questionError(errors: Record<string, string>): string | undefined {
+  const entry = Object.entries(errors).find(([key]) => key === "questions" || key.startsWith("questions."));
+  if (!entry) return undefined;
+  const index = Number(entry[0].split(".")[1]);
+  return Number.isInteger(index) ? `Question ${index + 1}: ${entry[1]}` : entry[1];
+}
+
 export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?: string; initial: EventFormValues }) {
   const router = useRouter();
   const [v, setV] = useState(initial);
@@ -181,7 +189,7 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
       <Field label="Details" hint="Prizes, deck rules, what to bring…" error={errors.description}>
         {(id) => <textarea id={id} rows={8} className={inputClass} value={v.description} onChange={(e) => set("description", e.target.value)} />}
       </Field>
-      <QuestionsEditor value={v.questions} onChange={(next) => set("questions", next)} error={errors.questions} />
+      <QuestionsEditor value={v.questions} onChange={(next) => set("questions", next)} error={questionError(errors)} />
       <ImageUpload label="Cover image" folder="events" value={v.coverImageUrl} onChange={(url) => set("coverImageUrl", url)} />
       <div className={cn(cardVariants({ padding: "md" }), "flex flex-wrap items-center gap-4")}>
         <Field label="Status">

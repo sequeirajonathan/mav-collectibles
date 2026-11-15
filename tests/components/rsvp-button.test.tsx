@@ -98,4 +98,12 @@ describe("RsvpButton", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save my details" }));
     await waitFor(() => expect(saveRegistrationAnswers).toHaveBeenCalledWith({ eventId: "e1", answers: { q_name: "Ash Ketchum" } }));
   });
+
+  it("a sign-up link opens the questions straight away, and survives signing in", () => {
+    const { unmount } = render(<RsvpButton {...props} questions={questions} autoOpen />);
+    expect(screen.getByRole("form", { name: "Player details" })).toBeInTheDocument();
+    unmount();
+    render(<RsvpButton {...props} signedIn={false} questions={questions} autoOpen />);
+    expect(screen.getByRole("link", { name: "Sign in to RSVP" })).toHaveAttribute("href", "/sign-in?next=%2Fevents%2Fleague%3Frsvp%3D1");
+  });
 });

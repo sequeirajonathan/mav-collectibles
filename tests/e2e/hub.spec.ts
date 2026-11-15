@@ -28,6 +28,8 @@ test.describe("event hub", () => {
     await expect(page.getByText("Full · waitlist open", { exact: true }).filter({ visible: true })).toBeVisible();
     await page.getByRole("button", { name: "Join the waitlist" }).click();
     await expect(page.getByText("On the waitlist", { exact: true }).filter({ visible: true })).toBeVisible();
+    // The button updates at once; wait for the save to be confirmed before reloading.
+    await expect(page.getByText("You're on the waitlist")).toBeVisible();
     await page.reload();
     await expect(page.getByText("On the waitlist", { exact: true }).filter({ visible: true })).toBeVisible();
     await page.getByRole("button", { name: "Cancel RSVP" }).click();

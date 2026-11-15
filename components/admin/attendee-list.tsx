@@ -32,7 +32,9 @@ export function AttendeeList({ eventId, eventSlug, attendees, questions = [] }: 
   const [pending, startTransition] = useTransition();
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? attendees.filter((a) => a.displayName.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q)) : attendees;
+    if (!q) return attendees;
+    // Players are often known by the name they gave on the form, not their account name.
+    return attendees.filter((a) => [a.displayName, a.email ?? "", ...Object.values(a.answers)].some((text) => text.toLowerCase().includes(q)));
   }, [attendees, query]);
 
   const going = attendees.filter((a) => a.status !== "waitlisted");

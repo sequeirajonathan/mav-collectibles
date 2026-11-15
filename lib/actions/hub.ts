@@ -43,9 +43,12 @@ export const registerForEvent = createAction(
     const { answers, errors } = checkAnswers(parseStoredQuestions(event.questions), given);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     try {
-      const rows = await prisma.$queryRaw<{ status: string }[]>`
-        select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`;
-      await prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } });
+      // One transaction: a player is never registered without their answers.
+      const [rows] = await prisma.$transaction([
+        prisma.$queryRaw<{ status: string }[]>`
+          select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`,
+        prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } }),
+      ]);
       refreshEvent(event.slug);
       return { status: registrationStatusSchema.parse(rows[0]?.status) };
     } catch (error) {

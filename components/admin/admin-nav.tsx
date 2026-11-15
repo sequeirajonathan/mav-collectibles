@@ -18,6 +18,7 @@ const LINKS: { href: Route; label: string; adminOnly?: boolean; hiringOnly?: boo
   { href: "/admin/site", label: "Site", adminOnly: true },
   { href: "/admin/roles", label: "Roles", adminOnly: true },
   { href: "/admin/downloads", label: "Downloads", adminOnly: true },
+  { href: "/admin/guide", label: "Guide" },
 ];
 
 export function AdminNav({ isAdmin, canHire }: { isAdmin: boolean; canHire: boolean }) {
