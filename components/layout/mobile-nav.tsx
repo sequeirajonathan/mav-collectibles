@@ -9,11 +9,13 @@ import { ThemeToggle } from "./theme-toggle";
 import { InstallApp } from "./install-app";
 import { NAV_LINKS } from "./nav-links";
 import { cn } from "@utils";
+import { useShopMode } from "./shop-mode";
 
 /** Slide-in drawer for phones (incl. the iPhone Duo cover screen). */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { visible: shopVisible } = useShopMode();
   const [openedOn, setOpenedOn] = useState(pathname);
   // Close the drawer after navigating (adjusting state during render, not in an effect).
   if (open && pathname !== openedOn) {
@@ -78,6 +80,7 @@ export function MobileNav() {
                   <X className="size-6" />
                 </button>
               </div>
+              {shopVisible && (
               <form
                 action="/search"
                 className="mb-3 flex items-center gap-2 rounded-lg border border-line bg-panel-2 px-3"
@@ -94,12 +97,13 @@ export function MobileNav() {
                   className="min-h-11 w-full bg-transparent text-base outline-none"
                 />
               </form>
+              )}
               <ThemeToggle
                 withLabel
                 className="mb-2 justify-start border border-line"
               />
               <InstallApp className="mb-2" />
-              {NAV_LINKS.map((link) => (
+              {NAV_LINKS.filter((link) => shopVisible || link.href !== "/shop").map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

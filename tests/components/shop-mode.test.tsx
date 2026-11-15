@@ -24,7 +24,7 @@ const item: CatalogItem = {
 function renderShop(live: boolean) {
   return render(
     <CartProvider>
-      <ShopModeProvider live={live}>
+      <ShopModeProvider live={live} shopVisible>
         <ShowcaseNotice />
         <ProductCard item={item} />
       </ShopModeProvider>

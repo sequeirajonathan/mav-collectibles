@@ -11,14 +11,24 @@ interface ShopMode {
   canPurchase: boolean;
   /** Staff are seeing purchase UI that customers don't. */
   previewing: boolean;
+  /** This person can open the shop: it's public, or they're admin/staff previewing it. */
+  visible: boolean;
+  /** The shop is hidden from customers and this person is seeing it as staff. */
+  hiddenPreview: boolean;
 }
 
-const ShopModeContext = createContext<ShopMode>({ live: false, canPurchase: false, previewing: false });
+const ShopModeContext = createContext<ShopMode>({ live: false, canPurchase: false, previewing: false, visible: false, hiddenPreview: false });
 
-export function ShopModeProvider({ live, children }: { live: boolean; children: React.ReactNode }) {
+export function ShopModeProvider({ live, shopVisible, children }: { live: boolean; shopVisible: boolean; children: React.ReactNode }) {
   const { role } = useAuth();
   const staff = role === UserRole.ADMIN || role === UserRole.STAFF;
-  const value: ShopMode = { live, canPurchase: live || staff, previewing: !live && staff };
+  const value: ShopMode = {
+    live,
+    canPurchase: (live && shopVisible) || staff,
+    previewing: !live && staff,
+    visible: shopVisible || staff,
+    hiddenPreview: !shopVisible && staff,
+  };
   return <ShopModeContext.Provider value={value}>{children}</ShopModeContext.Provider>;
 }
 

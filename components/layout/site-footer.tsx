@@ -6,6 +6,7 @@ import { STORE_ADDRESS, STORE_PHONE } from "@lib/format";
 import { NAV_LINKS } from "./nav-links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
+import { ShopOnly } from "./shop-only";
 
 const PHONE = STORE_PHONE;
 const EMAIL = "info@mavcollectibles.com";
@@ -46,11 +47,14 @@ export function SiteFooter() {
         <nav aria-label="Footer">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-gold">Explore</h2>
           <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm fold:grid-cols-1">
-            {NAV_LINKS.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">{l.label}</Link>
-              </li>
-            ))}
+            {NAV_LINKS.map((l) => {
+              const item = (
+                <li key={l.href}>
+                  <Link href={l.href} className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">{l.label}</Link>
+                </li>
+              );
+              return l.href === "/shop" ? <ShopOnly key={l.href}>{item}</ShopOnly> : item;
+            })}
             <li>
               <Link href="/pokemon-cards-montgomery-tx" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Pokémon cards</Link>
             </li>

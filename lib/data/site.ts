@@ -26,6 +26,7 @@ import { tags } from "./tags";
 
 const FLAG_DEFAULTS: FlagMap = {
   shopLive: false,
+  shopVisible: false,
   showAlertBanner: true,
   showYouTubeVideo: false,
   showVideoPlayer: false,

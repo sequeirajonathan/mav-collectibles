@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { CATEGORY_GROUPS } from "@const/categories";
 import { listEvents, listVendors } from "@lib/data/hub";
 import { siteUrl } from "@lib/seo";
+import { getFlags } from "@lib/data/site";
 
 const GROUP_PARAM: Record<string, string> = { TCG: "TCG", Collectibles: "COLLECTIBLES", "Supplies & Grading": "SUPPLIES" };
 
@@ -21,10 +22,12 @@ const STATIC: { path: string; priority: number; changeFrequency: "daily" | "week
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  const [events, vendors] = await Promise.all([listEvents({ limit: 100 }).catch(() => []), listVendors().catch(() => [])]);
+  const [events, vendors, flags] = await Promise.all([listEvents({ limit: 100 }).catch(() => []), listVendors().catch(() => []), getFlags()]);
+  // A hidden shop stays out of search results.
+  const shop = flags.shopVisible;
   return [
-    ...STATIC.map((p) => ({ url: `${base}${p.path}`, changeFrequency: p.changeFrequency, priority: p.priority })),
-    ...CATEGORY_GROUPS.flatMap((group) =>
+    ...STATIC.filter((p) => shop || p.path !== "/shop").map((p) => ({ url: `${base}${p.path}`, changeFrequency: p.changeFrequency, priority: p.priority })),
+    ...(shop ? CATEGORY_GROUPS : []).flatMap((group) =>
       group.categories.map((c) => ({
         url: `${base}/category/${c.slug}?group=${GROUP_PARAM[group.name] ?? "TCG"}`,
         changeFrequency: "daily" as const,

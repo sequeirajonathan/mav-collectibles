@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { InfoCard, LocalHero } from "@components/local/local-page";
 import { VisitBlock } from "@components/local/visit-block";
 import { LinkButton } from "@components/ui/link-button";
+import { ShopOnly } from "@components/layout/shop-only";
 import { JsonLd } from "@components/seo/json-ld";
 import { STORE, storeJsonLd } from "@lib/seo";
 
@@ -32,9 +33,11 @@ export default function VisitPage() {
         <InfoCard title="What to do when you're here">
           <div className="flex flex-col gap-2 fold:flex-row fold:flex-wrap">
             <LinkButton href="/events">See events</LinkButton>
-            <LinkButton href="/shop" variant="outline">
-              Browse the shop
-            </LinkButton>
+            <ShopOnly>
+              <LinkButton href="/shop" variant="outline">
+                Browse the shop
+              </LinkButton>
+            </ShopOnly>
             <LinkButton href="/sell-your-cards" variant="outline">
               Sell your cards
             </LinkButton>

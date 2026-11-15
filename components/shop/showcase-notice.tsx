@@ -7,7 +7,14 @@ import { cn } from "@utils";
 
 /** Explains showcase mode to customers, or reminds staff that they're previewing. */
 export function ShowcaseNotice() {
-  const { live, previewing } = useShopMode();
+  const { live, previewing, hiddenPreview } = useShopMode();
+  if (hiddenPreview) {
+    return (
+      <p role="status" className="mb-5 rounded-lg border border-warning/50 bg-warning/10 px-4 py-2.5 text-sm text-warning">
+        Staff preview: the shop is hidden from customers. Only admins and staff can see these pages. Turn on <strong>Show the shop to customers</strong> in Admin → Site to open it.
+      </p>
+    );
+  }
   if (live) return null;
   return previewing ? (
     <p role="status" className="mb-5 rounded-lg border border-warning/50 bg-warning/10 px-4 py-2.5 text-sm text-warning">
