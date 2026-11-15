@@ -30,6 +30,7 @@ export default defineConfig({
     { name: "duo-cover-landscape", use: { ...phone, viewport: { width: 678, height: 466 } }, testMatch: /responsive/ },
     { name: "duo-inner", use: { ...phone, viewport: { width: 626, height: 890 } }, testMatch: /responsive/ },
     { name: "duo-inner-landscape", use: { ...phone, viewport: { width: 890, height: 626 } }, testMatch: /responsive/ },
+    { name: "ipad", use: { ...phone, deviceScaleFactor: 2, viewport: { width: 1000, height: 700 } }, testMatch: /responsive/ },
     { name: "iphone", use: { ...phone, viewport: { width: 393, height: 852 } }, testMatch: /responsive/ },
   ],
 });
