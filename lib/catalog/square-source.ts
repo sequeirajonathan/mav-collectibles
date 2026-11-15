@@ -6,6 +6,7 @@ import { catalogItemSchema, type CatalogItem, type CatalogPage, type Product } f
 import { serverEnv } from "@lib/env.server";
 import sandboxMap from "@const/square-sandbox-map.json";
 import { matchesStock, type CatalogSource, type ListOptions } from "./source";
+import { withProcessedImages } from "./product-images";
 
 /**
  * The app's category IDs (const/categories.ts) are production IDs. A sandbox
@@ -72,7 +73,8 @@ async function collect(query: Square.CatalogQuery, options: ListOptions): Promis
       },
     }));
 
-    for (const normalized of normalizeItemsWithInventory(withInventory, page.relatedObjects)) {
+    const related = await withProcessedImages(page.relatedObjects);
+    for (const normalized of normalizeItemsWithInventory(withInventory, related)) {
       const item = catalogItemSchema.parse(
         sandboxIdsActive() && normalized.categoryId
           ? { ...normalized, categoryId: fromSandbox.get(normalized.categoryId) ?? normalized.categoryId }
@@ -115,7 +117,11 @@ export const squareCatalogSource: CatalogSource = {
     const counts = variationIds.length
       ? await client.inventory.batchGetCounts({ catalogObjectIds: variationIds, locationIds: [location] })
       : { data: [] };
-    const product = normalizeProductResponse(response, { counts: counts.data ?? [] }, location);
+    const product = normalizeProductResponse(
+      { ...response, relatedObjects: await withProcessedImages(response.relatedObjects) },
+      { counts: counts.data ?? [] },
+      location
+    );
 
     return {
       id: product.id,

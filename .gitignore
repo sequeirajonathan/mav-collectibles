@@ -52,3 +52,6 @@ next-env.d.ts
 
 # Square catalog export (scripts/square/clone-catalog.ts)
 /square-export
+
+# downloaded ML models (scripts/images)
+/.cache

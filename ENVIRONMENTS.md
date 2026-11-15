@@ -62,6 +62,26 @@ development never touches the live store. The production step only *reads*.
 
 `import` refuses to run if the sandbox already has items (pass `--force` to add anyway).
 
+### Product photos
+
+The shop's photos on Square are never changed. `scripts/images/sync.ts` makes
+a cleaned copy of each one (background removed from products shot on white,
+borders trimmed, corners rounded, resized to WebP) in the `product-images`
+storage bucket and records it in `product_images`. The shop shows the cleaned
+copy when one exists and the Square original otherwise.
+
+- **Production:** the *Product images* workflow runs nightly and processes
+  only new or replaced photos. Run it by hand once after the first deploy for
+  the full pass (about 7,000 photos; it resumes where it stopped). It needs
+  `SQUARE_ACCESS_TOKEN` and `SUPABASE_SECRET_KEY` as secrets in the GitHub
+  `production` environment.
+- **Locally:** `npx tsx scripts/images/sync.ts --from-export --limit 50` after a
+  catalog export, with `.env.local` loaded. The model (~170 MB) downloads once
+  to `.cache/`.
+- **Improving the processing:** change `scripts/images/process-image.ts` and
+  bump `PROCESSOR_VERSION` in `lib/catalog/product-image-config.ts`; the next
+  run redoes every photo under new file names.
+
 ### Changing the database
 
 1. `npm run db:migration <name>` creates `supabase/migrations/<timestamp>_<name>.sql`.
@@ -132,6 +152,8 @@ Settings → Environments → **New environment** `production`:
 | `SUPABASE_ACCESS_TOKEN` | secret | Personal access token from supabase.com/dashboard/account/tokens |
 | `SUPABASE_DB_PASSWORD` | secret | The production database password |
 | `VERCEL_TOKEN` | secret | Token from vercel.com/account/tokens |
+| `SQUARE_ACCESS_TOKEN` | secret | Square production token (read-only use, for the nightly photo job) |
+| `SUPABASE_SECRET_KEY` | secret | Production secret key (`sb_secret_…`), for the nightly photo job |
 | `SUPABASE_PROJECT_ID` | variable | `dxtlhxaxmuxxkdecehqb` |
 | `VERCEL_ORG_ID` | variable | `team_sMnSSXzNrFvRsmm06ojfFbc4` |
 | `VERCEL_PROJECT_ID` | variable | `prj_jl9VG2RKnQIYpJDSj05RfFVAu0Xe` |

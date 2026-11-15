@@ -369,3 +369,17 @@ model CommunitySettings {
 
   @@map("community_settings")
 }
+
+/// Cleaned copies of Square product photos (see scripts/images).
+model ProductImage {
+  square_image_id   String   @id
+  path              String
+  kind              String
+  width             Int
+  height            Int
+  source_url        String
+  processor_version Int
+  processed_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("product_images")
+}

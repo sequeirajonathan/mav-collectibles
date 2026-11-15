@@ -19,6 +19,7 @@ import { SquareClient, SquareEnvironment, type Square } from "square";
 import { z } from "zod";
 import { CATEGORY_MAPPING, COLLECTIBLES_MAPPING, SUPPLIES_MAPPING } from "../../const/categories";
 import { catalogItemSchema, productSchema, type CatalogItem, type Product } from "../../lib/contracts/catalog";
+import { processImage } from "../images/process-image";
 
 const ROOT = process.cwd();
 const EXPORT_DIR = path.join(ROOT, "square-export");
@@ -419,7 +420,9 @@ async function runFixtures(): Promise<void> {
     const file = data.images[imageId];
     if (!file) return undefined;
     const out = `${imageId}.webp`;
-    await sharp(path.join(IMAGE_DIR, file)).resize(480, 480, { fit: "inside" }).webp({ quality: 72 }).toFile(path.join(FIXTURE_IMAGE_DIR, out));
+    // Same cleaning the live site gets (scripts/images/sync.ts), at fixture size.
+    const cleaned = await processImage(await readFile(path.join(IMAGE_DIR, file)));
+    await sharp(cleaned.data).resize(480, 480, { fit: "inside" }).webp({ quality: 76, alphaQuality: 85 }).toFile(path.join(FIXTURE_IMAGE_DIR, out));
     return `/fixtures/catalog/${out}`;
   };
 

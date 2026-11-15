@@ -136,6 +136,13 @@
       radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px);
     background-size: auto, auto, 22px 22px;
   }
+  /* Product tile: a soft spotlight so cut-out products and card scans both sit well on the dark theme. */
+  .bg-spotlight {
+    background-color: var(--panel-2);
+    background-image:
+      radial-gradient(75% 60% at 50% 42%, rgb(255 255 255 / 0.13), transparent 72%),
+      radial-gradient(60% 20% at 50% 96%, rgb(0 0 0 / 0.45), transparent 75%);
+  }
   /* Gold foil text for a word or two in big headings. */
   .text-foil {
     background-image: linear-gradient(100deg, var(--gold-light), var(--gold) 45%, var(--gold-dark));
