@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { httpUrl, isoDateTime, optionalText, optionalUrl, slug, uuid } from "./common";
+import { answersSchema, eventQuestionSchema, eventQuestionsSchema } from "@lib/event-questions";
 
 // ---------------------------------------------------------------------------
 // Games
@@ -72,6 +73,8 @@ export const eventDetailSchema = eventSummarySchema.extend({
   /** Optional button on the event page, e.g. a sign-up form. */
   linkUrl: z.string().nullable(),
   linkLabel: z.string().nullable(),
+  /** Asked when a player RSVPs. */
+  questions: z.array(eventQuestionSchema),
   registrationOpensAt: isoDateTime.nullable(),
   registrationClosesAt: isoDateTime.nullable(),
   /** The signed-in viewer's registration, if any. */
@@ -110,6 +113,7 @@ export const eventInput = z
     location: z.string().trim().min(1).max(120),
     linkUrl: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), httpUrl("Paste the full link, starting with https://").max(500).nullable()).default(null),
     linkLabel: optionalText(40).default(null),
+    questions: eventQuestionsSchema.default([]),
     coverImageUrl: optionalUrl,
     capacity: z.preprocess((v) => (v === "" || v === null ? null : v), z.coerce.number().int().positive().nullable()),
     entryFeeDollars: z.preprocess(
@@ -130,6 +134,8 @@ export const attendeeSchema = z.object({
   status: registrationStatusSchema,
   registeredAt: isoDateTime,
   checkedInAt: isoDateTime.nullable(),
+  /** Answers to the event's questions, by question id. */
+  answers: answersSchema,
 });
 export type Attendee = z.infer<typeof attendeeSchema>;
 

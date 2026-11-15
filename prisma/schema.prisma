@@ -111,6 +111,7 @@ model EventRegistration {
   user_id       String             @db.Uuid
   status        RegistrationStatus
   note          String?
+  answers       Json               @default("{}")
   created_at    DateTime           @default(now()) @db.Timestamptz(6)
   updated_at    DateTime           @default(now()) @db.Timestamptz(6)
   checked_in_at DateTime?          @db.Timestamptz(6)
@@ -153,6 +154,7 @@ model Event {
   location               String              @default("MAV Collectibles")
   link_url               String?
   link_label             String?
+  questions              Json                @default("[]")
   cover_image_url        String?
   capacity               Int?
   entry_fee_cents        Int?

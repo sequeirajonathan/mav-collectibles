@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { ExternalLink, MapPin, Ticket, Users } from "lucide-react";
 import { buttonVariants } from "@components/ui/button";
 import { Linkified } from "@components/ui/linkified";
-import { getEvent, getMyRegistration } from "@lib/data/hub";
+import { getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
 import { getCurrentUser } from "@lib/auth/server";
 import { googleCalendarUrl, outlookCalendarUrl, type CalendarEvent } from "@lib/calendar";
 import { capacityLabel, formatEntryFee, formatEventWhen } from "@lib/format";
@@ -43,7 +43,7 @@ async function Rsvp({ event }: { event: Event }) {
   const user = await getCurrentUser();
   await connection();
   const closedReason = registrationClosedReason(event, requestTime());
-  const status = user ? await getMyRegistration(event.id, user.id) : null;
+  const [status, answers] = user ? await Promise.all([getMyRegistration(event.id, user.id), getMyAnswers(event.id, user.id)]) : [null, {}];
   return (
     <RsvpButton
       eventId={event.id}
@@ -52,6 +52,8 @@ async function Rsvp({ event }: { event: Event }) {
       signedIn={user !== null}
       closedReason={closedReason}
       full={isFull(event)}
+      questions={event.questions}
+      answers={answers}
     />
   );
 }

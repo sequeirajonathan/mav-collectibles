@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Button } from "@components/ui/button";
 import { Field, inputClass } from "@components/ui/field";
+import { QuestionsEditor } from "./questions-editor";
 import { ImageUpload } from "./image-upload";
 import { ConfirmButton } from "./confirm-button";
 import { createEvent, deleteEvent, duplicateEvent, updateEvent } from "@lib/actions/hub";
@@ -38,6 +39,7 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
     location: v.location,
     linkUrl: v.linkUrl,
     linkLabel: v.linkLabel,
+    questions: v.questions,
     coverImageUrl: v.coverImageUrl,
     capacity: v.capacity,
     entryFeeDollars: v.entryFeeDollars,
@@ -179,6 +181,7 @@ export function EventForm({ games, eventId, initial }: { games: Game[]; eventId?
       <Field label="Details" hint="Prizes, deck rules, what to bring…" error={errors.description}>
         {(id) => <textarea id={id} rows={8} className={inputClass} value={v.description} onChange={(e) => set("description", e.target.value)} />}
       </Field>
+      <QuestionsEditor value={v.questions} onChange={(next) => set("questions", next)} error={errors.questions} />
       <ImageUpload label="Cover image" folder="events" value={v.coverImageUrl} onChange={(url) => set("coverImageUrl", url)} />
       <div className={cn(cardVariants({ padding: "md" }), "flex flex-wrap items-center gap-4")}>
         <Field label="Status">

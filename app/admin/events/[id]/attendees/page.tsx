@@ -6,6 +6,7 @@ import { AttendeeList } from "@components/admin/attendee-list";
 import { requirePageRole } from "@lib/auth/guard";
 import { CONTENT_ROLES } from "@interfaces/roles";
 import { getEventForEdit, listAttendees } from "@lib/data/hub";
+import { parseStoredQuestions } from "@lib/event-questions";
 import { uuid } from "@lib/contracts/common";
 import { formatEventWhen } from "@lib/format";
 import { Skeleton } from "@components/ui/skeleton";
@@ -22,7 +23,7 @@ async function Attendees({ params }: { params: Params }) {
     <>
       <PageHeader title={event.title} description={formatEventWhen(event.starts_at.toISOString())} />
       <EventTabs id={id} active="attendees" />
-      <AttendeeList eventId={id} attendees={attendees} />
+      <AttendeeList eventId={id} eventSlug={event.slug} attendees={attendees} questions={parseStoredQuestions(event.questions)} />
     </>
   );
 }

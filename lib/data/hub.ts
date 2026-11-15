@@ -1,4 +1,5 @@
 import "server-only";
+import { parseStoredAnswers, parseStoredQuestions, type Answers } from "@lib/event-questions";
 import { cacheLife, cacheTag } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@lib/prisma";
@@ -172,6 +173,7 @@ export async function getEvent(slug: string): Promise<Omit<EventDetail, "myRegis
     description: e.description,
     linkUrl: e.link_url,
     linkLabel: e.link_label,
+    questions: parseStoredQuestions(e.questions),
     registrationOpensAt: e.registration_opens_at,
     registrationClosesAt: e.registration_closes_at,
     vendors: e.event_vendors
@@ -196,6 +198,15 @@ export async function getMyRegistration(eventId: string, userId: string): Promis
     select: { status: true },
   });
   return row && row.status !== "cancelled" ? row.status : null;
+}
+
+/** The signed-in player's saved answers to an event's questions. */
+export async function getMyAnswers(eventId: string, userId: string): Promise<Answers> {
+  const row = await prisma.eventRegistration.findUnique({
+    where: { event_id_user_id: { event_id: eventId, user_id: userId } },
+    select: { answers: true, status: true },
+  });
+  return row && row.status !== "cancelled" ? parseStoredAnswers(row.answers) : {};
 }
 
 export async function listMyEvents(userId: string): Promise<(EventSummary & { myStatus: RegistrationStatus })[]> {
@@ -238,6 +249,7 @@ export async function listAttendees(eventId: string): Promise<Attendee[]> {
       status: r.status,
       registeredAt: r.created_at,
       checkedInAt: r.checked_in_at,
+      answers: parseStoredAnswers(r.answers),
     }))
   );
 }
