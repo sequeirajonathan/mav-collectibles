@@ -48,14 +48,15 @@ async function wheelCards(): Promise<WheelCard[]> {
 
 function Wheel({ cards }: { cards: WheelCard[] }) {
   return (
-    <div aria-hidden className="wheel relative h-44 overflow-hidden border-b-[3px] border-[#10222f] bg-[#10222f] fold:h-52" style={{ "--n": cards.length } as React.CSSProperties}>
+    <div aria-hidden className="wheel relative h-44 overflow-hidden border-b-[3px] border-[#10222f] fold:h-52" style={{ "--n": cards.length } as React.CSSProperties}>
       <div className="wheel-ring">
         {cards.map((card, i) => (
           <div key={i} className="wheel-item" style={{ "--i": i } as React.CSSProperties}>
-            <div className="relative aspect-[5/7] overflow-hidden rounded-lg border-2 border-[#10222f] bg-white">
-              <Image src={card.src} alt="" fill sizes="(min-width: 576px) 240px, 208px" className="object-contain p-1" />
+            {/* Multiply lets a photo's white backdrop melt into the paper behind it. */}
+            <div className="relative aspect-[5/7]">
+              <Image src={card.src} alt="" fill sizes="(min-width: 576px) 240px, 208px" className="object-contain mix-blend-multiply" />
             </div>
-            <p className="mt-1 text-center font-display text-sm leading-none text-[#ffd02e]">{card.label}</p>
+            <p className="mt-1 text-center font-display text-sm leading-none text-[#10222f]">{card.label}</p>
           </div>
         ))}
       </div>
