@@ -164,6 +164,77 @@ function edgeConnectedBackground(rgb: Buffer, step: number, width: number, heigh
   return background;
 }
 
+/**
+ * Clears stray fragments (caption text, dust) far smaller than the product
+ * itself, so they don't push the trimmed product off-centre.
+ */
+function dropSmallFragments(rgba: Buffer, width: number, height: number): void {
+  const total = width * height;
+  const label = new Int32Array(total);
+  const queue = new Int32Array(total);
+  const sizes: number[] = [0];
+  for (let start = 0; start < total; start++) {
+    if (label[start] || rgba[start * 4 + 3] <= 32) continue;
+    const id = sizes.length;
+    let head = 0;
+    let tail = 0;
+    label[start] = id;
+    queue[tail++] = start;
+    while (head < tail) {
+      const i = queue[head++];
+      const x = i % width;
+      const visit = (j: number) => {
+        if (!label[j] && rgba[j * 4 + 3] > 32) {
+          label[j] = id;
+          queue[tail++] = j;
+        }
+      };
+      if (x > 0) visit(i - 1);
+      if (x < width - 1) visit(i + 1);
+      if (i >= width) visit(i - width);
+      if (i < total - width) visit(i + width);
+    }
+    sizes.push(tail);
+  }
+  const keep = Math.max(...sizes) * 0.02;
+  for (let i = 0; i < total; i++) {
+    if (label[i] && sizes[label[i]] < keep) rgba[i * 4 + 3] = 0;
+  }
+}
+
+/**
+ * True when the area about to be removed contains outlines or detail. Real
+ * backgrounds are flat; edges in the removed area mean part of the product
+ * (a white wrapper, a pale box) is being cut away.
+ */
+function removesDetail(rgba: Buffer, width: number, height: number): boolean {
+  const step = Math.max(1, Math.round(Math.max(width, height) / 320));
+  const w = Math.floor(width / step);
+  const h = Math.floor(height / step);
+  const gray = new Float32Array(w * h);
+  const removed = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * step * width + x * step) * 4;
+      gray[y * w + x] = (rgba[i] + rgba[i + 1] + rgba[i + 2]) / 3;
+      removed[y * w + x] = rgba[i + 3] < 32 ? 1 : 0;
+    }
+  }
+  let area = 0;
+  let edges = 0;
+  const margin = 3;
+  for (let y = margin; y < h - margin; y++) {
+    for (let x = margin; x < w - margin; x++) {
+      const i = y * w + x;
+      // Only look well inside the removed area, away from the product's own edge.
+      if (!removed[i] || !removed[i - margin] || !removed[i + margin] || !removed[i - margin * w] || !removed[i + margin * w]) continue;
+      area++;
+      if (Math.abs(gray[i + 1] - gray[i - 1]) + Math.abs(gray[i + w] - gray[i - w]) > 22) edges++;
+    }
+  }
+  return area > 0 && edges / area > 0.012;
+}
+
 async function cutout(image: Sharp, width: number, height: number): Promise<Buffer | null> {
   const mask = await foregroundMask(image, width, height);
   const { data: rgb, info } = await image.clone().removeAlpha().toColourspace("srgb").raw().toBuffer({ resolveWithObject: true });
@@ -180,6 +251,8 @@ async function cutout(image: Sharp, width: number, height: number): Promise<Buff
     rgba[i * 4 + 2] = rgb[i * step + (step > 2 ? 2 : 0)];
     rgba[i * 4 + 3] = alpha;
   }
+  if (removesDetail(rgba, width, height)) return null;
+  dropSmallFragments(rgba, width, height);
   const coverage = kept / (width * height);
   // Keeping almost nothing or almost everything means there was no clear
   // subject on a plain background; the caller falls back to the photo path.
