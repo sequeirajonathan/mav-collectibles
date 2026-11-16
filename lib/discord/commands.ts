@@ -1,10 +1,13 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@lib/prisma";
-import { getEvent, getLeaderboard, listEvents, listGames, listMyEvents, listSeasons, getBracket } from "@lib/data/hub";
+import { getEvent, getLeaderboard, listAttendees, listEvents, listGames, listMyEvents, listPosts, listSeasons, getBracket } from "@lib/data/hub";
 import { capacityLabel, formatEntryFee, STORE_ADDRESS, STORE_NAME, STORE_PHONE } from "@lib/format";
 import { isFull, registrationClosedReason } from "@lib/hub-rules";
-import { checkAnswers, prefillFromProfile } from "@lib/event-questions";
+import { PLAYER_ID, checkAnswers, displayAnswer, parseStoredQuestions, prefillFromProfile } from "@lib/event-questions";
+import { JOB_OPENINGS } from "@const/jobs";
+import { CONTENT_ROLES, parseRole } from "@interfaces/roles";
 import { viewBracket } from "@lib/bracket";
 import { siteUrl, STORE } from "@lib/seo";
 import { TCGPLAYER_STORE_URL } from "@const/links";
@@ -23,10 +26,16 @@ const BRAND_COLOR = 0x1b6ca8;
  * Keep names and descriptions short: Discord shows them as the user types.
  */
 export const COMMANDS = [
+  { name: "help", description: "What this bot can do" },
   {
     name: "events",
     description: "What's coming up at MAV Collectibles",
     options: [{ type: OptionType.String, name: "game", description: "Only this game", autocomplete: true }],
+  },
+  {
+    name: "event",
+    description: "Details for one event: time, entry, seats and what to bring",
+    options: [{ type: OptionType.String, name: "event", description: "Which event", required: true, autocomplete: true }],
   },
   {
     name: "rsvp",
@@ -45,15 +54,44 @@ export const COMMANDS = [
     options: [{ type: OptionType.String, name: "game", description: "Which game (Pokémon if left out)", autocomplete: true }],
   },
   {
+    name: "rank",
+    description: "Where you stand this season",
+    options: [{ type: OptionType.String, name: "game", description: "Which game (Pokémon if left out)", autocomplete: true }],
+  },
+  {
     name: "bracket",
     description: "How an event's bracket stands",
     options: [{ type: OptionType.String, name: "event", description: "Which event", required: true, autocomplete: true }],
   },
+  { name: "news", description: "The latest from the shop" },
   { name: "hours", description: "Opening hours, address and phone" },
   { name: "singles", description: "Buy singles from our TCGplayer store" },
+  { name: "sell", description: "Sell or trade your cards to the shop" },
+  { name: "jobs", description: "Work at MAV Collectibles" },
+  {
+    name: "playerid",
+    description: "See or save your Pokémon Player ID, so sign-ups fill it in",
+    options: [{ type: OptionType.String, name: "id", description: "Your Play! Pokémon ID (leave out to see what's saved)" }],
+  },
   { name: "link", description: "Connect your Discord to your MAV account, so you can RSVP from here" },
   { name: "unlink", description: "Disconnect your Discord from your MAV account" },
+  {
+    name: "attendees",
+    description: "Staff: who's signed up for an event",
+    options: [{ type: OptionType.String, name: "event", description: "Which event", required: true, autocomplete: true }],
+  },
 ] as const;
+
+/** Changes whenever the command list does; Admin compares it with what Discord was last told. */
+export const COMMANDS_VERSION = createHash("sha256").update(JSON.stringify(COMMANDS)).digest("hex").slice(0, 16);
+
+/** How /help groups the commands, in the order a new player would want them. */
+const HELP_GROUPS: { title: string; commands: (typeof COMMANDS)[number]["name"][] }[] = [
+  { title: "Events", commands: ["events", "event", "rsvp", "cancel", "myevents", "bracket"] },
+  { title: "Standings", commands: ["standings", "rank"] },
+  { title: "Your account", commands: ["link", "unlink", "playerid"] },
+  { title: "The shop", commands: ["news", "hours", "singles", "sell", "jobs"] },
+];
 
 const interactionSchema = z.object({
   type: z.number(),
@@ -266,6 +304,145 @@ async function unlink(user: { id: string }) {
   return privately(count ? "Done. Your Discord is no longer connected to a MAV account." : "Your Discord wasn't connected to a MAV account.");
 }
 
+function help() {
+  const described = new Map<string, string>(COMMANDS.map((c) => [c.name, c.description]));
+  return message({
+    ephemeral: true,
+    embeds: [
+      {
+        title: "What I can do",
+        color: BRAND_COLOR,
+        description: "Type `/` and pick a command. Anything about your own account is shown only to you.",
+        fields: HELP_GROUPS.map((group) => ({
+          name: group.title,
+          value: group.commands.map((name) => `\`/${name}\` ${described.get(name) ?? ""}`).join("\n"),
+        })),
+        footer: { text: "New here? Start with /events, then /link so you can /rsvp." },
+      },
+    ],
+    components: [row(linkButton("Open the website", siteUrl()))],
+  });
+}
+
+async function eventDetails(interaction: Interaction) {
+  const event = await getEvent(option(interaction, "event"));
+  if (!event) return privately("I couldn't find that event. Pick one from the list that appears as you type.");
+  const closed = registrationClosedReason(event, Date.now());
+  const lines = [
+    `🗓️ ${when(event.startsAt)} (${when(event.startsAt, "R")})`,
+    `📍 ${plain(event.location)}`,
+    `🎟️ ${formatEntryFee(event.entryFeeCents)}`,
+    `👥 ${capacityLabel(event.capacity, event.registeredCount, event.waitlistCount)}`,
+    event.format ? `🃏 ${plain(event.format)}` : null,
+    closed ? `🚫 ${closed}` : event.registrationClosesAt ? `⏳ Sign-ups close ${when(event.registrationClosesAt, "R")}` : null,
+    event.questions.length ? `📝 Sign-up asks for: ${event.questions.map((q) => plain(q.label)).join(", ")}` : null,
+  ].filter(Boolean);
+  return message({
+    embeds: [
+      {
+        title: event.title,
+        url: eventUrl(event.slug),
+        color: BRAND_COLOR,
+        description: [event.summary && plain(event.summary), "", ...lines].filter((l) => l !== null && l !== undefined).join("\n").trim().slice(0, 3500),
+        ...(event.coverImageUrl?.startsWith("https://") ? { image: { url: event.coverImageUrl } } : {}),
+      },
+    ],
+    components: [row(linkButton(closed ? "Event page" : "Details and RSVP", closed ? eventUrl(event.slug) : `${eventUrl(event.slug)}?rsvp=1`), ...(event.linkUrl ? [linkButton((event.linkLabel || "More info").slice(0, 80), event.linkUrl)] : []))],
+  });
+}
+
+async function rank(interaction: Interaction, user: { id: string }) {
+  const account = await linkedAccount(user.id);
+  if (!account) return privately(NOT_LINKED);
+  const games = await listGames();
+  const game = games.find((g) => g.id === (option(interaction, "game") || "pokemon")) ?? games[0];
+  if (!game) return privately("No games are set up yet.");
+  const today = new Date().toISOString().slice(0, 10);
+  const season = (await listSeasons(game.id)).find((s) => s.startsOn <= today && s.endsOn >= today);
+  const rows = await getLeaderboard(game.id, season?.id);
+  const mine = rows.find((r) => r.userId === account.id);
+  const scope = `${game.name}${season ? `, ${season.name}` : ""}`;
+  if (!mine) return privately(`You don't have any ${scope} results yet. Play in an event and you'll show up here.`);
+  return privately(`**${scope}**: you're **#${mine.rank}** of ${rows.length} with **${mine.points} points** from ${mine.events} ${mine.events === 1 ? "event" : "events"}.`, [
+    row(linkButton("Full standings", `${siteUrl()}/leaderboard`)),
+  ]);
+}
+
+async function news() {
+  const { posts } = await listPosts({ limit: 4 });
+  if (posts.length === 0) return message({ content: "No news yet. Check back soon!" });
+  return message({
+    embeds: [
+      {
+        title: "Latest from MAV Collectibles",
+        url: `${siteUrl()}/feed`,
+        color: BRAND_COLOR,
+        description: posts
+          .map((p) => {
+            const body = plain(p.body.replace(/\s+/g, " ").trim());
+            return `**${plain(p.title)}**${p.publishedAt ? ` · ${when(p.publishedAt, "R")}` : ""}\n${body.length > 180 ? `${body.slice(0, 180)}…` : body}`;
+          })
+          .join("\n\n"),
+      },
+    ],
+    components: [row(linkButton("Read more", `${siteUrl()}/feed`))],
+  });
+}
+
+function sell() {
+  return message({
+    content: `We buy and trade cards, slabs and sealed product. Bring them to the counter, or call ${STORE_PHONE} first for a big collection.`,
+    components: [row(linkButton("How selling works", `${siteUrl()}/sell-your-cards`))],
+  });
+}
+
+function jobs() {
+  const openings = JOB_OPENINGS.map((o) => `**${o.title}**: ${o.summary}`).join("\n");
+  return message({ content: `We're hiring!\n${openings}`.slice(0, 1900), components: [row(linkButton("Apply", `${siteUrl()}/jobs`))] });
+}
+
+async function playerId(interaction: Interaction, user: { id: string }) {
+  const account = await linkedAccount(user.id);
+  if (!account) return privately(NOT_LINKED);
+  const given = option(interaction, "id");
+  if (!given) {
+    return privately(account.pokemon_player_id ? `Your saved Pokémon Player ID is **${account.pokemon_player_id}**. Run \`/playerid id:<number>\` to change it.` : "You haven't saved a Pokémon Player ID yet. Run `/playerid id:<number>` to save one.");
+  }
+  if (!PLAYER_ID.test(given)) return privately("Player IDs are numbers only. Check it and try again.");
+  await prisma.profile.update({ where: { id: account.id }, data: { pokemon_player_id: given } });
+  return privately(`Saved. Your Pokémon Player ID is **${given}**, and event sign-ups will fill it in for you.`);
+}
+
+/** Staff only, and only ever shown to the person who asked: it lists players' names. */
+async function attendees(interaction: Interaction, user: { id: string }) {
+  const account = await linkedAccount(user.id);
+  if (!account) return privately(NOT_LINKED);
+  const [siteUser] = await prisma.$queryRaw<{ role: string | null }[]>`select raw_app_meta_data->>'role' as role from auth.users where id = ${account.id}::uuid`;
+  if (!CONTENT_ROLES.includes(parseRole(siteUser?.role))) return privately("That command is for MAV staff.");
+  const slug = option(interaction, "event");
+  const event = await prisma.event.findUnique({ where: { slug }, select: { id: true, title: true, capacity: true, questions: true } });
+  if (!event) return privately("I couldn't find that event. Pick one from the list that appears as you type.");
+  const list = await listAttendees(event.id);
+  if (list.length === 0) return privately(`Nobody has signed up for **${plain(event.title)}** yet.`);
+  const going = list.filter((a) => a.status !== "waitlisted");
+  const idQuestion = event ? parseStoredQuestions(event.questions).find((q) => q.autofill === "playerId") : undefined;
+  const line = (a: (typeof list)[number]) =>
+    `${a.status === "checked_in" ? "✅" : a.status === "waitlisted" ? "⏳" : "▫️"} ${plain(a.displayName)}${idQuestion && a.answers[idQuestion.id] ? ` · ID ${displayAnswer(idQuestion, a.answers[idQuestion.id])}` : ""}`;
+  const shown = list.slice(0, 40).map(line);
+  return message({
+    ephemeral: true,
+    embeds: [
+      {
+        title: `${event.title}: ${going.length}${event.capacity ? ` of ${event.capacity}` : ""} signed up`,
+        color: BRAND_COLOR,
+        description: [...shown, list.length > shown.length ? `…and ${list.length - shown.length} more` : ""].filter(Boolean).join("\n"),
+        footer: { text: `${list.filter((a) => a.status === "checked_in").length} checked in · ${list.length - going.length} on the waitlist` },
+      },
+    ],
+    components: [row(linkButton("Open check-in", `${siteUrl()}/admin/events/${event.id}/attendees`))],
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Suggestions shown while someone types an option
 // ---------------------------------------------------------------------------
@@ -302,8 +479,24 @@ export async function handleInteraction(raw: unknown): Promise<Record<string, un
   if (!user) return privately("I couldn't tell who you are. Try again from the server.");
   try {
     switch (interaction.data.name) {
+      case "help":
+        return help();
       case "events":
         return await events(interaction);
+      case "event":
+        return await eventDetails(interaction);
+      case "rank":
+        return await rank(interaction, user);
+      case "news":
+        return await news();
+      case "sell":
+        return sell();
+      case "jobs":
+        return jobs();
+      case "playerid":
+        return await playerId(interaction, user);
+      case "attendees":
+        return await attendees(interaction, user);
       case "rsvp":
         return await rsvp(interaction, user);
       case "cancel":
@@ -323,7 +516,7 @@ export async function handleInteraction(raw: unknown): Promise<Record<string, un
       case "unlink":
         return await unlink(user);
       default:
-        return privately("I don't know that command yet.");
+        return privately("I don't know that command yet. Try `/help`.");
     }
   } catch (error) {
     console.error("Discord command failed", interaction.data.name, error);

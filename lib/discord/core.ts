@@ -27,6 +27,8 @@ export interface DiscordSettings {
   announceResults: boolean;
   staffAlerts: boolean;
   commandsRegisteredAt: string | null;
+  /** The command list Discord was last told about (see COMMANDS_VERSION). */
+  commandsVersion: string | null;
 }
 
 export async function getDiscordSettings(): Promise<DiscordSettings> {
@@ -42,6 +44,7 @@ export async function getDiscordSettings(): Promise<DiscordSettings> {
     announceResults: row?.announce_results ?? true,
     staffAlerts: row?.staff_alerts ?? true,
     commandsRegisteredAt: row?.commands_registered_at?.toISOString() ?? null,
+    commandsVersion: row?.commands_version ?? null,
   };
 }
 

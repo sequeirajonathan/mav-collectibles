@@ -140,6 +140,7 @@ model DiscordSettings {
   announce_results       Boolean   @default(true)
   staff_alerts           Boolean   @default(true)
   commands_registered_at DateTime? @db.Timestamptz(6)
+  commands_version       String?
   updated_at             DateTime  @default(now()) @db.Timestamptz(6)
 
   @@map("discord_settings")

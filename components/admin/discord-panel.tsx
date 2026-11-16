@@ -19,7 +19,7 @@ const TOGGLES = [
 ] as const;
 
 /** Everything an admin needs to connect the shop's Discord bot, in the order they'll do it. */
-export function DiscordPanel({ settings, hasToken, interactionsUrl, commandCount }: { settings: DiscordSettings; hasToken: boolean; interactionsUrl: string; commandCount: number }) {
+export function DiscordPanel({ settings, hasToken, interactionsUrl, commandCount, commandsVersion }: { settings: DiscordSettings; hasToken: boolean; interactionsUrl: string; commandCount: number; commandsVersion: string }) {
   const router = useRouter();
   const [v, setV] = useState({
     applicationId: settings.applicationId ?? "",
@@ -149,6 +149,11 @@ export function DiscordPanel({ settings, hasToken, interactionsUrl, commandCount
             Test staff channel
           </Button>
         </div>
+        {settings.commandsRegisteredAt && settings.commandsVersion !== commandsVersion && (
+          <p role="status" className="rounded-lg border border-gold bg-gold/10 p-3 text-sm font-semibold">
+            The bot has new commands that Discord doesn&apos;t know about yet. Press “Register slash commands” to make them appear.
+          </p>
+        )}
         {settings.commandsRegisteredAt && <p className="text-xs text-muted-foreground">Slash commands last registered {new Date(settings.commandsRegisteredAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}.</p>}
       </form>
     </div>

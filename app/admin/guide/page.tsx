@@ -162,7 +162,9 @@ const SECTIONS: Section[] = [
         steps: [
           "Follow the setup checklist once: it connects the shop's bot to the Discord server.",
           "The bot posts new events, day-before reminders and bracket champions in the announcements channel, and tells the staff channel about new requests and applications.",
-          "Players use /events, /rsvp, /cancel, /myevents, /standings, /bracket, /hours and /singles. /link connects their Discord to their MAV account so /rsvp works.",
+          "Players type /help to see everything: events and sign-ups, standings and their own rank, news, hours, singles, selling and jobs. /link connects their Discord to their MAV account so /rsvp works.",
+          "Staff who have linked their own account can use /attendees to see who is signed up for an event. Only they see the answer.",
+          "When the bot gains new commands, this screen says so: press “Register slash commands” to make them appear in Discord.",
           "Each kind of post has its own on/off switch.",
         ],
       },
