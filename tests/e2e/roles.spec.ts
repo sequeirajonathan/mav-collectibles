@@ -127,9 +127,14 @@ test.describe("role changes", () => {
       await admin.goto("/admin/roles");
       // While the page streams in, its form can briefly exist twice; use the visible one.
       const form = admin.locator("form").filter({ visible: true }).filter({ has: admin.getByRole("button", { name: "Update role" }) });
-      await form.getByLabel("Email, username or user ID").fill("staff@mav.local");
+      // A misspelled, partial name is enough: pick the person from the suggestions.
+      await form.getByRole("searchbox", { name: "Find a person" }).fill("staf@mav");
+      await form.getByRole("list", { name: "People" }).getByRole("button", { name: /staff@mav\.local/ }).click();
       await form.getByRole("radio", { name: role }).check();
-      await form.getByRole("button", { name: "Update role" }).click();
+      const update = form.getByRole("button", { name: "Update role" });
+      // Nothing to save when they already have that role.
+      if (await update.isDisabled()) return;
+      await update.click();
       await expect(admin.getByText(/staff is now/i)).toBeVisible();
     };
 
@@ -149,5 +154,38 @@ test.describe("role changes", () => {
       await admin.context().close();
       await staff.context().close();
     }
+  });
+});
+
+test.describe("finding people on the roles screen", () => {
+  test("suggestions, a team list, and a clear message when nobody matches", async ({ browser }) => {
+    const admin = await pageFor(browser, "admin");
+    await admin.goto("/admin/roles");
+    const form = admin.locator("form").filter({ visible: true }).filter({ has: admin.getByRole("button", { name: "Update role" }) });
+
+    // Before typing: the newest accounts, and nothing can be saved without picking someone.
+    await expect(form.getByText("Newest accounts")).toBeVisible();
+    await expect(form.getByRole("button", { name: "Update role" })).toBeDisabled();
+
+    // The team list shows who already has access.
+    const team = admin.getByRole("region", { name: /Who has access/ });
+    await expect(team.getByRole("button", { name: /admin@mav\.local/ })).toContainText("Admin");
+    await expect(team.getByRole("button", { name: /customer@mav\.local/ })).toHaveCount(0);
+
+    // A close spelling still finds the person, with their current role shown.
+    const search = form.getByRole("searchbox", { name: "Find a person" });
+    await search.fill("custmer");
+    await expect(form.getByRole("list", { name: "People" }).getByRole("button", { name: /customer@mav\.local/ })).toContainText("Customer");
+
+    await search.fill("zzzz-nobody-here");
+    await expect(form.getByRole("status")).toContainText("Nobody matches");
+    await admin.context().close();
+  });
+
+  test("only admins can search people", async ({ browser }) => {
+    const staff = await pageFor(browser, "staff");
+    await staff.goto("/admin/roles");
+    await expect(staff).not.toHaveURL(/\/admin\/roles/);
+    await staff.context().close();
   });
 });

@@ -10,6 +10,7 @@ import { validateAddress } from "@lib/shippo";
 import { serverEnv } from "@lib/env.server";
 import { createAdminClient } from "@utils/supabase/admin";
 import { UserRole } from "@interfaces/roles";
+import { searchPeople } from "@lib/data/users";
 import { roleChangeInput, updateCustomerInput, type UpdateCustomerResponse } from "@lib/contracts/customer";
 
 const profileInput = z.object({
@@ -75,6 +76,11 @@ async function resolveUserId(identifier: string): Promise<string | null> {
     limit 1`;
   return rows[0]?.id ?? null;
 }
+
+/** ADMIN only: people matching what was typed, for the role picker. */
+export const findPeople = createAction({ input: z.object({ query: z.string().max(80) }), access: [UserRole.ADMIN] }, async ({ query }) => {
+  return { people: await searchPeople(query) };
+});
 
 /** ADMIN only: sets a user's role in app_metadata. */
 export const setUserRole = createAction({ input: roleChangeInput, access: [UserRole.ADMIN] }, async (input, admin) => {

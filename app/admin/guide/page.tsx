@@ -161,7 +161,11 @@ const SECTIONS: Section[] = [
         title: "Give someone access",
         where: { href: "/admin/roles", label: "Roles" },
         only: "admin",
-        steps: ["They sign up on the site first.", "Enter their email and choose Event team, Staff or Admin."],
+        steps: [
+          "They sign up on the site first.",
+          "Start typing their name, username or email and pick them from the suggestions. Close spellings work.",
+          "Choose Event team, Staff or Admin. “Who has access” lists everyone on the team; tap a person to change or remove their access.",
+        ],
       },
     ],
   },
