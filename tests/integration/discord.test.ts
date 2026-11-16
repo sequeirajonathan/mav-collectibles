@@ -171,6 +171,82 @@ describe("slash commands", () => {
   });
 });
 
+describe("more commands", () => {
+  const link = (userId: string, discord = DISCORD_USER) => prisma.profile.update({ where: { id: userId }, data: { discord_user_id: discord.id } });
+
+  it("/help is private and lists every command a player can use", async () => {
+    const reply = (await handleInteraction(command("help"))) as { data: { flags?: number; embeds: { fields: { value: string }[] }[] } };
+    expect(reply.data.flags).toBe(64);
+    const text = reply.data.embeds[0]?.fields.map((f) => f.value).join("\n") ?? "";
+    for (const c of COMMANDS) {
+      // Help itself and the staff command are the only ones left out.
+      if (c.name === "help" || c.name === "attendees") expect(text, c.name).not.toContain(`/${c.name}\``);
+      else expect(text, c.name).toContain(`\`/${c.name}\` ${c.description}`);
+    }
+  });
+
+  it("/event shows the details and what sign-up asks for", async () => {
+    const questions = [{ id: "q_pid", label: "Player ID", help: "", type: "number", required: true, autofill: "playerId", options: [] }];
+    const cup = await event(`Details Cup ${Date.now()}`, { questions, entry_fee_cents: 2000, capacity: 32, format: "Standard", link_url: "https://example.com/rules", link_label: "Rules" });
+    const reply = await run(command("event", { event: cup.slug }));
+    const text = reply.data?.embeds?.[0]?.description ?? "";
+    expect(text).toContain("$20");
+    expect(text).toContain("Standard");
+    expect(text).toContain("Sign-up asks for: Player ID");
+    const buttons = reply.data?.components?.[0]?.components ?? [];
+    expect(buttons.map((b) => b.label)).toEqual(["Details and RSVP", "Rules"]);
+    expect((await run(command("event", { event: "no-such-event" }))).data?.content).toContain("couldn't find");
+  });
+
+  it("/playerid saves, shows and validates the ID for a connected account", async () => {
+    expect((await run(command("playerid", { id: "1234567" }))).data?.content).toContain("/link");
+    await link(customerId);
+    expect((await run(command("playerid"))).data?.content).toContain("haven't saved");
+    expect((await run(command("playerid", { id: "12ab" }))).data?.content).toContain("numbers only");
+    expect((await run(command("playerid", { id: "1234567" }))).data?.content).toContain("1234567");
+    expect((await prisma.profile.findUniqueOrThrow({ where: { id: customerId } })).pokemon_player_id).toBe("1234567");
+    expect((await run(command("playerid"))).data?.content).toContain("1234567");
+  });
+
+  it("/rank needs a connected account and says so when there are no results", async () => {
+    expect((await run(command("rank"))).data?.content).toContain("/link");
+    await link(customerId);
+    const reply = await run(command("rank"));
+    expect(reply.data?.flags).toBe(64);
+    expect(reply.data?.content).toMatch(/you're \*\*#\d+|don't have any/);
+  });
+
+  it("/news, /sell and /jobs answer in public with a link", async () => {
+    for (const name of ["sell", "jobs"]) {
+      const reply = await run(command(name));
+      expect(reply.data?.flags, name).toBeUndefined();
+      expect(reply.data?.components?.[0]?.components[0]?.url, name).toContain("http");
+    }
+    const news = await run(command("news"));
+    expect(news.data?.content ?? news.data?.embeds?.[0]?.title).toBeTruthy();
+  });
+
+  it("/attendees is for staff only and is never shown to the channel", async () => {
+    const cup = await event(`Staff Cup ${Date.now()}`);
+    await prisma.eventRegistration.create({ data: { event_id: cup.id, user_id: customerId, status: "registered", answers: {} } });
+
+    // A customer who has connected Discord is refused.
+    await link(customerId);
+    expect((await run(command("attendees", { event: cup.slug }))).data?.content).toContain("for MAV staff");
+    await prisma.profile.update({ where: { id: customerId }, data: { discord_user_id: null } });
+
+    const [staff] = await prisma.$queryRaw<{ id: string }[]>`select id from auth.users where email = 'staff@mav.local'`;
+    if (!staff) throw new Error("seed staff missing");
+    await link(staff.id, OTHER_DISCORD_USER);
+    const reply = await run(command("attendees", { event: cup.slug }, OTHER_DISCORD_USER));
+    expect(reply.data?.flags).toBe(64);
+    expect(reply.data?.embeds?.[0]?.title).toContain("1 signed up");
+    expect(reply.data?.embeds?.[0]?.description).toContain("customer");
+    // Someone who hasn't connected Discord at all is refused too.
+    expect((await run(command("attendees", { event: cup.slug }))).data?.content).toContain("/link");
+  });
+});
+
 describe("announcements", () => {
   const calls: { url: string; body: { embeds?: { title?: string }[]; allowed_mentions?: unknown } }[] = [];
   const stubDiscord = (ok = true) => {

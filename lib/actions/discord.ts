@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@lib/prisma";
 import { ActionError, createAction } from "@lib/actions/safe-action";
 import { UserRole } from "@interfaces/roles";
-import { COMMANDS } from "@lib/discord/commands";
+import { COMMANDS, COMMANDS_VERSION } from "@lib/discord/commands";
 import { DiscordError, discordApi, getDiscordSettings, readLinkToken } from "@lib/discord/core";
 
 const ADMIN = [UserRole.ADMIN] as const;
@@ -68,7 +68,7 @@ export const registerDiscordCommands = createAction({ input: z.object({}), acces
   } catch (error) {
     throw new ActionError(explain(error));
   }
-  await prisma.discordSettings.update({ where: { id: 1 }, data: { commands_registered_at: new Date() } });
+  await prisma.discordSettings.update({ where: { id: 1 }, data: { commands_registered_at: new Date(), commands_version: COMMANDS_VERSION } });
   return { count: COMMANDS.length };
 });
 

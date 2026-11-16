@@ -4,7 +4,7 @@ import { Skeleton } from "@components/ui/skeleton";
 import { BannerForm, CommunityForm, FlagToggles, MediaForms } from "@components/admin/site-settings";
 import { DiscordPanel } from "@components/admin/discord-panel";
 import { getDiscordSettings } from "@lib/discord/core";
-import { COMMANDS } from "@lib/discord/commands";
+import { COMMANDS, COMMANDS_VERSION } from "@lib/discord/commands";
 import { siteUrl } from "@lib/seo";
 import { ServiceKeysPanel } from "@components/admin/service-keys-panel";
 import { listServiceKeyStatus } from "@lib/service-keys";
@@ -44,6 +44,7 @@ async function Settings() {
           hasToken={serviceKeys.some((k) => k.name === "DISCORD_BOT_TOKEN" && (k.source === "host" || k.source === "saved"))}
           interactionsUrl={`${siteUrl()}/api/discord/interactions`}
           commandCount={COMMANDS.length}
+          commandsVersion={COMMANDS_VERSION}
         />
       </section>
       <section aria-labelledby="service-keys"><h2 id="service-keys" className="mb-3 text-lg font-bold">Service keys</h2><ServiceKeysPanel keys={serviceKeys} /></section>
