@@ -7,6 +7,7 @@ import { NAV_LINKS } from "./nav-links";
 import { TCGPLAYER_STORE_URL } from "@const/links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
+import { GoogleRating } from "@components/hub/google-reviews";
 import { ShopOnly, VendorsOnly } from "./shop-only";
 
 const PHONE = STORE_PHONE;
@@ -96,6 +97,9 @@ export function SiteFooter() {
               <a href={`mailto:${EMAIL}`} className="hover:text-gold">{EMAIL}</a>
             </li>
           </ul>
+          <Suspense fallback={null}>
+            <GoogleRating className="mt-2 text-foreground/80" />
+          </Suspense>
         </div>
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wider text-gold">Hours</h2>

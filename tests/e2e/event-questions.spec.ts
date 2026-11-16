@@ -64,6 +64,8 @@ test.describe("event sign-up questions", () => {
     // The Player ID they typed is now on their profile, ready for the next event.
     await player.goto("/profile");
     await expect(player.getByRole("textbox", { name: "Pokémon Player ID (optional)" })).toHaveValue("7654322");
+    // They gave a 2011 birth date: a minor's is never copied to the profile.
+    await expect(player.getByText(/We remember your birth month/)).toHaveCount(0);
 
     await staff.goto(adminUrl);
     await staff.getByRole("link", { name: "Check-in" }).click();

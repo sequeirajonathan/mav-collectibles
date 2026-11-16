@@ -12,6 +12,14 @@ import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, checkAnswers, type Answe
 import { getBrowserClient } from "@utils/supabase/client";
 import { cn } from "@utils";
 
+/** Tells the player what their profile supplied, or what will be remembered. */
+function autofillNote(q: EventQuestion, filled: boolean): string {
+  if (q.autofill === "none") return "";
+  if (filled) return "Filled in from your profile.";
+  if (q.autofill === "birthMonth") return "If you're 18 or over we'll remember this for next time; under 18, it stays with this event only.";
+  return "We'll save this to your profile for next time.";
+}
+
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /** Month and year as two menus: works the same in every browser, and is quick for a birth date. */
@@ -121,7 +129,7 @@ export function RsvpQuestions({
         <Field
           key={q.id}
           label={q.required ? q.label : `${q.label} (optional)`}
-          hint={[q.help, q.autofill === "playerId" ? (initial[q.id] ? "Filled in from your profile." : "We'll save this to your profile for next time.") : ""].filter(Boolean).join(" ") || undefined}
+          hint={[q.help, autofillNote(q, Boolean(initial[q.id]))].filter(Boolean).join(" ") || undefined}
           error={errors[q.id]}
         >
           {(id) => {

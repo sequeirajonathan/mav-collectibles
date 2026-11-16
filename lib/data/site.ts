@@ -90,26 +90,55 @@ export async function listInstallers(): Promise<Installer[]> {
 }
 
 const placesResponse = z.object({
-  result: z.object({ reviews: z.array(googleReviewSchema).optional() }).optional(),
+  result: z
+    .object({
+      rating: z.number().min(0).max(5).optional(),
+      user_ratings_total: z.number().int().nonnegative().optional(),
+      reviews: z.array(googleReviewSchema).optional(),
+    })
+    .optional(),
 });
 
-/** Google reviews for the shop, cached for an hour (the Places API is billed per call). */
-export async function getGoogleReviews(): Promise<GoogleReview[]> {
+interface GoogleReviewSummary {
+  /** Average star rating and how many people left one; null until Google can be reached. */
+  rating: number | null;
+  total: number | null;
+  reviews: GoogleReview[];
+  /** Where anyone can read every review, or write one. Null when the shop's Google listing isn't set. */
+  readUrl: string | null;
+  writeUrl: string | null;
+}
+
+/**
+ * The shop's Google rating and recent reviews, cached for an hour (the Places
+ * API is billed per call). Without a working server key the links still work,
+ * so the site can always point people at the reviews.
+ */
+export async function getGoogleReviews(): Promise<GoogleReviewSummary> {
   "use cache";
   cacheLife("hours");
   const placeId = publicEnv().NEXT_PUBLIC_GOOGLE_PLACE_ID;
   const apiKey = serverEnv().GOOGLE_PLACES_API_KEY;
-  if (!placeId || !apiKey) return [];
+  const empty: GoogleReviewSummary = {
+    rating: null,
+    total: null,
+    reviews: [],
+    readUrl: placeId ? `https://search.google.com/local/reviews?placeid=${encodeURIComponent(placeId)}` : null,
+    writeUrl: placeId ? `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}` : null,
+  };
+  if (!placeId || !apiKey) return empty;
   const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
   url.searchParams.set("place_id", placeId);
-  url.searchParams.set("fields", "reviews");
+  url.searchParams.set("fields", "rating,user_ratings_total,reviews");
   url.searchParams.set("key", apiKey);
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
     const parsed = placesResponse.safeParse(await response.json());
-    return parsed.success ? (parsed.data.result?.reviews ?? []) : [];
+    const result = parsed.success ? parsed.data.result : undefined;
+    if (!result) return empty;
+    return { ...empty, rating: result.rating ?? null, total: result.user_ratings_total ?? null, reviews: result.reviews ?? [] };
   } catch {
-    return [];
+    return empty;
   }
 }
 

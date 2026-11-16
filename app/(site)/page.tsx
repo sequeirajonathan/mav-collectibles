@@ -166,10 +166,6 @@ async function Media() {
   );
 }
 
-async function Reviews() {
-  const flags = await getFlags();
-  return flags.showGoogleReviews ? <GoogleReviews /> : null;
-}
 
 const QUICK_LINKS = [
   { href: "/events", label: "Events", description: "Leagues, tournaments, pre-releases", Icon: CalendarDays },
@@ -282,7 +278,7 @@ export default function HomePage() {
       </Suspense>
 
       <Suspense fallback={null}>
-        <Reviews />
+        <GoogleReviews />
       </Suspense>
     </div>
   );

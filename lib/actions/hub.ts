@@ -20,7 +20,7 @@ import { tags } from "@lib/data/tags";
 import { randomBytes } from "node:crypto";
 import { BRACKET_FORMATS, bracketSchema, clearResult, reportResult, type Bracket } from "@lib/bracket";
 import { createAdminClient } from "@utils/supabase/admin";
-import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions, playerIdFromAnswers, type Answers, type EventQuestion } from "@lib/event-questions";
+import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions, birthMonthToRemember, playerIdFromAnswers, type Answers, type EventQuestion } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
 
 const REGISTRATION_ERRORS: Record<string, string> = {
@@ -37,12 +37,16 @@ function refreshEvent(slug: string) {
 // ---------------------------------------------------------------------------
 // Players: RSVP
 // ---------------------------------------------------------------------------
-/** Keeps the player's profile in step with the Player ID they just gave, so the next event fills it in. */
-async function rememberPlayerId(userId: string, questions: EventQuestion[], answers: Answers) {
+/** Keeps the player's profile in step with what they just gave, so the next event fills it in. */
+async function rememberOnProfile(userId: string, questions: EventQuestion[], answers: Answers) {
   const playerId = playerIdFromAnswers(questions, answers);
-  if (!playerId) return;
+  // Birth dates are kept for adults only; a minor's stays on the event they entered.
+  const birthMonth = birthMonthToRemember(questions, answers, new Date());
+  if (!playerId && !birthMonth) return;
   // Best-effort: a profile hiccup must never undo an RSVP.
-  await prisma.profile.updateMany({ where: { id: userId }, data: { pokemon_player_id: playerId } }).catch((error) => console.error("Saving Player ID failed", error));
+  await prisma.profile
+    .updateMany({ where: { id: userId }, data: { ...(playerId ? { pokemon_player_id: playerId } : {}), ...(birthMonth ? { birth_month: birthMonth } : {}) } })
+    .catch((error) => console.error("Saving sign-up details to the profile failed", error));
 }
 
 export const registerForEvent = createAction(
@@ -61,7 +65,7 @@ export const registerForEvent = createAction(
           select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`,
         prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } }),
       ]);
-      await rememberPlayerId(user.id, questions, answers);
+      await rememberOnProfile(user.id, questions, answers);
       refreshEvent(event.slug);
       return { status: registrationStatusSchema.parse(rows[0]?.status) };
     } catch (error) {
@@ -85,7 +89,7 @@ export const saveRegistrationAnswers = createAction(
     const { answers, errors } = checkAnswers(questions, given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     await prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } });
-    await rememberPlayerId(user.id, questions, answers);
+    await rememberOnProfile(user.id, questions, answers);
     return null;
   }
 );

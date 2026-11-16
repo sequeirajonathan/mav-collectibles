@@ -22,7 +22,7 @@ export function ProfileForm({
   email,
   games,
 }: {
-  profile: { username: string | null; firstName: string; lastName: string; phone: string | null; favoriteGameId: string | null; pokemonPlayerId: string | null };
+  profile: { username: string | null; firstName: string; lastName: string; phone: string | null; favoriteGameId: string | null; pokemonPlayerId: string | null; birthMonth: string | null };
   email: string;
   games: Game[];
 }) {
@@ -52,6 +52,14 @@ export function ProfileForm({
       router.refresh();
     });
   };
+
+  const forgetBirth = () =>
+    startTransition(async () => {
+      const result = await updateMyProfile({ ...values, forgetBirthMonth: true });
+      if (!result.ok) return void toast.error(result.error);
+      toast.success("Birth month removed from your profile");
+      router.refresh();
+    });
 
   const changeEmail = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +102,14 @@ export function ProfileForm({
           {(id) => <input id={id} className={inputClass} inputMode="numeric" maxLength={12} autoComplete="off" value={values.pokemonPlayerId} onChange={(e) => setValues((v) => ({ ...v, pokemonPlayerId: e.target.value }))} />}
         </Field>
         <Button type="submit" variant="gold" disabled={pending} className="w-full fold:w-auto">Save</Button>
+        {profile.birthMonth && (
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-4 text-sm text-muted-foreground">
+            <span>We remember your birth month ({profile.birthMonth}) to fill in event sign-ups.</span>
+            <button type="button" className="min-h-9 font-semibold text-gold underline underline-offset-2" disabled={pending} onClick={forgetBirth}>
+              Forget it
+            </button>
+          </p>
+        )}
       </form>
 
       <form onSubmit={changeEmail} className={cn(cardVariants({ padding: "lg" }), "space-y-4")}>

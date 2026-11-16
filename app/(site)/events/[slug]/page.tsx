@@ -52,7 +52,7 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
         getMyRegistration(event.id, user.id),
         getMyAnswers(event.id, user.id),
         // Only looked up when a question can be filled in from it.
-        event.questions.some((q) => q.autofill !== "none") ? prisma.profile.findUnique({ where: { id: user.id }, select: { pokemon_player_id: true } }) : null,
+        event.questions.some((q) => q.autofill !== "none") ? prisma.profile.findUnique({ where: { id: user.id }, select: { pokemon_player_id: true, birth_month: true } }) : null,
       ])
     : [null, {}, null];
   return (
@@ -65,7 +65,7 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
       full={isFull(event)}
       questions={event.questions}
       answers={answers}
-      prefill={prefillFromProfile(event.questions, { playerId: profile?.pokemon_player_id ?? null })}
+      prefill={prefillFromProfile(event.questions, { playerId: profile?.pokemon_player_id ?? null, birthMonth: profile?.birth_month ?? null })}
       autoOpen={(await searchParams).rsvp === "1"}
     />
   );

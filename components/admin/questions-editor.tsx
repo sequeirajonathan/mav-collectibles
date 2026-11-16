@@ -61,6 +61,12 @@ export function QuestionsEditor({ value, onChange, error }: { value: EventQuesti
                 </Field>
               )}
               <div className="flex flex-wrap items-center gap-2">
+                {q.type === "month" && (
+                  <label className="flex min-h-11 w-full items-center gap-2 text-sm">
+                    <input type="checkbox" className="size-5 shrink-0 accent-[var(--gold)]" checked={q.autofill === "birthMonth"} onChange={(e) => update(q.id, { autofill: e.target.checked ? "birthMonth" : "none" })} />
+                    This is the date of birth (remembered for adults only)
+                  </label>
+                )}
                 {(q.type === "number" || q.type === "text") && (
                   <label className="flex min-h-11 w-full items-center gap-2 text-sm">
                     <input type="checkbox" className="size-5 shrink-0 accent-[var(--gold)]" checked={q.autofill === "playerId"} onChange={(e) => update(q.id, { autofill: e.target.checked ? "playerId" : "none" })} />

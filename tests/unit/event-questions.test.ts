@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkAnswers, displayAnswer, playerIdFromAnswers, prefillFromProfile, eventQuestionsSchema, parseStoredQuestions, type EventQuestion } from "@lib/event-questions";
+import { birthMonthToRemember, checkAnswers, displayAnswer, isAtLeast, playerIdFromAnswers, prefillFromProfile, eventQuestionsSchema, parseStoredQuestions, type EventQuestion } from "@lib/event-questions";
 import { attendeesCsv } from "@components/admin/attendee-list";
 
 const q = (id: string, extra: Partial<EventQuestion> = {}): EventQuestion => ({ id, label: id, help: "", type: "text", required: false, autofill: "none", options: [], ...extra });
@@ -110,5 +110,32 @@ describe("Player ID kept on the profile", () => {
 
   it("questions saved before this existed still load, with no autofill", () => {
     expect(parseStoredQuestions([{ id: "old", label: "Player ID", help: "", type: "number", required: true, options: [] }])[0]?.autofill).toBe("none");
+  });
+});
+
+describe("birth dates are remembered for adults only", () => {
+  const questions = [q("dob", { type: "month", autofill: "birthMonth" })];
+  const now = new Date("2026-11-16T12:00:00Z");
+
+  it("keeps an adult's birth month", () => {
+    expect(birthMonthToRemember(questions, { dob: "1994-06" }, now)).toBe("1994-06");
+  });
+
+  it("never keeps a minor's", () => {
+    for (const dob of ["2012-05", "2015-01", "2009-01", "2026-10"]) expect(birthMonthToRemember(questions, { dob }, now), dob).toBeNull();
+  });
+
+  it("waits until someone has certainly turned 18", () => {
+    // Born November 2008: they turn 18 some day this month, which we can't know, so not yet.
+    expect(isAtLeast("2008-11", 18, now)).toBe(false);
+    expect(isAtLeast("2008-12", 18, now)).toBe(false);
+    expect(isAtLeast("2008-10", 18, now)).toBe(true);
+    expect(isAtLeast("not-a-date", 18, now)).toBe(false);
+  });
+
+  it("only fills in the question marked as the date of birth", () => {
+    const mixed = [q("dob", { type: "month", autofill: "birthMonth" }), q("other", { type: "month" })];
+    expect(prefillFromProfile(mixed, { playerId: null, birthMonth: "1994-06" })).toEqual({ dob: "1994-06" });
+    expect(birthMonthToRemember([q("other", { type: "month" })], { other: "1994-06" }, now)).toBeNull();
   });
 });

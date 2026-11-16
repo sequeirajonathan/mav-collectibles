@@ -20,13 +20,15 @@ const profileInput = z.object({
   phone: z.string().transform((v) => toE164(v)).refine((v): v is string => v !== null, "Enter a 10-digit US phone number"),
   favoriteGameId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable()),
   pokemonPlayerId: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), z.string().trim().regex(PLAYER_ID, "Player IDs are numbers only").nullable()).default(null),
+  /** Clears the saved birth month. It is only ever set from an event sign-up. */
+  forgetBirthMonth: z.boolean().default(false),
 });
 
 /** Updates the caller's profile (and their linked Square customer's name/phone). */
 export const updateMyProfile = createAction({ input: profileInput, access: "user" }, async (input, user) => {
   await prisma.profile.update({
     where: { id: user.id },
-    data: { first_name: input.firstName || null, last_name: input.lastName || null, phone: input.phone, favorite_game_id: input.favoriteGameId, pokemon_player_id: input.pokemonPlayerId },
+    data: { first_name: input.firstName || null, last_name: input.lastName || null, phone: input.phone, favorite_game_id: input.favoriteGameId, pokemon_player_id: input.pokemonPlayerId, ...(input.forgetBirthMonth ? { birth_month: null } : {}) },
   });
   return null;
 });

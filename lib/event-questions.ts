@@ -41,7 +41,7 @@ export const eventQuestionSchema = z
     type: z.enum(QUESTION_TYPES),
     required: z.boolean().default(false),
     /** Filled in from the player's profile, and saved back to it, so they type it once. */
-    autofill: z.enum(["none", "playerId"]).default("none"),
+    autofill: z.enum(["none", "playerId", "birthMonth"]).default("none"),
     /** Choices for "Pick one" questions. */
     options: z.array(z.string().trim().min(1).max(60)).max(12).default([]),
   })
@@ -110,7 +110,7 @@ export const QUESTION_PRESETS: { label: string; questions: PresetQuestion[] }[] 
     label: "Pokémon tournament",
     questions: [
       { label: "Player ID", help: "Your Play! Pokémon ID number", type: "number", required: true, autofill: "playerId", options: [] },
-      { label: "Date of birth (month and year)", help: "Used to place you in the Junior, Senior or Masters division", type: "month", required: true, options: [] },
+      { label: "Date of birth (month and year)", help: "Used to place you in the Junior, Senior or Masters division", type: "month", required: true, autofill: "birthMonth", options: [] },
       { label: "Deck list (copy and paste)", help: "Paste from RK9 or TCG Live. Make sure each Pokémon matches its set and set number.", type: "long", required: false, options: [] },
       { label: "Deck list (image or PDF)", help: "Or upload a photo or PDF instead. Up to 10 MB.", type: "file", required: false, options: [] },
     ],
@@ -143,13 +143,36 @@ export function displayAnswer(question: EventQuestion, value: string | undefined
 /** A Play! Pokémon ID as stored on a profile: digits only. */
 export const PLAYER_ID = /^[0-9]{1,12}$/;
 
+/** Birth dates are only kept on a profile from this age. Younger players give theirs per event. */
+const REMEMBER_BIRTH_FROM_AGE = 18;
+
+/** Whether someone born in this month ("YYYY-MM") has certainly reached `age` by `now`. */
+export function isAtLeast(birthMonth: string, age: number, now: Date): boolean {
+  if (!ISO_MONTH.test(birthMonth)) return false;
+  const year = Number(birthMonth.slice(0, 4));
+  const month = Number(birthMonth.slice(5));
+  // Only the month is known, so wait until the month after their birthday month.
+  const months = (now.getUTCFullYear() - year) * 12 + (now.getUTCMonth() + 1 - month);
+  return months > age * 12;
+}
+
 /** Answers to start the form with: what the player's profile already knows. */
-export function prefillFromProfile(questions: readonly EventQuestion[], profile: { playerId: string | null }): Answers {
+export function prefillFromProfile(questions: readonly EventQuestion[], profile: { playerId: string | null; birthMonth?: string | null }): Answers {
   const answers: Answers = {};
   for (const q of questions) {
     if (q.autofill === "playerId" && profile.playerId) answers[q.id] = profile.playerId;
+    if (q.autofill === "birthMonth" && q.type === "month" && profile.birthMonth) answers[q.id] = profile.birthMonth;
   }
   return answers;
+}
+
+/** The birth month to keep on the profile: only when the event asked, and only for an adult. */
+export function birthMonthToRemember(questions: readonly EventQuestion[], answers: Answers, now: Date): string | null {
+  for (const q of questions) {
+    const value = q.autofill === "birthMonth" ? answers[q.id] : undefined;
+    if (value && isAtLeast(value, REMEMBER_BIRTH_FROM_AGE, now)) return value;
+  }
+  return null;
 }
 
 /** The Player ID a player gave in their answers, if the event asked for one and it looks like an ID. */

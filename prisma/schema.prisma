@@ -100,6 +100,7 @@ model Profile {
   avatar_url       String?
   favorite_game_id String?
   pokemon_player_id String?
+  birth_month      String?
   game             Game?    @relation(fields: [favorite_game_id], references: [id], onUpdate: NoAction)
 
   @@map("profiles")
