@@ -17,7 +17,10 @@ import {
 } from "@lib/contracts/hub";
 import { slug as slugSchema, uuid } from "@lib/contracts/common";
 import { tags } from "@lib/data/tags";
-import { answersSchema, checkAnswers, parseStoredQuestions } from "@lib/event-questions";
+import { randomBytes } from "node:crypto";
+import { BRACKET_FORMATS, bracketSchema, clearResult, reportResult, type Bracket } from "@lib/bracket";
+import { createAdminClient } from "@utils/supabase/admin";
+import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions, birthMonthToRemember, playerIdFromAnswers, type Answers, type EventQuestion } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
 
 const REGISTRATION_ERRORS: Record<string, string> = {
@@ -34,13 +37,26 @@ function refreshEvent(slug: string) {
 // ---------------------------------------------------------------------------
 // Players: RSVP
 // ---------------------------------------------------------------------------
+/** Keeps the player's profile in step with what they just gave, so the next event fills it in. */
+async function rememberOnProfile(userId: string, questions: EventQuestion[], answers: Answers) {
+  const playerId = playerIdFromAnswers(questions, answers);
+  // Birth dates are kept for adults only; a minor's stays on the event they entered.
+  const birthMonth = birthMonthToRemember(questions, answers, new Date());
+  if (!playerId && !birthMonth) return;
+  // Best-effort: a profile hiccup must never undo an RSVP.
+  await prisma.profile
+    .updateMany({ where: { id: userId }, data: { ...(playerId ? { pokemon_player_id: playerId } : {}), ...(birthMonth ? { birth_month: birthMonth } : {}) } })
+    .catch((error) => console.error("Saving sign-up details to the profile failed", error));
+}
+
 export const registerForEvent = createAction(
   { input: z.object({ eventId: uuid, answers: answersSchema.default({}) }), access: "user" },
   async ({ eventId, answers: given }, user) => {
     const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true, questions: true } });
     if (!event) throw new ActionError("Event not found.");
     // Answers are checked before a spot is taken, so nobody is registered with a half-filled form.
-    const { answers, errors } = checkAnswers(parseStoredQuestions(event.questions), given);
+    const questions = parseStoredQuestions(event.questions);
+    const { answers, errors } = checkAnswers(questions, given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     try {
       // One transaction: a player is never registered without their answers.
@@ -49,6 +65,7 @@ export const registerForEvent = createAction(
           select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`,
         prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } }),
       ]);
+      await rememberOnProfile(user.id, questions, answers);
       refreshEvent(event.slug);
       return { status: registrationStatusSchema.parse(rows[0]?.status) };
     } catch (error) {
@@ -68,10 +85,50 @@ export const saveRegistrationAnswers = createAction(
       select: { status: true, event: { select: { questions: true } } },
     });
     if (!registration || registration.status === "cancelled") throw new ActionError("You're not registered for this event.");
-    const { answers, errors } = checkAnswers(parseStoredQuestions(registration.event.questions), given);
+    const questions = parseStoredQuestions(registration.event.questions);
+    const { answers, errors } = checkAnswers(questions, given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     await prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } });
+    await rememberOnProfile(user.id, questions, answers);
     return null;
+  }
+);
+
+/** A signed-in player gets a one-time link to upload a file for one of the event's questions. */
+export const startAnswerUpload = createAction(
+  {
+    input: z.object({ eventId: uuid, questionId: z.string().max(24), contentType: z.string().max(60), size: z.number().int().positive() }),
+    access: "user",
+  },
+  async ({ eventId, questionId, contentType, size }, user) => {
+    const extension = UPLOAD_TYPES[contentType];
+    if (!extension) throw new ActionError("Upload a PDF or a photo (JPG, PNG, WebP or HEIC).");
+    if (size > UPLOAD_MAX_BYTES) throw new ActionError("That file is larger than 10 MB.");
+    const event = await prisma.event.findFirst({ where: { id: eventId, status: "published" }, select: { questions: true } });
+    const question = event && parseStoredQuestions(event.questions).find((q) => q.id === questionId && q.type === "file");
+    if (!question) throw new ActionError("This event isn't taking that file.");
+    const path = `${eventId}/${user.id}/${questionId}-${randomBytes(6).toString("hex")}.${extension}`;
+    const { data, error } = await createAdminClient().storage.from(UPLOAD_BUCKET).createSignedUploadUrl(path);
+    if (error || !data) throw new ActionError("Couldn't start the upload. Try again.");
+    return { path, token: data.token };
+  }
+);
+
+/** Staff open a file a player attached; players can open their own. */
+export const viewAnswerFile = createAction(
+  { input: z.object({ eventId: uuid, userId: uuid, questionId: z.string().max(24) }), access: "user" },
+  async ({ eventId, userId, questionId }, user) => {
+    if (userId !== user.id && !CONTENT_ROLES.includes(user.role)) throw new ActionError("You can't open that file.");
+    const registration = await prisma.eventRegistration.findUnique({
+      where: { event_id_user_id: { event_id: eventId, user_id: userId } },
+      select: { answers: true },
+    });
+    const path = registration ? parseStoredAnswers(registration.answers)[questionId] : undefined;
+    // Only ever sign a path inside this player's folder for this event.
+    if (!path || !path.startsWith(`${eventId}/${userId}/`)) throw new ActionError("No file was uploaded.");
+    const { data, error } = await createAdminClient().storage.from(UPLOAD_BUCKET).createSignedUrl(path, 120);
+    if (error || !data) throw new ActionError("Couldn't open that file.");
+    return { url: data.signedUrl };
   }
 );
 
@@ -419,6 +476,67 @@ export const deletePost = createAction({ input: z.object({ id: uuid }), access: 
   await prisma.post.delete({ where: { id } });
   updateTag(tags.posts);
   updateTag(tags.post(id));
+  return null;
+});
+
+// ---------------------------------------------------------------------------
+// Staff: brackets
+// ---------------------------------------------------------------------------
+const bracketSetupInput = z.object({
+  eventId: uuid,
+  format: z.enum(BRACKET_FORMATS),
+  bestOf: z.union([z.literal(1), z.literal(3)]),
+  entrants: z.array(z.object({ id: z.string(), name: z.string(), userId: uuid.nullable() })),
+});
+
+/** Creates the event's bracket, or replaces it (which clears any recorded winners). */
+export const saveBracket = createAction({ input: bracketSetupInput, access: CONTENT_ROLES }, async ({ eventId, format, bestOf, entrants }) => {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  if (!event) throw new ActionError("Event not found.");
+  const parsed = bracketSchema.safeParse({ format, bestOf, entrants, results: {} });
+  if (!parsed.success) throw new ActionError(parsed.error.issues[0]?.message ?? "That bracket can't be created.");
+  await prisma.eventBracket.upsert({ where: { event_id: eventId }, create: { event_id: eventId, data: parsed.data }, update: { data: parsed.data } });
+  refreshEvent(event.slug);
+  return null;
+});
+
+/** Applies one change to the stored bracket while holding its row, so two staff tapping at once can't overwrite each other. */
+async function changeBracket(eventId: string, change: (bracket: Bracket) => Bracket) {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  if (!event) throw new ActionError("Event not found.");
+  await prisma.$transaction(async (tx) => {
+    const rows = await tx.$queryRaw<{ data: unknown }[]>`select data from public.event_brackets where event_id = ${eventId}::uuid for update`;
+    const current = bracketSchema.safeParse(rows[0]?.data);
+    if (!current.success) throw new ActionError("This event doesn't have a bracket yet.");
+    let next: Bracket;
+    try {
+      next = change(current.data);
+    } catch (error) {
+      throw new ActionError(error instanceof Error ? error.message : "That change couldn't be made.");
+    }
+    await tx.eventBracket.update({ where: { event_id: eventId }, data: { data: next } });
+  });
+  refreshEvent(event.slug);
+}
+
+export const reportBracketResult = createAction(
+  { input: z.object({ eventId: uuid, matchId: z.string().max(12), winnerId: z.string().max(40) }), access: CONTENT_ROLES },
+  async ({ eventId, matchId, winnerId }) => {
+    await changeBracket(eventId, (b) => reportResult(b, matchId, winnerId));
+    return null;
+  }
+);
+
+export const clearBracketResult = createAction({ input: z.object({ eventId: uuid, matchId: z.string().max(12) }), access: CONTENT_ROLES }, async ({ eventId, matchId }) => {
+  await changeBracket(eventId, (b) => clearResult(b, matchId));
+  return null;
+});
+
+export const deleteBracket = createAction({ input: z.object({ eventId: uuid }), access: CONTENT_ROLES }, async ({ eventId }) => {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  if (!event) throw new ActionError("Event not found.");
+  await prisma.eventBracket.deleteMany({ where: { event_id: eventId } });
+  refreshEvent(event.slug);
   return null;
 });
 

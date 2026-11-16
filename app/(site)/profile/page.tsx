@@ -26,6 +26,8 @@ async function Profile() {
         lastName: profile?.last_name ?? "",
         phone: profile?.phone ?? null,
         favoriteGameId: profile?.favorite_game_id ?? null,
+        pokemonPlayerId: profile?.pokemon_player_id ?? null,
+        birthMonth: profile?.birth_month ?? null,
       }}
     />
   );

@@ -1,10 +1,10 @@
 import "server-only";
 import { Shippo } from "shippo";
-import { serverEnv } from "@lib/env.server";
+import { getServiceKey } from "@lib/service-keys";
 import type { CustomerAddress as SquareCustomerAddress } from "@lib/contracts/customer";
 
-function createShippoClient() {
-  const apiKey = serverEnv().SHIPPO_API_KEY;
+async function createShippoClient() {
+  const apiKey = await getServiceKey("SHIPPO_API_KEY");
   if (!apiKey) throw new Error("SHIPPO_API_KEY is not configured");
   return new Shippo({ apiKeyHeader: apiKey });
 }
@@ -21,7 +21,7 @@ interface ShippoAddressValidationResult {
 }
 
 export async function validateAddress(address: SquareCustomerAddress): Promise<ShippoAddressValidationResult> {
-  const shippo = createShippoClient();
+  const shippo = (await createShippoClient());
 
   try {
     // Convert Square address format to Shippo format

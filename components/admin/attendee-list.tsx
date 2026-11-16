@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Check, Download, Search, UserMinus } from "lucide-react";
 import { Button } from "@components/ui/button";
-import type { EventQuestion } from "@lib/event-questions";
-import { removeAttendee, setCheckIn } from "@lib/actions/hub";
+import { displayAnswer, type EventQuestion } from "@lib/event-questions";
+import { removeAttendee, setCheckIn, viewAnswerFile } from "@lib/actions/hub";
 import type { Attendee } from "@lib/contracts/hub";
 import { cn } from "@utils";
 import { cardVariants } from "@components/ui/card";
@@ -22,7 +22,7 @@ const STATUS_LABEL = { registered: "Registered", waitlisted: "Waitlist", checked
 
 export function attendeesCsv(attendees: Attendee[], questions: EventQuestion[]): string {
   const header = ["Name", "Email", "Status", "Registered", ...questions.map((q) => q.label)];
-  const rows = attendees.map((a) => [a.displayName, a.email ?? "", STATUS_LABEL[a.status], a.registeredAt.slice(0, 10), ...questions.map((q) => a.answers[q.id] ?? "")]);
+  const rows = attendees.map((a) => [a.displayName, a.email ?? "", STATUS_LABEL[a.status], a.registeredAt.slice(0, 10), ...questions.map((q) => displayAnswer(q, a.answers[q.id]))]);
   return [header, ...rows].map((row) => row.map(cell).join(",")).join("\r\n");
 }
 
@@ -48,6 +48,17 @@ export function AttendeeList({ eventId, eventSlug, attendees, questions = [] }: 
     link.download = `${eventSlug ?? "event"}-players.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const openFile = async (userId: string, questionId: string) => {
+    // Opened first, inside the tap, so phones don't block it as a pop-up.
+    const tab = window.open("", "_blank");
+    const result = await viewAnswerFile({ eventId, userId, questionId });
+    if (!result.ok) {
+      tab?.close();
+      return void toast.error(result.error);
+    }
+    (tab ?? window).location.assign(result.data.url);
   };
 
   const run = (fn: () => ReturnType<typeof setCheckIn>) =>
@@ -108,7 +119,15 @@ export function AttendeeList({ eventId, eventSlug, attendees, questions = [] }: 
                       {questions.map((q) => (
                         <div key={q.id} className="flex min-w-0 gap-1">
                           <dt className="shrink-0 text-muted-foreground">{q.label}:</dt>
-                          <dd className={cn("min-w-0 break-words", a.answers[q.id] ? "font-semibold" : "text-muted-foreground")}>{a.answers[q.id] || "—"}</dd>
+                          <dd className={cn("min-w-0 whitespace-pre-line break-words", a.answers[q.id] ? "font-semibold" : "text-muted-foreground")}>
+                            {q.type === "file" && a.answers[q.id] ? (
+                              <button type="button" className="font-semibold text-gold underline underline-offset-2" onClick={() => openFile(a.userId, q.id)}>
+                                View file
+                              </button>
+                            ) : (
+                              displayAnswer(q, a.answers[q.id]) || "—"
+                            )}
+                          </dd>
                         </div>
                       ))}
                     </dl>

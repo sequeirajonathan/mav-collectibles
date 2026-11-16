@@ -44,9 +44,10 @@ const SECTIONS: Section[] = [
         title: "Ask players for details when they sign up",
         where: { href: "/admin/events/new", label: "Event form → Questions for players" },
         steps: [
-          "Tap “Pokémon player info” to add player name, Player ID and date of birth in one go, or “Add a question” to write your own.",
-          "Pick the answer type (short answer, number, date, pick one, yes/no) and tick “Required” if players must answer.",
+          "Tap “Pokémon tournament” to add Player ID, date of birth and the deck list (pasted or uploaded) in one go, or “Add a question” to write your own.",
+          "Pick the answer type (short answer, number, date, month and year, pick one, yes/no, file upload) and tick “Required” if players must answer.",
           "Players answer when they RSVP, so there is no separate Google Form to keep in step.",
+          "The Player ID is remembered on each player’s profile, so they only type it the first time.",
         ],
       },
       {
@@ -72,8 +73,19 @@ const SECTIONS: Section[] = [
         steps: [
           "Tap the box beside a name to check them in. Tap again to undo.",
           "Use “Find a player” to search by name, email or anything they answered.",
-          "Each player’s answers show under their name.",
+          "Each player’s answers show under their name. Tap “View file” to open an uploaded deck list.",
           "“Download spreadsheet” saves the whole list, answers included, for Excel or Google Sheets.",
+        ],
+      },
+      {
+        title: "Run a bracket",
+        where: { href: "/admin/events", label: "Events → open an event → Bracket" },
+        steps: [
+          "Checked-in players are listed for you. Drag them by the handle (or use the arrows) into seed order, and add walk-ins by name.",
+          "For a top cut after Swiss rounds, put players in standings order and choose “Top 4 only” or “Top 8 only”. 1st plays 8th, 2nd plays 7th, and so on.",
+          "Pick single elimination (the usual top cut) or double elimination, which adds a losers bracket.",
+          "Tap the winner of each match. “Undo” fixes a wrong tap. Players follow the bracket on the event page.",
+          "When there’s a champion, “Fill from the bracket” on the Results tab copies the finishing order.",
         ],
       },
       {
@@ -161,7 +173,11 @@ const SECTIONS: Section[] = [
         title: "Give someone access",
         where: { href: "/admin/roles", label: "Roles" },
         only: "admin",
-        steps: ["They sign up on the site first.", "Enter their email and choose Event team, Staff or Admin."],
+        steps: [
+          "They sign up on the site first.",
+          "Start typing their name, username or email and pick them from the suggestions. Close spellings work.",
+          "Choose Event team, Staff or Admin. “Who has access” lists everyone on the team; tap a person to change or remove their access.",
+        ],
       },
     ],
   },
@@ -177,6 +193,16 @@ const SECTIONS: Section[] = [
           "“Show the shop to customers” hides or shows the online shop. Admins and staff can always preview it.",
           "“Show vendors” hides or shows the Vendors section.",
           "Other switches cover Google reviews, the videos on the home page and Facebook sign-in.",
+        ],
+      },
+      {
+        title: "Connect outside services",
+        where: { href: "/admin/site", label: "Site → Service keys" },
+        only: "admin",
+        steps: [
+          "Paste a key for Google reviews, email, address checking or Discord and save.",
+          "Keys are stored encrypted and never shown again. You can replace or remove one at any time.",
+          "The Google key is tried as soon as you save it, and tells you if Google refuses it.",
         ],
       },
       {

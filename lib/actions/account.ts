@@ -7,9 +7,11 @@ import { ActionError, createAction } from "@lib/actions/safe-action";
 import { createSquareClient } from "@lib/square";
 import { findCustomerForUser, toE164 } from "@lib/square-customer";
 import { validateAddress } from "@lib/shippo";
-import { serverEnv } from "@lib/env.server";
 import { createAdminClient } from "@utils/supabase/admin";
 import { UserRole } from "@interfaces/roles";
+import { searchPeople } from "@lib/data/users";
+import { PLAYER_ID } from "@lib/event-questions";
+import { getServiceKey } from "@lib/service-keys";
 import { roleChangeInput, updateCustomerInput, type UpdateCustomerResponse } from "@lib/contracts/customer";
 
 const profileInput = z.object({
@@ -17,13 +19,16 @@ const profileInput = z.object({
   lastName: z.string().trim().max(60),
   phone: z.string().transform((v) => toE164(v)).refine((v): v is string => v !== null, "Enter a 10-digit US phone number"),
   favoriteGameId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable()),
+  pokemonPlayerId: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), z.string().trim().regex(PLAYER_ID, "Player IDs are numbers only").nullable()).default(null),
+  /** Clears the saved birth month. It is only ever set from an event sign-up. */
+  forgetBirthMonth: z.boolean().default(false),
 });
 
 /** Updates the caller's profile (and their linked Square customer's name/phone). */
 export const updateMyProfile = createAction({ input: profileInput, access: "user" }, async (input, user) => {
   await prisma.profile.update({
     where: { id: user.id },
-    data: { first_name: input.firstName || null, last_name: input.lastName || null, phone: input.phone, favorite_game_id: input.favoriteGameId },
+    data: { first_name: input.firstName || null, last_name: input.lastName || null, phone: input.phone, favorite_game_id: input.favoriteGameId, pokemon_player_id: input.pokemonPlayerId, ...(input.forgetBirthMonth ? { birth_month: null } : {}) },
   });
   return null;
 });
@@ -36,7 +41,7 @@ export const updateMyCustomer = createAction(
     if (!customer?.id) throw new ActionError("We couldn't find your store account yet. Try signing out and back in.");
 
     let address = input.address;
-    if (address && serverEnv().SHIPPO_API_KEY && !acceptSuggestion) {
+    if (address && !acceptSuggestion && (await getServiceKey("SHIPPO_API_KEY"))) {
       const check = await validateAddress(address);
       if (!check.isValid) return { status: "invalid_address", messages: check.messages };
       if (check.validatedAddress && JSON.stringify(check.validatedAddress) !== JSON.stringify(address)) {
@@ -75,6 +80,11 @@ async function resolveUserId(identifier: string): Promise<string | null> {
     limit 1`;
   return rows[0]?.id ?? null;
 }
+
+/** ADMIN only: people matching what was typed, for the role picker. */
+export const findPeople = createAction({ input: z.object({ query: z.string().max(80) }), access: [UserRole.ADMIN] }, async ({ query }) => {
+  return { people: await searchPeople(query) };
+});
 
 /** ADMIN only: sets a user's role in app_metadata. */
 export const setUserRole = createAction({ input: roleChangeInput, access: [UserRole.ADMIN] }, async (input, admin) => {

@@ -8,7 +8,10 @@ import { Suspense } from "react";
 import { ExternalLink, MapPin, Ticket, Users } from "lucide-react";
 import { buttonVariants } from "@components/ui/button";
 import { Linkified } from "@components/ui/linkified";
-import { getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
+import { prisma } from "@lib/prisma";
+import { prefillFromProfile } from "@lib/event-questions";
+import { BracketView } from "@components/hub/bracket-view";
+import { getBracket, getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
 import { getCurrentUser } from "@lib/auth/server";
 import { googleCalendarUrl, outlookCalendarUrl, type CalendarEvent } from "@lib/calendar";
 import { capacityLabel, formatEntryFee, formatEventWhen } from "@lib/format";
@@ -44,7 +47,14 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
   const user = await getCurrentUser();
   await connection();
   const closedReason = registrationClosedReason(event, requestTime());
-  const [status, answers] = user ? await Promise.all([getMyRegistration(event.id, user.id), getMyAnswers(event.id, user.id)]) : [null, {}];
+  const [status, answers, profile] = user
+    ? await Promise.all([
+        getMyRegistration(event.id, user.id),
+        getMyAnswers(event.id, user.id),
+        // Only looked up when a question can be filled in from it.
+        event.questions.some((q) => q.autofill !== "none") ? prisma.profile.findUnique({ where: { id: user.id }, select: { pokemon_player_id: true, birth_month: true } }) : null,
+      ])
+    : [null, {}, null];
   return (
     <RsvpButton
       eventId={event.id}
@@ -55,8 +65,20 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
       full={isFull(event)}
       questions={event.questions}
       answers={answers}
+      prefill={prefillFromProfile(event.questions, { playerId: profile?.pokemon_player_id ?? null, birthMonth: profile?.birth_month ?? null })}
       autoOpen={(await searchParams).rsvp === "1"}
     />
+  );
+}
+
+async function EventBracket({ eventId, slug }: { eventId: string; slug: string }) {
+  const bracket = await getBracket(eventId, slug);
+  if (!bracket) return null;
+  return (
+    <section className="mt-10" aria-labelledby="bracket-heading">
+      <h2 id="bracket-heading" className="mb-3 text-lg font-bold">Bracket</h2>
+      <BracketView bracket={bracket} />
+    </section>
   );
 }
 
@@ -145,6 +167,10 @@ async function EventContent({ params, searchParams }: { params: Params; searchPa
           {event.description && <p className="whitespace-pre-line leading-relaxed"><Linkified text={event.description} /></p>}
         </div>
       )}
+
+      <Suspense fallback={null}>
+        <EventBracket eventId={event.id} slug={event.slug} />
+      </Suspense>
 
       <VendorsOnly>
       {event.vendors.length > 0 && (

@@ -99,6 +99,8 @@ model Profile {
   updated_at       DateTime @default(now()) @db.Timestamptz(6)
   avatar_url       String?
   favorite_game_id String?
+  pokemon_player_id String?
+  birth_month      String?
   game             Game?    @relation(fields: [favorite_game_id], references: [id], onUpdate: NoAction)
 
   @@map("profiles")
@@ -121,6 +123,27 @@ model EventRegistration {
   @@index([event_id, status, created_at], map: "event_registrations_event_status_idx")
   @@index([user_id], map: "event_registrations_user_idx")
   @@map("event_registrations")
+}
+
+// Keys for outside services entered in Admin → Site. Encrypted by the app; server-only.
+model ServiceKey {
+  name       String   @id
+  ciphertext String
+  updated_by String?  @db.Uuid
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("service_keys")
+}
+
+// Elimination bracket for an event (Admin → event → Bracket). Server-only.
+model EventBracket {
+  event_id   String   @id @db.Uuid
+  data       Json
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("event_brackets")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -166,6 +189,7 @@ model Event {
   created_at             DateTime            @default(now()) @db.Timestamptz(6)
   updated_at             DateTime            @default(now()) @db.Timestamptz(6)
   event_registrations    EventRegistration[]
+  event_bracket          EventBracket?
   event_vendors          EventVendor[]
   game                   Game?               @relation(fields: [game_id], references: [id], onUpdate: NoAction)
   posts                  Post[]

@@ -13,4 +13,6 @@ export const tags = {
   leaderboard: "leaderboard",
   catalog: "catalog",
   community: "community",
+  /** Anything that depends on a service key entered in Admin → Site. */
+  integrations: "integrations",
 } as const;

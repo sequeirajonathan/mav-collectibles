@@ -15,6 +15,8 @@ import {
   youTubeSettingsInput,
 } from "@lib/contracts/site";
 import { tags } from "@lib/data/tags";
+import { publicEnv } from "@lib/env";
+import { SERVICE_KEYS, SERVICE_KEY_NAMES, checkGoogleKey, encryptServiceKey } from "@lib/service-keys";
 
 const ADMIN = [UserRole.ADMIN] as const;
 
@@ -79,4 +81,30 @@ export const refreshSearchIndexAction = createAction({ input: z.object({}), acce
   } catch (error) {
     throw new ActionError(error instanceof Error ? error.message : "The refresh failed.");
   }
+});
+
+/** ADMIN only: saves a service key. The value is encrypted and can't be read back in the admin screens. */
+export const saveServiceKey = createAction(
+  { input: z.object({ name: z.enum(SERVICE_KEY_NAMES), value: z.string().trim().min(1).max(400) }), access: [UserRole.ADMIN] },
+  async ({ name, value }, admin) => {
+    const service = SERVICE_KEYS[name];
+    if (!service.pattern.test(value)) throw new ActionError(`That doesn't look like a ${service.label} key. ${service.hint}.`);
+    const ciphertext = encryptServiceKey(value);
+    await prisma.serviceKey.upsert({
+      where: { name },
+      create: { name, ciphertext, updated_by: admin.id },
+      update: { ciphertext, updated_by: admin.id, updated_at: new Date() },
+    });
+    updateTag(tags.integrations);
+    // Try the key straight away where we can, so a problem shows up now rather than as a silently empty page.
+    const check = name === "GOOGLE_PLACES_API_KEY" ? await checkGoogleKey(value, publicEnv().NEXT_PUBLIC_GOOGLE_PLACE_ID) : null;
+    return { check };
+  }
+);
+
+/** ADMIN only: forgets a key saved here. */
+export const removeServiceKey = createAction({ input: z.object({ name: z.enum(SERVICE_KEY_NAMES) }), access: [UserRole.ADMIN] }, async ({ name }) => {
+  await prisma.serviceKey.deleteMany({ where: { name } });
+  updateTag(tags.integrations);
+  return null;
 });

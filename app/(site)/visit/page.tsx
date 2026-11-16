@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { GoogleReviews } from "@components/hub/google-reviews";
 import { InfoCard, LocalHero } from "@components/local/local-page";
 import { VisitBlock } from "@components/local/visit-block";
 import { LinkButton } from "@components/ui/link-button";
@@ -22,6 +24,10 @@ export default function VisitPage() {
       </LocalHero>
 
       <VisitBlock heading="Find us" />
+
+      <Suspense fallback={null}>
+        <GoogleReviews heading="What visitors say" />
+      </Suspense>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <InfoCard title="Coming from nearby">
