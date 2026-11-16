@@ -101,6 +101,8 @@ model Profile {
   favorite_game_id String?
   pokemon_player_id String?
   birth_month      String?
+  discord_user_id  String?  @unique
+  discord_username String?
   game             Game?    @relation(fields: [favorite_game_id], references: [id], onUpdate: NoAction)
 
   @@map("profiles")
@@ -123,6 +125,24 @@ model EventRegistration {
   @@index([event_id, status, created_at], map: "event_registrations_event_status_idx")
   @@index([user_id], map: "event_registrations_user_idx")
   @@map("event_registrations")
+}
+
+// The Discord bot's settings (Admin → Site). One row. Server-only.
+model DiscordSettings {
+  id                     Int       @id @default(1)
+  application_id         String?
+  public_key             String?
+  guild_id               String?
+  announce_channel_id    String?
+  staff_channel_id       String?
+  announce_events        Boolean   @default(true)
+  announce_reminders     Boolean   @default(true)
+  announce_results       Boolean   @default(true)
+  staff_alerts           Boolean   @default(true)
+  commands_registered_at DateTime? @db.Timestamptz(6)
+  updated_at             DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@map("discord_settings")
 }
 
 // Keys for outside services entered in Admin → Site. Encrypted by the app; server-only.
@@ -178,6 +198,9 @@ model Event {
   link_url               String?
   link_label             String?
   questions              Json                @default("[]")
+  discord_announced_at   DateTime?           @db.Timestamptz(6)
+  discord_reminded_at    DateTime?           @db.Timestamptz(6)
+  discord_champion_at    DateTime?           @db.Timestamptz(6)
   cover_image_url        String?
   capacity               Int?
   entry_fee_cents        Int?

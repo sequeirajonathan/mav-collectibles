@@ -6,11 +6,11 @@ const NAME = "SHIPPO_API_KEY";
 const VALUE = "shippo_test_0123456789abcdef";
 
 afterEach(async () => {
-  delete process.env.DISCORD_WEBHOOK_URL;
-  await prisma.serviceKey.deleteMany({ where: { name: { in: [NAME, "DISCORD_WEBHOOK_URL"] } } });
+  delete process.env.DISCORD_BOT_TOKEN;
+  await prisma.serviceKey.deleteMany({ where: { name: { in: [NAME, "DISCORD_BOT_TOKEN"] } } });
 });
 afterAll(async () => {
-  await prisma.serviceKey.deleteMany({ where: { name: { in: [NAME, "DISCORD_WEBHOOK_URL"] } } });
+  await prisma.serviceKey.deleteMany({ where: { name: { in: [NAME, "DISCORD_BOT_TOKEN"] } } });
 });
 
 describe("service keys entered by an admin", () => {
@@ -37,13 +37,13 @@ describe("service keys entered by an admin", () => {
   });
 
   it("a key in the hosting settings wins over one saved here", async () => {
-    const saved = "https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyzABCDEF";
-    await prisma.serviceKey.create({ data: { name: "DISCORD_WEBHOOK_URL", ciphertext: encryptServiceKey(saved) } });
-    expect(await getServiceKey("DISCORD_WEBHOOK_URL")).toBe(saved);
-    expect((await listServiceKeyStatus()).find((k) => k.name === "DISCORD_WEBHOOK_URL")?.source).toBe("saved");
-    process.env.DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/999999999999999999/hostvaluehostvaluehostvalue12345";
-    expect(await getServiceKey("DISCORD_WEBHOOK_URL")).toContain("hostvalue");
-    expect((await listServiceKeyStatus()).find((k) => k.name === "DISCORD_WEBHOOK_URL")?.source).toBe("host");
+    const saved = "savedsavedsavedsavedsaved.AbCdEf.savedsavedsavedsavedsavedsaved";
+    await prisma.serviceKey.create({ data: { name: "DISCORD_BOT_TOKEN", ciphertext: encryptServiceKey(saved) } });
+    expect(await getServiceKey("DISCORD_BOT_TOKEN")).toBe(saved);
+    expect((await listServiceKeyStatus()).find((k) => k.name === "DISCORD_BOT_TOKEN")?.source).toBe("saved");
+    process.env.DISCORD_BOT_TOKEN = "hostvaluehostvaluehostvalue.AbCdEf.hostvaluehostvaluehostvalue";
+    expect(await getServiceKey("DISCORD_BOT_TOKEN")).toContain("hostvalue");
+    expect((await listServiceKeyStatus()).find((k) => k.name === "DISCORD_BOT_TOKEN")?.source).toBe("host");
   });
 
   it("the status list never carries a key's value", async () => {

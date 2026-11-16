@@ -18,7 +18,8 @@ import {
 import { slug as slugSchema, uuid } from "@lib/contracts/common";
 import { tags } from "@lib/data/tags";
 import { randomBytes } from "node:crypto";
-import { BRACKET_FORMATS, bracketSchema, clearResult, reportResult, type Bracket } from "@lib/bracket";
+import { BRACKET_FORMATS, bracketSchema, clearResult, reportResult, viewBracket, type Bracket } from "@lib/bracket";
+import { alertStaff, announceChampion, announceEvent } from "@lib/discord/announce";
 import { createAdminClient } from "@utils/supabase/admin";
 import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions, birthMonthToRemember, playerIdFromAnswers, type Answers, type EventQuestion } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
@@ -265,6 +266,7 @@ export const applyAsVendor = createAction({ input: vendorApplicationInput, acces
     });
   }
   updateTag(tags.vendors);
+  if (!existing) await alertStaff("New vendor application", data.name, "/admin/vendors");
   return { vendorId, status: existing?.status === "rejected" ? "rejected" : "pending" };
 });
 
@@ -304,6 +306,7 @@ export const createEvent = createAction({ input: eventInput, access: CONTENT_ROL
   try {
     const event = await prisma.event.create({ data: { ...eventData(input), created_by: user.id } });
     refreshEvent(event.slug);
+    if (event.status === "published") await announceEvent(event.id);
     return { id: event.id, slug: event.slug };
   } catch (error) {
     if (uniqueViolation(error)) throw new ActionError("Another event already uses that URL slug.");
@@ -320,6 +323,8 @@ export const updateEvent = createAction(
       const event = await prisma.event.update({ where: { id }, data: eventData(values) });
       refreshEvent(before.slug);
       refreshEvent(event.slug);
+      // Announced the first time it is published; later edits don't repeat it.
+      if (event.status === "published") await announceEvent(event.id);
       return { id: event.id, slug: event.slug };
     } catch (error) {
       if (uniqueViolation(error)) throw new ActionError("Another event already uses that URL slug.");
@@ -522,7 +527,14 @@ async function changeBracket(eventId: string, change: (bracket: Bracket) => Brac
 export const reportBracketResult = createAction(
   { input: z.object({ eventId: uuid, matchId: z.string().max(12), winnerId: z.string().max(40) }), access: CONTENT_ROLES },
   async ({ eventId, matchId, winnerId }) => {
-    await changeBracket(eventId, (b) => reportResult(b, matchId, winnerId));
+    let champion: string | null = null;
+    await changeBracket(eventId, (b) => {
+      const next = reportResult(b, matchId, winnerId);
+      const winner = viewBracket(next).champion;
+      champion = next.entrants.find((e) => e.id === winner)?.name ?? null;
+      return next;
+    });
+    if (champion) await announceChampion(eventId, champion);
     return null;
   }
 );

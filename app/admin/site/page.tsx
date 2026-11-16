@@ -2,6 +2,10 @@ import { Suspense } from "react";
 import { PageHeader } from "@components/ui/page-header";
 import { Skeleton } from "@components/ui/skeleton";
 import { BannerForm, CommunityForm, FlagToggles, MediaForms } from "@components/admin/site-settings";
+import { DiscordPanel } from "@components/admin/discord-panel";
+import { getDiscordSettings } from "@lib/discord/core";
+import { COMMANDS } from "@lib/discord/commands";
+import { siteUrl } from "@lib/seo";
 import { ServiceKeysPanel } from "@components/admin/service-keys-panel";
 import { listServiceKeyStatus } from "@lib/service-keys";
 import { requirePageRole } from "@lib/auth/guard";
@@ -16,7 +20,7 @@ export const maxDuration = 300;
 
 async function Settings() {
   await requirePageRole([UserRole.ADMIN], "/admin/site");
-  const [flags, banner, youtube, video, community, index, serviceKeys] = await Promise.all([
+  const [flags, banner, youtube, video, community, index, serviceKeys, discord] = await Promise.all([
     listFlagRows(),
     getAlertBanner(),
     getYouTubeSettings(),
@@ -24,6 +28,7 @@ async function Settings() {
     getCommunity(),
     searchIndexStatus(),
     listServiceKeyStatus(),
+    getDiscordSettings(),
   ]);
   return (
     <div className="space-y-8">
@@ -32,6 +37,15 @@ async function Settings() {
       <section><h2 className="mb-3 text-lg font-bold">Community</h2><CommunityForm community={community} now={requestTime()} /></section>
       <section><h2 className="mb-3 text-lg font-bold">Alert banner</h2><BannerForm banner={banner} /></section>
       <section><h2 className="mb-3 text-lg font-bold">Video</h2><MediaForms youtube={youtube} video={video} /></section>
+      <section aria-labelledby="discord-bot">
+        <h2 id="discord-bot" className="mb-3 text-lg font-bold">Discord bot</h2>
+        <DiscordPanel
+          settings={discord}
+          hasToken={serviceKeys.some((k) => k.name === "DISCORD_BOT_TOKEN" && (k.source === "host" || k.source === "saved"))}
+          interactionsUrl={`${siteUrl()}/api/discord/interactions`}
+          commandCount={COMMANDS.length}
+        />
+      </section>
       <section aria-labelledby="service-keys"><h2 id="service-keys" className="mb-3 text-lg font-bold">Service keys</h2><ServiceKeysPanel keys={serviceKeys} /></section>
     </div>
   );

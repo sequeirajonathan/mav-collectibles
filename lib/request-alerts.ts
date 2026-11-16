@@ -3,6 +3,7 @@ import { prisma } from "@lib/prisma";
 import { notifyRoles } from "@lib/push";
 import { sendEmail } from "@lib/email";
 import { siteUrl } from "@lib/seo";
+import { alertStaff } from "@lib/discord/announce";
 import { CONTENT_ROLES } from "@interfaces/roles";
 
 /** Author of automatic Team chat messages (not a real account). */
@@ -44,6 +45,7 @@ export async function sendRequestAlerts(): Promise<number> {
         url: "/admin/requests?view=done",
         tag: `request-${request.id}`,
       });
+      await alertStaff("Request finished", `${request.title} (asked by ${request.created_by_name})${reply ? `\n${reply}` : ""}`, "/admin/requests?view=done");
       const [asker] = await prisma.$queryRaw<{ email: string | null }[]>`select email from auth.users where id = ${request.created_by}::uuid`;
       if (asker?.email) {
         await sendEmail({

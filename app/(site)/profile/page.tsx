@@ -28,6 +28,7 @@ async function Profile() {
         favoriteGameId: profile?.favorite_game_id ?? null,
         pokemonPlayerId: profile?.pokemon_player_id ?? null,
         birthMonth: profile?.birth_month ?? null,
+        discordUsername: profile?.discord_username ?? null,
       }}
     />
   );

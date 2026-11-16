@@ -1,3 +1,4 @@
+import { alertStaff } from "@lib/discord/announce";
 import { defineRoute, HttpError } from "@lib/api/define-route";
 import { prisma } from "@lib/prisma";
 import { createAdminClient } from "@utils/supabase/admin";
@@ -70,6 +71,8 @@ export const POST = defineRoute({
     await prisma.jobApplication.create({ data: { ...input, resume_path: resumePath, resume_name: resumeName } });
 
     await notifyRoles(HIRING_ROLES, { title: "New job application", body: `${input.name} applied for ${input.position}`, url: "/admin/applications", tag: "job-application" });
+
+    await alertStaff("New job application", `${input.name} applied for ${input.position}`, "/admin/applications");
 
     const notify = serverEnv().JOBS_NOTIFY_EMAIL;
     if (notify) {

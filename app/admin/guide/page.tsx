@@ -156,6 +156,17 @@ const SECTIONS: Section[] = [
         ],
       },
       {
+        title: "The Discord bot",
+        where: { href: "/admin/site", label: "Site → Discord bot" },
+        only: "admin",
+        steps: [
+          "Follow the setup checklist once: it connects the shop's bot to the Discord server.",
+          "The bot posts new events, day-before reminders and bracket champions in the announcements channel, and tells the staff channel about new requests and applications.",
+          "Players use /events, /rsvp, /cancel, /myevents, /standings, /bracket, /hours and /singles. /link connects their Discord to their MAV account so /rsvp works.",
+          "Each kind of post has its own on/off switch.",
+        ],
+      },
+      {
         title: "Ask for a feature or report a problem",
         where: { href: "/admin/requests", label: "Requests" },
         steps: [

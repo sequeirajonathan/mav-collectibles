@@ -32,12 +32,12 @@ export const SERVICE_KEYS = {
     pattern: /^shippo_(live|test)_[0-9A-Za-z]{10,100}$/,
     hint: "Starts with shippo_live_",
   },
-  DISCORD_WEBHOOK_URL: {
-    label: "Discord announcements",
-    purpose: "Lets the site post in a Discord channel. Nothing uses it yet; it is here ready for the Discord work.",
-    where: "Discord → channel settings → Integrations → Webhooks → Copy Webhook URL.",
-    pattern: /^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d{5,30}\/[0-9A-Za-z_-]{20,120}$/,
-    hint: "Starts with https://discord.com/api/webhooks/",
+  DISCORD_BOT_TOKEN: {
+    label: "Discord bot",
+    purpose: "Lets the shop's bot post announcements and answer slash commands in your Discord server.",
+    where: "Discord Developer Portal → your application → Bot → Reset Token.",
+    pattern: /^[A-Za-z0-9_-]{20,40}\.[A-Za-z0-9_-]{4,10}\.[A-Za-z0-9_-]{20,60}$/,
+    hint: "Three parts separated by dots",
   },
 } as const;
 
@@ -70,8 +70,8 @@ export function decryptServiceKey(stored: string): string | null {
 }
 
 function fromEnvironment(name: ServiceKeyName): string | undefined {
-  // The Discord webhook has no place in the validated server environment; read it directly.
-  if (name === "DISCORD_WEBHOOK_URL") return process.env.DISCORD_WEBHOOK_URL || undefined;
+  // The bot token isn't part of the validated server environment; read it directly.
+  if (name === "DISCORD_BOT_TOKEN") return process.env.DISCORD_BOT_TOKEN || undefined;
   return serverEnv()[name];
 }
 
