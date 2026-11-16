@@ -20,7 +20,7 @@ import { tags } from "@lib/data/tags";
 import { randomBytes } from "node:crypto";
 import { BRACKET_FORMATS, bracketSchema, clearResult, reportResult, type Bracket } from "@lib/bracket";
 import { createAdminClient } from "@utils/supabase/admin";
-import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions } from "@lib/event-questions";
+import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions, playerIdFromAnswers, type Answers, type EventQuestion } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
 
 const REGISTRATION_ERRORS: Record<string, string> = {
@@ -37,13 +37,22 @@ function refreshEvent(slug: string) {
 // ---------------------------------------------------------------------------
 // Players: RSVP
 // ---------------------------------------------------------------------------
+/** Keeps the player's profile in step with the Player ID they just gave, so the next event fills it in. */
+async function rememberPlayerId(userId: string, questions: EventQuestion[], answers: Answers) {
+  const playerId = playerIdFromAnswers(questions, answers);
+  if (!playerId) return;
+  // Best-effort: a profile hiccup must never undo an RSVP.
+  await prisma.profile.updateMany({ where: { id: userId }, data: { pokemon_player_id: playerId } }).catch((error) => console.error("Saving Player ID failed", error));
+}
+
 export const registerForEvent = createAction(
   { input: z.object({ eventId: uuid, answers: answersSchema.default({}) }), access: "user" },
   async ({ eventId, answers: given }, user) => {
     const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true, questions: true } });
     if (!event) throw new ActionError("Event not found.");
     // Answers are checked before a spot is taken, so nobody is registered with a half-filled form.
-    const { answers, errors } = checkAnswers(parseStoredQuestions(event.questions), given, `${eventId}/${user.id}/`);
+    const questions = parseStoredQuestions(event.questions);
+    const { answers, errors } = checkAnswers(questions, given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     try {
       // One transaction: a player is never registered without their answers.
@@ -52,6 +61,7 @@ export const registerForEvent = createAction(
           select public.register_for_event(${eventId}::uuid, ${user.id}::uuid)::text as status`,
         prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } }),
       ]);
+      await rememberPlayerId(user.id, questions, answers);
       refreshEvent(event.slug);
       return { status: registrationStatusSchema.parse(rows[0]?.status) };
     } catch (error) {
@@ -71,9 +81,11 @@ export const saveRegistrationAnswers = createAction(
       select: { status: true, event: { select: { questions: true } } },
     });
     if (!registration || registration.status === "cancelled") throw new ActionError("You're not registered for this event.");
-    const { answers, errors } = checkAnswers(parseStoredQuestions(registration.event.questions), given, `${eventId}/${user.id}/`);
+    const questions = parseStoredQuestions(registration.event.questions);
+    const { answers, errors } = checkAnswers(questions, given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     await prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } });
+    await rememberPlayerId(user.id, questions, answers);
     return null;
   }
 );

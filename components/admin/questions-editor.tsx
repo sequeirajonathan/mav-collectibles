@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { cardVariants } from "@components/ui/card";
 import { Field, inputClass } from "@components/ui/field";
-import { MAX_QUESTIONS, QUESTION_PRESETS, QUESTION_TYPES, QUESTION_TYPE_LABELS, newQuestionId, type EventQuestion, type QuestionType } from "@lib/event-questions";
+import { MAX_QUESTIONS, QUESTION_PRESETS, QUESTION_TYPES, QUESTION_TYPE_LABELS, newQuestionId, type EventQuestion, type PresetQuestion, type QuestionType } from "@lib/event-questions";
 import { cn } from "@utils";
 
 /** Staff choose what to ask players when they RSVP. */
@@ -17,8 +17,8 @@ export function QuestionsEditor({ value, onChange, error }: { value: EventQuesti
     if (item) next.splice(index + by, 0, item);
     onChange(next);
   };
-  const add = (questions: Omit<EventQuestion, "id">[]) =>
-    onChange([...value, ...questions.map((q) => ({ ...q, id: newQuestionId() }))].slice(0, MAX_QUESTIONS));
+  const add = (questions: PresetQuestion[]) =>
+    onChange([...value, ...questions.map((q) => ({ autofill: "none" as const, ...q, id: newQuestionId() }))].slice(0, MAX_QUESTIONS));
 
   return (
     <fieldset>
@@ -61,6 +61,12 @@ export function QuestionsEditor({ value, onChange, error }: { value: EventQuesti
                 </Field>
               )}
               <div className="flex flex-wrap items-center gap-2">
+                {(q.type === "number" || q.type === "text") && (
+                  <label className="flex min-h-11 w-full items-center gap-2 text-sm">
+                    <input type="checkbox" className="size-5 shrink-0 accent-[var(--gold)]" checked={q.autofill === "playerId"} onChange={(e) => update(q.id, { autofill: e.target.checked ? "playerId" : "none" })} />
+                    This is the Pokémon Player ID (fill it in from the player&apos;s profile)
+                  </label>
+                )}
                 <label className="mr-auto flex min-h-11 items-center gap-2 text-sm font-semibold">
                   <input type="checkbox" className="size-5 accent-[var(--gold)]" checked={q.required} onChange={(e) => update(q.id, { required: e.target.checked })} />
                   Required

@@ -61,6 +61,10 @@ test.describe("event sign-up questions", () => {
     await edit.getByRole("button", { name: "Save my details" }).click();
     await expect(player.getByText("You're going", { exact: true }).filter({ visible: true })).toBeVisible();
 
+    // The Player ID they typed is now on their profile, ready for the next event.
+    await player.goto("/profile");
+    await expect(player.getByRole("textbox", { name: "Pokémon Player ID (optional)" })).toHaveValue("7654322");
+
     await staff.goto(adminUrl);
     await staff.getByRole("link", { name: "Check-in" }).click();
     // Staff can find a player by something they answered, not just their account name.
@@ -82,6 +86,21 @@ test.describe("event sign-up questions", () => {
     const download = staff.waitForEvent("download");
     await staff.getByRole("button", { name: "Download spreadsheet" }).click();
     expect((await download).suggestedFilename()).toBe(`${slug}-players.csv`);
+
+    // A second event that asks for the Player ID has it filled in already.
+    await staff.goto("/admin/events/new");
+    const second = `Second Cup ${Date.now()}`;
+    await staff.getByRole("textbox", { name: "Title", exact: true }).fill(second);
+    await staff.getByLabel("Starts", { exact: true }).filter({ visible: true }).fill("2030-07-13T12:15");
+    await staff.getByRole("button", { name: "Pokémon tournament" }).click();
+    await staff.getByLabel("Status", { exact: true }).filter({ visible: true }).selectOption("published");
+    await staff.getByRole("button", { name: "Create event" }).click();
+    await expect(staff.getByRole("heading", { name: second })).toBeVisible();
+    const secondSlug = await staff.getByRole("textbox", { name: "URL", exact: true }).inputValue();
+    await player.goto(`/events/${secondSlug}?rsvp=1`);
+    const next = player.getByRole("form", { name: "Player details" });
+    await expect(next.getByRole("textbox", { name: "Player ID" })).toHaveValue("7654322");
+    await expect(next.getByText("Filled in from your profile.")).toBeVisible();
 
     await player.context().close();
     await staff.context().close();

@@ -8,6 +8,8 @@ import { Suspense } from "react";
 import { ExternalLink, MapPin, Ticket, Users } from "lucide-react";
 import { buttonVariants } from "@components/ui/button";
 import { Linkified } from "@components/ui/linkified";
+import { prisma } from "@lib/prisma";
+import { prefillFromProfile } from "@lib/event-questions";
 import { BracketView } from "@components/hub/bracket-view";
 import { getBracket, getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
 import { getCurrentUser } from "@lib/auth/server";
@@ -45,7 +47,14 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
   const user = await getCurrentUser();
   await connection();
   const closedReason = registrationClosedReason(event, requestTime());
-  const [status, answers] = user ? await Promise.all([getMyRegistration(event.id, user.id), getMyAnswers(event.id, user.id)]) : [null, {}];
+  const [status, answers, profile] = user
+    ? await Promise.all([
+        getMyRegistration(event.id, user.id),
+        getMyAnswers(event.id, user.id),
+        // Only looked up when a question can be filled in from it.
+        event.questions.some((q) => q.autofill !== "none") ? prisma.profile.findUnique({ where: { id: user.id }, select: { pokemon_player_id: true } }) : null,
+      ])
+    : [null, {}, null];
   return (
     <RsvpButton
       eventId={event.id}
@@ -56,6 +65,7 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
       full={isFull(event)}
       questions={event.questions}
       answers={answers}
+      prefill={prefillFromProfile(event.questions, { playerId: profile?.pokemon_player_id ?? null })}
       autoOpen={(await searchParams).rsvp === "1"}
     />
   );

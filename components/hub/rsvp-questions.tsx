@@ -118,7 +118,12 @@ export function RsvpQuestions({
         <p className="text-xs text-muted-foreground">Only the MAV team sees your answers.</p>
       </div>
       {questions.map((q) => (
-        <Field key={q.id} label={q.required ? q.label : `${q.label} (optional)`} hint={q.help || undefined} error={errors[q.id]}>
+        <Field
+          key={q.id}
+          label={q.required ? q.label : `${q.label} (optional)`}
+          hint={[q.help, q.autofill === "playerId" ? (initial[q.id] ? "Filled in from your profile." : "We'll save this to your profile for next time.") : ""].filter(Boolean).join(" ") || undefined}
+          error={errors[q.id]}
+        >
           {(id) => {
             const common = { id, value: values[q.id] ?? "", "aria-required": q.required, "aria-invalid": Boolean(errors[q.id]) };
             if (q.type === "month") return <MonthField id={id} value={values[q.id] ?? ""} invalid={Boolean(errors[q.id])} onChange={(v) => set(q.id, v)} />;

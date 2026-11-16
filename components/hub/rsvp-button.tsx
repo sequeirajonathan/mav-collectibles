@@ -23,11 +23,13 @@ interface RsvpButtonProps {
   questions?: EventQuestion[];
   /** This player's saved answers, when they're already registered. */
   answers?: Answers;
+  /** Answers their profile already knows, used where they haven't answered yet. */
+  prefill?: Answers;
   /** Opened from a sign-up link: go straight to the questions. */
   autoOpen?: boolean;
 }
 
-export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full, questions = [], answers = {}, autoOpen = false }: RsvpButtonProps) {
+export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full, questions = [], answers = {}, prefill = {}, autoOpen = false }: RsvpButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // What the server last confirmed to this button. It wins over the `status`
@@ -36,7 +38,7 @@ export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full
   const [optimistic, setOptimistic] = useOptimistic(confirmed ? confirmed.status : status);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [asking, setAsking] = useState(autoOpen && signedIn && status === null && !closedReason && questions.length > 0);
-  const [savedAnswers, setSavedAnswers] = useState<Answers>(answers);
+  const [savedAnswers, setSavedAnswers] = useState<Answers>({ ...prefill, ...answers });
 
   if (!signedIn) {
     return (

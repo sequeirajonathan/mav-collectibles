@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { checkAnswers, displayAnswer, eventQuestionsSchema, parseStoredQuestions, type EventQuestion } from "@lib/event-questions";
+import { checkAnswers, displayAnswer, playerIdFromAnswers, prefillFromProfile, eventQuestionsSchema, parseStoredQuestions, type EventQuestion } from "@lib/event-questions";
 import { attendeesCsv } from "@components/admin/attendee-list";
 
-const q = (id: string, extra: Partial<EventQuestion> = {}): EventQuestion => ({ id, label: id, help: "", type: "text", required: false, options: [], ...extra });
+const q = (id: string, extra: Partial<EventQuestion> = {}): EventQuestion => ({ id, label: id, help: "", type: "text", required: false, autofill: "none", options: [], ...extra });
 
 describe("checking a player's answers", () => {
   const questions = [
@@ -90,5 +90,25 @@ describe("month and file answers", () => {
     expect(displayAnswer(dobQuestion, "2011-03")).toBe("Mar 2011");
     expect(displayAnswer(deckQuestion, path)).toBe("File uploaded");
     expect(displayAnswer(deckQuestion, undefined)).toBe("");
+  });
+});
+
+describe("Player ID kept on the profile", () => {
+  const questions = [q("pid", { type: "number", autofill: "playerId" }), q("other", { type: "number" })];
+
+  it("fills in only the question marked as the Player ID", () => {
+    expect(prefillFromProfile(questions, { playerId: "1234567" })).toEqual({ pid: "1234567" });
+    expect(prefillFromProfile(questions, { playerId: null })).toEqual({});
+  });
+
+  it("reads the ID back from the answers, ignoring anything that isn't an ID", () => {
+    expect(playerIdFromAnswers(questions, { pid: "1234567", other: "99" })).toBe("1234567");
+    expect(playerIdFromAnswers(questions, { other: "99" })).toBeNull();
+    expect(playerIdFromAnswers(questions, { pid: "12.5" })).toBeNull();
+    expect(playerIdFromAnswers(questions, { pid: "-4" })).toBeNull();
+  });
+
+  it("questions saved before this existed still load, with no autofill", () => {
+    expect(parseStoredQuestions([{ id: "old", label: "Player ID", help: "", type: "number", required: true, options: [] }])[0]?.autofill).toBe("none");
   });
 });

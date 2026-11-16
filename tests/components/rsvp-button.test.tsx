@@ -66,8 +66,8 @@ describe("RsvpButton", () => {
   });
 
   const questions = [
-    { id: "q_name", label: "Player name", help: "", type: "text" as const, required: true, options: [] },
-    { id: "q_pid", label: "Player ID", help: "", type: "number" as const, required: false, options: [] },
+    { id: "q_name", label: "Player name", help: "", type: "text" as const, required: true, autofill: "none" as const, options: [] },
+    { id: "q_pid", label: "Player ID", help: "", type: "number" as const, required: false, autofill: "playerId" as const, options: [] },
   ];
 
   it("asks the event's questions before saving the RSVP", async () => {
@@ -105,5 +105,16 @@ describe("RsvpButton", () => {
     unmount();
     render(<RsvpButton {...props} signedIn={false} questions={questions} autoOpen />);
     expect(screen.getByRole("link", { name: "Sign in to RSVP" })).toHaveAttribute("href", "/sign-in?next=%2Fevents%2Fleague%3Frsvp%3D1");
+  });
+
+  it("fills in the Player ID from the profile, without overriding an answer already given", async () => {
+    const { unmount } = render(<RsvpButton {...props} questions={questions} prefill={{ q_pid: "1234567" }} autoOpen />);
+    expect(screen.getByRole("textbox", { name: "Player ID (optional)" })).toHaveValue("1234567");
+    expect(screen.getByText(/Filled in from your profile/)).toBeInTheDocument();
+    unmount();
+
+    render(<RsvpButton {...props} status="registered" questions={questions} answers={{ q_name: "Ash", q_pid: "7654321" }} prefill={{ q_pid: "1234567" }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Edit my details" }));
+    expect(screen.getByRole("textbox", { name: "Player ID (optional)" })).toHaveValue("7654321");
   });
 });

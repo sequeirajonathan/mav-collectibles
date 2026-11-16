@@ -99,6 +99,7 @@ model Profile {
   updated_at       DateTime @default(now()) @db.Timestamptz(6)
   avatar_url       String?
   favorite_game_id String?
+  pokemon_player_id String?
   game             Game?    @relation(fields: [favorite_game_id], references: [id], onUpdate: NoAction)
 
   @@map("profiles")

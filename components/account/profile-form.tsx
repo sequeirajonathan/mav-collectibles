@@ -22,7 +22,7 @@ export function ProfileForm({
   email,
   games,
 }: {
-  profile: { username: string | null; firstName: string; lastName: string; phone: string | null; favoriteGameId: string | null };
+  profile: { username: string | null; firstName: string; lastName: string; phone: string | null; favoriteGameId: string | null; pokemonPlayerId: string | null };
   email: string;
   games: Game[];
 }) {
@@ -32,6 +32,7 @@ export function ProfileForm({
     lastName: profile.lastName,
     phone: toDisplayPhone(profile.phone),
     favoriteGameId: profile.favoriteGameId ?? "",
+    pokemonPlayerId: profile.pokemonPlayerId ?? "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newEmail, setNewEmail] = useState(email);
@@ -88,6 +89,9 @@ export function ProfileForm({
               ))}
             </select>
           )}
+        </Field>
+        <Field label="Pokémon Player ID (optional)" hint="Your Play! Pokémon ID. We fill it in for you when you sign up for a Pokémon event." error={errors.pokemonPlayerId}>
+          {(id) => <input id={id} className={inputClass} inputMode="numeric" maxLength={12} autoComplete="off" value={values.pokemonPlayerId} onChange={(e) => setValues((v) => ({ ...v, pokemonPlayerId: e.target.value }))} />}
         </Field>
         <Button type="submit" variant="gold" disabled={pending} className="w-full fold:w-auto">Save</Button>
       </form>

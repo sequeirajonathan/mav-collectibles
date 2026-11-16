@@ -11,6 +11,7 @@ import { serverEnv } from "@lib/env.server";
 import { createAdminClient } from "@utils/supabase/admin";
 import { UserRole } from "@interfaces/roles";
 import { searchPeople } from "@lib/data/users";
+import { PLAYER_ID } from "@lib/event-questions";
 import { roleChangeInput, updateCustomerInput, type UpdateCustomerResponse } from "@lib/contracts/customer";
 
 const profileInput = z.object({
@@ -18,13 +19,14 @@ const profileInput = z.object({
   lastName: z.string().trim().max(60),
   phone: z.string().transform((v) => toE164(v)).refine((v): v is string => v !== null, "Enter a 10-digit US phone number"),
   favoriteGameId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable()),
+  pokemonPlayerId: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), z.string().trim().regex(PLAYER_ID, "Player IDs are numbers only").nullable()).default(null),
 });
 
 /** Updates the caller's profile (and their linked Square customer's name/phone). */
 export const updateMyProfile = createAction({ input: profileInput, access: "user" }, async (input, user) => {
   await prisma.profile.update({
     where: { id: user.id },
-    data: { first_name: input.firstName || null, last_name: input.lastName || null, phone: input.phone, favorite_game_id: input.favoriteGameId },
+    data: { first_name: input.firstName || null, last_name: input.lastName || null, phone: input.phone, favorite_game_id: input.favoriteGameId, pokemon_player_id: input.pokemonPlayerId },
   });
   return null;
 });

@@ -47,6 +47,7 @@ const SECTIONS: Section[] = [
           "Tap “Pokémon tournament” to add Player ID, date of birth and the deck list (pasted or uploaded) in one go, or “Add a question” to write your own.",
           "Pick the answer type (short answer, number, date, month and year, pick one, yes/no, file upload) and tick “Required” if players must answer.",
           "Players answer when they RSVP, so there is no separate Google Form to keep in step.",
+          "The Player ID is remembered on each player’s profile, so they only type it the first time.",
         ],
       },
       {

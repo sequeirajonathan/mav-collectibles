@@ -40,6 +40,8 @@ export const eventQuestionSchema = z
     help: z.string().trim().max(200).default(""),
     type: z.enum(QUESTION_TYPES),
     required: z.boolean().default(false),
+    /** Filled in from the player's profile, and saved back to it, so they type it once. */
+    autofill: z.enum(["none", "playerId"]).default("none"),
     /** Choices for "Pick one" questions. */
     options: z.array(z.string().trim().min(1).max(60)).max(12).default([]),
   })
@@ -99,12 +101,15 @@ export function checkAnswers(
 }
 
 /** Ready-made question sets staff can add with one tap. */
-export const QUESTION_PRESETS: { label: string; questions: Omit<EventQuestion, "id">[] }[] = [
+/** A ready-made question, before it gets an id. */
+export type PresetQuestion = Omit<EventQuestion, "id" | "autofill"> & { autofill?: EventQuestion["autofill"] };
+
+export const QUESTION_PRESETS: { label: string; questions: PresetQuestion[] }[] = [
   {
     // Mirrors the Google Form the shop used for its Cups.
     label: "Pokémon tournament",
     questions: [
-      { label: "Player ID", help: "Your Play! Pokémon ID number", type: "number", required: true, options: [] },
+      { label: "Player ID", help: "Your Play! Pokémon ID number", type: "number", required: true, autofill: "playerId", options: [] },
       { label: "Date of birth (month and year)", help: "Used to place you in the Junior, Senior or Masters division", type: "month", required: true, options: [] },
       { label: "Deck list (copy and paste)", help: "Paste from RK9 or TCG Live. Make sure each Pokémon matches its set and set number.", type: "long", required: false, options: [] },
       { label: "Deck list (image or PDF)", help: "Or upload a photo or PDF instead. Up to 10 MB.", type: "file", required: false, options: [] },
@@ -133,4 +138,25 @@ export function displayAnswer(question: EventQuestion, value: string | undefined
   if (question.type === "month" && ISO_MONTH.test(value)) return `${MONTHS[Number(value.slice(5)) - 1]} ${value.slice(0, 4)}`;
   if (question.type === "file") return "File uploaded";
   return value;
+}
+
+/** A Play! Pokémon ID as stored on a profile: digits only. */
+export const PLAYER_ID = /^[0-9]{1,12}$/;
+
+/** Answers to start the form with: what the player's profile already knows. */
+export function prefillFromProfile(questions: readonly EventQuestion[], profile: { playerId: string | null }): Answers {
+  const answers: Answers = {};
+  for (const q of questions) {
+    if (q.autofill === "playerId" && profile.playerId) answers[q.id] = profile.playerId;
+  }
+  return answers;
+}
+
+/** The Player ID a player gave in their answers, if the event asked for one and it looks like an ID. */
+export function playerIdFromAnswers(questions: readonly EventQuestion[], answers: Answers): string | null {
+  for (const q of questions) {
+    const value = q.autofill === "playerId" ? answers[q.id] : undefined;
+    if (value && PLAYER_ID.test(value)) return value;
+  }
+  return null;
 }
