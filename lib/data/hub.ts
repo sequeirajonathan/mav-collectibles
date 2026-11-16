@@ -1,4 +1,5 @@
 import "server-only";
+import { bracketSchema, type Bracket } from "@lib/bracket";
 import { parseStoredAnswers, parseStoredQuestions, type Answers } from "@lib/event-questions";
 import { cacheLife, cacheTag } from "next/cache";
 import { z } from "zod";
@@ -224,6 +225,24 @@ export async function listAllEventsForStaff(): Promise<EventSummary[]> {
   const rows = await prisma.event.findMany({ include: eventInclude, orderBy: { starts_at: "desc" }, take: 200 });
   const counts = await registrationCounts(rows.map((r) => r.id));
   return rows.map((r) => toSummary(r, counts));
+}
+
+/** The event's bracket, or null when there isn't one (or it was stored in a shape we no longer read). */
+async function readBracket(eventId: string): Promise<Bracket | null> {
+  const row = await prisma.eventBracket.findUnique({ where: { event_id: eventId }, select: { data: true } });
+  const parsed = row ? bracketSchema.safeParse(row.data) : null;
+  return parsed?.success ? parsed.data : null;
+}
+
+/** For staff: always the latest. */
+export const getBracketForStaff = readBracket;
+
+/** For the public event page. */
+export async function getBracket(eventId: string, slug: string): Promise<Bracket | null> {
+  "use cache";
+  cacheTag(tags.events, tags.event(slug));
+  cacheLife("minutes");
+  return readBracket(eventId);
 }
 
 export async function getEventForEdit(id: string) {

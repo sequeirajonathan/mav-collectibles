@@ -8,7 +8,8 @@ import { Suspense } from "react";
 import { ExternalLink, MapPin, Ticket, Users } from "lucide-react";
 import { buttonVariants } from "@components/ui/button";
 import { Linkified } from "@components/ui/linkified";
-import { getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
+import { BracketView } from "@components/hub/bracket-view";
+import { getBracket, getEvent, getMyAnswers, getMyRegistration } from "@lib/data/hub";
 import { getCurrentUser } from "@lib/auth/server";
 import { googleCalendarUrl, outlookCalendarUrl, type CalendarEvent } from "@lib/calendar";
 import { capacityLabel, formatEntryFee, formatEventWhen } from "@lib/format";
@@ -57,6 +58,17 @@ async function Rsvp({ event, searchParams }: { event: Event; searchParams: Searc
       answers={answers}
       autoOpen={(await searchParams).rsvp === "1"}
     />
+  );
+}
+
+async function EventBracket({ eventId, slug }: { eventId: string; slug: string }) {
+  const bracket = await getBracket(eventId, slug);
+  if (!bracket) return null;
+  return (
+    <section className="mt-10" aria-labelledby="bracket-heading">
+      <h2 id="bracket-heading" className="mb-3 text-lg font-bold">Bracket</h2>
+      <BracketView bracket={bracket} />
+    </section>
   );
 }
 
@@ -145,6 +157,10 @@ async function EventContent({ params, searchParams }: { params: Params; searchPa
           {event.description && <p className="whitespace-pre-line leading-relaxed"><Linkified text={event.description} /></p>}
         </div>
       )}
+
+      <Suspense fallback={null}>
+        <EventBracket eventId={event.id} slug={event.slug} />
+      </Suspense>
 
       <VendorsOnly>
       {event.vendors.length > 0 && (

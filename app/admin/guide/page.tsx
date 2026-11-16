@@ -77,6 +77,17 @@ const SECTIONS: Section[] = [
         ],
       },
       {
+        title: "Run a bracket",
+        where: { href: "/admin/events", label: "Events → open an event → Bracket" },
+        steps: [
+          "Checked-in players are listed for you. Drag them by the handle (or use the arrows) into seed order, and add walk-ins by name.",
+          "For a top cut after Swiss rounds, put players in standings order and choose “Top 4 only” or “Top 8 only”. 1st plays 8th, 2nd plays 7th, and so on.",
+          "Pick single elimination (the usual top cut) or double elimination, which adds a losers bracket.",
+          "Tap the winner of each match. “Undo” fixes a wrong tap. Players follow the bracket on the event page.",
+          "When there’s a champion, “Fill from the bracket” on the Results tab copies the finishing order.",
+        ],
+      },
+      {
         title: "Post results and season points",
         where: { href: "/admin/events", label: "Events → open an event → Results" },
         steps: [

@@ -18,6 +18,7 @@ import {
 import { slug as slugSchema, uuid } from "@lib/contracts/common";
 import { tags } from "@lib/data/tags";
 import { randomBytes } from "node:crypto";
+import { BRACKET_FORMATS, bracketSchema, clearResult, reportResult, type Bracket } from "@lib/bracket";
 import { createAdminClient } from "@utils/supabase/admin";
 import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
@@ -459,6 +460,67 @@ export const deletePost = createAction({ input: z.object({ id: uuid }), access: 
   await prisma.post.delete({ where: { id } });
   updateTag(tags.posts);
   updateTag(tags.post(id));
+  return null;
+});
+
+// ---------------------------------------------------------------------------
+// Staff: brackets
+// ---------------------------------------------------------------------------
+const bracketSetupInput = z.object({
+  eventId: uuid,
+  format: z.enum(BRACKET_FORMATS),
+  bestOf: z.union([z.literal(1), z.literal(3)]),
+  entrants: z.array(z.object({ id: z.string(), name: z.string(), userId: uuid.nullable() })),
+});
+
+/** Creates the event's bracket, or replaces it (which clears any recorded winners). */
+export const saveBracket = createAction({ input: bracketSetupInput, access: CONTENT_ROLES }, async ({ eventId, format, bestOf, entrants }) => {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  if (!event) throw new ActionError("Event not found.");
+  const parsed = bracketSchema.safeParse({ format, bestOf, entrants, results: {} });
+  if (!parsed.success) throw new ActionError(parsed.error.issues[0]?.message ?? "That bracket can't be created.");
+  await prisma.eventBracket.upsert({ where: { event_id: eventId }, create: { event_id: eventId, data: parsed.data }, update: { data: parsed.data } });
+  refreshEvent(event.slug);
+  return null;
+});
+
+/** Applies one change to the stored bracket while holding its row, so two staff tapping at once can't overwrite each other. */
+async function changeBracket(eventId: string, change: (bracket: Bracket) => Bracket) {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  if (!event) throw new ActionError("Event not found.");
+  await prisma.$transaction(async (tx) => {
+    const rows = await tx.$queryRaw<{ data: unknown }[]>`select data from public.event_brackets where event_id = ${eventId}::uuid for update`;
+    const current = bracketSchema.safeParse(rows[0]?.data);
+    if (!current.success) throw new ActionError("This event doesn't have a bracket yet.");
+    let next: Bracket;
+    try {
+      next = change(current.data);
+    } catch (error) {
+      throw new ActionError(error instanceof Error ? error.message : "That change couldn't be made.");
+    }
+    await tx.eventBracket.update({ where: { event_id: eventId }, data: { data: next } });
+  });
+  refreshEvent(event.slug);
+}
+
+export const reportBracketResult = createAction(
+  { input: z.object({ eventId: uuid, matchId: z.string().max(12), winnerId: z.string().max(40) }), access: CONTENT_ROLES },
+  async ({ eventId, matchId, winnerId }) => {
+    await changeBracket(eventId, (b) => reportResult(b, matchId, winnerId));
+    return null;
+  }
+);
+
+export const clearBracketResult = createAction({ input: z.object({ eventId: uuid, matchId: z.string().max(12) }), access: CONTENT_ROLES }, async ({ eventId, matchId }) => {
+  await changeBracket(eventId, (b) => clearResult(b, matchId));
+  return null;
+});
+
+export const deleteBracket = createAction({ input: z.object({ eventId: uuid }), access: CONTENT_ROLES }, async ({ eventId }) => {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true } });
+  if (!event) throw new ActionError("Event not found.");
+  await prisma.eventBracket.deleteMany({ where: { event_id: eventId } });
+  refreshEvent(event.slug);
   return null;
 });
 

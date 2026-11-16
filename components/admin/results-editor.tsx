@@ -38,10 +38,13 @@ export function ResultsEditor({
   eventId,
   existing,
   checkedIn,
+  bracketStandings = [],
 }: {
   eventId: string;
   existing: { placement: number; playerName: string; userId: string | null; wins: number; losses: number; draws: number; points: number; deck: string | null }[];
   checkedIn: { userId: string; displayName: string }[];
+  /** Finishing order from the event's bracket, once it has a champion. */
+  bracketStandings?: { place: number; name: string; userId: string | null }[];
 }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[]>(() =>
@@ -55,6 +58,9 @@ export function ResultsEditor({
 
   const prefill = () =>
     setRows(checkedIn.map((p, i) => ({ ...blank(i + 1, p.displayName, p.userId), points: String(POINTS_BY_PLACE[i] ?? 2) })));
+
+  const prefillFromBracket = () =>
+    setRows(bracketStandings.map((p) => ({ ...blank(p.place, p.name, p.userId ?? ""), points: String(POINTS_BY_PLACE[p.place - 1] ?? 2) })));
 
   const save = () => {
     setError(null);
@@ -75,6 +81,11 @@ export function ResultsEditor({
   const cell = "w-full min-w-0 rounded-md border border-line bg-panel-2 px-2 py-2 text-base tabular-nums focus:border-gold";
   return (
     <div className="space-y-4">
+      {bracketStandings.length > 0 && (
+        <Button type="button" variant="outline" size="sm" className="mr-2" onClick={prefillFromBracket}>
+          Fill from the bracket
+        </Button>
+      )}
       {checkedIn.length > 0 && (
         <Button type="button" variant="outline" size="sm" onClick={prefill}>
           Fill from {checkedIn.length} checked-in players

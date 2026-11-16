@@ -41,7 +41,7 @@ async function rest(path: string, init: { method?: string; token?: string; body?
 
 const HUB_TABLES = [
   "events", "event_registrations", "posts", "post_likes", "post_saves", "post_comments",
-  "vendors", "event_vendors", "seasons", "tournament_results", "games",
+  "vendors", "event_vendors", "event_brackets", "seasons", "tournament_results", "games",
   "feature_flags", "staff_requests", "job_applications", "staff_messages", "push_subscriptions", "catalog_search", "catalog_search_sync", "alert_banners", "youtube_settings", "VideoSettings", "installers",
 ];
 
