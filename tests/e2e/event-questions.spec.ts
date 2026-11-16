@@ -70,11 +70,15 @@ test.describe("event sign-up questions", () => {
     await expect(row).toContainText("Mar 2011");
     await expect(row).toContainText("4 Pikachu ex SSP 57");
     // Staff open the uploaded deck list through a short-lived private link.
-    const opened = staff.waitForEvent("popup");
+    // (A headless browser downloads a PDF instead of showing it, so check the link itself, not the new tab.)
+    const signed = staff.context().waitForEvent("request", (r) => /\/storage\/v1\/object\/sign\/event-uploads\//.test(r.url()));
     await row.getByRole("button", { name: "View file" }).click();
-    const file = await opened;
-    await file.waitForURL(/\/storage\/v1\/object\/sign\/event-uploads\//);
-    await file.close();
+    const fileResponse = await staff.request.get((await signed).url());
+    expect(fileResponse.status()).toBe(200);
+    expect(fileResponse.headers()["content-type"]).toContain("pdf");
+    // Without the signature, the file is not readable.
+    const unsigned = await staff.request.get(fileResponse.url().split("?")[0] ?? "");
+    expect(unsigned.status()).toBeGreaterThanOrEqual(400);
     const download = staff.waitForEvent("download");
     await staff.getByRole("button", { name: "Download spreadsheet" }).click();
     expect((await download).suggestedFilename()).toBe(`${slug}-players.csv`);
