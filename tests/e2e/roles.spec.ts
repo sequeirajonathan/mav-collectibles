@@ -84,7 +84,10 @@ test.describe("role matrix", () => {
       const page = await pageFor(browser, role);
       const results: string[] = [];
       for (const [path, expected] of PAGES) {
-        const response = await page.goto(path);
+        let response = await page.goto(path);
+        // A page that redirects after it starts loading (the dashboard does, for print agents) can land its
+        // redirect on top of the next navigation. That navigation reports no response; make it again.
+        if (response === null) response = await page.goto(path);
         const actual = outcomeOf(new URL(page.url()), path);
         if (actual !== expected[role] || (response && response.status() >= 500)) {
           results.push(`${path}: expected ${expected[role]}, got ${actual} (${response?.status() ?? "?"})`);

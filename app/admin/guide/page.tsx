@@ -196,6 +196,16 @@ const SECTIONS: Section[] = [
         ],
       },
       {
+        title: "Connect outside services",
+        where: { href: "/admin/site", label: "Site → Service keys" },
+        only: "admin",
+        steps: [
+          "Paste a key for Google reviews, email, address checking or Discord and save.",
+          "Keys are stored encrypted and never shown again. You can replace or remove one at any time.",
+          "The Google key is tried as soon as you save it, and tells you if Google refuses it.",
+        ],
+      },
+      {
         title: "Keep shop search up to date",
         where: { href: "/admin/site", label: "Site → Shop search" },
         only: "admin",

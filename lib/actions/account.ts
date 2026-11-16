@@ -7,11 +7,11 @@ import { ActionError, createAction } from "@lib/actions/safe-action";
 import { createSquareClient } from "@lib/square";
 import { findCustomerForUser, toE164 } from "@lib/square-customer";
 import { validateAddress } from "@lib/shippo";
-import { serverEnv } from "@lib/env.server";
 import { createAdminClient } from "@utils/supabase/admin";
 import { UserRole } from "@interfaces/roles";
 import { searchPeople } from "@lib/data/users";
 import { PLAYER_ID } from "@lib/event-questions";
+import { getServiceKey } from "@lib/service-keys";
 import { roleChangeInput, updateCustomerInput, type UpdateCustomerResponse } from "@lib/contracts/customer";
 
 const profileInput = z.object({
@@ -41,7 +41,7 @@ export const updateMyCustomer = createAction(
     if (!customer?.id) throw new ActionError("We couldn't find your store account yet. Try signing out and back in.");
 
     let address = input.address;
-    if (address && serverEnv().SHIPPO_API_KEY && !acceptSuggestion) {
+    if (address && !acceptSuggestion && (await getServiceKey("SHIPPO_API_KEY"))) {
       const check = await validateAddress(address);
       if (!check.isValid) return { status: "invalid_address", messages: check.messages };
       if (check.validatedAddress && JSON.stringify(check.validatedAddress) !== JSON.stringify(address)) {

@@ -21,8 +21,8 @@ import {
   type YouTubeSettings,
 } from "@lib/contracts/site";
 import { publicEnv } from "@lib/env";
-import { serverEnv } from "@lib/env.server";
 import { tags } from "./tags";
+import { getServiceKey } from "@lib/service-keys";
 
 const FLAG_DEFAULTS: FlagMap = {
   shopLive: false,
@@ -116,9 +116,10 @@ interface GoogleReviewSummary {
  */
 export async function getGoogleReviews(): Promise<GoogleReviewSummary> {
   "use cache";
+  cacheTag(tags.integrations);
   cacheLife("hours");
   const placeId = publicEnv().NEXT_PUBLIC_GOOGLE_PLACE_ID;
-  const apiKey = serverEnv().GOOGLE_PLACES_API_KEY;
+  const apiKey = await getServiceKey("GOOGLE_PLACES_API_KEY");
   const empty: GoogleReviewSummary = {
     rating: null,
     total: null,
