@@ -7,6 +7,7 @@ import { Button } from "@components/ui/button";
 import { Field, inputClass } from "@components/ui/field";
 import { PhoneInput } from "@components/ui/phone-input";
 import { updateMyProfile } from "@lib/actions/account";
+import { unlinkDiscordAccount } from "@lib/actions/discord";
 import { getBrowserClient } from "@utils/supabase/client";
 import type { Game } from "@lib/contracts/hub";
 import { cardVariants } from "@components/ui/card";
@@ -22,7 +23,7 @@ export function ProfileForm({
   email,
   games,
 }: {
-  profile: { username: string | null; firstName: string; lastName: string; phone: string | null; favoriteGameId: string | null; pokemonPlayerId: string | null; birthMonth: string | null };
+  profile: { username: string | null; firstName: string; lastName: string; phone: string | null; favoriteGameId: string | null; pokemonPlayerId: string | null; birthMonth: string | null; discordUsername: string | null };
   email: string;
   games: Game[];
 }) {
@@ -58,6 +59,14 @@ export function ProfileForm({
       const result = await updateMyProfile({ ...values, forgetBirthMonth: true });
       if (!result.ok) return void toast.error(result.error);
       toast.success("Birth month removed from your profile");
+      router.refresh();
+    });
+
+  const disconnectDiscord = () =>
+    startTransition(async () => {
+      const result = await unlinkDiscordAccount({});
+      if (!result.ok) return void toast.error(result.error);
+      toast.success("Discord disconnected");
       router.refresh();
     });
 
@@ -111,6 +120,24 @@ export function ProfileForm({
           </p>
         )}
       </form>
+
+      <section className={cn(cardVariants({ padding: "lg" }), "space-y-3")}>
+        <h2 className="text-lg font-bold">Discord</h2>
+        {profile.discordUsername ? (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Connected as <strong className="text-foreground">{profile.discordUsername}</strong>. You can RSVP from our Discord server with <code>/rsvp</code>.
+            </p>
+            <Button type="button" variant="outline" disabled={pending} onClick={disconnectDiscord} className="w-full fold:w-auto">
+              Disconnect Discord
+            </Button>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Not connected. In our Discord server, type <code>/link</code> and follow the button to connect your account. Then you can RSVP from Discord.
+          </p>
+        )}
+      </section>
 
       <form onSubmit={changeEmail} className={cn(cardVariants({ padding: "lg" }), "space-y-4")}>
         <h2 className="text-lg font-bold">Email</h2>

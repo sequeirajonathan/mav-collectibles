@@ -3,6 +3,7 @@
 import { prisma } from "@lib/prisma";
 import { ActionError, createAction } from "@lib/actions/safe-action";
 import { CONTENT_ROLES, UserRole } from "@interfaces/roles";
+import { alertStaff } from "@lib/discord/announce";
 import { sendRequestAlerts } from "@lib/request-alerts";
 import { deleteRequestInput, submitRequestInput, updateRequestInput } from "@lib/contracts/requests";
 
@@ -14,6 +15,7 @@ export const submitStaffRequest = createAction({ input: submitRequestInput, acce
     data: { kind, title, details, page: page ?? null, priority: urgent ? "high" : "normal", created_by: user.id, created_by_name: name },
     select: { id: true },
   });
+  await alertStaff(`${urgent ? "Urgent request" : "New request"} from ${name}`, title, "/admin/requests");
   return { id: row.id };
 });
 

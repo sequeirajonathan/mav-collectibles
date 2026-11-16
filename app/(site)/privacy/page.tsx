@@ -51,7 +51,7 @@ export default function PrivacyPage() {
             <li>
               <strong>What you do here:</strong> the events you RSVP to and the answers you give to an event&apos;s
               sign-up questions (for example a player ID, date of birth or an uploaded deck list, which only our staff see; a date of birth is kept on your profile only if you are 18 or over, and you can remove it there), tournament results and
-              season points, posts you like, save or comment on, and vendor applications you send us.
+              season points, posts you like, save or comment on, and vendor applications you send us. If you connect your Discord account with the /link command, we keep your Discord user ID and display name so our bot can sign you up for events; you can disconnect it on your profile or with /unlink.
             </li>
             <li>
               <strong>Store records:</strong> if the email on your account matches a customer record at our register,

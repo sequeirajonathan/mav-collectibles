@@ -5,16 +5,16 @@ test.describe("service keys", () => {
   test("an admin saves a key, it is never shown back, and it can be removed", async ({ page }) => {
     await signInAs(page, "admin@mav.local", "/admin/site");
     const section = page.getByRole("region", { name: "Service keys" });
-    const row = section.getByRole("listitem").filter({ hasText: "Discord announcements" });
+    const row = section.getByRole("listitem").filter({ hasText: "Email (Resend)" });
     await expect(row).toContainText("Not set");
 
-    // A value that isn't a webhook address is refused with a hint.
+    // A value that isn't shaped like the key is refused with a hint.
     const input = row.getByLabel("Paste the key");
     await input.fill("hello");
     await row.getByRole("button", { name: "Save" }).click();
-    await expect(row.getByRole("status")).toContainText("Starts with https://discord.com/api/webhooks/");
+    await expect(row.getByRole("status")).toContainText("Starts with re_");
 
-    const secret = "https://discord.com/api/webhooks/123456789012345678/e2e-secret-value-abcdefghijklmnop";
+    const secret = "re_e2e-secret-value-abcdefghijklmnop";
     await input.fill(secret);
     await row.getByRole("button", { name: "Save" }).click();
     await expect(row).toContainText("Saved here");
@@ -22,10 +22,10 @@ test.describe("service keys", () => {
 
     // Reloading shows it is set, without the value anywhere in the page.
     await page.reload();
-    await expect(page.getByRole("region", { name: "Service keys" }).getByRole("listitem").filter({ hasText: "Discord announcements" })).toContainText("Saved here");
+    await expect(page.getByRole("region", { name: "Service keys" }).getByRole("listitem").filter({ hasText: "Email (Resend)" })).toContainText("Saved here");
     expect(await page.content()).not.toContain("e2e-secret-value");
 
-    const again = page.getByRole("region", { name: "Service keys" }).getByRole("listitem").filter({ hasText: "Discord announcements" });
+    const again = page.getByRole("region", { name: "Service keys" }).getByRole("listitem").filter({ hasText: "Email (Resend)" });
     await again.getByRole("button", { name: "Remove" }).click();
     await again.getByRole("button", { name: "Remove key" }).click();
     await expect(again).toContainText("Not set");

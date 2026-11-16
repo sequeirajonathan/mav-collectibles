@@ -47,6 +47,10 @@ const RULES: Rule[] = [
   { path: "/pokemon-cards-montgomery-tx", access: { "*": "public" } },
   { path: "/sell-your-cards", access: { "*": "public" } },
   { path: "/visit", access: { "*": "public" } },
+  // Discord calls this; every request is checked against Discord's signature in the route.
+  { path: "/api/discord/interactions", access: { POST: "public" } },
+  // Finishing "/link" from Discord: needs a signed-in site account.
+  { path: "/link-discord", access: { "*": "user" } },
   { path: "/robots.txt", access: { "*": "public" } },
   { path: "/sitemap.xml", access: { "*": "public" } },
   { path: "/og.png", access: { "*": "public" } },
