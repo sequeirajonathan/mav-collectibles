@@ -17,7 +17,9 @@ import {
 } from "@lib/contracts/hub";
 import { slug as slugSchema, uuid } from "@lib/contracts/common";
 import { tags } from "@lib/data/tags";
-import { answersSchema, checkAnswers, parseStoredQuestions } from "@lib/event-questions";
+import { randomBytes } from "node:crypto";
+import { createAdminClient } from "@utils/supabase/admin";
+import { UPLOAD_BUCKET, UPLOAD_MAX_BYTES, UPLOAD_TYPES, answersSchema, checkAnswers, parseStoredAnswers, parseStoredQuestions } from "@lib/event-questions";
 import { getFlags } from "@lib/data/site";
 
 const REGISTRATION_ERRORS: Record<string, string> = {
@@ -40,7 +42,7 @@ export const registerForEvent = createAction(
     const event = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true, questions: true } });
     if (!event) throw new ActionError("Event not found.");
     // Answers are checked before a spot is taken, so nobody is registered with a half-filled form.
-    const { answers, errors } = checkAnswers(parseStoredQuestions(event.questions), given);
+    const { answers, errors } = checkAnswers(parseStoredQuestions(event.questions), given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     try {
       // One transaction: a player is never registered without their answers.
@@ -68,10 +70,48 @@ export const saveRegistrationAnswers = createAction(
       select: { status: true, event: { select: { questions: true } } },
     });
     if (!registration || registration.status === "cancelled") throw new ActionError("You're not registered for this event.");
-    const { answers, errors } = checkAnswers(parseStoredQuestions(registration.event.questions), given);
+    const { answers, errors } = checkAnswers(parseStoredQuestions(registration.event.questions), given, `${eventId}/${user.id}/`);
     if (Object.keys(errors).length > 0) throw new ActionError("Please answer the required questions.");
     await prisma.eventRegistration.update({ where: { event_id_user_id: { event_id: eventId, user_id: user.id } }, data: { answers } });
     return null;
+  }
+);
+
+/** A signed-in player gets a one-time link to upload a file for one of the event's questions. */
+export const startAnswerUpload = createAction(
+  {
+    input: z.object({ eventId: uuid, questionId: z.string().max(24), contentType: z.string().max(60), size: z.number().int().positive() }),
+    access: "user",
+  },
+  async ({ eventId, questionId, contentType, size }, user) => {
+    const extension = UPLOAD_TYPES[contentType];
+    if (!extension) throw new ActionError("Upload a PDF or a photo (JPG, PNG, WebP or HEIC).");
+    if (size > UPLOAD_MAX_BYTES) throw new ActionError("That file is larger than 10 MB.");
+    const event = await prisma.event.findFirst({ where: { id: eventId, status: "published" }, select: { questions: true } });
+    const question = event && parseStoredQuestions(event.questions).find((q) => q.id === questionId && q.type === "file");
+    if (!question) throw new ActionError("This event isn't taking that file.");
+    const path = `${eventId}/${user.id}/${questionId}-${randomBytes(6).toString("hex")}.${extension}`;
+    const { data, error } = await createAdminClient().storage.from(UPLOAD_BUCKET).createSignedUploadUrl(path);
+    if (error || !data) throw new ActionError("Couldn't start the upload. Try again.");
+    return { path, token: data.token };
+  }
+);
+
+/** Staff open a file a player attached; players can open their own. */
+export const viewAnswerFile = createAction(
+  { input: z.object({ eventId: uuid, userId: uuid, questionId: z.string().max(24) }), access: "user" },
+  async ({ eventId, userId, questionId }, user) => {
+    if (userId !== user.id && !CONTENT_ROLES.includes(user.role)) throw new ActionError("You can't open that file.");
+    const registration = await prisma.eventRegistration.findUnique({
+      where: { event_id_user_id: { event_id: eventId, user_id: userId } },
+      select: { answers: true },
+    });
+    const path = registration ? parseStoredAnswers(registration.answers)[questionId] : undefined;
+    // Only ever sign a path inside this player's folder for this event.
+    if (!path || !path.startsWith(`${eventId}/${userId}/`)) throw new ActionError("No file was uploaded.");
+    const { data, error } = await createAdminClient().storage.from(UPLOAD_BUCKET).createSignedUrl(path, 120);
+    if (error || !data) throw new ActionError("Couldn't open that file.");
+    return { url: data.signedUrl };
   }
 );
 

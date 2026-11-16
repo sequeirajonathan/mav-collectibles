@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkAnswers, eventQuestionsSchema, parseStoredQuestions, type EventQuestion } from "@lib/event-questions";
+import { checkAnswers, displayAnswer, eventQuestionsSchema, parseStoredQuestions, type EventQuestion } from "@lib/event-questions";
 import { attendeesCsv } from "@components/admin/attendee-list";
 
 const q = (id: string, extra: Partial<EventQuestion> = {}): EventQuestion => ({ id, label: id, help: "", type: "text", required: false, options: [], ...extra });
@@ -57,5 +57,38 @@ describe("attendee spreadsheet", () => {
     const [header, row] = csv.split("\r\n");
     expect(header).toBe('"Name","Email","Status","Registered","Player ID","Date of birth"');
     expect(row).toBe('"Ash ""AK"" Ketchum","ash@example.com","Registered","2026-11-20","\'=HYPERLINK(1)",""');
+  });
+});
+
+describe("month and file answers", () => {
+  const EVENT = "11111111-1111-4111-8111-111111111111";
+  const PLAYER = "22222222-2222-4222-8222-222222222222";
+  const dobQuestion = q("dob", { type: "month", required: true });
+  const deckQuestion = q("deck", { type: "file" });
+  const questions = [dobQuestion, deckQuestion];
+  const path = `${EVENT}/${PLAYER}/deck-a1b2c3d4e5f6.pdf`;
+
+  it("accepts a month and year, and a file in the player's own folder", () => {
+    const { answers, errors } = checkAnswers(questions, { dob: "2011-03", deck: path }, `${EVENT}/${PLAYER}/`);
+    expect(errors).toEqual({});
+    expect(answers).toEqual({ dob: "2011-03", deck: path });
+  });
+
+  it("rejects a half-picked month", () => {
+    for (const dob of ["2011-", "-03", "2011-13", "March 2011"]) expect(checkAnswers(questions, { dob }).errors.dob, dob).toBeDefined();
+  });
+
+  it("rejects a file path that isn't this player's upload for this event", () => {
+    const other = `${EVENT}/33333333-3333-4333-8333-333333333333/deck-a1b2c3d4e5f6.pdf`;
+    expect(checkAnswers(questions, { dob: "2011-03", deck: other }, `${EVENT}/${PLAYER}/`).errors.deck).toBeDefined();
+    for (const deck of ["../../resumes/x.pdf", "https://evil.example/x.pdf", `${EVENT}/${PLAYER}/../x.pdf`]) {
+      expect(checkAnswers(questions, { dob: "2011-03", deck }, `${EVENT}/${PLAYER}/`).errors.deck, deck).toBeDefined();
+    }
+  });
+
+  it("shows staff a readable month and never a storage path", () => {
+    expect(displayAnswer(dobQuestion, "2011-03")).toBe("Mar 2011");
+    expect(displayAnswer(deckQuestion, path)).toBe("File uploaded");
+    expect(displayAnswer(deckQuestion, undefined)).toBe("");
   });
 });

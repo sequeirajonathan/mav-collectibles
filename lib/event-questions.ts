@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** Kinds of question staff can ask players when they RSVP. */
-export const QUESTION_TYPES = ["text", "long", "number", "date", "choice", "yesno"] as const;
+export const QUESTION_TYPES = ["text", "long", "number", "date", "month", "choice", "yesno", "file"] as const;
 export type QuestionType = (typeof QUESTION_TYPES)[number];
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
@@ -9,9 +9,26 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   long: "Long answer",
   number: "Number",
   date: "Date",
+  month: "Month and year",
   choice: "Pick one",
   yesno: "Yes / No",
+  file: "File upload (PDF or photo)",
 };
+
+/** Files players can attach to an answer. */
+export const UPLOAD_TYPES: Record<string, string> = {
+  "application/pdf": "pdf",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/heic": "heic",
+  "image/heif": "heif",
+};
+export const UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+export const UPLOAD_BUCKET = "event-uploads";
+
+/** Where one player's file for one question lives: `<event>/<player>/<question>-<random>.<ext>`. */
+const UPLOAD_PATH = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[a-z0-9_]{1,24}-[a-z0-9]{6,16}\.(pdf|jpg|png|webp|heic|heif)$/;
 
 export const MAX_QUESTIONS = 12;
 const MAX_ANSWER = 2000;
@@ -50,12 +67,18 @@ export function parseStoredAnswers(value: unknown): Answers {
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /**
  * Checks a player's answers against an event's questions. Returns the cleaned
  * answers (only this event's questions, trimmed) and any problems by question id.
  */
-export function checkAnswers(questions: readonly EventQuestion[], given: Answers): { answers: Answers; errors: Record<string, string> } {
+export function checkAnswers(
+  questions: readonly EventQuestion[],
+  given: Answers,
+  /** On the server: the folder this player's files for this event must be in (`<event>/<player>/`). */
+  uploadFolder?: string
+): { answers: Answers; errors: Record<string, string> } {
   const answers: Answers = {};
   const errors: Record<string, string> = {};
   for (const q of questions) {
@@ -66,6 +89,8 @@ export function checkAnswers(questions: readonly EventQuestion[], given: Answers
     }
     if (q.type === "number" && !Number.isFinite(Number(value))) errors[q.id] = "Enter a number";
     else if (q.type === "date" && (!ISO_DATE.test(value) || Number.isNaN(Date.parse(value)))) errors[q.id] = "Pick a date";
+    else if (q.type === "month" && !ISO_MONTH.test(value)) errors[q.id] = "Pick a month and year";
+    else if (q.type === "file" && (!UPLOAD_PATH.test(value) || (uploadFolder !== undefined && !value.startsWith(uploadFolder)))) errors[q.id] = "Upload the file again";
     else if (q.type === "choice" && !q.options.includes(value)) errors[q.id] = "Pick one of the choices";
     else if (q.type === "yesno" && value !== "Yes" && value !== "No") errors[q.id] = "Choose Yes or No";
     else answers[q.id] = value;
@@ -76,16 +101,18 @@ export function checkAnswers(questions: readonly EventQuestion[], given: Answers
 /** Ready-made question sets staff can add with one tap. */
 export const QUESTION_PRESETS: { label: string; questions: Omit<EventQuestion, "id">[] }[] = [
   {
-    label: "Pokémon player info",
+    // Mirrors the Google Form the shop used for its Cups.
+    label: "Pokémon tournament",
     questions: [
-      { label: "Player name", help: "As it appears on your Pokémon Trainer Club account", type: "text", required: true, options: [] },
-      { label: "Player ID", help: "Your Play! Pokémon ID number. Leave blank if you don't have one yet and we'll set you up at the door.", type: "number", required: false, options: [] },
-      { label: "Date of birth", help: "Used to place you in the Junior, Senior or Masters division", type: "date", required: true, options: [] },
+      { label: "Player ID", help: "Your Play! Pokémon ID number", type: "number", required: true, options: [] },
+      { label: "Date of birth (month and year)", help: "Used to place you in the Junior, Senior or Masters division", type: "month", required: true, options: [] },
+      { label: "Deck list (copy and paste)", help: "Paste from RK9 or TCG Live. Make sure each Pokémon matches its set and set number.", type: "long", required: false, options: [] },
+      { label: "Deck list (image or PDF)", help: "Or upload a photo or PDF instead. Up to 10 MB.", type: "file", required: false, options: [] },
     ],
   },
   {
-    label: "Deck list",
-    questions: [{ label: "Deck list", help: "Paste your 60-card list, or a link to it", type: "long", required: false, options: [] }],
+    label: "Player name",
+    questions: [{ label: "Player name", help: "As it appears on your Pokémon Trainer Club account", type: "text", required: true, options: [] }],
   },
   {
     label: "Parent or guardian",
@@ -97,3 +124,13 @@ export const QUESTION_PRESETS: { label: string; questions: Omit<EventQuestion, "
 ];
 
 export const newQuestionId = () => `q_${Math.random().toString(36).slice(2, 10)}`;
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** An answer as staff read it: "Mar 2011" for a month, "File uploaded" for a file. */
+export function displayAnswer(question: EventQuestion, value: string | undefined): string {
+  if (!value) return "";
+  if (question.type === "month" && ISO_MONTH.test(value)) return `${MONTHS[Number(value.slice(5)) - 1]} ${value.slice(0, 4)}`;
+  if (question.type === "file") return "File uploaded";
+  return value;
+}

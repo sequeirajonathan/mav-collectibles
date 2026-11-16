@@ -44,8 +44,8 @@ const SECTIONS: Section[] = [
         title: "Ask players for details when they sign up",
         where: { href: "/admin/events/new", label: "Event form → Questions for players" },
         steps: [
-          "Tap “Pokémon player info” to add player name, Player ID and date of birth in one go, or “Add a question” to write your own.",
-          "Pick the answer type (short answer, number, date, pick one, yes/no) and tick “Required” if players must answer.",
+          "Tap “Pokémon tournament” to add Player ID, date of birth and the deck list (pasted or uploaded) in one go, or “Add a question” to write your own.",
+          "Pick the answer type (short answer, number, date, month and year, pick one, yes/no, file upload) and tick “Required” if players must answer.",
           "Players answer when they RSVP, so there is no separate Google Form to keep in step.",
         ],
       },
@@ -72,7 +72,7 @@ const SECTIONS: Section[] = [
         steps: [
           "Tap the box beside a name to check them in. Tap again to undo.",
           "Use “Find a player” to search by name, email or anything they answered.",
-          "Each player’s answers show under their name.",
+          "Each player’s answers show under their name. Tap “View file” to open an uploaded deck list.",
           "“Download spreadsheet” saves the whole list, answers included, for Excel or Google Sheets.",
         ],
       },

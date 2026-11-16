@@ -92,7 +92,7 @@ export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full
     const label =
       optimistic === "waitlisted" ? "On the waitlist" : optimistic === "checked_in" ? "Checked in" : "You're going";
     if (asking) {
-      return <RsvpQuestions questions={questions} initial={savedAnswers} submitLabel="Save my details" pending={pending} onSubmit={saveAnswers} onCancel={() => setAsking(false)} />;
+      return <RsvpQuestions eventId={eventId} questions={questions} initial={savedAnswers} submitLabel="Save my details" pending={pending} onSubmit={saveAnswers} onCancel={() => setAsking(false)} />;
     }
     return (
       <div className="flex w-full flex-col gap-2 fold:w-auto fold:flex-row fold:items-center">
@@ -137,6 +137,7 @@ export function RsvpButton({ eventId, slug, status, signedIn, closedReason, full
   if (asking) {
     return (
       <RsvpQuestions
+        eventId={eventId}
         questions={questions}
         initial={savedAnswers}
         submitLabel={full ? "Join the waitlist" : "Confirm RSVP"}
