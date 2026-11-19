@@ -29,7 +29,7 @@ npm run dev
 - Test accounts (password `password123`): `admin@mav.local`, `staff@mav.local`, `events@mav.local` (EVENT role),
   `printer@mav.local` (print agent), `customer@mav.local`.
 - Emails (sign-up confirmation, password reset) appear in Mailpit at
-  http://127.0.0.1:54324.
+  http://127.0.0.1:54334.
 - `npm run db:reset` rebuilds the local database from migrations + seed.
 - Tests:
   - `npm test`: unit + component tests (Vitest), no database needed.
