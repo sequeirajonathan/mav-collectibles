@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { Mascot } from "@components/ui/mascot";
+import { LinkButton } from "@components/ui/link-button";
+import { getFlags } from "@lib/data/site";
 import { ApplyForm } from "@components/jobs/apply-form";
 import { Eyebrow } from "@components/ui/page-header";
 import { cardVariants } from "@components/ui/card";
@@ -8,16 +10,17 @@ import { JOB_OPENINGS } from "@const/jobs";
 import { STORE_ADDRESS } from "@lib/format";
 import { cn } from "@utils";
 
-export const metadata: Metadata = {
-  title: "We're hiring",
-  description: "Work at MAV Collectibles in Montgomery, TX. See open positions and apply online.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  if ((await getFlags()).hiringOpen) return { title: "We're hiring", description: "Work at MAV Collectibles in Montgomery, TX. See open positions and apply online." };
+  // Kept out of search results while applications are closed.
+  return { title: "Jobs", robots: { index: false } };
+}
 
 const EMAIL = "info@mavcollectibles.com";
 /** Staff-run line for help with applications (from the shop's own job posts). */
 const HIRING_PHONE = "(936) 330-3553";
 
-export default function JobsPage() {
+function Hiring() {
   return (
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-2xl border border-line bg-hero px-5 py-8 fold:px-8 fold:py-10">
@@ -71,4 +74,25 @@ export default function JobsPage() {
       </div>
     </div>
   );
+}
+
+/** Shown while the shop isn't taking applications, so an old link still gets a clear answer. */
+function NotHiring() {
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center py-14 text-center">
+      <Mascot name="lucario" className="size-28" />
+      <h1 className="font-display mt-6 text-4xl">We&apos;re not hiring right now</h1>
+      <p className="mt-2 text-muted-foreground">Thanks for your interest in working at MAV Collectibles. We aren&apos;t taking applications at the moment. Check back here, or keep an eye on our Discord, for when that changes.</p>
+      <div className="mt-6 flex flex-col gap-2 fold:flex-row">
+        <LinkButton href="/events">See events</LinkButton>
+        <LinkButton href="/visit" variant="outline">
+          Hours and directions
+        </LinkButton>
+      </div>
+    </div>
+  );
+}
+
+export default async function JobsPage() {
+  return (await getFlags()).hiringOpen ? <Hiring /> : <NotHiring />;
 }

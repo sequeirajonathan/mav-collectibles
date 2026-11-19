@@ -54,4 +54,46 @@ test.describe("job applications", () => {
     });
     expect(response.status()).toBe(400);
   });
+
+  test("closing hiring hides the link, closes the form and says so on the page", async ({ browser, request }) => {
+    const admin = await (await browser.newContext()).newPage();
+    await signInAs(admin, "admin@mav.local", "/admin/site");
+    const setHiring = async (open: boolean) => {
+      await admin.goto("/admin/site");
+      const toggle = admin.getByRole("switch", { name: "We're hiring" }).filter({ visible: true });
+      if (((await toggle.getAttribute("aria-checked")) === "true") !== open) {
+        await toggle.click();
+        await expect(toggle).toHaveAttribute("aria-checked", String(open));
+      }
+    };
+    try {
+      await setHiring(false);
+      const visitor = await (await browser.newContext()).newPage();
+      await visitor.goto("/");
+      await expect(visitor.getByRole("navigation", { name: "Footer" }).getByRole("link", { name: "Visit us" })).toBeVisible();
+      await expect(visitor.locator('a[href="/jobs"]')).toHaveCount(0);
+
+      // An old link still gets a clear answer, with no form to fill in.
+      await visitor.goto("/jobs");
+      await expect(visitor.getByRole("heading", { name: "We're not hiring right now" })).toBeVisible();
+      await expect(visitor.getByRole("button", { name: "Send application" })).toHaveCount(0);
+      await visitor.context().close();
+
+      // The form's address refuses applications too.
+      const refused = await request.post("/api/v1/job-applications", { multipart: { position: "General application", name: "Late Applicant", email: "late@example.com", message: "Hello" } });
+      expect(refused.status()).toBe(404);
+      expect(await (await request.get("/sitemap.xml")).text()).not.toContain("/jobs");
+
+      // Staff keep the applications they already have.
+      await admin.goto("/admin/applications");
+      await expect(admin.getByRole("heading", { level: 1, name: "Job applications" })).toBeVisible();
+    } finally {
+      await setHiring(true);
+    }
+    const visitor = await (await browser.newContext()).newPage();
+    await visitor.goto("/jobs");
+    await expect(visitor.getByRole("button", { name: "Send application" }).filter({ visible: true })).toBeVisible();
+    await visitor.context().close();
+    await admin.context().close();
+  });
 });

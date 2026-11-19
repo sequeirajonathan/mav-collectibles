@@ -180,7 +180,11 @@ const SECTIONS: Section[] = [
         title: "Job applications",
         where: { href: "/admin/applications", label: "Applications" },
         only: "hiring",
-        steps: ["Applications from the We’re hiring page land here with the résumé.", "Move each one along: Reviewing, Interview, Hired or Not moving forward."],
+        steps: [
+          "Applications from the We’re hiring page land here with the résumé.",
+          "Move each one along: Reviewing, Interview, Hired or Not moving forward.",
+          "An admin opens or closes hiring with the “We’re hiring” switch in Site → Features. While it is off, the link is hidden and the form is closed.",
+        ],
       },
       {
         title: "Give someone access",

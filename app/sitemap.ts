@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // A hidden shop stays out of search results.
   const shop = flags.shopVisible;
   return [
-    ...STATIC.filter((p) => (shop || p.path !== "/shop") && (flags.vendorsVisible || p.path !== "/vendors")).map((p) => ({ url: `${base}${p.path}`, changeFrequency: p.changeFrequency, priority: p.priority })),
+    ...STATIC.filter((p) => (shop || p.path !== "/shop") && (flags.vendorsVisible || p.path !== "/vendors") && (flags.hiringOpen || p.path !== "/jobs")).map((p) => ({ url: `${base}${p.path}`, changeFrequency: p.changeFrequency, priority: p.priority })),
     ...(shop ? CATEGORY_GROUPS : []).flatMap((group) =>
       group.categories.map((c) => ({
         url: `${base}/category/${c.slug}?group=${GROUP_PARAM[group.name] ?? "TCG"}`,

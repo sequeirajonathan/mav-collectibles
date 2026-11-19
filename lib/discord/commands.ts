@@ -7,6 +7,7 @@ import { capacityLabel, formatEntryFee, STORE_ADDRESS, STORE_NAME, STORE_PHONE }
 import { isFull, registrationClosedReason } from "@lib/hub-rules";
 import { PLAYER_ID, checkAnswers, displayAnswer, parseStoredQuestions, prefillFromProfile } from "@lib/event-questions";
 import { JOB_OPENINGS } from "@const/jobs";
+import { getFlags } from "@lib/data/site";
 import { CONTENT_ROLES, parseRole } from "@interfaces/roles";
 import { viewBracket } from "@lib/bracket";
 import { siteUrl, STORE } from "@lib/seo";
@@ -304,8 +305,10 @@ async function unlink(user: { id: string }) {
   return privately(count ? "Done. Your Discord is no longer connected to a MAV account." : "Your Discord wasn't connected to a MAV account.");
 }
 
-function help() {
+async function help() {
   const described = new Map<string, string>(COMMANDS.map((c) => [c.name, c.description]));
+  // Don't advertise applying while the shop isn't hiring.
+  const hiring = (await getFlags()).hiringOpen;
   return message({
     ephemeral: true,
     embeds: [
@@ -315,7 +318,10 @@ function help() {
         description: "Type `/` and pick a command. Anything about your own account is shown only to you.",
         fields: HELP_GROUPS.map((group) => ({
           name: group.title,
-          value: group.commands.map((name) => `\`/${name}\` ${described.get(name) ?? ""}`).join("\n"),
+          value: group.commands
+            .filter((name) => hiring || name !== "jobs")
+            .map((name) => `\`/${name}\` ${described.get(name) ?? ""}`)
+            .join("\n"),
         })),
         footer: { text: "New here? Start with /events, then /link so you can /rsvp." },
       },
@@ -396,7 +402,8 @@ function sell() {
   });
 }
 
-function jobs() {
+async function jobs() {
+  if (!(await getFlags()).hiringOpen) return message({ content: "We're not hiring right now. Thanks for asking! We'll post here when that changes." });
   const openings = JOB_OPENINGS.map((o) => `**${o.title}**: ${o.summary}`).join("\n");
   return message({ content: `We're hiring!\n${openings}`.slice(0, 1900), components: [row(linkButton("Apply", `${siteUrl()}/jobs`))] });
 }
@@ -480,7 +487,7 @@ export async function handleInteraction(raw: unknown): Promise<Record<string, un
   try {
     switch (interaction.data.name) {
       case "help":
-        return help();
+        return await help();
       case "events":
         return await events(interaction);
       case "event":
@@ -492,7 +499,7 @@ export async function handleInteraction(raw: unknown): Promise<Record<string, un
       case "sell":
         return sell();
       case "jobs":
-        return jobs();
+        return await jobs();
       case "playerid":
         return await playerId(interaction, user);
       case "attendees":

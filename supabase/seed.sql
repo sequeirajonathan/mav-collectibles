@@ -14,6 +14,8 @@ on conflict (name) do nothing;
 
 -- Local and test data shows the shop to everyone (production starts hidden).
 update public.feature_flags set enabled = true where name = 'shopVisible';
+-- Hiring is open in local and test data too (production starts closed).
+update public.feature_flags set enabled = true where name = 'hiringOpen';
 
 insert into public.alert_banners (id, message, code, "backgroundColor", "textColor", enabled, "updatedAt")
 values ('1', 'Pokémon League every Friday at 6 PM. RSVP to save your seat!', null, '#E6B325', '#000000', true, now())
