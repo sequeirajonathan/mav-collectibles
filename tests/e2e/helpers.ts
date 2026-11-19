@@ -4,7 +4,7 @@ import { z } from "zod";
 const searchResult = z.object({ messages: z.array(z.object({ ID: z.string() })).optional() });
 const message = z.object({ Text: z.string() });
 
-export const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
+export const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54334";
 export const PASSWORD = "password123";
 
 /** Signs in through the real form (works with username or email). */

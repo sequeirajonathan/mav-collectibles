@@ -185,6 +185,21 @@ describe("more commands", () => {
     }
   });
 
+  it("while hiring is closed, /jobs says so and /help doesn't offer it", async () => {
+    await prisma.featureFlag.updateMany({ where: { name: "hiringOpen" }, data: { enabled: false } });
+    try {
+      const jobs = await run(command("jobs"));
+      expect(jobs.data?.content).toContain("not hiring right now");
+      expect(jobs.data?.components).toBeUndefined();
+      const help = (await handleInteraction(command("help"))) as { data: { embeds: { fields: { value: string }[] }[] } };
+      const text = help.data.embeds[0]?.fields.map((f) => f.value).join("\n") ?? "";
+      expect(text).not.toContain("/jobs");
+      expect(text).toContain("/sell");
+    } finally {
+      await prisma.featureFlag.updateMany({ where: { name: "hiringOpen" }, data: { enabled: true } });
+    }
+  });
+
   it("/event shows the details and what sign-up asks for", async () => {
     const questions = [{ id: "q_pid", label: "Player ID", help: "", type: "number", required: true, autofill: "playerId", options: [] }];
     const cup = await event(`Details Cup ${Date.now()}`, { questions, entry_fee_cents: 2000, capacity: 32, format: "Standard", link_url: "https://example.com/rules", link_label: "Rules" });

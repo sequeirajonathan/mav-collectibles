@@ -1,3 +1,4 @@
+import { getFlags } from "@lib/data/site";
 import { alertStaff } from "@lib/discord/announce";
 import { defineRoute, HttpError } from "@lib/api/define-route";
 import { prisma } from "@lib/prisma";
@@ -24,6 +25,7 @@ const text = (form: FormData, key: string) => {
 export const POST = defineRoute({
   response: applyResponseSchema,
   handler: async ({ request }) => {
+    if (!(await getFlags()).hiringOpen) throw new HttpError("NOT_FOUND", "We aren't taking applications right now.");
     const form = await request.formData().catch(() => null);
     if (!form) throw new HttpError("BAD_REQUEST", "Please fill in the form and try again.");
     // Honeypot: real people never see or fill this field.

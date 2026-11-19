@@ -7,6 +7,7 @@ import { NAV_LINKS } from "./nav-links";
 import { TCGPLAYER_STORE_URL } from "@const/links";
 import { DiscordIcon } from "@components/hub/discord";
 import { InstallApp } from "./install-app";
+import { getFlags } from "@lib/data/site";
 import { GoogleRating } from "@components/hub/google-reviews";
 import { ShopOnly, VendorsOnly } from "./shop-only";
 
@@ -25,6 +26,16 @@ const SOCIAL = [
   { href: "https://www.tiktok.com/@mav_collectibles", label: "TikTok", Icon: FaTiktok },
   { href: "https://x.com/MavCollectibles", label: "X", Icon: FaTwitter },
 ];
+
+/** Only shown while the shop is taking applications (Admin → Site). */
+async function HiringLink() {
+  if (!(await getFlags()).hiringOpen) return null;
+  return (
+    <li>
+      <Link href="/jobs" className="inline-flex min-h-9 items-center font-semibold text-gold hover:text-gold-light">We&apos;re hiring</Link>
+    </li>
+  );
+}
 
 export function SiteFooter() {
   return (
@@ -76,9 +87,9 @@ export function SiteFooter() {
                 <Link href="/vendors/apply" className="inline-flex min-h-9 items-center text-foreground/80 hover:text-gold">Become a vendor</Link>
               </li>
             </VendorsOnly>
-            <li>
-              <Link href="/jobs" className="inline-flex min-h-9 items-center font-semibold text-gold hover:text-gold-light">We&apos;re hiring</Link>
-            </li>
+            <Suspense fallback={null}>
+              <HiringLink />
+            </Suspense>
           </ul>
         </nav>
         <div>

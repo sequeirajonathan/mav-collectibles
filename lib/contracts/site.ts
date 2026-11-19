@@ -13,6 +13,7 @@ export const FLAG_NAMES = [
   "paidBackgroundRemoval",
   "facebookSignIn",
   "vendorsVisible",
+  "hiringOpen",
 ] as const;
 const flagNameSchema = z.enum(FLAG_NAMES);
 export type FlagName = z.infer<typeof flagNameSchema>;

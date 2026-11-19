@@ -35,6 +35,7 @@ const FLAG_DEFAULTS: FlagMap = {
   paidBackgroundRemoval: false,
   facebookSignIn: false,
   vendorsVisible: true,
+  hiringOpen: false,
 };
 
 export async function getFlags(): Promise<FlagMap> {
